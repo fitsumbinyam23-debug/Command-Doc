@@ -1,0 +1,392 @@
+{
+  "knowledge_base_version": "2026.07-mvp",
+  "vendor": "Linux",
+  "vendor_key": "linux",
+  "commands": [
+    {
+      "id": "linux_ip_addr",
+      "vendor": "Linux",
+      "os": "Linux",
+      "command": "ip addr",
+      "category": "endpoint",
+      "meaning": "Shows Linux network interfaces, link state, MAC addresses, and assigned IP addresses.",
+      "use_for": ["Check interface up/down state", "Check IP address assignment", "Check MAC address"],
+      "good_output": ["Interface state UP", "Valid inet address", "Expected interface present"],
+      "bad_output": ["state DOWN", "NO-CARRIER", "No inet address", "169.254.x.x"],
+      "normal_patterns": ["state UP", "\\binet\\s+\\d+\\.\\d+\\.\\d+\\.\\d+"],
+      "warning_patterns": ["state DOWN", "NO-CARRIER", "169\\.254\\.", "linkdown"],
+      "critical_patterns": ["NO-CARRIER", "169\\.254\\."],
+      "detection_patterns": ["ip\\s+addr", "^\\d+:\\s+\\S+:", "\\binet\\s+\\d+\\.\\d+\\.\\d+\\.\\d+"],
+      "diagnosis_rules": [
+        {
+          "id": "no_carrier",
+          "status": "Critical",
+          "patterns": ["NO-CARRIER"],
+          "diagnosis": "The Linux interface reports no carrier.",
+          "meaning": "The NIC does not detect physical link.",
+          "possible_causes": ["Cable unplugged", "Switch port down", "Endpoint dock or NIC issue", "Remote interface disabled"],
+          "do_not_touch": "Do not change IP routes or DNS until physical link is restored."
+        },
+        {
+          "id": "interface_down",
+          "status": "Warning",
+          "patterns": ["state DOWN", "linkdown"],
+          "diagnosis": "A Linux network interface appears down.",
+          "meaning": "The interface is not currently operational for normal traffic.",
+          "possible_causes": ["Interface administratively down", "No carrier", "Driver or NetworkManager state", "Cable issue"],
+          "do_not_touch": "Do not bring interfaces up on production systems without confirming network role and approval."
+        },
+        {
+          "id": "apipa",
+          "status": "Critical",
+          "patterns": ["169\\.254\\."],
+          "diagnosis": "The Linux endpoint appears to have a link-local IPv4 address.",
+          "meaning": "A 169.254.x.x address usually indicates DHCP did not provide a usable IPv4 lease.",
+          "possible_causes": ["DHCP unavailable", "Wrong VLAN", "Cable or Wi-Fi issue", "DHCP scope exhausted"],
+          "do_not_touch": "Do not assign a static IP until VLAN, DHCP, and gateway details are confirmed."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ip route",
+          "why": "Checks the default gateway and routing table.",
+          "meaning": "Shows kernel routes and default path.",
+          "look_for_good": ["default via expected gateway"],
+          "look_for_bad": ["No default route", "linkdown route", "wrong gateway"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "ping <gateway>",
+          "why": "Checks gateway reachability.",
+          "meaning": "Sends ICMP echo requests to the gateway.",
+          "look_for_good": ["Replies from gateway"],
+          "look_for_bad": ["Destination Host Unreachable", "100% packet loss"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "arp -a",
+          "why": "Checks whether the endpoint has learned local neighbor MAC addresses.",
+          "meaning": "Shows ARP neighbor mappings.",
+          "look_for_good": ["Gateway MAC address appears"],
+          "look_for_bad": ["incomplete gateway entry", "no entry"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "On Linux, link state and IP state are separate; an interface can have configuration but still lack carrier.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against distro and tool version differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "linux_ip_route",
+      "vendor": "Linux",
+      "os": "Linux",
+      "command": "ip route",
+      "category": "gateway",
+      "meaning": "Shows the Linux routing table, including default gateway and connected routes.",
+      "use_for": ["Check default gateway", "Check route selection", "Confirm interface for outbound traffic"],
+      "good_output": ["default via expected gateway", "connected route for local subnet"],
+      "bad_output": ["No default route", "wrong gateway", "linkdown route"],
+      "normal_patterns": ["default via", "dev\\s+\\S+"],
+      "warning_patterns": ["linkdown", "unreachable", "prohibit"],
+      "critical_patterns": ["unreachable", "prohibit"],
+      "detection_patterns": ["ip\\s+route", "default via", "dev\\s+\\S+"],
+      "diagnosis_rules": [
+        {
+          "id": "route_unreachable",
+          "status": "Critical",
+          "patterns": ["unreachable", "prohibit"],
+          "diagnosis": "The Linux route table contains an unreachable or prohibited route.",
+          "meaning": "Traffic matching that route may be intentionally blocked by routing policy.",
+          "possible_causes": ["Static route policy", "VPN route control", "Misconfigured route", "Security hardening"],
+          "do_not_touch": "Do not remove or change routes on production systems without approval and rollback."
+        },
+        {
+          "id": "linkdown_route",
+          "status": "Warning",
+          "patterns": ["linkdown"],
+          "diagnosis": "A route references an interface that is down.",
+          "meaning": "Traffic for that route may fail until the interface link is restored.",
+          "possible_causes": ["Disconnected cable", "Interface disabled", "Driver or carrier issue"],
+          "do_not_touch": "Do not add alternate routes until interface state and design are confirmed."
+        },
+        {
+          "id": "default_route",
+          "status": "Info",
+          "patterns": ["default via"],
+          "diagnosis": "The pasted route table contains a default route.",
+          "meaning": "The system has an outbound path for non-local destinations.",
+          "possible_causes": ["No route issue is visible from the default route alone"],
+          "do_not_touch": "Do not change the default route without confirming active sessions and rollback."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ip addr",
+          "why": "Checks whether the route interface has a valid address and link state.",
+          "meaning": "Shows interface state and assigned IP addresses.",
+          "look_for_good": ["state UP", "valid inet address"],
+          "look_for_bad": ["NO-CARRIER", "state DOWN", "no inet address"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "ping <gateway>",
+          "why": "Checks whether the default gateway is reachable.",
+          "meaning": "Sends ICMP echo requests to the gateway IP.",
+          "look_for_good": ["Replies from gateway"],
+          "look_for_bad": ["100% packet loss", "Destination Host Unreachable"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "A route table shows intended forwarding; ping and ARP show whether the next hop responds.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against distro and tool version differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "linux_ping",
+      "vendor": "Linux",
+      "os": "Linux",
+      "command": "ping",
+      "category": "connectivity",
+      "meaning": "Tests reachability to an IP address or hostname using ICMP echo.",
+      "use_for": ["Check gateway reachability", "Check remote host reachability", "Compare DNS name and IP tests"],
+      "good_output": ["bytes from", "0% packet loss"],
+      "bad_output": ["100% packet loss", "Destination Host Unreachable", "Name or service not known"],
+      "normal_patterns": ["bytes from", "0% packet loss"],
+      "warning_patterns": ["100% packet loss", "Destination Host Unreachable", "Name or service not known", "Temporary failure in name resolution"],
+      "critical_patterns": ["Destination Host Unreachable", "Temporary failure in name resolution"],
+      "detection_patterns": ["PING\\s+", "packets transmitted", "packet loss", "bytes from"],
+      "diagnosis_rules": [
+        {
+          "id": "packet_loss",
+          "status": "Warning",
+          "patterns": ["100% packet loss"],
+          "diagnosis": "The ping test did not receive replies.",
+          "meaning": "The target may be offline, ICMP may be blocked, or routing may be broken.",
+          "possible_causes": ["Target offline", "Firewall blocks ICMP", "Gateway or routing issue", "Wrong VLAN"],
+          "do_not_touch": "Do not assume the application is down based only on ICMP."
+        },
+        {
+          "id": "host_unreachable",
+          "status": "Critical",
+          "patterns": ["Destination Host Unreachable"],
+          "diagnosis": "The local system or gateway reports the destination is unreachable.",
+          "meaning": "The endpoint may lack a valid route or Layer 2 path.",
+          "possible_causes": ["No default gateway", "Wrong subnet", "Gateway unreachable", "Interface down"],
+          "do_not_touch": "Do not change routes until IP, link, and gateway details are confirmed."
+        },
+        {
+          "id": "dns_fail",
+          "status": "Warning",
+          "patterns": ["Name or service not known", "Temporary failure in name resolution"],
+          "diagnosis": "The hostname could not be resolved.",
+          "meaning": "DNS failed before ping could test network reachability to the target.",
+          "possible_causes": ["Wrong hostname", "DNS server issue", "Resolver configuration issue", "No network connectivity"],
+          "do_not_touch": "Do not change resolver configuration until direct IP connectivity and DNS server reachability are checked."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ip addr",
+          "why": "Checks local interface state and IP assignment.",
+          "meaning": "Shows interfaces and assigned IP addresses.",
+          "look_for_good": ["state UP", "valid inet address"],
+          "look_for_bad": ["NO-CARRIER", "state DOWN", "no inet"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "ip route",
+          "why": "Checks default gateway and route selection.",
+          "meaning": "Shows kernel routing table.",
+          "look_for_good": ["default via expected gateway"],
+          "look_for_bad": ["No default route", "wrong gateway", "linkdown"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "dig <hostname>",
+          "why": "Checks DNS resolution when pinging a name fails.",
+          "meaning": "Queries DNS for records.",
+          "look_for_good": ["ANSWER section with expected IP"],
+          "look_for_bad": ["NXDOMAIN", "SERVFAIL", "connection timed out"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Ping should be interpreted with IP configuration, routing, DNS, and firewall behavior in mind.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against distro and tool version differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "linux_traceroute",
+      "vendor": "Linux",
+      "os": "Linux",
+      "command": "traceroute",
+      "category": "connectivity",
+      "meaning": "Shows hop-by-hop path toward a target.",
+      "use_for": ["Find where path stops", "Compare local gateway and upstream reachability", "Check route path clues"],
+      "good_output": ["Hops progress toward target", "Destination reached"],
+      "bad_output": ["Name resolution failure", "Timeouts from first hop", "Stops early"],
+      "normal_patterns": ["traceroute to", "\\d+\\s+\\S+"],
+      "warning_patterns": ["\\* \\* \\*", "Name or service not known", "unknown host"],
+      "critical_patterns": ["Name or service not known", "unknown host"],
+      "detection_patterns": ["traceroute\\s+to", "\\* \\* \\*", "traceroute"],
+      "diagnosis_rules": [
+        {
+          "id": "timeouts",
+          "status": "Info",
+          "patterns": ["\\* \\* \\*"],
+          "diagnosis": "The traceroute contains timeout hops.",
+          "meaning": "Some devices do not respond to traceroute; repeated early timeouts are more important.",
+          "possible_causes": ["ICMP/UDP probes filtered", "Firewall policy", "Routing issue", "Target unreachable"],
+          "do_not_touch": "Do not assume one timeout hop is the fault if later hops continue."
+        },
+        {
+          "id": "name_fail",
+          "status": "Warning",
+          "patterns": ["Name or service not known", "unknown host"],
+          "diagnosis": "Traceroute could not resolve the target name.",
+          "meaning": "DNS failed before route testing began.",
+          "possible_causes": ["Wrong hostname", "DNS resolver issue", "No network connectivity"],
+          "do_not_touch": "Do not change routes before DNS resolution is checked."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ip route",
+          "why": "Checks route selection and default gateway.",
+          "meaning": "Shows kernel routing table.",
+          "look_for_good": ["default via expected gateway"],
+          "look_for_bad": ["No default route", "linkdown"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "ping <gateway>",
+          "why": "Checks local gateway reachability.",
+          "meaning": "Sends ICMP echo requests to the gateway.",
+          "look_for_good": ["Replies from gateway"],
+          "look_for_bad": ["Destination Host Unreachable", "packet loss"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Traceroute output is path evidence, but filtering can hide healthy hops.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against distro and tool version differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "linux_arp_a",
+      "vendor": "Linux",
+      "os": "Linux",
+      "command": "arp -a",
+      "category": "gateway",
+      "meaning": "Shows local ARP neighbor mappings.",
+      "use_for": ["Check gateway MAC learning", "Confirm local subnet neighbors", "Find incomplete ARP entries"],
+      "good_output": ["Gateway IP has a MAC address", "Expected interface"],
+      "bad_output": ["incomplete entry", "No gateway ARP", "Wrong interface"],
+      "normal_patterns": ["\\bat\\b", "ether", "on\\s+\\S+"],
+      "warning_patterns": ["incomplete", "no entry"],
+      "critical_patterns": [],
+      "detection_patterns": ["arp\\s+-a", "\\bat\\b\\s+[0-9a-f:.-]+", "on\\s+\\S+"],
+      "diagnosis_rules": [
+        {
+          "id": "incomplete_arp",
+          "status": "Warning",
+          "patterns": ["incomplete"],
+          "diagnosis": "An ARP entry is incomplete.",
+          "meaning": "The endpoint has not resolved the IP address to a MAC address.",
+          "possible_causes": ["Gateway unreachable", "Wrong VLAN", "Endpoint offline", "Layer 2 issue"],
+          "do_not_touch": "Do not change routes until link, IP, and gateway reachability are confirmed."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ping <gateway>",
+          "why": "Generates traffic to the gateway and tests reachability.",
+          "meaning": "Sends ICMP echo requests to the gateway.",
+          "look_for_good": ["Replies from gateway"],
+          "look_for_bad": ["Destination Host Unreachable", "packet loss"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "ip addr",
+          "why": "Checks link and IP state on the local interface.",
+          "meaning": "Shows network interface state and addresses.",
+          "look_for_good": ["state UP", "valid inet address"],
+          "look_for_bad": ["NO-CARRIER", "state DOWN", "no inet"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "ARP is local-subnet evidence; it does not prove remote internet or application reachability.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against distro and tool version differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "linux_dig",
+      "vendor": "Linux",
+      "os": "Linux",
+      "command": "dig",
+      "category": "dns",
+      "meaning": "Queries DNS records and displays resolver response details.",
+      "use_for": ["Check DNS answer", "Check DNS server response", "Review NXDOMAIN, SERVFAIL, or timeout"],
+      "good_output": ["ANSWER SECTION", "NOERROR", "Expected IP address"],
+      "bad_output": ["NXDOMAIN", "SERVFAIL", "connection timed out", "no servers could be reached"],
+      "normal_patterns": ["ANSWER SECTION", "status: NOERROR"],
+      "warning_patterns": ["NXDOMAIN", "SERVFAIL", "connection timed out", "no servers could be reached"],
+      "critical_patterns": ["connection timed out", "no servers could be reached"],
+      "detection_patterns": [";\\s*<<>>\\s*DiG", "ANSWER SECTION", "status:\\s+\\w+"],
+      "diagnosis_rules": [
+        {
+          "id": "dns_timeout",
+          "status": "Critical",
+          "patterns": ["connection timed out", "no servers could be reached"],
+          "diagnosis": "DNS queries are timing out or no DNS server is reachable.",
+          "meaning": "The endpoint may not be able to reach its configured resolver.",
+          "possible_causes": ["DNS server unreachable", "No network connectivity", "Firewall blocking DNS", "Wrong resolver"],
+          "do_not_touch": "Do not change resolver configuration until IP connectivity to DNS servers is checked."
+        },
+        {
+          "id": "nxdomain",
+          "status": "Warning",
+          "patterns": ["NXDOMAIN"],
+          "diagnosis": "DNS responded that the name does not exist.",
+          "meaning": "The queried hostname may be incorrect or missing from DNS.",
+          "possible_causes": ["Typo", "Missing DNS record", "Wrong zone", "Search domain mismatch"],
+          "do_not_touch": "Do not change DNS servers until the hostname and expected zone are confirmed."
+        },
+        {
+          "id": "servfail",
+          "status": "Warning",
+          "patterns": ["SERVFAIL"],
+          "diagnosis": "DNS returned a server failure.",
+          "meaning": "The resolver or upstream authoritative path could not answer successfully.",
+          "possible_causes": ["Authoritative DNS issue", "Resolver problem", "DNSSEC validation failure", "Upstream timeout"],
+          "do_not_touch": "Do not change endpoint network settings before comparing another resolver or known-good client."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ip route",
+          "why": "Checks whether the endpoint has a default route to reach DNS servers.",
+          "meaning": "Shows kernel routing table.",
+          "look_for_good": ["default via expected gateway"],
+          "look_for_bad": ["No default route", "linkdown"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "ping <ip>",
+          "why": "Compares direct IP reachability with DNS behavior.",
+          "meaning": "Tests reachability to an IP address.",
+          "look_for_good": ["Replies from IP"],
+          "look_for_bad": ["packet loss", "Destination Host Unreachable"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "DNS evidence is strongest when you compare the resolver, the returned status, and direct IP reachability.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against distro and tool version differences.",
+      "last_reviewed": "2026-07"
+    }
+  ]
+}

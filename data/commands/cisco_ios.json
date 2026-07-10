@@ -1,0 +1,792 @@
+{
+  "knowledge_base_version": "2026.07-mvp",
+  "vendor": "Cisco IOS",
+  "vendor_key": "cisco_ios",
+  "commands": [
+    {
+      "id": "cisco_show_version",
+      "vendor": "Cisco",
+      "os": "IOS",
+      "command": "show version",
+      "category": "system",
+      "meaning": "Shows software version, uptime, model, serial details, image, and configuration register.",
+      "use_for": [
+        "Confirm platform and IOS version",
+        "Check uptime and reload context",
+        "Check image and configuration register"
+      ],
+      "good_output": [
+        "Cisco IOS Software",
+        "uptime is present",
+        "Configuration register is normal for the platform"
+      ],
+      "bad_output": [
+        "Unexpected configuration register",
+        "Frequent reload history",
+        "Unsupported or unknown image"
+      ],
+      "normal_patterns": [
+        "Cisco IOS Software",
+        "uptime is",
+        "System image file is"
+      ],
+      "warning_patterns": [
+        "Configuration register is 0x2142",
+        "returned to ROM by power-on",
+        "Last reload reason"
+      ],
+      "critical_patterns": [],
+      "detection_patterns": [
+        "Cisco IOS Software",
+        "show\\s+version",
+        "System image file is",
+        "Processor board ID"
+      ],
+      "diagnosis_rules": [
+        {
+          "id": "config_register_2142",
+          "status": "Warning",
+          "patterns": ["Configuration register is 0x2142"],
+          "diagnosis": "The device may be set to ignore startup configuration at boot.",
+          "meaning": "Configuration register 0x2142 is commonly used during password recovery and can cause the device to boot without loading saved configuration.",
+          "possible_causes": [
+            "Password recovery was performed",
+            "Configuration register was changed and not restored",
+            "Device was staged or recovered recently"
+          ],
+          "do_not_touch": "Do not reload the device until the configuration register and saved configuration state are confirmed."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show running-config",
+          "why": "Checks the active configuration currently running in memory.",
+          "meaning": "Displays the current configuration applied to the device.",
+          "look_for_good": ["Expected hostname, interfaces, VLANs, and routing settings"],
+          "look_for_bad": ["Missing configuration", "Unexpected defaults", "Recovery-mode settings"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show startup-config",
+          "why": "Checks the saved configuration that would load after reboot.",
+          "meaning": "Displays the configuration saved in NVRAM.",
+          "look_for_good": ["Saved configuration matches expected production state"],
+          "look_for_bad": ["Startup configuration missing", "Startup configuration differs from running configuration"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Version output is useful context before deeper troubleshooting because platform and software differences affect command behavior.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "cisco_show_interface_status",
+      "vendor": "Cisco",
+      "os": "IOS",
+      "command": "show interface status",
+      "category": "interface",
+      "meaning": "Shows switch port status, VLAN, duplex, speed, and media type.",
+      "use_for": [
+        "Check if a port is connected",
+        "Check access VLAN",
+        "Check speed and duplex",
+        "Find disabled or err-disabled ports"
+      ],
+      "good_output": [
+        "connected",
+        "correct VLAN",
+        "expected speed"
+      ],
+      "bad_output": [
+        "notconnect",
+        "disabled",
+        "err-disabled",
+        "wrong VLAN"
+      ],
+      "normal_patterns": [
+        "connected"
+      ],
+      "warning_patterns": [
+        "notconnect",
+        "\\bdisabled\\b"
+      ],
+      "critical_patterns": [
+        "err-disabled"
+      ],
+      "detection_patterns": [
+        "Port\\s+Name\\s+Status\\s+Vlan",
+        "show\\s+interface\\s+status",
+        "err-disabled|notconnect|connected"
+      ],
+      "diagnosis_rules": [
+        {
+          "id": "err_disabled",
+          "status": "Critical",
+          "patterns": ["err-disabled"],
+          "diagnosis": "The switch port appears to be err-disabled.",
+          "meaning": "The switch has automatically disabled the interface after detecting a protective condition.",
+          "possible_causes": [
+            "Port security violation",
+            "BPDU guard event",
+            "Link-flap protection",
+            "UDLD or loop detection",
+            "Storm-control event"
+          ],
+          "do_not_touch": "Do not re-enable the port until the err-disable cause is identified in logs and the connected device/path is checked."
+        },
+        {
+          "id": "notconnect",
+          "status": "Warning",
+          "patterns": ["notconnect"],
+          "diagnosis": "The switch port appears to be physically down.",
+          "meaning": "The switch does not detect an active endpoint or cable on this port.",
+          "possible_causes": [
+            "Cable unplugged",
+            "Endpoint powered off",
+            "Wrong patching",
+            "Faulty cable",
+            "Port disabled upstream or downstream"
+          ],
+          "do_not_touch": "Do not change VLAN or reboot the switch until physical link and MAC learning are confirmed."
+        },
+        {
+          "id": "disabled",
+          "status": "Warning",
+          "patterns": ["\\bdisabled\\b"],
+          "diagnosis": "The switch port is administratively disabled or unavailable.",
+          "meaning": "The port is not forwarding user traffic in its current state.",
+          "possible_causes": [
+            "Interface configured with shutdown",
+            "Port intentionally reserved",
+            "Template or policy disabled the port"
+          ],
+          "do_not_touch": "Do not enable the port without confirming ownership, endpoint, VLAN, and change approval."
+        },
+        {
+          "id": "connected",
+          "status": "Passed",
+          "patterns": ["connected"],
+          "diagnosis": "The switch port appears physically connected.",
+          "meaning": "The switch detects link on at least one interface in the pasted output.",
+          "possible_causes": [
+            "No physical fault is visible in the status output"
+          ],
+          "do_not_touch": "Do not change the interface until counters, VLAN, and MAC learning are checked if users still report an issue."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface <interface>",
+          "why": "Checks detailed port status, errors, speed, duplex, and counters.",
+          "meaning": "Shows the physical and protocol state plus traffic and error counters for the interface.",
+          "look_for_good": [
+            "Interface is up",
+            "Line protocol is up",
+            "No CRC errors",
+            "Expected speed and duplex"
+          ],
+          "look_for_bad": [
+            "Interface is down",
+            "CRC errors",
+            "Input errors",
+            "Speed or duplex mismatch"
+          ],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show running-config interface <interface>",
+          "why": "Checks port configuration.",
+          "meaning": "Displays the configuration applied only to the selected interface.",
+          "look_for_good": [
+            "Correct access VLAN",
+            "No shutdown",
+            "Expected switchport mode"
+          ],
+          "look_for_bad": [
+            "shutdown",
+            "Wrong VLAN",
+            "Unexpected trunk mode",
+            "Port-security restrictions"
+          ],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show mac address-table interface <interface>",
+          "why": "Checks if the switch has learned a MAC address from the connected device.",
+          "meaning": "Shows MAC addresses learned on the selected interface.",
+          "look_for_good": [
+            "Expected endpoint MAC address appears",
+            "MAC address is in the expected VLAN"
+          ],
+          "look_for_bad": [
+            "No MAC address",
+            "MAC address appears in the wrong VLAN",
+            "Unexpected number of MAC addresses"
+          ],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Interface status helps confirm whether the problem is physical, VLAN-related, or configuration-related.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "cisco_show_interfaces",
+      "vendor": "Cisco",
+      "os": "IOS",
+      "command": "show interfaces",
+      "category": "interface",
+      "meaning": "Shows detailed interface state, counters, errors, speed, duplex, and traffic.",
+      "use_for": [
+        "Check up/down state",
+        "Find CRC and input errors",
+        "Review speed and duplex",
+        "Check traffic counters"
+      ],
+      "good_output": [
+        "is up, line protocol is up",
+        "0 input errors",
+        "0 CRC",
+        "expected duplex and speed"
+      ],
+      "bad_output": [
+        "is down, line protocol is down",
+        "administratively down",
+        "CRC errors",
+        "input errors"
+      ],
+      "normal_patterns": [
+        "is up, line protocol is up",
+        "0 input errors",
+        "0 CRC"
+      ],
+      "warning_patterns": [
+        "is down, line protocol is down",
+        "administratively down",
+        "input errors",
+        "CRC"
+      ],
+      "critical_patterns": [
+        "err-disabled",
+        "line protocol is down"
+      ],
+      "detection_patterns": [
+        "line protocol is",
+        "input errors",
+        "CRC",
+        "show\\s+interfaces?"
+      ],
+      "diagnosis_rules": [
+        {
+          "id": "admin_down",
+          "status": "Warning",
+          "patterns": ["administratively down"],
+          "diagnosis": "The interface is administratively down.",
+          "meaning": "The interface has been disabled by configuration and will not pass traffic until it is intentionally enabled.",
+          "possible_causes": [
+            "Configured shutdown",
+            "Reserved or unused port",
+            "Policy disabled the interface"
+          ],
+          "do_not_touch": "Do not enable the port without confirming ownership, endpoint, VLAN, and approval."
+        },
+        {
+          "id": "link_down",
+          "status": "Warning",
+          "patterns": ["is down, line protocol is down"],
+          "diagnosis": "The interface is down at both physical and protocol layers.",
+          "meaning": "The device is not seeing a usable link on the interface.",
+          "possible_causes": [
+            "Cable or transceiver issue",
+            "Endpoint powered off",
+            "Wrong patch path",
+            "Remote interface disabled"
+          ],
+          "do_not_touch": "Do not change VLAN or trunk settings until physical cabling and endpoint state are confirmed."
+        },
+        {
+          "id": "crc_errors",
+          "status": "Warning",
+          "patterns": ["CRC", "input errors"],
+          "diagnosis": "The interface shows physical-layer error indicators.",
+          "meaning": "CRC or input errors often point to cabling, optic, speed, duplex, or hardware issues.",
+          "possible_causes": [
+            "Bad copper cable or fiber optic",
+            "Dirty or faulty transceiver",
+            "Duplex mismatch on older links",
+            "Physical interference",
+            "Failing endpoint NIC"
+          ],
+          "do_not_touch": "Do not reset counters as a first step if evidence is needed for escalation."
+        },
+        {
+          "id": "up_up",
+          "status": "Passed",
+          "patterns": ["is up, line protocol is up"],
+          "diagnosis": "The interface appears operational.",
+          "meaning": "The physical and protocol layers are both up in the pasted output.",
+          "possible_causes": [
+            "No link-state fault is visible in this output"
+          ],
+          "do_not_touch": "Do not make configuration changes if the issue may be above Layer 1 or Layer 2."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface status",
+          "why": "Compares detailed interface state against the switchport summary.",
+          "meaning": "Shows status, VLAN, duplex, speed, and media for switchports.",
+          "look_for_good": ["connected", "expected VLAN", "expected speed"],
+          "look_for_bad": ["notconnect", "disabled", "err-disabled", "wrong VLAN"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show running-config interface <interface>",
+          "why": "Checks whether configuration explains the interface behavior.",
+          "meaning": "Displays configuration applied to the selected interface.",
+          "look_for_good": ["No shutdown", "Expected access or trunk mode", "Correct VLAN"],
+          "look_for_bad": ["shutdown", "Wrong VLAN", "Unexpected trunk", "Port security"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show mac address-table interface <interface>",
+          "why": "Checks whether frames are being learned from the endpoint.",
+          "meaning": "Lists learned MAC addresses on the selected interface.",
+          "look_for_good": ["Expected MAC address is present"],
+          "look_for_bad": ["No MAC address", "MAC in wrong VLAN"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Interface counters help separate physical faults from configuration or endpoint issues.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "cisco_show_vlan_brief",
+      "vendor": "Cisco",
+      "os": "IOS",
+      "command": "show vlan brief",
+      "category": "vlan",
+      "meaning": "Shows VLAN IDs, VLAN names, status, and access ports assigned to each VLAN.",
+      "use_for": [
+        "Confirm a VLAN exists",
+        "Check access-port VLAN assignment",
+        "Confirm VLAN status"
+      ],
+      "good_output": ["VLAN is active", "Interface appears under expected VLAN"],
+      "bad_output": ["VLAN missing", "VLAN suspended", "Port assigned to wrong VLAN"],
+      "normal_patterns": ["active"],
+      "warning_patterns": ["suspend", "act/lshut"],
+      "critical_patterns": [],
+      "detection_patterns": ["VLAN\\s+Name\\s+Status\\s+Ports", "show\\s+vlan\\s+brief"],
+      "diagnosis_rules": [
+        {
+          "id": "vlan_suspended",
+          "status": "Warning",
+          "patterns": ["suspend", "act/lshut"],
+          "diagnosis": "A VLAN appears suspended or locally shut.",
+          "meaning": "Ports in that VLAN may not pass traffic as expected.",
+          "possible_causes": ["VLAN was disabled", "VTP or platform policy changed VLAN state"],
+          "do_not_touch": "Do not add or remove VLANs on trunks until VLAN ownership and path are confirmed."
+        },
+        {
+          "id": "vlan_active",
+          "status": "Info",
+          "patterns": ["active"],
+          "diagnosis": "The pasted VLAN output contains active VLANs.",
+          "meaning": "At least one VLAN is present and active in the pasted output.",
+          "possible_causes": ["No VLAN state issue is visible from this output alone"],
+          "do_not_touch": "Do not change access VLANs without confirming endpoint requirements."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface status",
+          "why": "Checks the access VLAN assigned to each switchport.",
+          "meaning": "Shows port state and VLAN summary.",
+          "look_for_good": ["Expected interface in expected VLAN"],
+          "look_for_bad": ["Wrong VLAN", "notconnect", "disabled"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show mac address-table vlan <vlan>",
+          "why": "Checks whether devices are learning MAC addresses in the VLAN.",
+          "meaning": "Lists MAC addresses learned in a specific VLAN.",
+          "look_for_good": ["Expected endpoint MAC addresses are present"],
+          "look_for_bad": ["No MAC addresses", "Unexpected MAC movement"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "VLAN output confirms existence and access-port placement, but trunk allowance may need separate checks.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "cisco_show_mac_address_table",
+      "vendor": "Cisco",
+      "os": "IOS",
+      "command": "show mac address-table",
+      "category": "switching",
+      "meaning": "Shows MAC addresses learned by the switch and the interfaces where they were learned.",
+      "use_for": ["Confirm endpoint communication", "Find where a device is connected", "Check VLAN learning"],
+      "good_output": ["DYNAMIC entries", "Expected VLAN", "Expected interface"],
+      "bad_output": ["No entries", "MAC learned on wrong interface", "MAC flapping"],
+      "normal_patterns": ["DYNAMIC", "STATIC"],
+      "warning_patterns": ["No entries", "not found", "drop"],
+      "critical_patterns": [],
+      "detection_patterns": ["show\\s+mac\\s+address-table", "Mac Address Table", "DYNAMIC"],
+      "diagnosis_rules": [
+        {
+          "id": "no_mac_entries",
+          "status": "Warning",
+          "patterns": ["No entries", "not found"],
+          "diagnosis": "No matching MAC address entry is visible.",
+          "meaning": "The switch may not be learning frames from the endpoint or VLAN path being checked.",
+          "possible_causes": ["Endpoint offline", "Wrong port", "Wrong VLAN", "No traffic from endpoint"],
+          "do_not_touch": "Do not move VLANs or patching until link state and endpoint power are checked."
+        },
+        {
+          "id": "mac_learned",
+          "status": "Passed",
+          "patterns": ["DYNAMIC"],
+          "diagnosis": "The switch is learning at least one dynamic MAC address.",
+          "meaning": "MAC learning indicates Layer 2 traffic is reaching the switch.",
+          "possible_causes": ["No MAC-learning fault is visible in this output"],
+          "do_not_touch": "Do not clear the MAC table unless directed during a controlled troubleshooting step."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface <interface>",
+          "why": "Checks whether the interface learning the MAC has errors or instability.",
+          "meaning": "Shows physical state and counters.",
+          "look_for_good": ["up/up", "low or zero errors"],
+          "look_for_bad": ["CRC errors", "input errors", "link resets"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show vlan brief",
+          "why": "Confirms the VLAN associated with the learned MAC exists and is active.",
+          "meaning": "Shows VLAN status and access-port membership.",
+          "look_for_good": ["VLAN active"],
+          "look_for_bad": ["VLAN missing", "VLAN suspended"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "A MAC address usually appears only after the endpoint sends traffic.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "cisco_show_cdp_neighbors",
+      "vendor": "Cisco",
+      "os": "IOS",
+      "command": "show cdp neighbors",
+      "category": "neighbors",
+      "meaning": "Shows Cisco Discovery Protocol neighbors visible from local interfaces.",
+      "use_for": ["Identify connected Cisco devices", "Check local and remote interface mapping"],
+      "good_output": ["Expected neighbor appears", "Expected local interface"],
+      "bad_output": ["No entries", "Unexpected neighbor", "Wrong interface"],
+      "normal_patterns": ["Device ID", "Platform", "Port ID"],
+      "warning_patterns": ["Total cdp entries displayed : 0", "CDP is not enabled"],
+      "critical_patterns": [],
+      "detection_patterns": ["show\\s+cdp\\s+neighbors", "Device ID\\s+Local Intrfce", "Port ID"],
+      "diagnosis_rules": [
+        {
+          "id": "no_cdp",
+          "status": "Info",
+          "patterns": ["Total cdp entries displayed : 0", "CDP is not enabled"],
+          "diagnosis": "No CDP neighbor is visible in the pasted output.",
+          "meaning": "The connected device may not support CDP, CDP may be disabled, or no neighbor is connected.",
+          "possible_causes": ["Non-Cisco neighbor", "CDP disabled", "Physical link down"],
+          "do_not_touch": "Do not enable discovery protocols without confirming site policy."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show lldp neighbors",
+          "why": "Checks for standards-based LLDP neighbors.",
+          "meaning": "Lists neighbors discovered by LLDP.",
+          "look_for_good": ["Expected neighbor appears"],
+          "look_for_bad": ["No neighbor", "Unexpected interface"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show interface status",
+          "why": "Checks whether the local interface has link.",
+          "meaning": "Shows switchport link and VLAN state.",
+          "look_for_good": ["connected"],
+          "look_for_bad": ["notconnect", "disabled"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "CDP is Cisco-specific; LLDP is better for mixed-vendor neighbor checks.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "cisco_show_lldp_neighbors",
+      "vendor": "Cisco",
+      "os": "IOS",
+      "command": "show lldp neighbors",
+      "category": "neighbors",
+      "meaning": "Shows LLDP neighbors visible from local interfaces.",
+      "use_for": ["Identify connected devices", "Check physical topology", "Confirm remote interface"],
+      "good_output": ["Expected neighbor appears", "Correct local interface"],
+      "bad_output": ["No entries", "Unexpected neighbor", "Wrong interface"],
+      "normal_patterns": ["Device ID", "Port ID", "Local Intf"],
+      "warning_patterns": ["Total entries displayed: 0", "LLDP is not enabled"],
+      "critical_patterns": [],
+      "detection_patterns": ["show\\s+lldp\\s+neighbors", "Local Intf", "Port id"],
+      "diagnosis_rules": [
+        {
+          "id": "no_lldp",
+          "status": "Info",
+          "patterns": ["Total entries displayed: 0", "LLDP is not enabled"],
+          "diagnosis": "No LLDP neighbor is visible in the pasted output.",
+          "meaning": "The neighbor may not send LLDP, LLDP may be disabled, or the physical link may be down.",
+          "possible_causes": ["LLDP disabled", "Neighbor not connected", "Physical link down"],
+          "do_not_touch": "Do not enable LLDP without confirming site policy."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface status",
+          "why": "Checks physical port state.",
+          "meaning": "Shows link, VLAN, speed, and duplex summary.",
+          "look_for_good": ["connected"],
+          "look_for_bad": ["notconnect", "disabled"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show cdp neighbors",
+          "why": "Checks whether a Cisco neighbor is visible through CDP.",
+          "meaning": "Lists CDP neighbors.",
+          "look_for_good": ["Expected Cisco neighbor"],
+          "look_for_bad": ["No entries", "Unexpected neighbor"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "LLDP is useful for mixed-vendor topology discovery but may be disabled by policy.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "cisco_show_ip_arp",
+      "vendor": "Cisco",
+      "os": "IOS",
+      "command": "show ip arp",
+      "category": "gateway",
+      "meaning": "Shows IP-to-MAC address mappings learned by ARP.",
+      "use_for": ["Check gateway or endpoint ARP", "Confirm Layer 3 adjacency"],
+      "good_output": ["Expected IP has a MAC address", "Age and interface look normal"],
+      "bad_output": ["Incomplete", "Missing gateway ARP", "Unexpected interface"],
+      "normal_patterns": ["Internet\\s+\\d+\\.\\d+\\.\\d+\\.\\d+"],
+      "warning_patterns": ["Incomplete", "not found"],
+      "critical_patterns": [],
+      "detection_patterns": ["show\\s+ip\\s+arp", "Protocol\\s+Address\\s+Age", "Hardware Addr"],
+      "diagnosis_rules": [
+        {
+          "id": "incomplete_arp",
+          "status": "Warning",
+          "patterns": ["Incomplete"],
+          "diagnosis": "ARP resolution is incomplete for at least one IP address.",
+          "meaning": "The device has not resolved the IP address to a MAC address.",
+          "possible_causes": ["Endpoint offline", "Wrong VLAN", "Gateway unreachable", "ARP blocked or filtered"],
+          "do_not_touch": "Do not change routes or VLANs until IP, mask, gateway, and Layer 2 path are confirmed."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show mac address-table vlan <vlan>",
+          "why": "Checks Layer 2 learning in the VLAN where ARP is expected.",
+          "meaning": "Lists learned MAC addresses for the VLAN.",
+          "look_for_good": ["Gateway or endpoint MAC appears"],
+          "look_for_bad": ["No relevant MAC address"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show interface <interface>",
+          "why": "Checks interface state and errors on the path.",
+          "meaning": "Shows physical/protocol state and counters.",
+          "look_for_good": ["up/up", "no errors"],
+          "look_for_bad": ["down", "CRC errors"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "ARP proves local subnet reachability only after the endpoint or gateway responds at Layer 2.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "cisco_show_spanning_tree",
+      "vendor": "Cisco",
+      "os": "IOS",
+      "command": "show spanning-tree",
+      "category": "switching",
+      "meaning": "Shows spanning-tree state, root bridge information, and port roles.",
+      "use_for": ["Check blocked ports", "Confirm root bridge", "Review topology change clues"],
+      "good_output": ["Expected root", "Expected forwarding ports", "Stable topology"],
+      "bad_output": ["Unexpected blocking", "Frequent topology changes", "Inconsistent state"],
+      "normal_patterns": ["Root ID", "Bridge ID", "FWD"],
+      "warning_patterns": ["BLK", "blocking", "topology change", "inconsistent"],
+      "critical_patterns": ["loop", "Root inconsistent", "Type-inconsistent"],
+      "detection_patterns": ["show\\s+spanning-tree", "Root ID", "Bridge ID", "Role\\s+Sts"],
+      "diagnosis_rules": [
+        {
+          "id": "stp_blocking",
+          "status": "Info",
+          "patterns": ["BLK", "blocking"],
+          "diagnosis": "A spanning-tree port is blocking.",
+          "meaning": "Blocking can be normal loop prevention, but unexpected blocking can break a path.",
+          "possible_causes": ["Expected redundant path", "Unexpected topology", "Root bridge change"],
+          "do_not_touch": "Do not force ports forwarding or change spanning-tree priority without approval."
+        },
+        {
+          "id": "stp_inconsistent",
+          "status": "Critical",
+          "patterns": ["Root inconsistent", "Type-inconsistent", "inconsistent"],
+          "diagnosis": "Spanning-tree reports an inconsistent state.",
+          "meaning": "The switch may be protecting the network from a dangerous topology or mismatch.",
+          "possible_causes": ["BPDU guard or root guard event", "Trunk mismatch", "Loop prevention event"],
+          "do_not_touch": "Do not disable spanning-tree protections until the topology and connected device are verified."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface status",
+          "why": "Maps spanning-tree ports to current link status.",
+          "meaning": "Shows port status, VLAN, speed, and duplex.",
+          "look_for_good": ["Expected ports connected"],
+          "look_for_bad": ["Unexpected ports connected", "disabled", "err-disabled"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show cdp neighbors",
+          "why": "Checks physical neighbors that may explain topology.",
+          "meaning": "Lists Cisco neighbors by local interface.",
+          "look_for_good": ["Expected neighbor on expected port"],
+          "look_for_bad": ["Unexpected neighbor or loop path"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Spanning-tree blocking is often normal; the key question is whether the blocking state matches the intended topology.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "cisco_show_etherchannel_summary",
+      "vendor": "Cisco",
+      "os": "IOS",
+      "command": "show etherchannel summary",
+      "category": "switching",
+      "meaning": "Shows port-channel groups, protocol, and member-port bundle state.",
+      "use_for": ["Check port-channel health", "Find suspended or individual links", "Confirm bundle membership"],
+      "good_output": ["P or bundled member state", "Port-channel up", "Expected protocol"],
+      "bad_output": ["suspended", "individual", "down", "not bundled"],
+      "normal_patterns": ["\\(P\\)", "SU", "LACP"],
+      "warning_patterns": ["suspended", "individual", "\\(I\\)", "\\(D\\)", "down"],
+      "critical_patterns": ["misconfig", "suspended"],
+      "detection_patterns": ["show\\s+etherchannel\\s+summary", "Group\\s+Port-channel\\s+Protocol", "Flags:"],
+      "diagnosis_rules": [
+        {
+          "id": "bundle_issue",
+          "status": "Warning",
+          "patterns": ["suspended", "individual", "\\(I\\)", "\\(D\\)", "down"],
+          "diagnosis": "A port-channel member may not be bundled correctly.",
+          "meaning": "A member link outside the bundle can reduce redundancy or indicate a configuration mismatch.",
+          "possible_causes": ["LACP mismatch", "Speed or duplex mismatch", "Trunk mismatch", "Native VLAN mismatch", "Remote port-channel issue"],
+          "do_not_touch": "Do not remove or add port-channel members until both ends and the change window are confirmed."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface <interface>",
+          "why": "Checks the member interface for physical errors or link state.",
+          "meaning": "Shows detailed state and counters.",
+          "look_for_good": ["up/up", "no errors"],
+          "look_for_bad": ["down", "CRC errors", "input errors"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show running-config interface <interface>",
+          "why": "Checks port-channel membership and trunk settings.",
+          "meaning": "Shows interface configuration.",
+          "look_for_good": ["channel-group matches design", "trunk settings match peer"],
+          "look_for_bad": ["Wrong channel-group", "mode mismatch", "trunk mismatch"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Port-channel problems often require comparing both ends; one-sided output rarely proves the full cause.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "cisco_show_running_config_interface",
+      "vendor": "Cisco",
+      "os": "IOS",
+      "command": "show running-config interface",
+      "category": "configuration",
+      "meaning": "Shows the active configuration applied to a specific interface.",
+      "use_for": ["Check shutdown state", "Check VLAN and switchport mode", "Check port security and descriptions"],
+      "good_output": ["Expected switchport mode", "Correct VLAN", "No shutdown"],
+      "bad_output": ["shutdown", "Wrong VLAN", "Unexpected trunk", "Port-security restrictions"],
+      "normal_patterns": ["interface\\s+", "switchport"],
+      "warning_patterns": ["\\bshutdown\\b", "switchport port-security", "access vlan"],
+      "critical_patterns": [],
+      "detection_patterns": ["show\\s+running-config\\s+interface", "^interface\\s+"],
+      "diagnosis_rules": [
+        {
+          "id": "configured_shutdown",
+          "status": "Warning",
+          "patterns": ["\\bshutdown\\b"],
+          "diagnosis": "The interface configuration contains shutdown.",
+          "meaning": "The interface may be intentionally disabled by configuration.",
+          "possible_causes": ["Port reserved", "Administrative shutdown", "Template disabled the port"],
+          "do_not_touch": "Do not remove shutdown without confirming endpoint ownership, VLAN, and approval."
+        },
+        {
+          "id": "port_security",
+          "status": "Info",
+          "patterns": ["switchport port-security"],
+          "diagnosis": "Port security is configured on the interface.",
+          "meaning": "Traffic may be restricted based on learned or configured MAC address policy.",
+          "possible_causes": ["Expected access-port hardening", "MAC limit reached", "Sticky MAC mismatch"],
+          "do_not_touch": "Do not clear or change port-security settings without checking policy and logs."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface status",
+          "why": "Checks whether the configuration matches the actual port state.",
+          "meaning": "Shows link, VLAN, duplex, speed, and media summary.",
+          "look_for_good": ["connected", "expected VLAN"],
+          "look_for_bad": ["disabled", "notconnect", "err-disabled", "wrong VLAN"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show interface <interface>",
+          "why": "Checks physical state and counters for the configured interface.",
+          "meaning": "Shows detailed state and counters.",
+          "look_for_good": ["up/up", "no errors"],
+          "look_for_bad": ["down", "CRC errors", "input errors"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Running-config explains intended behavior; interface status and counters show current behavior.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    }
+  ]
+}

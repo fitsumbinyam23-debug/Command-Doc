@@ -1,0 +1,13 @@
+{
+  "id": "dns_troubleshooting",
+  "title": "DNS Troubleshooting",
+  "category": "dns",
+  "steps": [
+    "Confirm DNS server assignment.",
+    "Check name resolution with nslookup or dig.",
+    "Compare DNS failure with direct IP reachability.",
+    "Confirm search suffix and resolver configuration.",
+    "Escalate to DNS administration if authoritative records or zone health are suspect."
+  ],
+  "do_not_touch": "Do not change DNS server settings on production endpoints or servers without confirming scope and approval."
+}

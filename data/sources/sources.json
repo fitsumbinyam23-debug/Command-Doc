@@ -1,0 +1,13 @@
+{
+  "knowledge_base_version": "2026.07-mvp",
+  "last_reviewed": "2026-07",
+  "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+  "maintainer_note": "MVP knowledge is intentionally conservative and focused on safe read-only troubleshooting guidance.",
+  "vendors": [
+    "Cisco IOS",
+    "HP Comware",
+    "ArubaOS-CX",
+    "Windows CMD",
+    "Linux"
+  ]
+}

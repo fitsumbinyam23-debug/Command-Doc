@@ -1,0 +1,13 @@
+{
+  "id": "gateway_troubleshooting",
+  "title": "Gateway Troubleshooting",
+  "category": "gateway",
+  "steps": [
+    "Confirm the endpoint has a valid IP address.",
+    "Confirm default gateway assignment.",
+    "Ping the default gateway.",
+    "Check ARP for the gateway MAC address.",
+    "Check route table if the gateway is missing or unreachable."
+  ],
+  "do_not_touch": "Do not change default gateway, static routes, or routing metrics until the current address, mask, gateway, and VLAN are confirmed."
+}

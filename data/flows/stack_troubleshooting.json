@@ -1,0 +1,13 @@
+{
+  "id": "stack_troubleshooting",
+  "title": "Stack Troubleshooting",
+  "category": "stack",
+  "steps": [
+    "Confirm all stack or IRF members are present.",
+    "Check topology and member roles.",
+    "Check logs for split, reload, or election events.",
+    "Check cabling and module status.",
+    "Escalate before replacing stack cables or rebooting members."
+  ],
+  "do_not_touch": "Do not reload a stack member, change IRF settings, or reseat stack cables during production hours without approval."
+}

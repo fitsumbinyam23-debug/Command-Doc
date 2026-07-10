@@ -1,0 +1,13 @@
+{
+  "id": "vlan_troubleshooting",
+  "title": "VLAN Troubleshooting",
+  "category": "vlan",
+  "steps": [
+    "Confirm the VLAN exists and is active.",
+    "Confirm the interface is assigned to the expected VLAN.",
+    "Confirm trunk ports allow the VLAN where required.",
+    "Check MAC learning in the VLAN.",
+    "Verify upstream gateway reachability."
+  ],
+  "do_not_touch": "Do not add, remove, or change VLANs on production trunks without approval and rollback details."
+}

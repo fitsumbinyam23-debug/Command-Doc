@@ -1,0 +1,77 @@
+{
+  "warning_message": "This command can cause outage, remove configuration, or disconnect users. Confirm backup, approval, and change window before using it.",
+  "commands": [
+    {
+      "command": "erase startup-config",
+      "patterns": ["erase\\s+startup-config"],
+      "risk": "Critical",
+      "reason": "Removes saved startup configuration."
+    },
+    {
+      "command": "write erase",
+      "patterns": ["write\\s+erase"],
+      "risk": "Critical",
+      "reason": "Removes saved startup configuration."
+    },
+    {
+      "command": "delete flash:",
+      "patterns": ["delete\\s+flash:"],
+      "risk": "Critical",
+      "reason": "Deletes files from device flash storage."
+    },
+    {
+      "command": "format",
+      "patterns": ["\\bformat\\b"],
+      "risk": "Critical",
+      "reason": "Can erase storage or a filesystem."
+    },
+    {
+      "command": "reload",
+      "patterns": ["\\breload\\b"],
+      "risk": "Critical",
+      "reason": "Can restart network equipment and interrupt users."
+    },
+    {
+      "command": "reboot",
+      "patterns": ["\\breboot\\b"],
+      "risk": "Critical",
+      "reason": "Can restart equipment and interrupt users."
+    },
+    {
+      "command": "reset saved-configuration",
+      "patterns": ["reset\\s+saved-configuration"],
+      "risk": "Critical",
+      "reason": "Removes saved configuration on Comware devices."
+    },
+    {
+      "command": "shutdown",
+      "patterns": ["(?<!no\\s)\\bshutdown\\b"],
+      "risk": "High",
+      "reason": "Can disable an interface or service."
+    },
+    {
+      "command": "undo shutdown",
+      "patterns": ["undo\\s+shutdown"],
+      "risk": "High",
+      "reason": "Can bring an interface up and affect production traffic."
+    },
+    {
+      "command": "no switchport",
+      "patterns": ["no\\s+switchport"],
+      "risk": "High",
+      "reason": "Changes a switchport into a routed port on supported platforms."
+    },
+    {
+      "command": "default interface",
+      "patterns": ["default\\s+interface"],
+      "risk": "High",
+      "reason": "Can remove interface configuration."
+    },
+    {
+      "command": "factory reset",
+      "patterns": ["factory\\s+reset"],
+      "risk": "Critical",
+      "reason": "Can return equipment to factory defaults."
+    }
+  ]
+}

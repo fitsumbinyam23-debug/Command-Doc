@@ -1,0 +1,481 @@
+{
+  "knowledge_base_version": "2026.07-mvp",
+  "vendor": "Windows CMD",
+  "vendor_key": "windows_cmd",
+  "commands": [
+    {
+      "id": "windows_ipconfig_all",
+      "vendor": "Microsoft",
+      "os": "Windows CMD",
+      "command": "ipconfig /all",
+      "category": "endpoint",
+      "meaning": "Shows Windows network adapter IP address, subnet mask, default gateway, DNS servers, DHCP, and MAC details.",
+      "use_for": [
+        "Check endpoint IP address",
+        "Check default gateway",
+        "Check DNS servers",
+        "Check DHCP assignment",
+        "Check adapter state"
+      ],
+      "good_output": [
+        "Valid IPv4 address",
+        "Default gateway present",
+        "DNS servers present",
+        "Expected adapter connected"
+      ],
+      "bad_output": [
+        "169.254.x.x APIPA address",
+        "Media disconnected",
+        "No default gateway",
+        "No DNS servers"
+      ],
+      "normal_patterns": [
+        "Windows IP Configuration",
+        "IPv4 Address",
+        "Default Gateway",
+        "DNS Servers"
+      ],
+      "warning_patterns": [
+        "Media disconnected",
+        "169\\.254\\.",
+        "Autoconfiguration IPv4 Address"
+      ],
+      "critical_patterns": [
+        "169\\.254\\.",
+        "Default Gateway\\s*\\.\\s*:",
+        "Media disconnected"
+      ],
+      "detection_patterns": [
+        "Windows IP Configuration",
+        "Ethernet adapter",
+        "Wireless LAN adapter",
+        "ipconfig\\s+/all"
+      ],
+      "diagnosis_rules": [
+        {
+          "id": "apipa",
+          "status": "Critical",
+          "patterns": ["169\\.254\\.", "Autoconfiguration IPv4 Address"],
+          "diagnosis": "The Windows endpoint appears to have an APIPA address.",
+          "meaning": "Windows assigned itself a 169.254.x.x address because it likely did not receive a DHCP lease.",
+          "possible_causes": [
+            "DHCP unavailable",
+            "Endpoint on wrong VLAN",
+            "Network cable or Wi-Fi issue",
+            "Port security or NAC blocking DHCP",
+            "DHCP scope exhausted"
+          ],
+          "do_not_touch": "Do not assign a static IP until VLAN, DHCP scope, and gateway details are confirmed."
+        },
+        {
+          "id": "media_disconnected",
+          "status": "Warning",
+          "patterns": ["Media disconnected"],
+          "diagnosis": "A Windows network adapter is disconnected.",
+          "meaning": "The adapter is not detecting a network link or active connection.",
+          "possible_causes": [
+            "Cable unplugged",
+            "Wi-Fi disconnected",
+            "Disabled adapter",
+            "Switch port down"
+          ],
+          "do_not_touch": "Do not change IP settings until the physical or wireless link is confirmed."
+        },
+        {
+          "id": "missing_gateway",
+          "status": "Critical",
+          "patterns": ["Default Gateway\\s*\\.\\s*:\\s*$"],
+          "diagnosis": "The endpoint may not have a default gateway.",
+          "meaning": "Without a default gateway, the endpoint may reach only the local subnet.",
+          "possible_causes": [
+            "DHCP option missing",
+            "Static IP configured without gateway",
+            "Wrong VLAN",
+            "Incomplete adapter configuration"
+          ],
+          "do_not_touch": "Do not change gateway settings until the correct subnet and VLAN are confirmed."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ping <gateway>",
+          "why": "Checks whether the endpoint can reach its default gateway.",
+          "meaning": "Sends ICMP echo requests to the gateway IP.",
+          "look_for_good": ["Reply from gateway IP", "Low packet loss"],
+          "look_for_bad": ["Request timed out", "Destination host unreachable", "General failure"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "arp -a",
+          "why": "Checks whether the endpoint has learned the gateway MAC address.",
+          "meaning": "Shows local ARP cache entries.",
+          "look_for_good": ["Gateway IP has a MAC address"],
+          "look_for_bad": ["Gateway IP missing", "Incomplete or stale entry"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "route print",
+          "why": "Checks the local routing table and default route.",
+          "meaning": "Displays IPv4 and IPv6 routes configured on the endpoint.",
+          "look_for_good": ["0.0.0.0 route points to expected gateway"],
+          "look_for_bad": ["No default route", "Wrong gateway", "Wrong interface metric"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "APIPA usually means the endpoint failed to get DHCP; gateway and ARP checks separate DHCP issues from Layer 2 reachability issues.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "windows_ping",
+      "vendor": "Microsoft",
+      "os": "Windows CMD",
+      "command": "ping",
+      "category": "connectivity",
+      "meaning": "Tests basic reachability to an IP address or hostname using ICMP echo.",
+      "use_for": ["Check gateway reachability", "Check remote host reachability", "Compare DNS name and IP tests"],
+      "good_output": ["Reply from", "0% loss"],
+      "bad_output": ["Request timed out", "Destination host unreachable", "could not find host", "100% loss"],
+      "normal_patterns": ["Reply from", "0% loss"],
+      "warning_patterns": ["Request timed out", "Destination host unreachable", "could not find host", "100% loss"],
+      "critical_patterns": ["could not find host", "Destination host unreachable", "100% loss"],
+      "detection_patterns": ["Pinging", "Ping statistics", "Reply from", "Request timed out"],
+      "diagnosis_rules": [
+        {
+          "id": "ping_timeout",
+          "status": "Warning",
+          "patterns": ["Request timed out", "100% loss"],
+          "diagnosis": "The ping test did not receive replies.",
+          "meaning": "The target may be unreachable, blocking ICMP, offline, or separated by a network issue.",
+          "possible_causes": ["Target offline", "Firewall blocks ICMP", "Routing issue", "Gateway issue"],
+          "do_not_touch": "Do not assume the service is down based only on ICMP; compare with gateway and DNS checks."
+        },
+        {
+          "id": "host_unreachable",
+          "status": "Critical",
+          "patterns": ["Destination host unreachable", "General failure"],
+          "diagnosis": "The local system or gateway reports the destination is unreachable.",
+          "meaning": "The endpoint may lack a valid route, gateway, or Layer 2 path.",
+          "possible_causes": ["No default gateway", "Wrong subnet", "Gateway unreachable", "Interface disconnected"],
+          "do_not_touch": "Do not change routes until IP, mask, gateway, and adapter state are confirmed."
+        },
+        {
+          "id": "dns_name_fail",
+          "status": "Warning",
+          "patterns": ["could not find host"],
+          "diagnosis": "The hostname could not be resolved.",
+          "meaning": "The ping did not reach the network test stage because DNS/name resolution failed.",
+          "possible_causes": ["Wrong hostname", "DNS server issue", "DNS suffix issue", "No network connectivity"],
+          "do_not_touch": "Do not change DNS settings until nslookup and IP connectivity are compared."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ipconfig /all",
+          "why": "Checks local IP, gateway, DNS, and adapter state.",
+          "meaning": "Shows endpoint network configuration.",
+          "look_for_good": ["Valid IP", "Gateway present", "DNS servers present"],
+          "look_for_bad": ["169.254.x.x", "No gateway", "Media disconnected"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "tracert <ip>",
+          "why": "Finds where the path stops after a ping failure.",
+          "meaning": "Shows route hops toward the target.",
+          "look_for_good": ["Hops progress toward target"],
+          "look_for_bad": ["Stops at gateway", "Repeated timeouts early in path"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "nslookup <hostname>",
+          "why": "Checks DNS resolution when pinging a name fails.",
+          "meaning": "Asks DNS for the hostname's address.",
+          "look_for_good": ["Expected IP address returned"],
+          "look_for_bad": ["Non-existent domain", "DNS request timed out"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Ping failure can be network, DNS, host, route, or firewall; compare name, IP, gateway, and traceroute results.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "windows_tracert",
+      "vendor": "Microsoft",
+      "os": "Windows CMD",
+      "command": "tracert",
+      "category": "connectivity",
+      "meaning": "Shows hop-by-hop path toward a target using TTL-limited probes.",
+      "use_for": ["Find where a route stops", "Compare gateway vs upstream reachability", "Check path asymmetry clues"],
+      "good_output": ["Hops continue toward destination", "Destination reached"],
+      "bad_output": ["Timeouts at first hop", "Unable to resolve target system name", "Stops before expected network"],
+      "normal_patterns": ["Tracing route", "Trace complete"],
+      "warning_patterns": ["Request timed out", "Unable to resolve target system name"],
+      "critical_patterns": ["Unable to resolve target system name"],
+      "detection_patterns": ["Tracing route", "over a maximum of", "Trace complete", "tracert"],
+      "diagnosis_rules": [
+        {
+          "id": "tracert_dns_fail",
+          "status": "Warning",
+          "patterns": ["Unable to resolve target system name"],
+          "diagnosis": "Traceroute could not resolve the target name.",
+          "meaning": "DNS failed before route testing began.",
+          "possible_causes": ["Wrong hostname", "DNS server issue", "DNS suffix issue"],
+          "do_not_touch": "Do not change routes before DNS resolution is checked."
+        },
+        {
+          "id": "tracert_timeouts",
+          "status": "Info",
+          "patterns": ["Request timed out"],
+          "diagnosis": "The path contains one or more timeout hops.",
+          "meaning": "Some devices do not reply to traceroute probes; repeated early timeouts are more concerning.",
+          "possible_causes": ["ICMP blocked", "Firewall policy", "Routing issue", "Target unreachable"],
+          "do_not_touch": "Do not assume a single timeout hop is a fault if later hops continue."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ping <gateway>",
+          "why": "Checks local gateway reachability before upstream path analysis.",
+          "meaning": "Sends ICMP echo requests to the gateway.",
+          "look_for_good": ["Reply from gateway"],
+          "look_for_bad": ["Timeout", "Host unreachable"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "route print",
+          "why": "Checks the endpoint routing table.",
+          "meaning": "Shows local routes and default gateway.",
+          "look_for_good": ["Correct default route"],
+          "look_for_bad": ["Missing or wrong default route"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Traceroute is strongest when compared with known-good path expectations and gateway reachability.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "windows_arp_a",
+      "vendor": "Microsoft",
+      "os": "Windows CMD",
+      "command": "arp -a",
+      "category": "gateway",
+      "meaning": "Shows the local ARP cache mapping IP addresses to MAC addresses.",
+      "use_for": ["Check gateway MAC learning", "Confirm local subnet neighbors", "Find stale or missing ARP clues"],
+      "good_output": ["Gateway IP has a physical address", "Expected dynamic entries"],
+      "bad_output": ["No ARP entry for gateway", "Invalid or stale entries", "No ARP Entries Found"],
+      "normal_patterns": ["Interface:", "Internet Address", "Physical Address", "dynamic"],
+      "warning_patterns": ["No ARP Entries Found"],
+      "critical_patterns": [],
+      "detection_patterns": ["arp\\s+-a", "Internet Address\\s+Physical Address", "Interface:"],
+      "diagnosis_rules": [
+        {
+          "id": "no_arp",
+          "status": "Warning",
+          "patterns": ["No ARP Entries Found"],
+          "diagnosis": "The ARP cache has no visible entries.",
+          "meaning": "The endpoint may not have recently communicated with local subnet devices, including the gateway.",
+          "possible_causes": ["No gateway communication", "Adapter disconnected", "Wrong VLAN", "No recent traffic"],
+          "do_not_touch": "Do not change adapter configuration until gateway reachability is tested."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ping <gateway>",
+          "why": "Generates traffic to the gateway and tests reachability.",
+          "meaning": "Sends ICMP echo requests to the gateway IP.",
+          "look_for_good": ["Reply from gateway"],
+          "look_for_bad": ["Timeout", "Destination host unreachable"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "ipconfig /all",
+          "why": "Checks the configured gateway and adapter state.",
+          "meaning": "Shows local network configuration.",
+          "look_for_good": ["Valid IP and gateway"],
+          "look_for_bad": ["No gateway", "169.254.x.x", "Media disconnected"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "ARP confirms local Layer 2 neighbor resolution, not internet reachability.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "windows_route_print",
+      "vendor": "Microsoft",
+      "os": "Windows CMD",
+      "command": "route print",
+      "category": "gateway",
+      "meaning": "Shows the Windows routing table and interface route metrics.",
+      "use_for": ["Check default route", "Check gateway path", "Find wrong route metrics"],
+      "good_output": ["0.0.0.0 route points to expected gateway", "Correct interface metric"],
+      "bad_output": ["No default route", "Wrong default gateway", "Unexpected static route"],
+      "normal_patterns": ["IPv4 Route Table", "Network Destination", "0\\.0\\.0\\.0"],
+      "warning_patterns": ["On-link", "Persistent Routes"],
+      "critical_patterns": ["No Active Routes"],
+      "detection_patterns": ["route\\s+print", "IPv4 Route Table", "Network Destination\\s+Netmask\\s+Gateway"],
+      "diagnosis_rules": [
+        {
+          "id": "no_routes",
+          "status": "Critical",
+          "patterns": ["No Active Routes"],
+          "diagnosis": "The routing table appears to have no active routes.",
+          "meaning": "The endpoint may not be able to reach local or remote networks normally.",
+          "possible_causes": ["Adapter disconnected", "TCP/IP issue", "VPN or route policy problem"],
+          "do_not_touch": "Do not add static routes until adapter and DHCP state are confirmed."
+        },
+        {
+          "id": "route_info",
+          "status": "Info",
+          "patterns": ["0\\.0\\.0\\.0", "IPv4 Route Table"],
+          "diagnosis": "The pasted output contains route table information.",
+          "meaning": "Review the default route and interface metric to confirm outbound path selection.",
+          "possible_causes": ["No obvious route failure is visible from this output alone"],
+          "do_not_touch": "Do not change persistent routes without approval and rollback details."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ipconfig /all",
+          "why": "Maps routes back to adapter IP, gateway, and DNS configuration.",
+          "meaning": "Shows local network adapter configuration.",
+          "look_for_good": ["Gateway matches default route"],
+          "look_for_bad": ["No gateway", "Wrong adapter selected"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "ping <gateway>",
+          "why": "Tests the default gateway shown in the route table.",
+          "meaning": "Sends ICMP echo requests to the gateway.",
+          "look_for_good": ["Reply from gateway"],
+          "look_for_bad": ["Timeout", "Host unreachable"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "A route table explains where Windows will send traffic; it does not prove the next hop is reachable.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "windows_nslookup",
+      "vendor": "Microsoft",
+      "os": "Windows CMD",
+      "command": "nslookup",
+      "category": "dns",
+      "meaning": "Queries DNS for hostname resolution and shows the DNS server used.",
+      "use_for": ["Check DNS resolution", "Compare DNS server behavior", "Confirm hostname records"],
+      "good_output": ["Server shown", "Address returned for name"],
+      "bad_output": ["DNS request timed out", "Non-existent domain", "server can't find"],
+      "normal_patterns": ["Server:", "Address:", "Name:"],
+      "warning_patterns": ["DNS request timed out", "Non-existent domain", "can't find", "No response from server"],
+      "critical_patterns": ["DNS request timed out", "No response from server"],
+      "detection_patterns": ["nslookup", "Server:", "Non-authoritative answer", "DNS request timed out"],
+      "diagnosis_rules": [
+        {
+          "id": "dns_timeout",
+          "status": "Critical",
+          "patterns": ["DNS request timed out", "No response from server"],
+          "diagnosis": "DNS queries are timing out.",
+          "meaning": "The endpoint may not be able to reach its configured DNS server.",
+          "possible_causes": ["DNS server unreachable", "No network connectivity", "Firewall blocking DNS", "Wrong DNS server"],
+          "do_not_touch": "Do not change DNS settings until IP connectivity to the DNS server is checked."
+        },
+        {
+          "id": "nxdomain",
+          "status": "Warning",
+          "patterns": ["Non-existent domain", "can't find"],
+          "diagnosis": "DNS responded that the name was not found.",
+          "meaning": "The queried hostname may be wrong or missing from DNS.",
+          "possible_causes": ["Typo", "Missing DNS record", "Wrong DNS suffix", "Wrong DNS zone"],
+          "do_not_touch": "Do not change endpoint DNS servers until the hostname and zone are confirmed."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ipconfig /all",
+          "why": "Checks which DNS servers the endpoint is using.",
+          "meaning": "Shows DNS server assignment and suffixes.",
+          "look_for_good": ["Expected DNS servers", "Expected DNS suffix"],
+          "look_for_bad": ["Missing DNS server", "Wrong DNS server", "No gateway"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "ping <ip>",
+          "why": "Compares IP connectivity with DNS name resolution.",
+          "meaning": "Tests reachability to an IP address.",
+          "look_for_good": ["Reply from IP"],
+          "look_for_bad": ["Timeout", "Destination unreachable"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "DNS troubleshooting is strongest when you compare name lookup, direct IP reachability, and configured DNS server reachability.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "windows_netsh_interface_show_interface",
+      "vendor": "Microsoft",
+      "os": "Windows CMD",
+      "command": "netsh interface show interface",
+      "category": "endpoint",
+      "meaning": "Shows Windows network interface administrative and connection state.",
+      "use_for": ["Check adapter enabled/disabled state", "Check disconnected interfaces", "Confirm interface names"],
+      "good_output": ["Enabled and Connected for expected interface"],
+      "bad_output": ["Disabled", "Disconnected", "Admin State Disabled"],
+      "normal_patterns": ["Enabled\\s+Connected"],
+      "warning_patterns": ["Disabled", "Disconnected"],
+      "critical_patterns": [],
+      "detection_patterns": ["netsh\\s+interface\\s+show\\s+interface", "Admin State\\s+State\\s+Type"],
+      "diagnosis_rules": [
+        {
+          "id": "adapter_disabled",
+          "status": "Warning",
+          "patterns": ["Disabled"],
+          "diagnosis": "A Windows network interface appears disabled.",
+          "meaning": "The adapter will not pass traffic while disabled.",
+          "possible_causes": ["User or policy disabled adapter", "Troubleshooting change", "Docking or driver issue"],
+          "do_not_touch": "Do not enable adapters without confirming which network they connect to."
+        },
+        {
+          "id": "adapter_disconnected",
+          "status": "Warning",
+          "patterns": ["Disconnected"],
+          "diagnosis": "A Windows network interface appears disconnected.",
+          "meaning": "The adapter is enabled but not currently connected.",
+          "possible_causes": ["Cable unplugged", "Wi-Fi disconnected", "Switch port down", "Dock issue"],
+          "do_not_touch": "Do not change IP settings until physical or wireless connectivity is checked."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "ipconfig /all",
+          "why": "Checks detailed adapter IP and gateway assignment.",
+          "meaning": "Shows full adapter configuration.",
+          "look_for_good": ["Valid IP", "Gateway and DNS present"],
+          "look_for_bad": ["Media disconnected", "169.254.x.x", "No gateway"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "ping <gateway>",
+          "why": "Checks whether the connected adapter can reach its gateway.",
+          "meaning": "Sends ICMP echo requests to the gateway IP.",
+          "look_for_good": ["Reply from gateway"],
+          "look_for_bad": ["Timeout", "Destination unreachable"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Adapter state explains whether the endpoint can even attempt IP communication.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    }
+  ]
+}

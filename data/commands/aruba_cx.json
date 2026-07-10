@@ -1,0 +1,362 @@
+{
+  "knowledge_base_version": "2026.07-mvp",
+  "vendor": "ArubaOS-CX",
+  "vendor_key": "aruba_cx",
+  "commands": [
+    {
+      "id": "aruba_show_version",
+      "vendor": "Aruba",
+      "os": "ArubaOS-CX",
+      "command": "show version",
+      "category": "system",
+      "meaning": "Shows ArubaOS-CX software version, platform, serial, and uptime information.",
+      "use_for": ["Confirm platform", "Check software version", "Check uptime"],
+      "good_output": ["ArubaOS-CX", "uptime present", "expected software version"],
+      "bad_output": ["Unexpected reboot context", "Unsupported software", "Missing platform details"],
+      "normal_patterns": ["ArubaOS-CX", "Version", "Up Time"],
+      "warning_patterns": ["reboot", "crash", "reload"],
+      "critical_patterns": [],
+      "detection_patterns": ["ArubaOS-CX", "show\\s+version", "Up Time"],
+      "diagnosis_rules": [
+        {
+          "id": "version_info",
+          "status": "Info",
+          "patterns": ["ArubaOS-CX", "Version"],
+          "diagnosis": "The pasted output contains ArubaOS-CX platform and software information.",
+          "meaning": "Version output gives context for platform behavior and support checks.",
+          "possible_causes": ["No fault is visible from version output alone"],
+          "do_not_touch": "Do not reboot or upgrade based only on version output."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface brief",
+          "why": "Checks interface link state across the switch.",
+          "meaning": "Shows a compact interface status summary.",
+          "look_for_good": ["Expected interfaces up"],
+          "look_for_bad": ["Interfaces down or disabled unexpectedly"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Version output is helpful context, but health checks need operational outputs.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "aruba_show_interface_brief",
+      "vendor": "Aruba",
+      "os": "ArubaOS-CX",
+      "command": "show interface brief",
+      "category": "interface",
+      "meaning": "Shows interface status, speed, duplex, and brief operational information.",
+      "use_for": ["Check link state", "Find disabled ports", "Review interface summary"],
+      "good_output": ["up state on expected interfaces", "expected speed and duplex"],
+      "bad_output": ["down", "disabled", "admin down", "unexpected speed"],
+      "normal_patterns": ["\\bup\\b"],
+      "warning_patterns": ["\\bdown\\b", "disabled", "admin down"],
+      "critical_patterns": ["error-disabled", "err-disabled"],
+      "detection_patterns": ["show\\s+interface\\s+brief", "Interface\\s+Status", "\\b1\\/1\\/\\d+\\b"],
+      "diagnosis_rules": [
+        {
+          "id": "interface_down",
+          "status": "Warning",
+          "patterns": ["\\bdown\\b"],
+          "diagnosis": "One or more interfaces appear down.",
+          "meaning": "The switch does not detect a usable link on the affected interface.",
+          "possible_causes": ["Cable unplugged", "Endpoint powered off", "Wrong patching", "Remote port down"],
+          "do_not_touch": "Do not change VLAN or trunk settings until link and endpoint state are confirmed."
+        },
+        {
+          "id": "interface_disabled",
+          "status": "Warning",
+          "patterns": ["disabled", "admin down"],
+          "diagnosis": "One or more interfaces appear administratively disabled.",
+          "meaning": "The interface may be disabled by configuration.",
+          "possible_causes": ["shutdown configured", "Reserved port", "Template disabled the interface"],
+          "do_not_touch": "Do not enable the port without approval and endpoint confirmation."
+        },
+        {
+          "id": "error_disabled",
+          "status": "Critical",
+          "patterns": ["error-disabled", "err-disabled"],
+          "diagnosis": "An interface appears error-disabled.",
+          "meaning": "The switch has disabled the interface after a protective condition.",
+          "possible_causes": ["Loop protection", "Port security", "BPDU protection", "Link-flap protection"],
+          "do_not_touch": "Do not re-enable the interface until the cause is identified."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface <interface>",
+          "why": "Checks detailed port state, counters, errors, speed, and duplex.",
+          "meaning": "Shows detailed operational data for the interface.",
+          "look_for_good": ["Interface up", "No CRC or input errors", "Expected speed"],
+          "look_for_bad": ["Interface down", "CRC errors", "Input errors", "Speed mismatch"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show running-config interface <interface>",
+          "why": "Checks the interface configuration.",
+          "meaning": "Displays configuration applied to the selected interface.",
+          "look_for_good": ["No shutdown", "Expected VLAN or trunk settings"],
+          "look_for_bad": ["shutdown", "Wrong VLAN", "Unexpected mode"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show mac-address-table interface <interface>",
+          "why": "Checks MAC learning on the interface.",
+          "meaning": "Shows MAC addresses learned on the selected interface.",
+          "look_for_good": ["Expected MAC address appears"],
+          "look_for_bad": ["No MAC address", "Wrong VLAN"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "A brief interface table is the fastest first pass; detailed counters explain why a port is unhealthy.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "aruba_show_interface",
+      "vendor": "Aruba",
+      "os": "ArubaOS-CX",
+      "command": "show interface",
+      "category": "interface",
+      "meaning": "Shows detailed interface state, counters, errors, speed, duplex, and media data.",
+      "use_for": ["Check link state", "Review counters and errors", "Check speed and duplex"],
+      "good_output": ["Interface is up", "Line protocol up", "No CRC or input errors"],
+      "bad_output": ["Interface is down", "admin down", "CRC errors", "input errors"],
+      "normal_patterns": ["is up", "line protocol is up"],
+      "warning_patterns": ["is down", "admin down", "CRC", "input errors"],
+      "critical_patterns": ["err-disabled", "error-disabled"],
+      "detection_patterns": ["show\\s+interface", "line protocol", "CRC", "\\b1\\/1\\/\\d+\\b"],
+      "diagnosis_rules": [
+        {
+          "id": "interface_down",
+          "status": "Warning",
+          "patterns": ["is down", "line protocol is down"],
+          "diagnosis": "The interface is down.",
+          "meaning": "The switch is not seeing a usable link or protocol state.",
+          "possible_causes": ["Cable issue", "Endpoint powered off", "Wrong patching", "Remote interface disabled"],
+          "do_not_touch": "Do not change VLAN or trunk settings until physical state is confirmed."
+        },
+        {
+          "id": "errors",
+          "status": "Warning",
+          "patterns": ["CRC", "input errors"],
+          "diagnosis": "The interface shows error indicators.",
+          "meaning": "CRC or input errors often point to physical media, optics, speed, duplex, or endpoint issues.",
+          "possible_causes": ["Bad cable", "Faulty optic", "Negotiation problem", "Endpoint NIC issue"],
+          "do_not_touch": "Do not clear counters before preserving evidence for escalation."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface brief",
+          "why": "Checks whether other interfaces show similar symptoms.",
+          "meaning": "Shows summary status across interfaces.",
+          "look_for_good": ["Only expected ports down"],
+          "look_for_bad": ["Multiple unexpected down interfaces"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show running-config interface <interface>",
+          "why": "Checks whether configuration explains the state.",
+          "meaning": "Displays interface configuration.",
+          "look_for_good": ["No shutdown", "Expected VLAN or trunk settings"],
+          "look_for_bad": ["shutdown", "Wrong VLAN", "Unexpected mode"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Detailed interface output is usually the best evidence for a physical-layer escalation.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "aruba_show_vlan",
+      "vendor": "Aruba",
+      "os": "ArubaOS-CX",
+      "command": "show vlan",
+      "category": "vlan",
+      "meaning": "Shows VLAN IDs, names, status, and interface membership.",
+      "use_for": ["Confirm VLAN exists", "Check interface membership", "Review VLAN status"],
+      "good_output": ["Expected VLAN exists", "Expected interface membership"],
+      "bad_output": ["VLAN missing", "Interface missing", "Unexpected VLAN"],
+      "normal_patterns": ["VLAN", "Name", "Status"],
+      "warning_patterns": ["not found", "down", "inactive"],
+      "critical_patterns": [],
+      "detection_patterns": ["show\\s+vlan", "VLAN\\s+Name", "Interfaces"],
+      "diagnosis_rules": [
+        {
+          "id": "vlan_issue",
+          "status": "Warning",
+          "patterns": ["not found", "inactive"],
+          "diagnosis": "The VLAN may be missing or inactive.",
+          "meaning": "Traffic for that VLAN may not pass on the expected path.",
+          "possible_causes": ["VLAN not configured", "Interface not assigned", "Trunk path missing VLAN"],
+          "do_not_touch": "Do not add or change VLANs on trunks without approved design details."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface brief",
+          "why": "Checks link state for ports that should carry the VLAN.",
+          "meaning": "Shows compact interface status.",
+          "look_for_good": ["Expected ports up"],
+          "look_for_bad": ["Expected ports down or disabled"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show mac-address-table vlan <vlan>",
+          "why": "Checks endpoint MAC learning in the VLAN.",
+          "meaning": "Lists MAC addresses learned in the VLAN.",
+          "look_for_good": ["Expected MAC addresses present"],
+          "look_for_bad": ["No MAC addresses", "Wrong port"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "VLAN output proves local configuration, not end-to-end path health.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "aruba_show_mac_address_table",
+      "vendor": "Aruba",
+      "os": "ArubaOS-CX",
+      "command": "show mac-address-table",
+      "category": "switching",
+      "meaning": "Shows MAC addresses learned by the switch.",
+      "use_for": ["Confirm endpoint traffic", "Find endpoint port", "Check VLAN learning"],
+      "good_output": ["Dynamic MAC entry", "Expected VLAN and interface"],
+      "bad_output": ["No MAC entry", "Wrong interface", "Wrong VLAN"],
+      "normal_patterns": ["dynamic", "MAC age", "vlan"],
+      "warning_patterns": ["No entries", "not found"],
+      "critical_patterns": [],
+      "detection_patterns": ["show\\s+mac-address-table", "MAC Address", "Port"],
+      "diagnosis_rules": [
+        {
+          "id": "no_mac",
+          "status": "Warning",
+          "patterns": ["No entries", "not found"],
+          "diagnosis": "No matching MAC address entry is visible.",
+          "meaning": "The endpoint may not be sending traffic or may be connected elsewhere.",
+          "possible_causes": ["Endpoint offline", "Wrong patching", "Wrong VLAN", "No recent traffic"],
+          "do_not_touch": "Do not change VLANs or patching until link state and endpoint power are confirmed."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface <interface>",
+          "why": "Checks the interface where the MAC is expected.",
+          "meaning": "Shows detailed interface state and counters.",
+          "look_for_good": ["Interface up", "No errors"],
+          "look_for_bad": ["Interface down", "CRC or input errors"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show vlan <vlan>",
+          "why": "Checks VLAN membership and status.",
+          "meaning": "Shows VLAN configuration and membership.",
+          "look_for_good": ["Expected VLAN exists", "Expected port membership"],
+          "look_for_bad": ["VLAN missing", "Port missing"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "MAC tables reflect learned traffic and may be empty if the endpoint is quiet.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "aruba_show_lldp_neighbor_info",
+      "vendor": "Aruba",
+      "os": "ArubaOS-CX",
+      "command": "show lldp neighbor-info",
+      "category": "neighbors",
+      "meaning": "Shows LLDP neighbor details and local-to-remote interface mapping.",
+      "use_for": ["Identify connected devices", "Confirm topology", "Check remote port"],
+      "good_output": ["Expected neighbor appears", "Expected local interface"],
+      "bad_output": ["No neighbor", "Unexpected neighbor", "Wrong interface"],
+      "normal_patterns": ["Neighbor Entries", "Chassis ID", "Port ID"],
+      "warning_patterns": ["No LLDP neighbors", "LLDP is disabled"],
+      "critical_patterns": [],
+      "detection_patterns": ["show\\s+lldp\\s+neighbor-info", "Neighbor Entries", "Chassis ID"],
+      "diagnosis_rules": [
+        {
+          "id": "no_lldp",
+          "status": "Info",
+          "patterns": ["No LLDP neighbors", "LLDP is disabled"],
+          "diagnosis": "No LLDP neighbor is visible.",
+          "meaning": "LLDP may be disabled, unsupported by the neighbor, or the link may be down.",
+          "possible_causes": ["LLDP disabled", "Neighbor offline", "Physical link down"],
+          "do_not_touch": "Do not enable LLDP without confirming site policy."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface brief",
+          "why": "Checks whether the local interface has link.",
+          "meaning": "Shows compact interface status.",
+          "look_for_good": ["Expected interface up"],
+          "look_for_bad": ["Interface down or disabled"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "LLDP absence is a clue, not proof of a physical fault.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "aruba_show_running_config_interface",
+      "vendor": "Aruba",
+      "os": "ArubaOS-CX",
+      "command": "show running-config interface",
+      "category": "configuration",
+      "meaning": "Shows running configuration applied to a specific interface.",
+      "use_for": ["Check shutdown state", "Check VLAN and trunk settings", "Check descriptions and policies"],
+      "good_output": ["No shutdown", "Expected VLAN or trunk settings"],
+      "bad_output": ["shutdown", "Wrong VLAN", "Unexpected mode"],
+      "normal_patterns": ["interface\\s+\\d+\\/\\d+\\/\\d+"],
+      "warning_patterns": ["\\bshutdown\\b", "vlan access", "vlan trunk"],
+      "critical_patterns": [],
+      "detection_patterns": ["show\\s+running-config\\s+interface", "^interface\\s+\\d+\\/\\d+\\/\\d+"],
+      "diagnosis_rules": [
+        {
+          "id": "shutdown_configured",
+          "status": "Warning",
+          "patterns": ["\\bshutdown\\b"],
+          "diagnosis": "The interface configuration contains shutdown.",
+          "meaning": "The interface may be intentionally disabled by configuration.",
+          "possible_causes": ["Reserved port", "Administrative shutdown", "Template or policy configuration"],
+          "do_not_touch": "Do not remove shutdown without confirming ownership, endpoint, VLAN, and approval."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "show interface <interface>",
+          "why": "Checks whether the configured interface is operational.",
+          "meaning": "Shows detailed interface state and counters.",
+          "look_for_good": ["Interface up", "No errors"],
+          "look_for_bad": ["Interface down", "CRC or input errors"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "show interface brief",
+          "why": "Checks the interface in summary context.",
+          "meaning": "Shows compact status for interfaces.",
+          "look_for_good": ["Expected interface up"],
+          "look_for_bad": ["Interface down or disabled"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Running configuration shows intent; operational output confirms current state.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    }
+  ]
+}

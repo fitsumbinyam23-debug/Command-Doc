@@ -1,0 +1,13 @@
+{
+  "id": "interface_troubleshooting",
+  "title": "Interface Troubleshooting",
+  "category": "interface",
+  "steps": [
+    "Confirm physical link state.",
+    "Check administrative state and interface configuration.",
+    "Check errors, CRC, speed, duplex, and counters.",
+    "Check MAC learning and VLAN placement.",
+    "Escalate only after physical, endpoint, and patching checks are complete."
+  ],
+  "do_not_touch": "Do not change VLAN, trunk mode, port-channel membership, or reboot equipment until link state, config, and MAC learning are confirmed."
+}

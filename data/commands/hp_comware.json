@@ -1,0 +1,763 @@
+{
+  "knowledge_base_version": "2026.07-mvp",
+  "vendor": "HP Comware",
+  "vendor_key": "hp_comware",
+  "commands": [
+    {
+      "id": "hp_display_version",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display version",
+      "category": "system",
+      "meaning": "Shows Comware software version, uptime, boot image, and hardware information.",
+      "use_for": ["Confirm platform", "Check uptime", "Check software version"],
+      "good_output": ["Comware Software", "uptime is present", "expected boot image"],
+      "bad_output": ["Unexpected reboot context", "Unsupported image", "Missing member information"],
+      "normal_patterns": ["Comware Software", "uptime is", "Boot image"],
+      "warning_patterns": ["reboot", "Last reboot reason"],
+      "critical_patterns": [],
+      "detection_patterns": ["display\\s+version", "Comware Software", "HPE Comware"],
+      "diagnosis_rules": [
+        {
+          "id": "version_info",
+          "status": "Info",
+          "patterns": ["Comware Software", "uptime is"],
+          "diagnosis": "The pasted output contains Comware platform and software information.",
+          "meaning": "Version output gives context for command behavior and platform-specific differences.",
+          "possible_causes": ["No fault is visible from version output alone"],
+          "do_not_touch": "Do not reboot or change boot images based only on version output."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display interface brief",
+          "why": "Checks interface link state across the device.",
+          "meaning": "Shows a compact summary of interface status.",
+          "look_for_good": ["UP state on expected ports"],
+          "look_for_bad": ["DOWN state", "ADM state", "errors needing detailed checks"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display logbuffer",
+          "why": "Checks recent platform and interface events.",
+          "meaning": "Displays recent system log messages.",
+          "look_for_good": ["No repeated port, stack, or hardware faults"],
+          "look_for_bad": ["Link flaps", "IRF events", "hardware alarms"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Version output is context, not a complete health check.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_interface_brief",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display interface brief",
+      "category": "interface",
+      "meaning": "Shows interface physical state, protocol state, and brief status information.",
+      "use_for": ["Check link state", "Find administratively down interfaces", "Scan interface health"],
+      "good_output": ["UP state on expected interfaces", "Protocol UP where expected"],
+      "bad_output": ["DOWN", "ADM", "Administratively DOWN", "Error-disabled style states"],
+      "normal_patterns": ["\\bUP\\b"],
+      "warning_patterns": ["\\bDOWN\\b", "\\bADM\\b", "Administratively"],
+      "critical_patterns": ["error-down", "DOWN\\s+DOWN"],
+      "detection_patterns": ["display\\s+interface\\s+brief", "Brief information on interface", "Interface\\s+Link\\s+Protocol"],
+      "diagnosis_rules": [
+        {
+          "id": "interface_down",
+          "status": "Warning",
+          "patterns": ["\\bDOWN\\b", "DOWN\\s+DOWN"],
+          "diagnosis": "One or more interfaces appear down.",
+          "meaning": "The device is not seeing a usable link or protocol state on the affected interface.",
+          "possible_causes": ["Cable unplugged", "Endpoint powered off", "Wrong patching", "Remote port disabled"],
+          "do_not_touch": "Do not change VLAN or interface settings until physical link and endpoint state are confirmed."
+        },
+        {
+          "id": "admin_down",
+          "status": "Warning",
+          "patterns": ["\\bADM\\b", "Administratively"],
+          "diagnosis": "One or more interfaces appear administratively down.",
+          "meaning": "The interface may be disabled by configuration.",
+          "possible_causes": ["shutdown configured", "Reserved port", "Template disabled the interface"],
+          "do_not_touch": "Do not undo shutdown without ownership and approval."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display interface <interface>",
+          "why": "Checks detailed link state, counters, and errors.",
+          "meaning": "Shows detailed interface operational data.",
+          "look_for_good": ["Current state UP", "Line protocol UP", "No CRC or input errors"],
+          "look_for_bad": ["Current state DOWN", "CRC errors", "Input errors", "Speed mismatch"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display current-configuration interface <interface>",
+          "why": "Checks the configuration applied to the interface.",
+          "meaning": "Shows interface configuration.",
+          "look_for_good": ["Expected VLAN or trunk settings", "No shutdown"],
+          "look_for_bad": ["shutdown", "Wrong VLAN", "Unexpected link-type"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display mac-address interface <interface>",
+          "why": "Checks whether MAC addresses are learned on the interface.",
+          "meaning": "Shows MAC addresses learned through the interface.",
+          "look_for_good": ["Expected MAC appears"],
+          "look_for_bad": ["No MAC address", "Unexpected VLAN"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Comware interface brief is a fast first screen; detailed counters need display interface.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_interface",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display interface",
+      "category": "interface",
+      "meaning": "Shows detailed interface state, counters, errors, speed, duplex, and media information.",
+      "use_for": ["Check detailed link state", "Find CRC/input errors", "Review speed and duplex"],
+      "good_output": ["Current state: UP", "Line protocol state: UP", "No CRC or input errors"],
+      "bad_output": ["Current state: DOWN", "Administratively DOWN", "CRC errors", "input errors"],
+      "normal_patterns": ["Current state:\\s+UP", "Line protocol state:\\s+UP"],
+      "warning_patterns": ["Current state:\\s+DOWN", "Administratively DOWN", "CRC", "input errors"],
+      "critical_patterns": ["error-down"],
+      "detection_patterns": ["display\\s+interface", "Current state:", "Line protocol state:"],
+      "diagnosis_rules": [
+        {
+          "id": "current_down",
+          "status": "Warning",
+          "patterns": ["Current state:\\s+DOWN"],
+          "diagnosis": "The interface current state is down.",
+          "meaning": "The device does not have usable physical link on the interface.",
+          "possible_causes": ["Cable issue", "Endpoint off", "Wrong patching", "Remote interface down"],
+          "do_not_touch": "Do not modify VLANs until physical link and patching are confirmed."
+        },
+        {
+          "id": "errors",
+          "status": "Warning",
+          "patterns": ["CRC", "input errors", "Input errors"],
+          "diagnosis": "The interface output shows error counters.",
+          "meaning": "Errors can indicate physical media, transceiver, speed, duplex, or hardware issues.",
+          "possible_causes": ["Bad cable", "Bad optic", "Duplex/speed mismatch", "Endpoint NIC issue"],
+          "do_not_touch": "Do not clear counters before preserving evidence if escalation is needed."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display interface brief",
+          "why": "Checks whether other ports show similar symptoms.",
+          "meaning": "Shows compact interface state across the device.",
+          "look_for_good": ["Only expected interfaces down"],
+          "look_for_bad": ["Multiple unexpected down interfaces"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display current-configuration interface <interface>",
+          "why": "Checks whether configuration explains the state.",
+          "meaning": "Shows the interface configuration.",
+          "look_for_good": ["No shutdown", "Expected link-type and VLAN"],
+          "look_for_bad": ["shutdown", "Wrong VLAN", "Unexpected trunk/access mode"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Detailed counters are stronger evidence than summary state because they show whether the link is unstable or dirty.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_vlan",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display vlan",
+      "category": "vlan",
+      "meaning": "Shows VLAN information, status, and member interfaces.",
+      "use_for": ["Confirm VLAN exists", "Check port membership", "Review tagged or untagged placement"],
+      "good_output": ["VLAN exists", "Expected port appears"],
+      "bad_output": ["VLAN missing", "Wrong port membership", "No matching ports"],
+      "normal_patterns": ["VLAN ID", "Tagged ports", "Untagged ports"],
+      "warning_patterns": ["not exist", "No matched"],
+      "critical_patterns": [],
+      "detection_patterns": ["display\\s+vlan", "VLAN ID", "Tagged ports", "Untagged ports"],
+      "diagnosis_rules": [
+        {
+          "id": "vlan_missing",
+          "status": "Warning",
+          "patterns": ["not exist", "No matched"],
+          "diagnosis": "The requested VLAN or membership may be missing.",
+          "meaning": "Traffic for that VLAN may not be available on the expected port or device.",
+          "possible_causes": ["VLAN not created", "Port not assigned", "Trunk missing VLAN"],
+          "do_not_touch": "Do not create or add VLANs to trunks without confirming the approved path."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display interface brief",
+          "why": "Checks the state of interfaces that should carry the VLAN.",
+          "meaning": "Shows compact interface state.",
+          "look_for_good": ["Expected ports UP"],
+          "look_for_bad": ["Expected ports DOWN or ADM"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display mac-address vlan <vlan>",
+          "why": "Checks whether endpoints are learning in the VLAN.",
+          "meaning": "Shows MAC addresses learned in the VLAN.",
+          "look_for_good": ["Expected MAC addresses are present"],
+          "look_for_bad": ["No MAC addresses", "Unexpected port"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "VLAN existence does not prove the whole path; trunks and endpoint ports also matter.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_mac_address",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display mac-address",
+      "category": "switching",
+      "meaning": "Shows MAC addresses learned by the switch.",
+      "use_for": ["Confirm endpoint communication", "Find an endpoint port", "Check VLAN learning"],
+      "good_output": ["Dynamic MAC entry present", "Expected VLAN and interface"],
+      "bad_output": ["No MAC entry", "Wrong VLAN", "Wrong interface"],
+      "normal_patterns": ["dynamic", "Learned"],
+      "warning_patterns": ["No matched", "not found"],
+      "critical_patterns": [],
+      "detection_patterns": ["display\\s+mac-address", "MAC Address", "VLAN ID"],
+      "diagnosis_rules": [
+        {
+          "id": "no_mac",
+          "status": "Warning",
+          "patterns": ["No matched", "not found"],
+          "diagnosis": "No matching MAC address entry is visible.",
+          "meaning": "The endpoint may not be sending traffic or may be on a different port or VLAN.",
+          "possible_causes": ["Endpoint offline", "Wrong patching", "Wrong VLAN", "No recent traffic"],
+          "do_not_touch": "Do not move VLANs or patching until link state and endpoint power are confirmed."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display interface <interface>",
+          "why": "Checks the interface where the MAC is expected.",
+          "meaning": "Shows detailed state and counters.",
+          "look_for_good": ["UP state", "No errors"],
+          "look_for_bad": ["DOWN state", "CRC errors"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display vlan <vlan>",
+          "why": "Checks VLAN membership for the learned MAC.",
+          "meaning": "Shows VLAN member interfaces.",
+          "look_for_good": ["Expected port in VLAN"],
+          "look_for_bad": ["Port missing from VLAN"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "MAC learning needs traffic; a quiet endpoint may not appear immediately.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_lldp_neighbor",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display lldp neighbor-information",
+      "category": "neighbors",
+      "meaning": "Shows LLDP neighbor information and local-to-remote interface mapping.",
+      "use_for": ["Identify connected devices", "Confirm topology", "Check remote interface"],
+      "good_output": ["Expected neighbor", "Expected local interface"],
+      "bad_output": ["No LLDP neighbor", "Unexpected neighbor"],
+      "normal_patterns": ["LLDP neighbor-information", "Chassis ID", "Port ID"],
+      "warning_patterns": ["No neighbor", "LLDP is disabled"],
+      "critical_patterns": [],
+      "detection_patterns": ["display\\s+lldp\\s+neighbor-information", "LLDP neighbor-information", "Chassis ID"],
+      "diagnosis_rules": [
+        {
+          "id": "no_lldp",
+          "status": "Info",
+          "patterns": ["No neighbor", "LLDP is disabled"],
+          "diagnosis": "No LLDP neighbor is visible.",
+          "meaning": "LLDP may be disabled, unsupported by the neighbor, or the physical link may be down.",
+          "possible_causes": ["LLDP disabled", "Neighbor offline", "Physical link down"],
+          "do_not_touch": "Do not enable LLDP without confirming site policy."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display interface brief",
+          "why": "Checks whether the local interface has link.",
+          "meaning": "Shows interface link summary.",
+          "look_for_good": ["Expected interface UP"],
+          "look_for_bad": ["DOWN or ADM"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "LLDP is helpful for topology, but absence of LLDP does not prove the cable is wrong.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_device",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display device",
+      "category": "system",
+      "meaning": "Shows device hardware, slots, members, board status, and operational state.",
+      "use_for": [
+        "Check chassis or stack member hardware status",
+        "Confirm all expected modules or members are present",
+        "Look for faulty, absent, or abnormal hardware states"
+      ],
+      "good_output": [
+        "Expected members or slots are present",
+        "Status shows Normal or equivalent healthy state",
+        "No failed, absent, or unknown modules"
+      ],
+      "bad_output": [
+        "Absent member or board",
+        "Fault or abnormal status",
+        "Unexpected missing module",
+        "Hardware alarm or failed component"
+      ],
+      "normal_patterns": ["Normal", "Master", "Standby", "Slot"],
+      "warning_patterns": ["Absent", "Unknown", "Offline", "Warning"],
+      "critical_patterns": ["Fault", "Failed", "Abnormal"],
+      "detection_patterns": ["display\\s+device", "Slot\\s+Type\\s+State", "Device status"],
+      "diagnosis_rules": [
+        {
+          "id": "device_fault",
+          "status": "Critical",
+          "patterns": ["Fault", "Failed", "Abnormal"],
+          "diagnosis": "Device hardware output shows a fault or abnormal state.",
+          "meaning": "A module, member, or hardware component may be unhealthy.",
+          "possible_causes": ["Failed module", "Power issue", "Member offline", "Hardware alarm"],
+          "do_not_touch": "Do not reseat modules, power-cycle members, or replace hardware without an approved maintenance plan."
+        },
+        {
+          "id": "device_absent",
+          "status": "Warning",
+          "patterns": ["Absent", "Offline", "Unknown"],
+          "diagnosis": "Device hardware output shows an absent, offline, or unknown component.",
+          "meaning": "Expected hardware may be missing or not currently participating.",
+          "possible_causes": ["Removed module", "Member powered off", "Hardware detection issue", "Stack member problem"],
+          "do_not_touch": "Do not assume failed hardware until inventory, power, logs, and physical state are confirmed."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display logbuffer",
+          "why": "Checks recent hardware, member, or alarm events.",
+          "meaning": "Displays recent system log messages.",
+          "look_for_good": ["No repeated hardware faults", "No member leave or reboot events"],
+          "look_for_bad": ["Fault messages", "Member leave/join", "Power or fan alarms"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display irf",
+          "why": "Checks stack membership if the device is part of an IRF fabric.",
+          "meaning": "Shows IRF member status, role, and priority.",
+          "look_for_good": ["All expected members present", "Stable Master and Standby roles"],
+          "look_for_bad": ["Missing member", "Fault or split indications"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Hardware state should be correlated with logs and IRF status before physical intervention.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_irf",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display irf",
+      "category": "stack",
+      "meaning": "Shows IRF member identity, role, priority, bridge MAC, and status.",
+      "use_for": ["Check stack membership", "Confirm master/standby role", "Check member health"],
+      "good_output": ["All expected members present", "Stable master and standby roles"],
+      "bad_output": ["Missing member", "Member not ready", "Unexpected master"],
+      "normal_patterns": ["MemberID", "Role", "Priority", "Master"],
+      "warning_patterns": ["Standby", "Loading", "Absent", "Recover"],
+      "critical_patterns": ["Absent", "Fault", "Split"],
+      "detection_patterns": ["display\\s+irf\\s*$", "MemberID\\s+Role\\s+Priority", "Bridge MAC"],
+      "diagnosis_rules": [
+        {
+          "id": "irf_missing_fault",
+          "status": "Critical",
+          "patterns": ["Absent", "Fault", "Split"],
+          "diagnosis": "The IRF stack may have a missing or faulty member.",
+          "meaning": "Stack redundancy or forwarding capacity may be degraded.",
+          "possible_causes": ["IRF cable issue", "Member rebooted", "Power issue", "Split stack"],
+          "do_not_touch": "Do not reboot members or change IRF settings without an approved maintenance window."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display irf topology",
+          "why": "Checks IRF link topology and connectivity.",
+          "meaning": "Shows how IRF members are connected.",
+          "look_for_good": ["Expected topology and active links"],
+          "look_for_bad": ["Broken links", "Missing member"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display logbuffer",
+          "why": "Checks recent stack events and member changes.",
+          "meaning": "Displays recent logs.",
+          "look_for_good": ["No IRF errors or reload events"],
+          "look_for_bad": ["IRF link down", "Member leave/join", "reboot reason"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "IRF issues can be service-affecting because control and forwarding roles depend on member health.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_irf_port",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display irf-port",
+      "category": "stack",
+      "meaning": "Shows operational status of IRF ports and their physical member links.",
+      "use_for": [
+        "Check IRF port link status",
+        "Confirm stack links are up",
+        "Find disconnected or inactive IRF physical links"
+      ],
+      "good_output": [
+        "IRF ports are UP",
+        "Expected physical ports are bound",
+        "No disabled or disconnected IRF links"
+      ],
+      "bad_output": [
+        "IRF port DOWN",
+        "No physical ports bound",
+        "Disconnected stack link",
+        "Unexpected inactive member link"
+      ],
+      "normal_patterns": ["\\bUP\\b", "IRF-Port", "Ten-GigabitEthernet"],
+      "warning_patterns": ["\\bDOWN\\b", "Disable", "No physical port", "Disconnected"],
+      "critical_patterns": ["\\bDOWN\\b", "Disconnected"],
+      "detection_patterns": ["display\\s+irf-port\\s*$", "IRF-Port\\d+", "Physical port"],
+      "diagnosis_rules": [
+        {
+          "id": "irf_port_down",
+          "status": "Critical",
+          "patterns": ["\\bDOWN\\b", "Disconnected"],
+          "diagnosis": "An IRF port or physical stack link appears down.",
+          "meaning": "Stack redundancy may be degraded and a split condition may become possible.",
+          "possible_causes": ["IRF cable unplugged", "Faulty transceiver", "IRF physical port down", "Member offline"],
+          "do_not_touch": "Do not reseat IRF cables or change IRF port bindings during production without approval."
+        },
+        {
+          "id": "irf_port_no_binding",
+          "status": "Warning",
+          "patterns": ["No physical port", "not bind", "unbound"],
+          "diagnosis": "An IRF port may not have a physical port binding.",
+          "meaning": "The logical IRF port may not be connected to a real physical member link.",
+          "possible_causes": ["Missing IRF port binding", "Configuration mismatch", "Port not converted for IRF use"],
+          "do_not_touch": "Do not bind or unbind IRF ports without a maintenance plan and peer-side confirmation."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display irf topology",
+          "why": "Checks the overall IRF topology after reviewing port state.",
+          "meaning": "Shows how IRF members are connected.",
+          "look_for_good": ["Expected chain or ring topology", "All expected links present"],
+          "look_for_bad": ["Broken topology", "Missing link", "Disconnected member"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display irf-port configuration",
+          "why": "Checks IRF port bindings and configured physical ports.",
+          "meaning": "Shows configured IRF port-to-physical-port mappings.",
+          "look_for_good": ["Expected physical ports are bound to expected IRF ports"],
+          "look_for_bad": ["Missing binding", "Wrong physical port", "Unexpected member"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display logbuffer",
+          "why": "Checks recent IRF link or member events.",
+          "meaning": "Displays recent system logs.",
+          "look_for_good": ["No IRF link down or member leave events"],
+          "look_for_bad": ["IRF port down", "member leave", "split or merge event"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "IRF-port output focuses on stack link health; compare it with topology and configuration before touching cables.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_irf_port_configuration",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display irf-port configuration",
+      "category": "stack",
+      "meaning": "Shows configured IRF port bindings and physical ports assigned to IRF links.",
+      "use_for": [
+        "Confirm IRF port-to-physical-port bindings",
+        "Compare configured bindings with operational IRF port status",
+        "Check whether expected stack links are configured"
+      ],
+      "good_output": [
+        "Expected physical ports are bound",
+        "Bindings match the approved stack design",
+        "Both sides of the IRF path have expected configuration"
+      ],
+      "bad_output": [
+        "Missing binding",
+        "Wrong physical port",
+        "Unexpected member or IRF port",
+        "Configuration does not match physical cabling"
+      ],
+      "normal_patterns": ["IRF-Port", "Port group", "Ten-GigabitEthernet"],
+      "warning_patterns": ["No physical port", "unbound", "not configured"],
+      "critical_patterns": [],
+      "detection_patterns": ["display\\s+irf-port\\s+configuration", "IRF-Port configuration", "Port group"],
+      "diagnosis_rules": [
+        {
+          "id": "irf_port_config_missing",
+          "status": "Warning",
+          "patterns": ["No physical port", "unbound", "not configured"],
+          "diagnosis": "An IRF port binding may be missing or incomplete.",
+          "meaning": "The configured stack link may not match the expected physical design.",
+          "possible_causes": ["IRF port not bound", "Wrong member port selected", "Incomplete stack configuration"],
+          "do_not_touch": "Do not change IRF bindings without confirming both ends, cabling, and maintenance approval."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display irf-port",
+          "why": "Checks whether configured IRF port bindings are operational.",
+          "meaning": "Shows IRF port link status and physical member links.",
+          "look_for_good": ["Configured IRF ports are UP"],
+          "look_for_bad": ["IRF port DOWN", "Disconnected link"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display irf topology",
+          "why": "Confirms whether the configured bindings form the expected topology.",
+          "meaning": "Shows IRF member topology and links.",
+          "look_for_good": ["Expected topology and active links"],
+          "look_for_bad": ["Broken topology", "Missing member or link"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "IRF port configuration shows intended bindings; display irf-port shows whether those bindings are actually up.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_irf_topology",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display irf topology",
+      "category": "stack",
+      "meaning": "Shows IRF topology and IRF port connection state.",
+      "use_for": ["Check stack cabling", "Confirm IRF link state", "Find topology breaks"],
+      "good_output": ["Expected ring or chain topology", "IRF ports connected"],
+      "bad_output": ["Disconnected IRF port", "Missing member", "Broken topology"],
+      "normal_patterns": ["Topology", "IRF-Port"],
+      "warning_patterns": ["DIS", "Down", "Disconnected"],
+      "critical_patterns": ["Disconnected", "Broken"],
+      "detection_patterns": ["display\\s+irf\\s+topology", "IRF-Port", "Topology"],
+      "diagnosis_rules": [
+        {
+          "id": "irf_link_down",
+          "status": "Critical",
+          "patterns": ["Disconnected", "Broken", "\\bDown\\b"],
+          "diagnosis": "An IRF topology link may be down or disconnected.",
+          "meaning": "Stack resilience may be reduced and a split condition may be possible.",
+          "possible_causes": ["IRF cable issue", "Transceiver issue", "Member offline"],
+          "do_not_touch": "Do not reseat IRF cables during production hours without approval."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display irf",
+          "why": "Checks whether all members are present and healthy.",
+          "meaning": "Shows member role and status.",
+          "look_for_good": ["All expected members present"],
+          "look_for_bad": ["Missing or faulted member"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display logbuffer",
+          "why": "Checks recent IRF link and member events.",
+          "meaning": "Displays recent system logs.",
+          "look_for_good": ["No IRF link or member events"],
+          "look_for_bad": ["IRF port down", "member leave", "split event"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "IRF topology output is especially useful before touching any physical stack cabling.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_irf_configuration",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display irf configuration",
+      "category": "stack",
+      "meaning": "Shows IRF configuration, member priorities, domains, and port bindings.",
+      "use_for": ["Review IRF configuration", "Compare intended stack settings", "Check port bindings"],
+      "good_output": ["Expected domain", "Expected member priorities", "Expected IRF port bindings"],
+      "bad_output": ["Unexpected domain", "Missing bindings", "Wrong priority"],
+      "normal_patterns": ["irf member", "irf-port", "domain"],
+      "warning_patterns": ["MAD", "domain"],
+      "critical_patterns": [],
+      "detection_patterns": ["display\\s+irf\\s+configuration", "irf-port", "irf member"],
+      "diagnosis_rules": [
+        {
+          "id": "irf_config_info",
+          "status": "Info",
+          "patterns": ["irf member", "irf-port", "domain"],
+          "diagnosis": "The pasted output contains IRF configuration details.",
+          "meaning": "Configuration should be compared with design documentation before any stack work.",
+          "possible_causes": ["No fault is visible from configuration alone"],
+          "do_not_touch": "Do not change IRF domain, member ID, priority, or port bindings without a maintenance plan."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display irf",
+          "why": "Compares configured IRF settings with operational member state.",
+          "meaning": "Shows current IRF member status.",
+          "look_for_good": ["All members present"],
+          "look_for_bad": ["Missing or faulted member"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "IRF configuration is not the same as IRF health; compare it with display irf and topology output.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_current_configuration_interface",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display current-configuration interface",
+      "category": "configuration",
+      "meaning": "Shows current configuration applied to a specific interface.",
+      "use_for": ["Check shutdown state", "Check VLAN and link-type", "Check descriptions and port settings"],
+      "good_output": ["Expected port link-type", "Correct VLAN", "No shutdown"],
+      "bad_output": ["shutdown", "Wrong VLAN", "Unexpected trunk/access mode"],
+      "normal_patterns": ["interface\\s+", "port link-type"],
+      "warning_patterns": ["\\bshutdown\\b", "port access vlan", "port trunk permit vlan"],
+      "critical_patterns": [],
+      "detection_patterns": ["display\\s+current-configuration\\s+interface", "^interface\\s+"],
+      "diagnosis_rules": [
+        {
+          "id": "shutdown_configured",
+          "status": "Warning",
+          "patterns": ["\\bshutdown\\b"],
+          "diagnosis": "The interface configuration contains shutdown.",
+          "meaning": "The interface may be intentionally disabled.",
+          "possible_causes": ["Reserved port", "Administrative shutdown", "Template applied"],
+          "do_not_touch": "Do not remove shutdown without confirming ownership, VLAN, and approval."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display interface <interface>",
+          "why": "Checks whether the configured interface is operational.",
+          "meaning": "Shows detailed interface state and counters.",
+          "look_for_good": ["Current state UP", "No errors"],
+          "look_for_bad": ["Current state DOWN", "CRC or input errors"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display interface brief",
+          "why": "Checks the interface state in summary context.",
+          "meaning": "Shows compact interface link state.",
+          "look_for_good": ["Expected interface UP"],
+          "look_for_bad": ["DOWN or ADM"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Configuration explains intent; operational commands show what the device is actually seeing.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    },
+    {
+      "id": "hp_display_logbuffer",
+      "vendor": "HP",
+      "os": "Comware",
+      "command": "display logbuffer",
+      "category": "logs",
+      "meaning": "Shows recent system log messages.",
+      "use_for": ["Check link flaps", "Find IRF events", "Review alarms and recent changes"],
+      "good_output": ["No repeated critical events", "Expected operational messages only"],
+      "bad_output": ["link down/up repeats", "IRF member events", "hardware alarms", "authentication failures"],
+      "normal_patterns": ["Informational", "Notice"],
+      "warning_patterns": ["LINK UPDOWN", "down", "fail", "warning"],
+      "critical_patterns": ["critical", "fault", "IRF", "reboot"],
+      "detection_patterns": ["display\\s+logbuffer", "%", "Logbuffer"],
+      "diagnosis_rules": [
+        {
+          "id": "link_flap_logs",
+          "status": "Warning",
+          "patterns": ["LINK UPDOWN", "link down", "link up"],
+          "diagnosis": "Logs suggest link flapping or interface transitions.",
+          "meaning": "Repeated link state changes often point to cabling, optics, endpoint power, or negotiation problems.",
+          "possible_causes": ["Loose cable", "Bad optic", "Endpoint rebooting", "Remote port issue"],
+          "do_not_touch": "Do not clear logs before capturing relevant evidence."
+        },
+        {
+          "id": "irf_logs",
+          "status": "Critical",
+          "patterns": ["IRF", "member", "split", "reboot"],
+          "diagnosis": "Logs may contain stack or reboot events.",
+          "meaning": "IRF or reboot events can affect availability and should be handled carefully.",
+          "possible_causes": ["IRF link issue", "Power event", "Member reload", "Split condition"],
+          "do_not_touch": "Do not reboot members or reseat IRF cables without an approved plan."
+        }
+      ],
+      "next_commands": [
+        {
+          "command": "display interface brief",
+          "why": "Checks current interface state after log events.",
+          "meaning": "Shows compact interface status.",
+          "look_for_good": ["Expected interfaces UP"],
+          "look_for_bad": ["Unexpected DOWN or ADM"],
+          "risk": "Safe read-only command"
+        },
+        {
+          "command": "display irf",
+          "why": "Checks stack health if logs mention IRF or member events.",
+          "meaning": "Shows IRF member state.",
+          "look_for_good": ["All members present"],
+          "look_for_bad": ["Missing member", "fault state"],
+          "risk": "Safe read-only command"
+        }
+      ],
+      "safety_level": "Safe read-only command",
+      "learning_note": "Logs provide timeline evidence; preserve them before making changes.",
+      "source_note": "Local command knowledge base. Verify exact command behavior against vendor documentation for platform-specific differences.",
+      "last_reviewed": "2026-07"
+    }
+  ]
+}
