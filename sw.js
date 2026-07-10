@@ -1,5 +1,5 @@
 Exit code: 0
-Wall time: 2.9 seconds
+Wall time: 2.6 seconds
 Output:
 "use strict";
 
@@ -7,6 +7,8 @@ const CACHE_NAME = "command-doctor-2026-07-lab-5";
 const OFFLINE_ASSETS = [
   "./",
   "./index.html",
+  "./refresh.html",
+  "./sw-refresh.js",
   "./styles.css?v=2026.07-lab.5",
   "./src/app.js?v=2026.07-lab.5",
   "./data/commands/admin_commands.json",
