@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 2.6 seconds
-Output:
 "use strict";
 
 const CACHE_NAME = "command-doctor-2026-07-lab-5";
@@ -88,4 +85,3 @@ self.addEventListener("fetch", (event) => {
     }))
   );
 });
-
