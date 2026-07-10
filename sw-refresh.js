@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 2.8 seconds
-Output:
 "use strict";
 
 const CACHE_NAME = "command-doctor-2026-07-refresh";
@@ -25,4 +22,3 @@ self.addEventListener("fetch", (event) => {
   const freshRequest = new Request(event.request, { cache: "reload" });
   event.respondWith(fetch(freshRequest).catch(() => caches.match(event.request)));
 });
-
