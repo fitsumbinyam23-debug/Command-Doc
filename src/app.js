@@ -6,7 +6,9 @@ const COMMAND_FILES = [
   "data/commands/aruba_cx.json",
   "data/commands/windows_cmd.json",
   "data/commands/linux.json",
-  "data/commands/admin_commands.json"
+  "data/commands/admin_commands.json",
+  "data/commands/platform_commands.json",
+  "data/commands/network_commands_extended.json"
 ];
 
 const FLOW_FILES = [
@@ -90,6 +92,16 @@ const COMMAND_ALIASES = {
   cisco_no_shutdown: ["no shut"],
   cisco_switchport_access_vlan: ["switchport access vlan <vlan>"],
   cisco_copy_running_startup: ["copy run start", "write memory", "wr mem"],
+  cisco_show_diagnostic_result: ["sh diagnostic result", "sh diag result", "show diag result"],
+  cisco_dir_flash: ["dir flash"],
+  cisco_show_file_systems: ["sh file systems"],
+  cisco_show_boot: ["sh boot"],
+  cisco_show_inventory: ["sh inventory", "sh inv"],
+  cisco_show_logging: ["sh logging", "sh log"],
+  cisco_show_ip_interface_brief: ["sh ip interface brief", "sh ip int brief", "sh ip int br"],
+  cisco_show_ip_route: ["sh ip route"],
+  cisco_show_running_config: ["sh running-config", "sh run"],
+  cisco_show_startup_config: ["sh startup-config", "sh start"],
   aruba_configure_terminal: ["conf t", "config terminal"],
   aruba_interface_config: ["int <interface>"],
   aruba_no_shutdown: ["no shut"],
@@ -123,6 +135,14 @@ const COMWARE_ALIASES = {
     "dis current int"
   ],
   hp_display_logbuffer: ["dis logbuffer"],
+  hp_display_diagnostic_information: ["dis diagnostic-information", "dis diag"],
+  hp_display_current_configuration: ["dis current-configuration", "dis current"],
+  hp_display_ip_interface_brief: ["dis ip interface brief", "dis ip int brief", "dis ip int br"],
+  hp_display_ip_routing_table: ["dis ip routing-table", "dis ip route"],
+  hp_display_arp: ["dis arp"],
+  hp_display_stp_brief: ["dis stp brief", "dis stp br"],
+  hp_display_link_aggregation_verbose: ["dis link-aggregation verbose", "dis link agg verbose"],
+  hp_display_saved_configuration: ["dis saved-configuration", "dis saved"],
   hp_system_view: ["sys", "system-view"],
   hp_interface_config: ["int <interface>", "interface <interface>"],
   hp_undo_shutdown: ["undo shut"],
@@ -298,7 +318,8 @@ const state = {
   safety: { commands: [], warning_message: "" },
   sources: null,
   history: [],
-  currentReport: null
+  currentReport: null,
+  lookupSource: "search"
 };
 
 const els = {};
@@ -330,6 +351,8 @@ function cacheElements() {
     "cliOutput",
     "commandSearch",
     "lookupResults",
+    "pasteSuggestions",
+    "pasteSuggestionList",
     "lookupDetailPanel",
     "explainCommandBtn",
     "vendorSelect",
@@ -362,11 +385,13 @@ function bindEvents() {
   els.clearBtn.addEventListener("click", clearInput);
   els.loadSampleBtn.addEventListener("click", loadSample);
   els.analyzeExampleBtn.addEventListener("click", diagnoseSample);
-  els.commandSearch.addEventListener("input", renderCommandLookup);
+  els.commandSearch.addEventListener("input", () => {
+    state.lookupSource = "search";
+    renderCommandLookup();
+  });
   els.cliOutput.addEventListener("input", () => {
-    if (!els.commandSearch.value.trim()) {
-      renderCommandLookup();
-    }
+    state.lookupSource = "paste";
+    renderCommandLookup();
   });
   els.vendorSelect.addEventListener("change", renderCommandLookup);
   els.explainCommandBtn.addEventListener("click", explainLookupCommand);
@@ -1014,9 +1039,15 @@ function renderCommandLookup() {
   if (!els.lookupResults) {
     return;
   }
-  const query = getLookupQueryFromInputs();
-  const matches = compactLookupMatches(findCommandLookupMatches(query, 18)).slice(0, 6);
+  const lookupContext = getLookupContext();
+  const query = lookupContext.query;
+  const lookupMatches = findCommandLookupMatches(query, 18);
+  const vendorMatches = els.vendorSelect.value === "auto"
+    ? lookupMatches
+    : lookupMatches.filter((match) => match.vendorKey === els.vendorSelect.value);
+  const matches = compactLookupMatches(vendorMatches).slice(0, 6);
   els.lookupResults.replaceChildren();
+  renderPasteSuggestions(matches, lookupContext.source === "paste", query);
   renderLookupDetail(matches[0] || null, query);
   if (!query) {
     return;
@@ -1042,19 +1073,72 @@ function renderCommandLookup() {
   });
 }
 
-function getLookupQueryFromInputs() {
-  const directQuery = els.commandSearch.value.trim();
-  if (directQuery) {
-    return directQuery;
+function renderPasteSuggestions(matches, isPasteLookup, query) {
+  if (!els.pasteSuggestions || !els.pasteSuggestionList) {
+    return;
   }
 
-  const pastedText = els.cliOutput.value.trim();
-  if (!pastedText || !looksLikeCommandOnlyText(pastedText)) {
+  els.pasteSuggestionList.replaceChildren();
+  els.pasteSuggestions.hidden = !isPasteLookup || !query || !matches.length;
+  if (els.pasteSuggestions.hidden) {
+    return;
+  }
+
+  matches.forEach((match) => {
+    const selected = resolveLookupVariant(match);
+    const button = document.createElement("button");
+    button.className = "paste-suggestion-button";
+    button.type = "button";
+    button.addEventListener("click", () => selectLookupCommand(match));
+
+    const command = document.createElement("strong");
+    command.textContent = selected.command;
+    const vendor = document.createElement("span");
+    vendor.textContent = match.vendor;
+    const meaning = document.createElement("small");
+    meaning.textContent = lookupSummary(selected.meaning, "Known local command");
+
+    button.append(command, vendor, meaning);
+    els.pasteSuggestionList.append(button);
+  });
+}
+
+function getLookupContext() {
+  const directQuery = els.commandSearch.value.trim();
+  const pastedQuery = getPastedLookupQuery(els.cliOutput.value);
+  if (state.lookupSource === "paste") {
+    return pastedQuery
+      ? { query: pastedQuery, source: "paste" }
+      : { query: "", source: "none" };
+  }
+  return directQuery
+    ? { query: directQuery, source: "search" }
+    : pastedQuery
+      ? { query: pastedQuery, source: "paste" }
+      : { query: "", source: "none" };
+}
+
+function getLookupQueryFromInputs() {
+  return getLookupContext().query;
+}
+
+function getPastedLookupQuery(text) {
+  const pastedText = text.trim();
+  const meaningfulLines = getMeaningfulLines(pastedText);
+  if (!pastedText || meaningfulLines.length !== 1) {
     return "";
   }
 
-  const firstLine = getMeaningfulLines(pastedText)[0] || "";
-  return firstLine.replace(/^\s*[^\s>#]+[>#]\s*/, "").trim();
+  const firstLine = meaningfulLines[0].replace(/^\s*[^\s>#]+[>#]\s*/, "").trim();
+  if (!firstLine || firstLine.length > 120) {
+    return "";
+  }
+  if (looksLikeCommandOnlyText(pastedText)) {
+    return firstLine;
+  }
+
+  const bestMatch = findCommandLookupMatches(firstLine, 1)[0];
+  return bestMatch?.score >= 55 ? firstLine : "";
 }
 
 function explainLookupCommand() {
@@ -1102,6 +1186,7 @@ function explainLookupCommand() {
 
 function selectLookupCommand(match) {
   const selected = resolveLookupVariant(match);
+  state.lookupSource = "search";
   els.commandSearch.value = selected.command;
   els.cliOutput.value = selected.command;
   els.vendorSelect.value = selected.vendorKey;
@@ -1187,6 +1272,7 @@ function normalizeLookupQuery(value) {
     .replace(/\?/g, "")
     .replace(/\bsh\b/g, "show")
     .replace(/\bdis\b/g, "display")
+    .replace(/\bdiag\b/g, "diagnostic")
     .trim();
 }
 
@@ -2242,6 +2328,8 @@ function switchView(viewName) {
 
 function clearInput() {
   els.cliOutput.value = "";
+  els.commandSearch.value = "";
+  state.lookupSource = "search";
   state.currentReport = null;
   els.resultsToolbar.hidden = true;
   els.resultsGrid.replaceChildren();
@@ -2259,6 +2347,7 @@ function clearInput() {
     command: "-",
     status: "-"
   });
+  renderCommandLookup();
 }
 
 function loadSample() {
@@ -2282,7 +2371,9 @@ function populateExamples() {
 function loadSelectedSample(shouldDiagnose) {
   const sample = SAMPLE_CASES.find((item) => item.id === els.exampleSelect.value) || SAMPLE_CASES[0];
   els.cliOutput.value = sample.output;
+  state.lookupSource = "paste";
   els.vendorSelect.value = sample.vendor || "auto";
+  renderCommandLookup();
   if (shouldDiagnose) {
     runDiagnosis();
     return;

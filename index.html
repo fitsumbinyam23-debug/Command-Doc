@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Command Doctor</title>
-    <link rel="stylesheet" href="styles.css?v=2026.07-mvp.19">
+    <link rel="stylesheet" href="styles.css?v=2026.07-mvp.20">
   </head>
   <body>
     <div class="app-shell">
@@ -48,6 +48,14 @@
                 <label for="cliOutput">Paste Output Evidence</label>
                 <textarea id="cliOutput" spellcheck="false" placeholder="Paste full command output here when you want diagnosis"></textarea>
               </div>
+
+              <section class="paste-suggestions" id="pasteSuggestions" hidden aria-live="polite">
+                <div class="paste-suggestions-head">
+                  <strong>Matching Commands</strong>
+                  <span>Choose a command to view its details</span>
+                </div>
+                <div class="paste-suggestion-list" id="pasteSuggestionList"></div>
+              </section>
 
               <section class="lookup-detail-panel" id="lookupDetailPanel" aria-live="polite"></section>
             </div>
@@ -128,6 +136,6 @@
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="src/app.js?v=2026.07-mvp.19" defer></script>
+    <script src="src/app.js?v=2026.07-mvp.20" defer></script>
   </body>
 </html>

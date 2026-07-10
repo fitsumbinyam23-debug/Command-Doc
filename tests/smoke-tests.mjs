@@ -24,7 +24,7 @@ const indexSource = await fs.readFile(path.join(root, "index.html"), "utf8");
 assert(!/<input[^>]+id="commandSearch"[^>]+\slist=/.test(indexSource), "lookup input does not use a duplicate native datalist");
 assert(!indexSource.includes("<datalist"), "native alias datalist removed");
 vm.runInNewContext(
-  `${appSource}\nglobalThis.__CommandDoctorTest = { state, diagnose, findCommandLookupMatches };`,
+  `${appSource}\nglobalThis.__CommandDoctorTest = { state, diagnose, findCommandLookupMatches, getPastedLookupQuery };`,
   sandbox,
   { filename: "src/app.js" }
 );
@@ -36,7 +36,9 @@ const commandFiles = [
   "aruba_cx.json",
   "windows_cmd.json",
   "linux.json",
-  "admin_commands.json"
+  "admin_commands.json",
+  "platform_commands.json",
+  "network_commands_extended.json"
 ];
 
 engine.state.commands = [];
@@ -198,6 +200,18 @@ for (const [query, expectedCommand] of lookupCases) {
   assert(matches[0]?.safetyLevel, `${query} risk level`);
 }
 
+for (const partial of ["sh", "dis", "diag", "flash:"]) {
+  assertEqual(engine.getPastedLookupQuery(partial), partial, `${partial} paste lookup prefix`);
+}
+assertEqual(engine.findCommandLookupMatches("flash:", 1)[0]?.command, "dir flash:", "flash filesystem suggestion");
+assert(engine.findCommandLookupMatches("diag", 6).some((match) => match.command.includes("diagnostic")), "diagnostic suggestions available");
+assertEqual(engine.findCommandLookupMatches("sh ip int br", 1)[0]?.command, "show ip interface brief", "Cisco IP interface shorthand");
+assertEqual(engine.findCommandLookupMatches("dis ip route", 1)[0]?.command, "display ip routing-table", "Comware routing shorthand");
+assertEqual(engine.findCommandLookupMatches("netsh wlan show interfaces", 1)[0]?.command, "netsh wlan show interfaces", "Windows wireless command");
+assertEqual(engine.findCommandLookupMatches("ss -tulpn", 1)[0]?.command, "ss -tulpn", "Linux listening sockets command");
+assertEqual(engine.getPastedLookupQuery("Gi1/0/24 notconnect 30"), "", "single output row is not treated as a command");
+assertEqual(engine.getPastedLookupQuery("show interface status\nGi1/0/24 notconnect 30"), "", "multi-line output hides command suggestions");
+
 const adminExplainReport = engine.diagnose("ipconfig /renew", "auto");
 assertEqual(adminExplainReport.mode, "Explanation Mode", "admin command explanation mode");
 assertEqual(adminExplainReport.command, "ipconfig /renew", "admin command recognized");
@@ -208,7 +222,7 @@ assertEqual(irfPortExplainReport.mode, "Explanation Mode", "IRF port command exp
 assertEqual(irfPortExplainReport.command, "display irf-port", "IRF port command recognized");
 assertEqual(irfPortExplainReport.ticketSummary, "Command recognized, but no output was provided for diagnosis.", "IRF port explanation ticket summary");
 
-console.log(`Command Doctor smoke tests passed: ${cases.length + lookupCases.length + 5}`);
+console.log(`Command Doctor smoke tests passed: ${cases.length + lookupCases.length + 17}`);
 
 function assert(condition, message) {
   if (!condition) {
