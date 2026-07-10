@@ -1,3 +1,7 @@
+Exit code: 0
+Wall time: 2.8 seconds
+Total output lines: 2842
+Output:
 "use strict";
 
 const COMMAND_FILES = [
@@ -8,7 +12,8 @@ const COMMAND_FILES = [
   "data/commands/linux.json",
   "data/commands/admin_commands.json",
   "data/commands/platform_commands.json",
-  "data/commands/network_commands_extended.json"
+  "data/commands/network_commands_extended.json",
+  "data/commands/vendor_learning_extended.json"
 ];
 
 const FLOW_FILES = [
@@ -566,8 +571,7 @@ function diagnose(text, selectedVendor) {
     }
   }
 
-  if (vendorDetection.key === "unknown" && commandDetection.command) {
-    ven…14473 tokens truncated…"
+  if (vendorDetection.key ===…14485 tokens truncated…"
   };
 }
 
