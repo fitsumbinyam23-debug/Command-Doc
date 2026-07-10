@@ -1,5 +1,5 @@
 Exit code: 0
-Wall time: 3 seconds
+Wall time: 2.8 seconds
 Output:
 <!doctype html>
 <html lang="en">
@@ -27,12 +27,14 @@ Output:
         }
         const registration = await navigator.serviceWorker.register("./sw-refresh.js", { scope: "./" });
         await new Promise((resolve) => {
-          if (navigator.serviceWorker.controller?.scriptURL.includes("sw-refresh.js")) {
+          const isRecoveryWorkerActive = () => navigator.serviceWorker.controller?.scriptURL.includes("sw-refresh.js");
+          if (isRecoveryWorkerActive()) {
             resolve();
             return;
           }
-          navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true });
-          if (!registration.installing && registration.active) resolve();
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            if (isRecoveryWorkerActive()) resolve();
+          });
         });
         location.replace("./?refreshed=1");
       })().catch(() => location.replace("./?refreshed=1"));
