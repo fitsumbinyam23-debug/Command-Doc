@@ -329,7 +329,6 @@ function cacheElements() {
     "kbVersion",
     "cliOutput",
     "commandSearch",
-    "commandLookupList",
     "lookupResults",
     "lookupDetailPanel",
     "explainCommandBtn",
@@ -437,7 +436,6 @@ async function loadKnowledge() {
     showToast("Knowledge files could not be loaded.");
   }
 
-  populateCommandDatalist();
   renderCommandLookup();
   setBusy(false);
 }
@@ -812,19 +810,6 @@ function getCommandAliases(command) {
     ...(COMMAND_ALIASES[command.id] || []),
     ...(COMWARE_ALIASES[command.id] || [])
   ];
-}
-
-function populateCommandDatalist() {
-  if (!els.commandLookupList) {
-    return;
-  }
-  els.commandLookupList.replaceChildren();
-  getCommandLookupEntries().forEach((entry) => {
-    const option = document.createElement("option");
-    option.value = entry.lookupText;
-    option.label = `${entry.vendor} - ${entry.command}`;
-    els.commandLookupList.append(option);
-  });
 }
 
 function lookupSummary(value, fallback) {

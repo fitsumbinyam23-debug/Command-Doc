@@ -20,6 +20,9 @@ const sandbox = {
 };
 
 const appSource = await fs.readFile(path.join(root, "src", "app.js"), "utf8");
+const indexSource = await fs.readFile(path.join(root, "index.html"), "utf8");
+assert(!/<input[^>]+id="commandSearch"[^>]+\slist=/.test(indexSource), "lookup input does not use a duplicate native datalist");
+assert(!indexSource.includes("<datalist"), "native alias datalist removed");
 vm.runInNewContext(
   `${appSource}\nglobalThis.__CommandDoctorTest = { state, diagnose, findCommandLookupMatches };`,
   sandbox,
@@ -205,7 +208,7 @@ assertEqual(irfPortExplainReport.mode, "Explanation Mode", "IRF port command exp
 assertEqual(irfPortExplainReport.command, "display irf-port", "IRF port command recognized");
 assertEqual(irfPortExplainReport.ticketSummary, "Command recognized, but no output was provided for diagnosis.", "IRF port explanation ticket summary");
 
-console.log(`Command Doctor smoke tests passed: ${cases.length + lookupCases.length + 3}`);
+console.log(`Command Doctor smoke tests passed: ${cases.length + lookupCases.length + 5}`);
 
 function assert(condition, message) {
   if (!condition) {

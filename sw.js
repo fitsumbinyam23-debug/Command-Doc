@@ -1,11 +1,11 @@
 "use strict";
 
-const CACHE_NAME = "command-doctor-2026-07-mvp-18";
+const CACHE_NAME = "command-doctor-2026-07-mvp-19";
 const OFFLINE_ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=2026.07-mvp.18",
-  "./src/app.js?v=2026.07-mvp.18",
+  "./styles.css?v=2026.07-mvp.19",
+  "./src/app.js?v=2026.07-mvp.19",
   "./data/commands/admin_commands.json",
   "./data/commands/aruba_cx.json",
   "./data/commands/cisco_ios.json",
