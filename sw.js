@@ -1,11 +1,14 @@
+Exit code: 0
+Wall time: 2.9 seconds
+Output:
 "use strict";
 
-const CACHE_NAME = "command-doctor-2026-07-lab-4";
+const CACHE_NAME = "command-doctor-2026-07-lab-5";
 const OFFLINE_ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=2026.07-lab.4",
-  "./src/app.js?v=2026.07-lab.4",
+  "./styles.css?v=2026.07-lab.5",
+  "./src/app.js?v=2026.07-lab.5",
   "./data/commands/admin_commands.json",
   "./data/commands/aruba_cx.json",
   "./data/commands/cisco_ios.json",
@@ -14,6 +17,7 @@ const OFFLINE_ASSETS = [
   "./data/commands/windows_cmd.json",
   "./data/commands/platform_commands.json",
   "./data/commands/network_commands_extended.json",
+  "./data/commands/vendor_learning_extended.json",
   "./data/labs/stages.json",
   "./data/labs/sections.json",
   "./data/labs/lessons/foundation.json",
@@ -57,20 +61,29 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((cached) => {
-      if (cached) {
-        return cached;
-      }
-      return fetch(event.request).then((response) => {
-        if (!response || !response.ok) {
-          return response;
+  const isAppShell = event.request.mode === "navigate"
+    || url.pathname.endsWith("/index.html")
+    || /\.(?:js|css)$/.test(url.pathname);
+
+  if (isAppShell) {
+    event.respondWith(
+      fetch(event.request).then((response) => {
+        if (response?.ok) {
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
         }
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         return response;
-      });
-    })
+      }).catch(() => caches.match(event.request, { ignoreSearch: true }))
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request, { ignoreSearch: true }).then((cached) => cached || fetch(event.request).then((response) => {
+      if (response?.ok) {
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+      }
+      return response;
+    }))
   );
 });
 
