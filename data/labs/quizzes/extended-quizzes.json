@@ -11,6 +11,8 @@
     "cisco-save-configuration":[{"question":"When should you save a simulated change?","options":["After verification and approval","Before checking the result","Immediately after any command"],"answer":0,"explanation":"Save only after the intended state has been verified."}],
     "cisco-verify-configuration":[{"question":"When is a configuration task complete?","options":["After the result is verified and explainable","After the first command is accepted","Before checking the port"],"answer":0,"explanation":"Verification proves the change matches the goal."}],
     "cisco-rollback-configuration":[{"question":"What is rollback for?","options":["Returning to the documented baseline","Testing random commands","Avoiding verification"],"answer":0,"explanation":"Rollback safely returns the simulated device to its baseline."}],
-    "configuration-safety":[{"question":"What is the safest first configuration action?","options":["Read-only checks to confirm scope and state","Reload the device","Use default interface"],"answer":0,"explanation":"Check first, then change only with approval and rollback."}]
+    "configuration-safety":[{"question":"What is the safest first configuration action?","options":["Read-only checks to confirm scope and state","Reload the device","Use default interface"],"answer":0,"explanation":"Check first, then change only with approval and rollback."}],
+    "branch-access-port":[{"question":"Which simulated device and port is this exercise for?","options":["BRANCH-ACC-02 Gi1/0/12","HQ-ACC-01 Gi1/0/24","WH-ACC-03 Gi1/0/8"],"answer":0,"explanation":"Always confirm the specific switch and port before making a change."}],
+    "warehouse-scanner-port":[{"question":"What VLAN is approved for Scanner-07 in this simulated exercise?","options":["VLAN 50","VLAN 20","VLAN 31"],"answer":0,"explanation":"The warehouse scenario uses Gi1/0/8 for Scanner-07 in VLAN 50."}]
   }
 }
