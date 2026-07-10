@@ -1,7 +1,6 @@
 {
   "sections": [
     {"id":"first-checks","stage":"foundation","title":"Network Basics / First Checks","description":"Start with safe checks and understand what the device is telling you.","difficulty":"Beginner","lesson_ids":["cisco-interface-status"]},
-    {"id":"interfaces","stage":"foundation","title":"Interface / Port Troubleshooting","description":"Read port state, errors, and link health.","difficulty":"Beginner","lesson_ids":["cisco-interface-status"]},
     {"id":"vlan","stage":"foundation","title":"VLAN / Access Port Understanding","description":"Understand VLAN membership and access-port output.","difficulty":"Beginner","lesson_ids":["cisco-vlan-brief"]},
     {"id":"mac","stage":"foundation","title":"MAC Address / Device Detection","description":"Find where an endpoint is learned.","difficulty":"Beginner","lesson_ids":["cisco-mac-table"]},
     {"id":"ip-arp","stage":"foundation","title":"IP / ARP / Gateway","description":"Connect IP addressing, ARP, and the default gateway.","difficulty":"Intermediate","lesson_ids":["cisco-ip-interface-brief"]},
