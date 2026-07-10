@@ -146,6 +146,25 @@ button:disabled {
 
 .lab-trainer-button { justify-self: start; }
 
+.lab-console-panel {
+  display: grid;
+  gap: 14px;
+  max-width: 980px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.lab-console-panel h3, .lab-console-panel p { margin: 0; }
+.lab-device-select { max-width: 420px; }
+.lab-console-terminal { min-height: 180px; padding: 16px; border-radius: var(--radius); background: #162831; color: #dcfff4; overflow: auto; }
+.lab-console-output { margin: 0; white-space: pre-wrap; font: 0.92rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.lab-console-input-row { display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: var(--radius); background: #162831; color: #dcfff4; }
+.lab-console-prompt { font: 700 0.9rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap; }
+.lab-console-input-row .lab-terminal-input { min-width: 0; flex: 1; background: transparent; color: #ffffff; border-color: #54737a; }
+.lab-console-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
 .status-stack {
   margin-top: auto;
   display: flex;
