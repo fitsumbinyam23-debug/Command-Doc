@@ -22,6 +22,7 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
-  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+  const freshRequest = new Request(event.request, { cache: "reload" });
+  event.respondWith(fetch(freshRequest).catch(() => caches.match(event.request)));
 });
 
