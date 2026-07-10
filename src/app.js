@@ -2698,6 +2698,19 @@ function renderLabScenario() {
     field.append(labCreate("strong", "", label), labCreate("p", "", value));
     panel.append(field);
   });
+  const challenge = labCreate("div", "lab-scenario-challenge");
+  challenge.append(labCreate("strong", "", "Choose the safest next action"));
+  const choices = [scenario.next_step, "Change the port configuration immediately", "Reload the device to test it"];
+  choices.forEach((choice, index) => challenge.append(labButton(choice, "secondary", () => {
+    const points = index === 0 ? 10 : -3;
+    state.lab.progress.scenarioScores[scenario.id] = points;
+    saveLabProgress();
+    showToast(index === 0 ? `Correct: +${points} points.` : `Unsafe shortcut: ${points} points.`);
+    renderLab();
+  })));
+  const score = state.lab.progress.scenarioScores[scenario.id];
+  if (score !== undefined) challenge.append(labCreate("strong", "lab-score", `Scenario score: ${score}/10`));
+  panel.append(challenge);
   const select = document.createElement("select");
   select.className = "lab-scenario-select";
   state.lab.scenarios.forEach((item) => { const option = document.createElement("option"); option.value = item.id; option.textContent = item.title; select.append(option); });
