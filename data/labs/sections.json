@@ -9,6 +9,7 @@
     {"id":"linux","stage":"foundation","title":"Linux Network Troubleshooting","description":"Read Linux interface and route state safely.","difficulty":"Intermediate","lesson_ids":["linux-ip-link"]},
     {"id":"stack","stage":"foundation","title":"Stack / IRF / VSF Basics","description":"Check stack members and redundancy links.","difficulty":"Intermediate","lesson_ids":["hp-irf","hp-irf-topology"]},
     {"id":"safety","stage":"foundation","title":"Dangerous Commands / Safety","description":"Recognize commands that can interrupt service or erase data.","difficulty":"Beginner","lesson_ids":["safety-dangerous-commands"]},
+    {"id":"switch-fleet","stage":"configuration","title":"Simulated Switch Fleet","description":"Practice the same safe workflow on separate imaginary access switches and endpoints.","difficulty":"Intermediate","lesson_ids":["branch-access-port","warehouse-scanner-port"]},
     {"id":"configuration-core","stage":"configuration","title":"Configuration Practice","description":"Make a simulated access-port change, verify it, and roll it back.","difficulty":"Intermediate","lesson_ids":["cisco-configure-access-port","cisco-create-vlan","cisco-configure-trunk","cisco-interface-description","cisco-shutdown-no-shutdown","cisco-save-configuration","cisco-verify-configuration","cisco-rollback-configuration","configuration-safety"]}
   ]
 }
