@@ -8,6 +8,7 @@ const OFFLINE_ASSETS = [
   "./sw-refresh.js",
   "./styles.css?v=2026.07-lab.5",
   "./src/app.js?v=2026.07-lab.5",
+  "./src/lab-engine.js?v=2026.07-engine.1",
   "./data/commands/admin_commands.json",
   "./data/commands/aruba_cx.json",
   "./data/commands/cisco_ios.json",
