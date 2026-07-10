@@ -1,0 +1,18 @@
+Exit code: 0
+Wall time: 3.1 seconds
+Output:
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Refreshing Command Doctor</title></head>
+<body><p>Refreshing Command Doctor...</p><script>
+  (async () => {
+    if (!("serviceWorker" in navigator)) { location.replace("./?recovered=1"); return; }
+    await navigator.serviceWorker.register("./sw-recover.js", { scope: "./" });
+    await new Promise((resolve) => {
+      const ready = () => navigator.serviceWorker.controller?.scriptURL.includes("sw-recover.js") && resolve();
+      navigator.serviceWorker.addEventListener("controllerchange", ready);
+      ready();
+    });
+    location.replace("./?recovered=1");
+  })().catch(() => location.replace("./?recovered=1"));
+</script></body></html>
+
