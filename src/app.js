@@ -23,8 +23,11 @@ const LAB_FILES = {
   stages: "data/labs/stages.json",
   sections: "data/labs/sections.json",
   foundationLessons: "data/labs/lessons/foundation.json",
+  foundationExtendedLessons: "data/labs/lessons/foundation_extended.json",
   configurationLessons: "data/labs/lessons/configuration.json",
+  configurationExtendedLessons: "data/labs/lessons/configuration_extended.json",
   quizzes: "data/labs/quizzes/lesson-quizzes.json",
+  extendedQuizzes: "data/labs/quizzes/extended-quizzes.json",
   scenarios: "data/labs/scenarios/scenarios.json"
 };
 
@@ -489,9 +492,11 @@ async function loadKnowledge() {
   state.lab.sections = labData.sections?.sections || [];
   state.lab.lessons = [
     ...(labData.foundationLessons?.lessons || []),
-    ...(labData.configurationLessons?.lessons || [])
+    ...(labData.foundationExtendedLessons?.lessons || []),
+    ...(labData.configurationLessons?.lessons || []),
+    ...(labData.configurationExtendedLessons?.lessons || [])
   ];
-  state.lab.quizzes = labData.quizzes?.quizzes || {};
+  state.lab.quizzes = { ...(labData.quizzes?.quizzes || {}), ...(labData.extendedQuizzes?.quizzes || {}) };
   state.lab.foundationFinalQuiz = labData.quizzes?.foundation_final || [];
   state.lab.scenarios = labData.scenarios?.scenarios || [];
   state.lab.progress = loadLabProgress();
@@ -562,20 +567,7 @@ function diagnose(text, selectedVendor) {
   }
 
   if (vendorDetection.key === "unknown" && commandDetection.command) {
-    vendorDetection = {
-      key: commandDetection.command.vendor_key,
-      label: commandDetection.command.vendor_label,
-      score: commandDetection.score,
-      confidence: "Low",
-      matches: ["Inferred from command knowledge"]
-    };
-  }
-
-  if (!commandDetection.command && vendorDetection.key !== "unknown") {
-    commandDetection = detectCommand(text, vendorDetection.key);
-  }
-
-  let ent…14375 tokens truncated…"
+    ven…14473 tokens truncated…"
   };
 }
 
