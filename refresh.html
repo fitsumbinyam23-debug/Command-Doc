@@ -1,0 +1,42 @@
+Exit code: 0
+Wall time: 3 seconds
+Output:
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Refreshing Command Doctor</title>
+    <style>
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #f5f8f8; color: #14232d; font: 16px/1.5 Arial, sans-serif; }
+      main { max-width: 34rem; padding: 2rem; text-align: center; }
+      h1 { margin: 0 0 .5rem; font-size: 1.5rem; }
+      p { margin: 0; color: #526273; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Refreshing Command Doctor</h1>
+      <p>Loading the latest offline learning tools.</p>
+    </main>
+    <script>
+      (async () => {
+        if (!("serviceWorker" in navigator)) {
+          location.replace("./?refreshed=1");
+          return;
+        }
+        const registration = await navigator.serviceWorker.register("./sw-refresh.js", { scope: "./" });
+        await new Promise((resolve) => {
+          if (navigator.serviceWorker.controller?.scriptURL.includes("sw-refresh.js")) {
+            resolve();
+            return;
+          }
+          navigator.serviceWorker.addEventListener("controllerchange", resolve, { once: true });
+          if (!registration.installing && registration.active) resolve();
+        });
+        location.replace("./?refreshed=1");
+      })().catch(() => location.replace("./?refreshed=1"));
+    </script>
+  </body>
+</html>
+
