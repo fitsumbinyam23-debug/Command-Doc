@@ -354,7 +354,11 @@ const state = {
 
 const els = {};
 
-document.addEventListener("DOMContentLoaded", init);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else if (document.readyState) {
+  init();
+}
 
 async function init() {
   cacheElements();
