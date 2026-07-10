@@ -1,0 +1,17 @@
+{
+  "quizzes": {
+    "cisco-ip-interface-brief":[{"question":"What is the healthy routed-interface state?","options":["up/up","down/down","administratively down"],"answer":0,"explanation":"Up/up means the interface and protocol are both operational."}],
+    "cisco-cdp-neighbors":[{"question":"What does CDP help you confirm?","options":["A directly connected neighbor","A saved Windows password","A VLAN deletion"],"answer":0,"explanation":"CDP identifies directly connected Cisco neighbors and ports."}],
+    "linux-ip-link":[{"question":"What does LOWER_UP usually indicate?","options":["The kernel detects a lower-layer link","The route table is empty","DNS is working"],"answer":0,"explanation":"LOWER_UP is a carrier or lower-layer signal."}],
+    "safety-dangerous-commands":[{"question":"What should come before a production change?","options":["Read-only checks, scope, approval, and rollback","Reload immediately","Erase the startup configuration"],"answer":0,"explanation":"Safe work starts with evidence and an approved rollback plan."}],
+    "cisco-create-vlan":[{"question":"What should you verify after creating VLAN 31?","options":["show vlan brief","reload","write erase"],"answer":0,"explanation":"Verify the VLAN exists and has the intended name and state."}],
+    "cisco-configure-trunk":[{"question":"Why verify the allowed VLAN list?","options":["To prevent missing or unintended VLANs on the trunk","To erase the route table","To test Windows DNS"],"answer":0,"explanation":"Trunk scope must match the approved design."}],
+    "cisco-interface-description":[{"question":"What is the purpose of a description?","options":["Identify the endpoint or circuit owner","Enable a trunk automatically","Save the startup configuration"],"answer":0,"explanation":"Descriptions make future troubleshooting and ownership clearer."}],
+    "cisco-shutdown-no-shutdown":[{"question":"Why is no shutdown not a diagnosis by itself?","options":["It changes service state and should follow evidence and approval","It only displays logs","It cannot affect an interface"],"answer":0,"explanation":"It is a configuration action that can restore or disrupt service."}],
+    "cisco-save-configuration":[{"question":"When should you save a simulated change?","options":["After verification and approval","Before checking the result","Immediately after any command"],"answer":0,"explanation":"Save only after the intended state has been verified."}],
+    "cisco-verify-configuration":[{"question":"When is a configuration task complete?","options":["After the result is verified and explainable","After the first command is accepted","Before checking the port"],"answer":0,"explanation":"Verification proves the change matches the goal."}],
+    "cisco-rollback-configuration":[{"question":"What is rollback for?","options":["Returning to the documented baseline","Testing random commands","Avoiding verification"],"answer":0,"explanation":"Rollback safely returns the simulated device to its baseline."}],
+    "configuration-safety":[{"question":"What is the safest first configuration action?","options":["Read-only checks to confirm scope and state","Reload the device","Use default interface"],"answer":0,"explanation":"Check first, then change only with approval and rollback."}]
+  }
+}
+
