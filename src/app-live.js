@@ -355,7 +355,8 @@ const state = {
       activeInterface: "Gi1/0/24",
       vlan: "31",
       description: "Finance-PC",
-      transcript: []
+      transcript: [],
+      engine: null
     }
   }
 };
@@ -2570,14 +2571,15 @@ function renderLabConsole() {
   });
   selector.value = state.lab.console.device;
   selector.addEventListener("change", () => {
-    state.lab.console = { device: selector.value, mode: "exec", activeInterface: deviceProfile(selector.value).port, vlan: deviceProfile(selector.value).vlan, description: deviceProfile(selector.value).endpoint, transcript: [] };
+    state.lab.console = { device: selector.value, mode: "exec", activeInterface: deviceProfile(selector.value).port, vlan: deviceProfile(selector.value).vlan, description: deviceProfile(selector.value).endpoint, transcript: [], engine: createLabEngine(selector.value) };
     renderLab();
   });
   consolePanel.append(selector);
 
   const terminal = labCreate("div", "lab-console-terminal");
-  const transcript = state.lab.console.transcript.length
-    ? state.lab.console.transcript.join("\n\n")
+  const engine = getLabEngine();
+  const transcript = engine.transcript.length
+    ? engine.transcript.join("\n\n")
     : "Choose a device, then start with a read-only command such as show interface status or display irf.";
   terminal.append(labCreate("pre", "lab-console-output", transcript));
   const row = labCreate("div", "lab-console-input-row");
@@ -2608,6 +2610,8 @@ function deviceProfile(device) {
 }
 
 function consolePrompt() {
+  const engine = getLabEngine();
+  if (engine) return engine.prompt();
   const profile = deviceProfile(state.lab.console.device);
   if (state.lab.console.mode === "config") return `${profile.name}(config)#`;
   if (state.lab.console.mode === "interface") return `${profile.name}(config-if)#`;
@@ -2620,11 +2624,26 @@ function runLabConsoleCommand(input) {
     showToast("Enter a simulated command first.");
     return;
   }
-  const output = simulateLabCommand(command);
-  state.lab.console.transcript.push(`${consolePrompt()} ${command}\n${output}`);
-  if (state.lab.console.transcript.length > 8) state.lab.console.transcript.shift();
+  const engine = getLabEngine();
+  const prompt = consolePrompt();
+  const result = engine ? engine.execute(command) : { output: simulateLabCommand(command), diff: "Simulator engine unavailable." };
+  if (engine) {
+    engine.transcript.push(`${prompt} ${command}\n${result.output}${result.diff ? `\n\nConfiguration diff\n${result.diff}` : ""}`);
+    if (engine.transcript.length > 8) engine.transcript.shift();
+  } else {
+    state.lab.console.transcript.push(`${prompt} ${command}\n${result.output}`);
+  }
   input.value = "";
   renderLab();
+}
+
+function createLabEngine(device) {
+  return window.CommandDoctorLabEngine ? new window.CommandDoctorLabEngine.SimulatedDeviceEngine(device) : null;
+}
+
+function getLabEngine() {
+  if (!state.lab.console.engine) state.lab.console.engine = createLabEngine(state.lab.console.device);
+  return state.lab.console.engine;
 }
 
 function simulateLabCommand(command) {
