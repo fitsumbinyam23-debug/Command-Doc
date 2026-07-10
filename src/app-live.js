@@ -348,7 +348,15 @@ const state = {
     practiceInput: "",
     practicePassed: false,
     quizSelection: null,
-    scenarioScore: 0
+    scenarioScore: 0,
+    console: {
+      device: "hq",
+      mode: "exec",
+      activeInterface: "Gi1/0/24",
+      vlan: "31",
+      description: "Finance-PC",
+      transcript: []
+    }
   }
 };
 
@@ -2476,6 +2484,7 @@ function renderLabDashboard() {
   els.labRoot.append(intro);
 
   els.labRoot.append(labButton("Open Trainer Controls", "secondary lab-trainer-button", () => switchView("admin")));
+  renderLabConsole();
 
   const stages = labCreate("div", "lab-stage-grid");
   state.lab.stages.forEach((stage) => {
@@ -2534,6 +2543,102 @@ function renderLabDashboard() {
     config.append(labButton("Open Configuration Lab", "secondary", () => openLabStage("configuration")));
     els.labRoot.append(config);
   }
+}
+
+function renderLabConsole() {
+  const consolePanel = labCreate("section", "lab-console-panel");
+  consolePanel.append(labCreate("div", "lab-card-kicker", "Simulated switch console"));
+  consolePanel.append(labCreate("h3", "", "Practice From First Check to Change and Verification"));
+  consolePanel.append(labCreate("p", "", "Choose an imaginary device. Commands only change the local simulation and never reach a real network."));
+  const selector = document.createElement("select");
+  selector.className = "lab-device-select";
+  [
+    ["hq", "HQ-ACC-01 | Cisco access switch"],
+    ["branch", "BRANCH-ACC-02 | Cisco branch switch"],
+    ["warehouse", "WH-ACC-03 | Cisco warehouse switch"],
+    ["irf", "CORE-IRF-01 | HP Comware IRF stack"],
+    ["aruba", "EDGE-CX-01 | ArubaOS-CX edge switch"]
+  ].forEach(([value, label]) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    selector.append(option);
+  });
+  selector.value = state.lab.console.device;
+  selector.addEventListener("change", () => {
+    state.lab.console = { device: selector.value, mode: "exec", activeInterface: deviceProfile(selector.value).port, vlan: deviceProfile(selector.value).vlan, description: deviceProfile(selector.value).endpoint, transcript: [] };
+    renderLab();
+  });
+  consolePanel.append(selector);
+
+  const terminal = labCreate("div", "lab-console-terminal");
+  const transcript = state.lab.console.transcript.length
+    ? state.lab.console.transcript.join("\n\n")
+    : "Choose a device, then start with a read-only command such as show interface status or display irf.";
+  terminal.append(labCreate("pre", "lab-console-output", transcript));
+  const row = labCreate("div", "lab-console-input-row");
+  row.append(labCreate("span", "lab-console-prompt", consolePrompt()));
+  const input = document.createElement("input");
+  input.className = "lab-terminal-input";
+  input.placeholder = "Type a simulated command";
+  input.setAttribute("aria-label", "Simulated switch command");
+  input.addEventListener("keydown", (event) => { if (event.key === "Enter") runLabConsoleCommand(input); });
+  row.append(input);
+  consolePanel.append(terminal, row);
+  const controls = labCreate("div", "lab-console-actions");
+  controls.append(labButton("Run simulated command", "primary", () => runLabConsoleCommand(input)));
+  controls.append(labButton("Clear console", "secondary", () => { state.lab.console.transcript = []; renderLab(); }));
+  consolePanel.append(controls);
+  els.labRoot.append(consolePanel);
+}
+
+function deviceProfile(device) {
+  const profiles = {
+    hq: { name: "HQ-ACC-01", vendor: "Cisco IOS", port: "Gi1/0/24", endpoint: "Finance-PC", vlan: "31" },
+    branch: { name: "BRANCH-ACC-02", vendor: "Cisco IOS", port: "Gi1/0/12", endpoint: "Reception-PC", vlan: "20" },
+    warehouse: { name: "WH-ACC-03", vendor: "Cisco IOS", port: "Gi1/0/8", endpoint: "Scanner-07", vlan: "50" },
+    irf: { name: "CORE-IRF-01", vendor: "HP Comware", port: "GigabitEthernet1/0/24", endpoint: "Distribution-Uplink", vlan: "30" },
+    aruba: { name: "EDGE-CX-01", vendor: "ArubaOS-CX", port: "1/1/10", endpoint: "Training-AP", vlan: "40" }
+  };
+  return profiles[device] || profiles.hq;
+}
+
+function consolePrompt() {
+  const profile = deviceProfile(state.lab.console.device);
+  if (state.lab.console.mode === "config") return `${profile.name}(config)#`;
+  if (state.lab.console.mode === "interface") return `${profile.name}(config-if)#`;
+  return profile.vendor === "HP Comware" ? `<${profile.name}>` : `${profile.name}#`;
+}
+
+function runLabConsoleCommand(input) {
+  const command = input.value.trim().replace(/\s+/g, " ");
+  if (!command) return;
+  const output = simulateLabCommand(command);
+  state.lab.console.transcript.push(`${consolePrompt()} ${command}\n${output}`);
+  if (state.lab.console.transcript.length > 8) state.lab.console.transcript.shift();
+  input.value = "";
+  renderLab();
+}
+
+function simulateLabCommand(command) {
+  const lower = command.toLowerCase();
+  const profile = deviceProfile(state.lab.console.device);
+  const consoleState = state.lab.console;
+  if (/^(configure terminal|conf t|system-view)$/.test(lower)) { consoleState.mode = "config"; return "Enter configuration mode. Simulation only."; }
+  if (/^(end|exit)$/.test(lower)) { consoleState.mode = "exec"; return "Return to privileged mode."; }
+  if (consoleState.mode === "config" && /^interface\s+/.test(lower)) { consoleState.mode = "interface"; consoleState.activeInterface = command.split(/\s+/).slice(1).join(" "); return `Selected simulated interface ${consoleState.activeInterface}.`; }
+  if (consoleState.mode === "interface" && /^switchport access vlan\s+\d+/.test(lower)) { consoleState.vlan = command.match(/\d+$/)[0]; return `Simulated access VLAN set to ${consoleState.vlan}. Verify before saving.`; }
+  if (consoleState.mode === "interface" && /^description\s+/.test(lower)) { consoleState.description = command.slice(12).trim(); return `Simulated description set to ${consoleState.description}.`; }
+  if (consoleState.mode === "interface" && /^(no shutdown|undo shutdown)$/.test(lower)) return "Simulated interface is administratively enabled. Check physical state and VLAN next.";
+  if (/^(show interface status|show interfaces status|sh int status)$/.test(lower)) return `Port        Name              Status     Vlan\n${consoleState.activeInterface}  ${consoleState.description}  connected  ${consoleState.vlan}`;
+  if (/^(show vlan brief|sh vlan brief)$/.test(lower)) return `VLAN  Name        Status    Ports\n${consoleState.vlan}    TRAINING-${consoleState.vlan}  active    ${consoleState.activeInterface}`;
+  if (/^show running-config interface/.test(lower)) return `interface ${consoleState.activeInterface}\n description ${consoleState.description}\n switchport access vlan ${consoleState.vlan}\n no shutdown`;
+  if (/^show cdp neighbors/.test(lower)) return `Device ID       Local Intrfce   Platform\nCORE-SW         ${consoleState.activeInterface}      C9300`;
+  if (/^display irf$/.test(lower)) return "MemberID  Role     Priority\n1         Master   32\n2         Standby  31";
+  if (/^display irf topology/.test(lower)) return "Topology Info\nMember 1  IRF-Port1 UP  IRF-Port2 UP\nMember 2  IRF-Port1 UP  IRF-Port2 UP";
+  if (/^show interface brief/.test(lower)) return `Interface  Status  Speed\n${profile.port}     up      1G`;
+  if (/^(write memory|copy running-config startup-config|save)$/.test(lower)) return "Simulated configuration saved. In real work, save only after approved verification.";
+  return "Unknown simulated command. Try show interface status, show vlan brief, show running-config interface <port>, configure terminal, display irf, or display irf topology.";
 }
 
 function renderLabSectionCard(section) {
