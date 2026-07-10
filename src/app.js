@@ -2419,7 +2419,11 @@ function saveLabProgress() {
 }
 
 function labFoundationLessons() {
-  return state.lab.lessons.filter((lesson) => lesson.section_id !== "configuration-core");
+  return state.lab.lessons.filter((lesson) => !isConfigurationLesson(lesson));
+}
+
+function isConfigurationLesson(lesson) {
+  return state.lab.sections.find((section) => section.id === lesson.section_id)?.stage === "configuration";
 }
 
 function labConfigurationUnlocked() {
@@ -2612,7 +2616,10 @@ function consolePrompt() {
 
 function runLabConsoleCommand(input) {
   const command = input.value.trim().replace(/\s+/g, " ");
-  if (!command) return;
+  if (!command) {
+    showToast("Enter a simulated command first.");
+    return;
+  }
   const output = simulateLabCommand(command);
   state.lab.console.transcript.push(`${consolePrompt()} ${command}\n${output}`);
   if (state.lab.console.transcript.length > 8) state.lab.console.transcript.shift();
@@ -2638,6 +2645,10 @@ function simulateLabCommand(command) {
   if (/^display irf topology/.test(lower)) return "Topology Info\nMember 1  IRF-Port1 UP  IRF-Port2 UP\nMember 2  IRF-Port1 UP  IRF-Port2 UP";
   if (/^show interface brief/.test(lower)) return `Interface  Status  Speed\n${profile.port}     up      1G`;
   if (/^(write memory|copy running-config startup-config|save)$/.test(lower)) return "Simulated configuration saved. In real work, save only after approved verification.";
+  const knownCommand = state.commands.find((item) => normalizeCommandText(item.command) === normalizeCommandText(command));
+  if (knownCommand) {
+    return `Recognized offline command: ${knownCommand.command}\n${knownCommand.meaning}\n\nThis command is available in Command Lookup. A detailed device-specific simulation has not been authored for this device yet.`;
+  }
   return "Unknown simulated command. Try show interface status, show vlan brief, show running-config interface <port>, configure terminal, display irf, or display irf topology.";
 }
 
@@ -2668,6 +2679,15 @@ function openLabStage(stageId) {
     state.lab.screen = "scenario";
     state.lab.activeLessonId = state.lab.scenarios[0]?.id || "";
   } else {
+    const stageLessons = state.lab.lessons.filter((lesson) => {
+      const section = state.lab.sections.find((item) => item.id === lesson.section_id);
+      return section?.stage === stageId;
+    });
+    const nextLesson = stageLessons.find((lesson) => !state.lab.progress.completedLessons[lesson.id]) || stageLessons[0];
+    if (nextLesson) {
+      openLabLesson(nextLesson.id);
+      return;
+    }
     state.lab.screen = "dashboard";
   }
   renderLab();
@@ -2675,7 +2695,7 @@ function openLabStage(stageId) {
 
 function openLabLesson(lessonId) {
   const lesson = state.lab.lessons.find((item) => item.id === lessonId);
-  if (!lesson || (lesson.section_id === "configuration-core" && !labConfigurationUnlocked())) {
+  if (!lesson || (isConfigurationLesson(lesson) && !labConfigurationUnlocked())) {
     showToast("Complete the Foundation final quiz first.");
     return;
   }
@@ -2782,8 +2802,8 @@ function renderLabLessonQuiz(parent, lesson) {
 }
 
 function getNextLabLesson(lesson) {
-  const lessons = lesson.section_id === "configuration-core"
-    ? state.lab.lessons.filter((item) => item.section_id === "configuration-core")
+  const lessons = isConfigurationLesson(lesson)
+    ? state.lab.lessons.filter((item) => isConfigurationLesson(item))
     : labFoundationLessons();
   const index = lessons.findIndex((item) => item.id === lesson.id);
   return lessons[index + 1] || null;
@@ -2794,7 +2814,7 @@ function finishLabLesson(lesson, correct, explanation) {
   state.lab.progress.lessonScores[lesson.id] = score;
   state.lab.quizSelection = correct ? 0 : -1;
   if (correct) state.lab.progress.completedLessons[lesson.id] = true;
-  if (correct && lesson.section_id === "configuration-core") state.lab.progress.configurationCompleted = true;
+  if (correct && isConfigurationLesson(lesson)) state.lab.progress.configurationCompleted = true;
   saveLabProgress();
   showToast(correct ? `Lesson complete. ${explanation}` : `Not quite. ${explanation}`);
   renderLab();
