@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 3.1 seconds
+Output:
 import fs from "node:fs/promises";
 import path from "node:path";
 import vm from "node:vm";
@@ -38,15 +41,19 @@ const commandFiles = [
   "linux.json",
   "admin_commands.json",
   "platform_commands.json",
-  "network_commands_extended.json"
+  "network_commands_extended.json",
+  "vendor_learning_extended.json"
 ];
 
 const labFiles = [
   ["stages.json", "stages"],
   ["sections.json", "sections"],
   ["lessons/foundation.json", "lessons"],
+  ["lessons/foundation_extended.json", "lessons"],
   ["lessons/configuration.json", "lessons"],
+  ["lessons/configuration_extended.json", "lessons"],
   ["quizzes/lesson-quizzes.json", "quizzes"],
+  ["quizzes/extended-quizzes.json", "quizzes"],
   ["scenarios/scenarios.json", "scenarios"]
 ];
 
@@ -226,7 +233,9 @@ assertEqual(engine.findCommandLookupMatches("ss -tulpn", 1)[0]?.command, "ss -tu
 assertEqual(engine.getPastedLookupQuery("Gi1/0/24 notconnect 30"), "", "single output row is not treated as a command");
 assertEqual(engine.getPastedLookupQuery("show interface status\nGi1/0/24 notconnect 30"), "", "multi-line output hides command suggestions");
 assert(JSON.parse(await fs.readFile(path.join(root, "data", "labs", "lessons", "foundation.json"), "utf8")).lessons.length === 6, "six foundation lessons available");
+assert(JSON.parse(await fs.readFile(path.join(root, "data", "labs", "lessons", "foundation_extended.json"), "utf8")).lessons.length === 4, "four extended foundation lessons available");
 assert(JSON.parse(await fs.readFile(path.join(root, "data", "labs", "lessons", "configuration.json"), "utf8")).lessons[0].commands.length > 5, "configuration lesson has simulated command sequence");
+assert(JSON.parse(await fs.readFile(path.join(root, "data", "labs", "lessons", "configuration_extended.json"), "utf8")).lessons.length === 8, "eight extended configuration lessons available");
 
 const adminExplainReport = engine.diagnose("ipconfig /renew", "auto");
 assertEqual(adminExplainReport.mode, "Explanation Mode", "admin command explanation mode");
@@ -249,3 +258,4 @@ function assert(condition, message) {
 function assertEqual(actual, expected, message) {
   assert(actual === expected, `${message} expected "${expected}", got "${actual}"`);
 }
+
