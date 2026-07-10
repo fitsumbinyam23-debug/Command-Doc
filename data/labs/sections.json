@@ -1,0 +1,15 @@
+{
+  "sections": [
+    {"id":"first-checks","stage":"foundation","title":"Network Basics / First Checks","description":"Start with safe checks and understand what the device is telling you.","difficulty":"Beginner","lesson_ids":["cisco-interface-status"]},
+    {"id":"interfaces","stage":"foundation","title":"Interface / Port Troubleshooting","description":"Read port state, errors, and link health.","difficulty":"Beginner","lesson_ids":["cisco-interface-status"]},
+    {"id":"vlan","stage":"foundation","title":"VLAN / Access Port Understanding","description":"Understand VLAN membership and access-port output.","difficulty":"Beginner","lesson_ids":["cisco-vlan-brief"]},
+    {"id":"mac","stage":"foundation","title":"MAC Address / Device Detection","description":"Find where an endpoint is learned.","difficulty":"Beginner","lesson_ids":["cisco-mac-table"]},
+    {"id":"ip-arp","stage":"foundation","title":"IP / ARP / Gateway","description":"Connect IP addressing, ARP, and the default gateway.","difficulty":"Intermediate","lesson_ids":[]},
+    {"id":"neighbors","stage":"foundation","title":"Neighbor Discovery / CDP / LLDP","description":"Learn how switches discover connected neighbors.","difficulty":"Intermediate","lesson_ids":[]},
+    {"id":"windows","stage":"foundation","title":"Windows Network Troubleshooting","description":"Read Windows adapter, address, gateway, and DNS output.","difficulty":"Beginner","lesson_ids":["windows-ipconfig"]},
+    {"id":"linux","stage":"foundation","title":"Linux Network Troubleshooting","description":"Read Linux interface and route state safely.","difficulty":"Intermediate","lesson_ids":[]},
+    {"id":"stack","stage":"foundation","title":"Stack / IRF / VSF Basics","description":"Check stack members and redundancy links.","difficulty":"Intermediate","lesson_ids":["hp-irf","hp-irf-topology"]},
+    {"id":"safety","stage":"foundation","title":"Dangerous Commands / Safety","description":"Recognize commands that can interrupt service or erase data.","difficulty":"Beginner","lesson_ids":[]},
+    {"id":"configuration-core","stage":"configuration","title":"Configuration Practice","description":"Make a simulated access-port change, verify it, and roll it back.","difficulty":"Intermediate","lesson_ids":["cisco-configure-access-port"]}
+  ]
+}

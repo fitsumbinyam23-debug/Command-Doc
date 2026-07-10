@@ -19,6 +19,17 @@ const FLOW_FILES = [
   "data/flows/gateway_troubleshooting.json"
 ];
 
+const LAB_FILES = {
+  stages: "data/labs/stages.json",
+  sections: "data/labs/sections.json",
+  foundationLessons: "data/labs/lessons/foundation.json",
+  configurationLessons: "data/labs/lessons/configuration.json",
+  quizzes: "data/labs/quizzes/lesson-quizzes.json",
+  scenarios: "data/labs/scenarios/scenarios.json"
+};
+
+const LAB_PROGRESS_KEY = "commandDoctorLabProgress";
+
 const VENDOR_LABELS = {
   cisco_ios: "Cisco IOS",
   hp_comware: "HP Comware",
@@ -319,7 +330,22 @@ const state = {
   sources: null,
   history: [],
   currentReport: null,
-  lookupSource: "search"
+  lookupSource: "search",
+  lab: {
+    stages: [],
+    sections: [],
+    lessons: [],
+    quizzes: {},
+    foundationFinalQuiz: [],
+    scenarios: [],
+    progress: null,
+    screen: "dashboard",
+    activeLessonId: "",
+    practiceInput: "",
+    practicePassed: false,
+    quizSelection: null,
+    scenarioScore: 0
+  }
 };
 
 const els = {};
@@ -333,6 +359,7 @@ async function init() {
   await loadKnowledge();
   renderKnowledge();
   renderHistory();
+  renderLab();
   registerServiceWorker();
 }
 
@@ -372,6 +399,7 @@ function cacheElements() {
     "historyList",
     "clearHistoryBtn",
     "knowledgeGrid",
+    "labRoot",
     "toast"
   ]) {
     els[id] = document.getElementById(id);
@@ -451,6 +479,22 @@ async function loadKnowledge() {
   state.flows = flowResults
     .filter((result) => result.status === "fulfilled")
     .map((result) => result.value);
+
+  const labResults = await Promise.allSettled(Object.values(LAB_FILES).map(loadJson));
+  const labData = Object.fromEntries(Object.keys(LAB_FILES).map((key, index) => [
+    key,
+    labResults[index]?.status === "fulfilled" ? labResults[index].value : null
+  ]));
+  state.lab.stages = labData.stages?.stages || [];
+  state.lab.sections = labData.sections?.sections || [];
+  state.lab.lessons = [
+    ...(labData.foundationLessons?.lessons || []),
+    ...(labData.configurationLessons?.lessons || [])
+  ];
+  state.lab.quizzes = labData.quizzes?.quizzes || {};
+  state.lab.foundationFinalQuiz = labData.quizzes?.foundation_final || [];
+  state.lab.scenarios = labData.scenarios?.scenarios || [];
+  state.lab.progress = loadLabProgress();
 
   const version = state.sources?.knowledge_base_version || loadedFiles[0]?.version || "local";
   els.kbVersion.textContent = commands.length ? `KB ${version}` : "KB unavailable";
@@ -2321,9 +2365,352 @@ function formatSuggestionsForReport(suggestions) {
     : "-";
 }
 
+function defaultLabProgress() {
+  return {
+    completedLessons: {},
+    lessonScores: {},
+    sectionTests: {},
+    foundationFinalScore: null,
+    configurationCompleted: false,
+    scenarioScores: {},
+    lastLessonId: ""
+  };
+}
+
+function loadLabProgress() {
+  try {
+    return { ...defaultLabProgress(), ...(JSON.parse(localStorage.getItem(LAB_PROGRESS_KEY) || "{}")) };
+  } catch {
+    return defaultLabProgress();
+  }
+}
+
+function saveLabProgress() {
+  localStorage.setItem(LAB_PROGRESS_KEY, JSON.stringify(state.lab.progress));
+}
+
+function labFoundationLessons() {
+  return state.lab.lessons.filter((lesson) => lesson.section_id !== "configuration-core");
+}
+
+function labConfigurationUnlocked() {
+  return Number(state.lab.progress.foundationFinalScore) >= 80;
+}
+
+function labFoundationComplete() {
+  const lessons = labFoundationLessons();
+  return lessons.length > 0 && lessons.every((lesson) => state.lab.progress.completedLessons[lesson.id]);
+}
+
+function labStageUnlocked(stageId) {
+  if (stageId === "foundation") return true;
+  if (stageId === "configuration") return labConfigurationUnlocked();
+  return labConfigurationUnlocked() && state.lab.progress.configurationCompleted;
+}
+
+function labProgressPercent(lessons) {
+  if (!lessons.length) return 0;
+  const complete = lessons.filter((lesson) => state.lab.progress.completedLessons[lesson.id]).length;
+  return Math.round((complete / lessons.length) * 100);
+}
+
+function labCreate(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+
+function labButton(label, className, action) {
+  const button = labCreate("button", className || "secondary", label);
+  button.type = "button";
+  button.addEventListener("click", action);
+  return button;
+}
+
+function renderLab() {
+  if (!els.labRoot || !state.lab.progress) return;
+  els.labRoot.replaceChildren();
+  if (state.lab.screen === "lesson") {
+    renderLabLesson();
+    return;
+  }
+  if (state.lab.screen === "final-quiz") {
+    renderLabFinalQuiz();
+    return;
+  }
+  if (state.lab.screen === "scenario") {
+    renderLabScenario();
+    return;
+  }
+  renderLabDashboard();
+}
+
+function renderLabDashboard() {
+  const intro = labCreate("div", "lab-banner");
+  intro.append(
+    labCreate("strong", "lab-banner-title", "100% simulated practice"),
+    labCreate("span", "lab-banner-copy", "Nothing in Lab Mode runs on a real device. Type commands, read evidence, and learn the safe next step.")
+  );
+  els.labRoot.append(intro);
+
+  const stages = labCreate("div", "lab-stage-grid");
+  state.lab.stages.forEach((stage) => {
+    const unlocked = labStageUnlocked(stage.id);
+    const card = labCreate("article", `lab-stage-card ${unlocked ? "" : "is-locked"}`);
+    const status = unlocked ? (stage.id === "foundation" ? "Available" : "Unlocked") : "Locked";
+    card.append(labCreate("span", `lab-status ${unlocked ? "available" : "locked"}`, status));
+    card.append(labCreate("h3", "", stage.title));
+    card.append(labCreate("p", "", stage.description));
+    if (stage.id === "foundation") {
+      card.append(labCreate("div", "lab-stage-metric", `${labProgressPercent(labFoundationLessons())}% complete`));
+    } else if (stage.id === "configuration") {
+      card.append(labCreate("div", "lab-stage-metric", labConfigurationUnlocked() ? "Ready for simulated configuration" : "Pass the Foundation final quiz"));
+    } else {
+      card.append(labCreate("div", "lab-stage-metric", state.lab.progress.configurationCompleted ? "Ready for final scenarios" : "Complete Configuration Lab"));
+    }
+    if (unlocked) {
+      card.append(labButton(stage.id === "scenarios" ? "Open scenarios" : "Open stage", "secondary", () => openLabStage(stage.id)));
+    } else {
+      card.append(labCreate("span", "lab-lock-note", "Complete the previous stage to unlock"));
+    }
+    stages.append(card);
+  });
+  els.labRoot.append(stages);
+
+  const foundationHeading = labCreate("div", "lab-section-heading");
+  foundationHeading.append(labCreate("h3", "", "Basic Foundation"), labCreate("p", "", "Check first. Understand the evidence. Build safe troubleshooting habits."));
+  els.labRoot.append(foundationHeading);
+  const sectionGrid = labCreate("div", "lab-section-grid");
+  state.lab.sections.filter((section) => section.stage === "foundation").forEach((section) => sectionGrid.append(renderLabSectionCard(section)));
+  els.labRoot.append(sectionGrid);
+
+  const finalQuiz = labCreate("article", "lab-final-card");
+  finalQuiz.append(labCreate("div", "lab-card-kicker", "Foundation checkpoint"));
+  finalQuiz.append(labCreate("h3", "", "Stage 1 Final Quiz"));
+  finalQuiz.append(labCreate("p", "", labFoundationComplete() ? "All sample foundation lessons are complete. Pass with 80% to unlock Configuration Lab." : "Complete the available foundation lessons before taking the final quiz."));
+  if (state.lab.progress.foundationFinalScore !== null) {
+    finalQuiz.append(labCreate("strong", "lab-score", `Last score: ${state.lab.progress.foundationFinalScore}%`));
+  }
+  const quizButton = labButton(labFoundationComplete() ? "Take final quiz" : "Locked until lessons are complete", labFoundationComplete() ? "primary" : "secondary", () => {
+    if (labFoundationComplete()) { state.lab.screen = "final-quiz"; renderLab(); }
+  });
+  quizButton.disabled = !labFoundationComplete();
+  finalQuiz.append(quizButton);
+  els.labRoot.append(finalQuiz);
+
+  if (labConfigurationUnlocked()) {
+    const configHeading = labCreate("div", "lab-section-heading");
+    configHeading.append(labCreate("h3", "", "Configuration Lab"), labCreate("p", "", "Practice a controlled simulated change, verify it, and learn the rollback."));
+    els.labRoot.append(configHeading);
+    const configGrid = labCreate("div", "lab-section-grid");
+    state.lab.sections.filter((section) => section.stage === "configuration").forEach((section) => configGrid.append(renderLabSectionCard(section)));
+    els.labRoot.append(configGrid);
+    const config = labCreate("article", "lab-unlock-card");
+    config.append(labCreate("strong", "", "Configuration Lab unlocked. You are now ready to practice simulated configuration."));
+    config.append(labButton("Open Configuration Lab", "secondary", () => openLabStage("configuration")));
+    els.labRoot.append(config);
+  }
+}
+
+function renderLabSectionCard(section) {
+  const lessons = section.lesson_ids.map((id) => state.lab.lessons.find((lesson) => lesson.id === id)).filter(Boolean);
+  const percent = labProgressPercent(lessons);
+  const card = labCreate("article", "lab-section-card");
+  card.append(labCreate("h4", "", section.title));
+  card.append(labCreate("p", "", section.description));
+  const meta = labCreate("div", "lab-section-meta", `${section.difficulty} | ${lessons.length} lesson${lessons.length === 1 ? "" : "s"} | ${percent}%`);
+  card.append(meta);
+  const bar = labCreate("div", "lab-progress-track");
+  const fill = labCreate("span", "lab-progress-fill");
+  fill.style.width = `${percent}%`;
+  bar.append(fill);
+  card.append(bar);
+  if (!lessons.length) {
+    card.append(labCreate("span", "lab-coming-soon", "More lessons coming soon"));
+  } else {
+    lessons.forEach((lesson) => card.append(labButton(state.lab.progress.completedLessons[lesson.id] ? `Review ${lesson.title}` : `Start ${lesson.title}`, "secondary lab-lesson-button", () => openLabLesson(lesson.id))));
+  }
+  return card;
+}
+
+function openLabStage(stageId) {
+  if (!labStageUnlocked(stageId)) return;
+  if (stageId === "scenarios") {
+    state.lab.screen = "scenario";
+    state.lab.activeLessonId = state.lab.scenarios[0]?.id || "";
+  } else {
+    state.lab.screen = "dashboard";
+  }
+  renderLab();
+}
+
+function openLabLesson(lessonId) {
+  const lesson = state.lab.lessons.find((item) => item.id === lessonId);
+  if (!lesson || (lesson.section_id === "configuration-core" && !labConfigurationUnlocked())) {
+    showToast("Complete the Foundation final quiz first.");
+    return;
+  }
+  state.lab.screen = "lesson";
+  state.lab.activeLessonId = lessonId;
+  state.lab.practiceInput = "";
+  state.lab.practicePassed = false;
+  state.lab.quizSelection = null;
+  state.lab.progress.lastLessonId = lessonId;
+  saveLabProgress();
+  renderLab();
+}
+
+function renderLabLesson() {
+  const lesson = state.lab.lessons.find((item) => item.id === state.lab.activeLessonId);
+  if (!lesson) { state.lab.screen = "dashboard"; renderLab(); return; }
+  els.labRoot.append(labButton("Back to Lab Dashboard", "secondary lab-back-button", () => { state.lab.screen = "dashboard"; renderLab(); }));
+  const header = labCreate("div", "lab-lesson-header");
+  header.append(labCreate("div", "lab-card-kicker", `${lesson.vendor} | ${lesson.difficulty}`));
+  header.append(labCreate("h3", "", lesson.title));
+  header.append(labCreate("code", "lab-command", lesson.command));
+  els.labRoot.append(header);
+  const details = labCreate("div", "lab-detail-grid");
+  [["Meaning", lesson.meaning], ["When to use it", lesson.when_to_use], ["Good output", lesson.good_output], ["Bad output", lesson.bad_output], ["Common mistakes", lesson.common_mistakes], ["Next related commands", lesson.next_commands], ["Practice task", lesson.practice_task], ["Final summary", lesson.final_summary]].forEach(([label, value]) => {
+    const field = labCreate("section", "lab-detail-field");
+    field.append(labCreate("strong", "", label));
+    if (Array.isArray(value)) {
+      const list = labCreate("ul");
+      value.forEach((item) => list.append(labCreate("li", "", item)));
+      field.append(list);
+    } else field.append(labCreate("p", "", value));
+    details.append(field);
+  });
+  els.labRoot.append(details);
+
+  const practice = labCreate("section", "lab-practice-panel");
+  practice.append(labCreate("div", "lab-card-kicker", "Practice terminal"));
+  practice.append(labCreate("p", "", "Type the command from the lesson. This terminal is simulated and does not execute anything."));
+  const terminal = labCreate("div", "lab-terminal");
+  terminal.append(labCreate("div", "lab-terminal-line", "simulated-switch#"));
+  const input = document.createElement("input");
+  input.className = "lab-terminal-input";
+  input.value = state.lab.practiceInput;
+  input.placeholder = "Type the command here";
+  input.setAttribute("aria-label", "Lab command input");
+  input.addEventListener("input", () => { state.lab.practiceInput = input.value; });
+  terminal.append(input);
+  practice.append(terminal);
+  practice.append(labButton("Check simulated command", "primary", () => checkLabPractice(lesson)));
+  if (state.lab.practicePassed) {
+    practice.append(labCreate("pre", "lab-output", lesson.practice_output));
+    practice.append(labCreate("p", "lab-success", "Correct. The simulated output is ready for interpretation."));
+    renderLabLessonQuiz(practice, lesson);
+  }
+  els.labRoot.append(practice);
+}
+
+function checkLabPractice(lesson) {
+  const entered = state.lab.practiceInput.trim().toLowerCase().replace(/\\s+/g, " ");
+  const accepted = lesson.accepted_commands.some((command) => command.toLowerCase().replace(/\\s+/g, " ") === entered);
+  const dangerous = isLabDangerous(entered);
+  if (dangerous) {
+    showToast("Safety stop: that command is not allowed in Lab Mode.");
+    state.lab.practicePassed = false;
+    renderLab();
+    return;
+  }
+  if (!accepted) {
+    showToast(lesson.hint);
+    return;
+  }
+  state.lab.practicePassed = true;
+  renderLab();
+}
+
+function isLabDangerous(command) {
+  return /(?:write erase|erase startup-config|delete flash:|format(?:\\s|$)|reload|reboot|reset saved-configuration|shutdown|undo shutdown|default interface|no switchport|factory reset)/i.test(command);
+}
+
+function renderLabLessonQuiz(parent, lesson) {
+  const question = state.lab.quizzes[lesson.id]?.[0];
+  if (!question) return;
+  const quiz = labCreate("div", "lab-quiz");
+  quiz.append(labCreate("strong", "", "Memory check"));
+  quiz.append(labCreate("p", "", question.question));
+  const options = labCreate("div", "lab-options");
+  question.options.forEach((option, index) => options.append(labButton(option, `secondary ${state.lab.quizSelection === index ? "is-selected" : ""}`, () => finishLabLesson(lesson, index === question.answer, question.explanation))));
+  quiz.append(options);
+  parent.append(quiz);
+}
+
+function finishLabLesson(lesson, correct, explanation) {
+  const score = correct ? 100 : 0;
+  state.lab.progress.lessonScores[lesson.id] = score;
+  state.lab.quizSelection = correct ? 0 : -1;
+  if (correct) state.lab.progress.completedLessons[lesson.id] = true;
+  if (correct && lesson.section_id === "configuration-core") state.lab.progress.configurationCompleted = true;
+  saveLabProgress();
+  showToast(correct ? `Lesson complete. ${explanation}` : `Not quite. ${explanation}`);
+  renderLab();
+}
+
+function renderLabFinalQuiz() {
+  els.labRoot.append(labButton("Back to Lab Dashboard", "secondary lab-back-button", () => { state.lab.screen = "dashboard"; renderLab(); }));
+  const panel = labCreate("section", "lab-quiz-panel");
+  panel.append(labCreate("div", "lab-card-kicker", "Stage 1 checkpoint"));
+  panel.append(labCreate("h3", "", "Basic Foundation Final Quiz"));
+  panel.append(labCreate("p", "", "Pass with 80% or higher to unlock the simulated Configuration Lab."));
+  let score = 0;
+  state.lab.foundationFinalQuiz.forEach((question, index) => {
+    const block = labCreate("fieldset", "lab-final-question");
+    block.append(labCreate("legend", "", `${index + 1}. ${question.question}`));
+    question.options.forEach((option, optionIndex) => {
+      const label = labCreate("label", "lab-radio");
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = `lab-final-${index}`;
+      input.value = optionIndex;
+      input.addEventListener("change", () => { block.dataset.answer = optionIndex; });
+      label.append(input, labCreate("span", "", option));
+      block.append(label);
+    });
+    panel.append(block);
+  });
+  panel.append(labButton("Submit final quiz", "primary", () => {
+    panel.querySelectorAll("fieldset").forEach((block, index) => { if (Number(block.dataset.answer) === state.lab.foundationFinalQuiz[index].answer) score += 20; });
+    state.lab.progress.foundationFinalScore = score;
+    saveLabProgress();
+    showToast(score >= 80 ? "Configuration Lab unlocked." : "Review the lessons and try the final quiz again.");
+    state.lab.screen = "dashboard";
+    renderLab();
+  }));
+  els.labRoot.append(panel);
+}
+
+function renderLabScenario() {
+  const scenario = state.lab.scenarios.find((item) => item.id === state.lab.activeLessonId) || state.lab.scenarios[0];
+  if (!scenario) return;
+  els.labRoot.append(labButton("Back to Lab Dashboard", "secondary lab-back-button", () => { state.lab.screen = "dashboard"; renderLab(); }));
+  const panel = labCreate("section", "lab-scenario-panel");
+  panel.append(labCreate("div", "lab-card-kicker", `Final Scenario | ${scenario.difficulty}`));
+  panel.append(labCreate("h3", "", scenario.title));
+  panel.append(labCreate("p", "", scenario.description));
+  panel.append(labCreate("strong", "lab-scenario-label", "Simulated evidence"));
+  panel.append(labCreate("pre", "lab-output", `${scenario.check_command}\n\n${scenario.evidence}`));
+  [["Interpretation", scenario.interpretation], ["Recommended next step", scenario.next_step], ["Safety", scenario.safety], ["Ticket summary", scenario.ticket_summary]].forEach(([label, value]) => {
+    const field = labCreate("div", "lab-scenario-field");
+    field.append(labCreate("strong", "", label), labCreate("p", "", value));
+    panel.append(field);
+  });
+  const select = document.createElement("select");
+  select.className = "lab-scenario-select";
+  state.lab.scenarios.forEach((item) => { const option = document.createElement("option"); option.value = item.id; option.textContent = item.title; select.append(option); });
+  select.value = scenario.id;
+  select.addEventListener("change", () => { state.lab.activeLessonId = select.value; renderLab(); });
+  panel.append(select);
+  els.labRoot.append(panel);
+}
+
 function switchView(viewName) {
   els.navTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === viewName));
   els.views.forEach((view) => view.classList.toggle("active", view.id === `${viewName}View`));
+  if (viewName === "lab") renderLab();
 }
 
 function clearInput() {

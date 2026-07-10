@@ -1,0 +1,18 @@
+{
+  "quizzes": {
+    "cisco-interface-status":[{"question":"Which output is a warning for an expected endpoint?","options":["connected","notconnect","active"],"answer":1,"explanation":"notconnect means the port is not detecting a connected endpoint."}],
+    "cisco-mac-table":[{"question":"What does a dynamic MAC entry tell you?","options":["A MAC was learned on a port","The port is configured as a trunk","The device rebooted"],"answer":0,"explanation":"A dynamic entry maps a learned MAC to a VLAN and interface."}],
+    "cisco-vlan-brief":[{"question":"What should you confirm before changing a port VLAN?","options":["The correct port and approved VLAN","The device serial number only","The clock timezone only"],"answer":0,"explanation":"Confirm scope and approval before making a change."}],
+    "hp-irf":[{"question":"What does display irf primarily show?","options":["IRF member roles and presence","Windows DNS servers","VLAN access ports"],"answer":0,"explanation":"It identifies members, roles, priorities, and state."}],
+    "hp-irf-topology":[{"question":"What indicates healthy IRF redundancy?","options":["Expected links are UP","One member is missing","A link is DOWN"],"answer":0,"explanation":"Healthy topology has the expected links up."}],
+    "windows-ipconfig":[{"question":"What does a 169.254.x.x address usually indicate?","options":["APIPA after DHCP failure","A healthy routed address","A DNS record"],"answer":0,"explanation":"APIPA commonly indicates the host did not obtain a DHCP lease."}],
+    "cisco-configure-access-port":[{"question":"What must happen before this simulated configuration?","options":["Confirm port, VLAN, approval, and rollback","Run reload immediately","Erase the startup configuration"],"answer":0,"explanation":"Scope, approval, backup, and rollback are required before configuration."}]
+  },
+  "foundation_final":[
+    {"question":"Which command checks a Cisco port summary?","options":["show interface status","write erase","reload"],"answer":0},
+    {"question":"What does a 169.254.x.x Windows address suggest?","options":["DHCP or local addressing problem","Healthy gateway","IRF split"],"answer":0},
+    {"question":"Which Comware command checks IRF connections?","options":["display irf topology","display vlan","ipconfig /all"],"answer":0},
+    {"question":"What is the safe first response to an unknown command?","options":["Ask for full output or verify the vendor","Run it on production","Guess the diagnosis"],"answer":0},
+    {"question":"Which action is dangerous in a real device?","options":["reload","show vlan brief","display irf"],"answer":0}
+  ]
+}

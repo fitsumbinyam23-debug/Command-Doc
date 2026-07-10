@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Command Doctor</title>
-    <link rel="stylesheet" href="styles.css?v=2026.07-mvp.21">
+    <link rel="stylesheet" href="styles.css?v=2026.07-lab.1">
   </head>
   <body>
     <div class="app-shell">
@@ -19,6 +19,7 @@
 
         <nav class="nav-tabs" aria-label="Views">
           <button class="nav-tab active" type="button" data-view="diagnose">Diagnose</button>
+          <button class="nav-tab" type="button" data-view="lab">Lab Mode</button>
           <button class="nav-tab" type="button" data-view="history">History</button>
           <button class="nav-tab" type="button" data-view="knowledge">Knowledge</button>
         </nav>
@@ -112,6 +113,17 @@
           </section>
         </section>
 
+        <section class="view" id="labView" aria-labelledby="labTitle">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Offline Simulated Training</p>
+              <h2 id="labTitle">Lab Mode</h2>
+              <p class="page-intro">Learn to check, understand, troubleshoot, configure, verify, and explain commands without touching a real device.</p>
+            </div>
+          </div>
+          <div id="labRoot" class="lab-root" aria-live="polite"></div>
+        </section>
+
         <section class="view" id="historyView" aria-labelledby="historyTitle">
           <div class="page-heading">
             <div>
@@ -136,6 +148,6 @@
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="src/app.js?v=2026.07-mvp.21" defer></script>
+    <script src="src/app.js?v=2026.07-lab.1" defer></script>
   </body>
 </html>

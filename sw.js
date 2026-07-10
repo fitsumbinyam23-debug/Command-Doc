@@ -1,11 +1,11 @@
 "use strict";
 
-const CACHE_NAME = "command-doctor-2026-07-mvp-21";
+const CACHE_NAME = "command-doctor-2026-07-lab-1";
 const OFFLINE_ASSETS = [
   "./",
   "./index.html",
-  "./styles.css?v=2026.07-mvp.21",
-  "./src/app.js?v=2026.07-mvp.21",
+  "./styles.css?v=2026.07-lab.1",
+  "./src/app.js?v=2026.07-lab.1",
   "./data/commands/admin_commands.json",
   "./data/commands/aruba_cx.json",
   "./data/commands/cisco_ios.json",
@@ -14,6 +14,12 @@ const OFFLINE_ASSETS = [
   "./data/commands/windows_cmd.json",
   "./data/commands/platform_commands.json",
   "./data/commands/network_commands_extended.json",
+  "./data/labs/stages.json",
+  "./data/labs/sections.json",
+  "./data/labs/lessons/foundation.json",
+  "./data/labs/lessons/configuration.json",
+  "./data/labs/quizzes/lesson-quizzes.json",
+  "./data/labs/scenarios/scenarios.json",
   "./data/flows/dns_troubleshooting.json",
   "./data/flows/gateway_troubleshooting.json",
   "./data/flows/interface_troubleshooting.json",

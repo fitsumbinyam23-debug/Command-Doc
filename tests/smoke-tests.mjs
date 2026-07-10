@@ -41,6 +41,20 @@ const commandFiles = [
   "network_commands_extended.json"
 ];
 
+const labFiles = [
+  ["stages.json", "stages"],
+  ["sections.json", "sections"],
+  ["lessons/foundation.json", "lessons"],
+  ["lessons/configuration.json", "lessons"],
+  ["quizzes/lesson-quizzes.json", "quizzes"],
+  ["scenarios/scenarios.json", "scenarios"]
+];
+
+for (const [fileName, key] of labFiles) {
+  const lab = JSON.parse(await fs.readFile(path.join(root, "data", "labs", fileName), "utf8"));
+  assert(lab[key] || (key === "quizzes" && lab.foundation_final), `Lab ${fileName} loads`);
+}
+
 engine.state.commands = [];
 for (const fileName of commandFiles) {
   const file = JSON.parse(
@@ -211,6 +225,8 @@ assertEqual(engine.findCommandLookupMatches("netsh wlan show interfaces", 1)[0]?
 assertEqual(engine.findCommandLookupMatches("ss -tulpn", 1)[0]?.command, "ss -tulpn", "Linux listening sockets command");
 assertEqual(engine.getPastedLookupQuery("Gi1/0/24 notconnect 30"), "", "single output row is not treated as a command");
 assertEqual(engine.getPastedLookupQuery("show interface status\nGi1/0/24 notconnect 30"), "", "multi-line output hides command suggestions");
+assert(JSON.parse(await fs.readFile(path.join(root, "data", "labs", "lessons", "foundation.json"), "utf8")).lessons.length === 6, "six foundation lessons available");
+assert(JSON.parse(await fs.readFile(path.join(root, "data", "labs", "lessons", "configuration.json"), "utf8")).lessons[0].commands.length > 5, "configuration lesson has simulated command sequence");
 
 const adminExplainReport = engine.diagnose("ipconfig /renew", "auto");
 assertEqual(adminExplainReport.mode, "Explanation Mode", "admin command explanation mode");
