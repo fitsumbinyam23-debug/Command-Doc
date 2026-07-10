@@ -119,6 +119,33 @@ button:disabled {
   color: #ffffff;
 }
 
+.admin-root {
+  display: grid;
+  gap: 16px;
+  max-width: 880px;
+}
+
+.admin-panel {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.admin-panel > p { margin: 0; }
+
+.admin-metric { font-weight: 700; color: var(--ink); }
+
+.admin-vendor-list {
+  margin: 0;
+  padding-left: 20px;
+  columns: 2;
+}
+
+.lab-trainer-button { justify-self: start; }
+
 .status-stack {
   margin-top: auto;
   display: flex;
@@ -1231,4 +1258,3 @@ input {
     min-height: 220px;
   }
 }
-
