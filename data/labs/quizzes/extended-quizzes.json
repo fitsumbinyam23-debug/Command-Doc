@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 2.8 seconds
+Output:
 {
   "quizzes": {
     "cisco-ip-interface-brief":[{"question":"What is the healthy routed-interface state?","options":["up/up","down/down","administratively down"],"answer":0,"explanation":"Up/up means the interface and protocol are both operational."}],
