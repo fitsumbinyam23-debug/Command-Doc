@@ -407,6 +407,7 @@ function cacheElements() {
     "historyList",
     "clearHistoryBtn",
     "knowledgeGrid",
+    "adminRoot",
     "labRoot",
     "toast"
   ]) {
@@ -505,6 +506,7 @@ async function loadKnowledge() {
   state.lab.foundationFinalQuiz = labData.quizzes?.foundation_final || [];
   state.lab.scenarios = labData.scenarios?.scenarios || [];
   state.lab.progress = loadLabProgress();
+  migrateLabProgress();
 
   const version = state.sources?.knowledge_base_version || loadedFiles[0]?.version || "local";
   els.kbVersion.textContent = commands.length ? `KB ${version}` : "KB unavailable";
@@ -2387,6 +2389,15 @@ function defaultLabProgress() {
   };
 }
 
+function migrateLabProgress() {
+  if (Number(state.lab.progress.foundationFinalScore) < 80) return;
+  labFoundationLessons().forEach((lesson) => {
+    state.lab.progress.completedLessons[lesson.id] = true;
+    state.lab.progress.lessonScores[lesson.id] ||= 100;
+  });
+  saveLabProgress();
+}
+
 function loadLabProgress() {
   try {
     return { ...defaultLabProgress(), ...(JSON.parse(localStorage.getItem(LAB_PROGRESS_KEY) || "{}")) };
@@ -2463,6 +2474,8 @@ function renderLabDashboard() {
     labCreate("span", "lab-banner-copy", "Nothing in Lab Mode runs on a real device. Type commands, read evidence, and learn the safe next step.")
   );
   els.labRoot.append(intro);
+
+  els.labRoot.append(labButton("Open Trainer Controls", "secondary lab-trainer-button", () => switchView("admin")));
 
   const stages = labCreate("div", "lab-stage-grid");
   state.lab.stages.forEach((stage) => {
@@ -2756,6 +2769,50 @@ function switchView(viewName) {
   els.navTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === viewName));
   els.views.forEach((view) => view.classList.toggle("active", view.id === `${viewName}View`));
   if (viewName === "lab") renderLab();
+  if (viewName === "admin") renderAdmin();
+}
+
+function renderAdmin() {
+  if (!els.adminRoot) return;
+  els.adminRoot.replaceChildren();
+  const panel = labCreate("section", "admin-panel");
+  panel.append(labCreate("strong", "lab-card-kicker", "Course administration"));
+  panel.append(labCreate("p", "", "These controls affect only this browser. They never connect to, configure, or run commands on a device."));
+  const lessonCount = state.lab.lessons.length;
+  const completed = Object.keys(state.lab.progress?.completedLessons || {}).length;
+  panel.append(labCreate("p", "admin-metric", `${completed} of ${lessonCount} lessons marked complete`));
+  panel.append(labButton("Unlock All Lab Content", "primary", () => {
+    state.lab.lessons.forEach((lesson) => {
+      state.lab.progress.completedLessons[lesson.id] = true;
+      state.lab.progress.lessonScores[lesson.id] = 100;
+    });
+    state.lab.progress.foundationFinalScore = 100;
+    state.lab.progress.configurationCompleted = true;
+    saveLabProgress();
+    renderAdmin();
+    showToast("All simulated Lab Mode content is unlocked on this browser.");
+  }));
+  panel.append(labButton("Reset Lab Progress", "secondary", () => {
+    state.lab.progress = defaultLabProgress();
+    saveLabProgress();
+    renderAdmin();
+    showToast("Local Lab Mode progress was reset.");
+  }));
+  panel.append(labButton("Open Command Catalog", "secondary", () => switchView("knowledge")));
+  els.adminRoot.append(panel);
+
+  const catalog = labCreate("section", "admin-panel");
+  catalog.append(labCreate("strong", "lab-card-kicker", "Offline command coverage"));
+  const vendorCounts = state.commands.reduce((counts, command) => {
+    const label = command.vendor_label || command.vendor || "Other";
+    counts[label] = (counts[label] || 0) + 1;
+    return counts;
+  }, {});
+  catalog.append(labCreate("p", "admin-metric", `${state.commands.length} practical commands loaded locally`));
+  const list = labCreate("ul", "admin-vendor-list");
+  Object.entries(vendorCounts).sort(([a], [b]) => a.localeCompare(b)).forEach(([vendor, count]) => list.append(labCreate("li", "", `${vendor}: ${count}`)));
+  catalog.append(list);
+  els.adminRoot.append(catalog);
 }
 
 function clearInput() {
