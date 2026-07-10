@@ -1,3 +1,6 @@
+Exit code: 0
+Wall time: 2.8 seconds
+Output:
 {
   "sections": [
     {"id":"first-checks","stage":"foundation","title":"Network Basics / First Checks","description":"Start with safe checks and understand what the device is telling you.","difficulty":"Beginner","lesson_ids":["cisco-interface-status"]},
