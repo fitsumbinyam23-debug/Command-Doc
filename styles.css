@@ -423,6 +423,16 @@ button:disabled {
   font-weight: 800;
 }
 
+.lab-lesson-complete {
+  margin: 0;
+  color: #14745d;
+  font-weight: 800;
+}
+
+.lab-next-button {
+  width: fit-content;
+}
+
 .lab-quiz {
   display: grid;
   gap: 10px;
@@ -462,7 +472,35 @@ button:disabled {
   display: flex;
   gap: 8px;
   align-items: center;
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #ffffff;
   color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.lab-radio:hover {
+  border-color: #8ebdb6;
+  background: #f3fbf9;
+}
+
+.lab-radio input[type="radio"] {
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
+  min-height: 18px;
+  margin: 0;
+  flex: 0 0 18px;
+  accent-color: var(--accent);
+}
+
+.lab-radio span {
+  flex: 1;
+  line-height: 1.35;
 }
 
 .lab-scenario-select {
@@ -1193,3 +1231,4 @@ input {
     min-height: 220px;
   }
 }
+
