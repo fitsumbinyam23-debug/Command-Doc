@@ -112,7 +112,7 @@
       "detection_patterns": ["display\\s+diagnostic-information", "diagnostic information"],
       "diagnosis_rules": [],
       "next_commands": [{"command": "display logbuffer", "why": "Focuses the broad collection on recent events.", "meaning": "Shows recent Comware logs.", "look_for_good": ["No repeated critical faults"], "look_for_bad": ["IRF, interface, or hardware errors"], "risk": "Safe read-only command"}],
-      "safety_level": "Low - read-only, but output can be large and may contain configuration details.",
+      "safety_level": "Medium - output can be large and the device may prompt to save a diagnostic file; review the prompt before continuing.",
       "learning_note": "Use this for evidence collection; use focused display commands for quicker troubleshooting."
     },
     {
