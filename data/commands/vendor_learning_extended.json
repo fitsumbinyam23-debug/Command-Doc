@@ -1,6 +1,3 @@
-Exit code: 0
-Wall time: 2.9 seconds
-Output:
 {
   "knowledge_base_version": "2026.07-learning-extended",
   "vendor": "Multi-vendor learning",
@@ -26,4 +23,3 @@ Output:
     {"id":"linux_resolvectl_status","vendor_key":"linux","vendor_label":"Linux","command":"resolvectl status","category":"dns","meaning":"Shows DNS resolver state, servers, and per-link DNS configuration on systemd-resolved systems.","use_for":["Check endpoint DNS settings","Investigate name-resolution problems"],"good_output":["Expected DNS servers and search domains"],"bad_output":["Missing servers","Unexpected DNS source"],"normal_patterns":["DNS Servers"],"warning_patterns":[],"critical_patterns":[],"detection_patterns":["resolvectl\\s+status","DNS Servers"],"diagnosis_rules":[],"next_commands":[{"command":"dig <name>","why":"Tests resolution against the configured resolver.","meaning":"Queries DNS for a record.","look_for_good":["Expected answer section"],"look_for_bad":["Timeout or SERVFAIL"],"risk":"Safe read-only command"}],"safety_level":"Safe read-only command","learning_note":"This applies only where systemd-resolved and resolvectl are installed.","source_note":"Linux distribution tools vary; some systems use resolv.conf or different resolvers."}
   ]
 }
-
