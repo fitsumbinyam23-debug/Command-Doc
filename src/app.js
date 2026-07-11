@@ -2645,14 +2645,62 @@ function renderLabSectionPage() {
   els.labRoot.append(list);
 }
 
-const PLAYGROUND_TASKS = [
-  { id: "free-practice", label: "Free Practice", device: "access", goal: "Explore safe read-only commands and local configuration changes.", hint: "Start with show interface status or show vlan brief." },
-  { id: "access-port", label: "Configure Access Port", device: "access", goal: "Set a simulated access port description, access VLAN, and verify it.", hint: "Read the port state before entering configuration mode." },
-  { id: "create-vlan", label: "Create VLAN", device: "access", goal: "Create a local simulated VLAN, give it a name, verify it, then save.", hint: "Create the VLAN before assigning it to a port." },
-  { id: "trunk-port", label: "Configure Trunk Port", device: "trunk", goal: "Configure a simulated trunk and verify its allowed VLANs.", hint: "Use a show command to inspect the existing trunk first." },
-  { id: "wrong-vlan", label: "Fix Wrong VLAN", device: "access", goal: "Inspect a simulated port, correct its VLAN, then confirm the result.", hint: "Use interface status and running configuration as evidence." },
-  { id: "recover-port", label: "Recover Shutdown Port", device: "disabled", goal: "Identify an administratively disabled simulated port and recover it safely.", hint: "Check port status before making the change." }
-];
+function buildTrainingRoutes() {
+  const core = [
+    { id: "free-practice", category: "Free Practice", label: "Free Practice", device: "access", goal: "Explore a fresh local switch without automatic answers.", hint: "Start with show interface status or show vlan brief.", steps: [] },
+    { id: "full-switch-configuration", category: "Complete Builds", label: "Full Switch Configuration - Start to Finish", device: "access", goal: "Configure a fresh simulated Cisco switch manually: name it, create a VLAN, configure two access ports, verify, and save.", hint: "Every command is typed by you. The coach only shows the next safe goal.", steps: [
+      { command: "show interface status", why: "See the fresh switch state before changing it.", alternatives: ["show vlan brief"] },
+      { command: "configure terminal", why: "Enter global configuration mode." },
+      { command: "hostname TRAINING-SWITCH", why: "Give the simulated switch a clear local name." },
+      { command: "vlan 20", why: "Create the training VLAN before assigning ports." },
+      { command: "name USERS", why: "Name the VLAN so the configuration is understandable." },
+      { command: "exit", why: "Return to global configuration mode." },
+      { command: "interface GigabitEthernet1/0/1", why: "Select the first intended access port." },
+      { command: "description PC-1", why: "Document the connected local endpoint." },
+      { command: "switchport mode access", why: "Make the port an access port." },
+      { command: "switchport access vlan 20", why: "Assign the port to the new VLAN." },
+      { command: "no shutdown", why: "Enable the simulated port." },
+      { command: "end", why: "Return to privileged EXEC mode before verification." },
+      { command: "show running-config interface GigabitEthernet1/0/1", why: "Verify the first port configuration." },
+      { command: "show vlan brief", why: "Verify VLAN membership." },
+      { command: "write memory", why: "Save only after the evidence is correct." }
+    ] },
+    { id: "access-port", category: "Access Ports", label: "Configure Access Port", device: "access", goal: "Set a simulated access port description, access VLAN, and verify it.", hint: "Read the port state before entering configuration mode.", steps: [] },
+    { id: "create-vlan", category: "VLANs", label: "Create VLAN", device: "access", goal: "Create a local simulated VLAN, give it a name, verify it, then save.", hint: "Create the VLAN before assigning it to a port.", steps: [] },
+    { id: "trunk-port", category: "Trunks", label: "Configure Trunk Port", device: "trunk", goal: "Configure a simulated trunk and verify its allowed VLANs.", hint: "Use a show command to inspect the existing trunk first.", steps: [] },
+    { id: "wrong-vlan", category: "Troubleshooting", label: "Fix Wrong VLAN", device: "access", goal: "Inspect a simulated port, correct its VLAN, then confirm the result.", hint: "Use interface status and running configuration as evidence.", steps: [] },
+    { id: "recover-port", category: "Troubleshooting", label: "Recover Shutdown Port", device: "disabled", goal: "Identify an administratively disabled simulated port and recover it safely.", hint: "Check port status before making the change.", steps: [] }
+  ];
+  const catalog = [
+    ["Interface Basics", ["Read port status", "Add a port description", "Set speed and duplex", "Disable an unused port", "Recover a disabled port", "Compare two port states", "Check interface counters", "Clear interface counters", "Inspect error-disabled state", "Document an endpoint"]],
+    ["VLANs", ["Create a user VLAN", "Name a VLAN", "Assign an access VLAN", "Move an endpoint VLAN", "Verify VLAN membership", "Remove a VLAN assignment", "Build a guest VLAN", "Build a voice VLAN", "Inspect VLAN status", "Save a VLAN change"]],
+    ["Trunks", ["Identify a trunk", "Configure a trunk", "Allow VLANs on a trunk", "Remove a trunk VLAN", "Inspect trunk status", "Find a native VLAN mismatch", "Validate uplink VLANs", "Document an uplink", "Recover a trunk mismatch", "Save a trunk change"]],
+    ["MAC and Neighbor", ["Inspect MAC learning", "Find a MAC on a port", "Clear a learned MAC", "Verify MAC movement", "Read CDP neighbors", "Read LLDP neighbors", "Find an unknown endpoint", "Check a device location", "Compare MAC tables", "Verify endpoint traffic"]],
+    ["Port Security", ["Inspect port security", "Set a secure port", "Test a violation", "Recover a violation", "Check secure MACs", "Set violation mode", "Review sticky MACs", "Clear a security state", "Document a violation", "Verify secure port recovery"]],
+    ["Switch Management", ["Set hostname", "Review running configuration", "Review startup configuration", "Save configuration", "Compare saved state", "Check version", "Set login banner", "Set management VLAN", "Inspect management interface", "Prepare a change summary"]],
+    ["Layer 2 Health", ["Read STP state", "Inspect root bridge", "Find a blocked port", "Review EtherChannel", "Inspect LACP member", "Check loop symptoms", "Verify uplink redundancy", "Document STP evidence", "Check broadcast symptoms", "Verify recovery"]],
+    ["Stacking", ["Inspect stack members", "Review stack priority", "Set stack priority", "Inspect IRF topology", "Inspect IRF port", "Review member role", "Check stack link health", "Document stack evidence", "Plan member replacement", "Verify stack recovery"]],
+    ["Endpoint Network", ["Configure a PC IP", "Check subnet mask", "Check default gateway", "Test same VLAN ping", "Test VLAN mismatch ping", "Fix a duplicate IP", "Inspect ARP", "Check DNS reachability", "Document endpoint state", "Verify endpoint connectivity"]],
+    ["Safety and Tickets", ["Read before change", "Use a rollback plan", "Build a change checklist", "Verify before save", "Write a ticket summary", "Escalate physical fault", "Identify dangerous commands", "Use a maintenance window", "Capture before/after evidence", "Close a verified ticket"]],
+    ["HP Comware", ["Display interface brief", "Display VLAN", "Configure access port", "Configure trunk", "Inspect MAC address", "Read LLDP neighbor", "Set system name", "Inspect IRF topology", "Set IRF priority", "Save Comware configuration"]],
+    ["Cisco IOS", ["Show interface status", "Show VLAN brief", "Configure access port", "Configure trunk", "Show MAC table", "Show CDP neighbors", "Show LLDP neighbors", "Save running configuration", "Recover shutdown port", "Verify configuration"]]
+  ];
+  return core.concat(catalog.flatMap(([category, labels], categoryIndex) => labels.map((label, itemIndex) => ({
+    id: `route-${categoryIndex + 1}-${itemIndex + 1}`,
+    category,
+    label,
+    device: category === "HP Comware" || category === "Stacking" ? "irf" : category === "Trunks" || category === "Layer 2 Health" ? "trunk" : "access",
+    goal: `${label}. Work through the local simulation manually and verify the final state.`,
+    hint: "The coach suggests safe verification steps; it does not run commands for you.",
+    steps: []
+  }))));
+}
+
+const PLAYGROUND_TASKS = buildTrainingRoutes();
+
+function currentTrainingRoute() {
+  return PLAYGROUND_TASKS.find((item) => item.id === state.lab.playgroundTaskId) || PLAYGROUND_TASKS[0];
+}
 
 function renderLabPlayground() {
   if (!labPlaygroundUnlocked()) { state.lab.screen = "dashboard"; renderLab(); return; }
@@ -2661,7 +2709,7 @@ function renderLabPlayground() {
   const header = labCreate("section", "lab-page-header");
   header.append(labCreate("div", "lab-card-kicker", "Simulated switch playground"));
   header.append(labCreate("h3", "", "Practice on a local imaginary switch"));
-  header.append(labCreate("p", "", "Choose one task, work in the terminal, then verify the result. Nothing connects to a network or changes a real device."));
+  header.append(labCreate("p", "", `Choose from ${PLAYGROUND_TASKS.length} local training routes, type every command yourself, then verify the result. Nothing connects to a network or changes a real device.`));
   els.labRoot.append(header);
 
   const taskBar = labCreate("section", "lab-playground-taskbar");
@@ -2669,11 +2717,16 @@ function renderLabPlayground() {
   selectorField.append(labCreate("span", "", "Scenario"));
   const selector = document.createElement("select");
   selector.setAttribute("aria-label", "Playground scenario");
-  PLAYGROUND_TASKS.forEach((item) => {
-    const option = document.createElement("option");
-    option.value = item.id;
-    option.textContent = item.label;
-    selector.append(option);
+  [...new Set(PLAYGROUND_TASKS.map((item) => item.category))].forEach((category) => {
+    const group = document.createElement("optgroup");
+    group.label = category;
+    PLAYGROUND_TASKS.filter((item) => item.category === category).forEach((item) => {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = item.label;
+      group.append(option);
+    });
+    selector.append(group);
   });
   selector.value = task.id;
   selector.addEventListener("change", () => {
@@ -2685,7 +2738,7 @@ function renderLabPlayground() {
   selectorField.append(selector);
   taskBar.append(selectorField);
   const taskCopy = labCreate("div", "lab-playground-task-copy");
-  taskCopy.append(labCreate("strong", "", task.label), labCreate("span", "", task.goal));
+  taskCopy.append(labCreate("strong", "", task.label), labCreate("span", "", task.goal), labCreate("span", "", "Manual CLI practice: the coach guides; it never types commands for you."));
   taskBar.append(taskCopy);
   els.labRoot.append(taskBar);
 
@@ -3090,6 +3143,13 @@ function renderLabConsole() {
   terminalPane.append(terminal, row);
   const controls = labCreate("div", "lab-console-actions");
   controls.append(labButton("Run simulated command", "primary", () => runLabConsoleCommand(input)));
+  controls.append(labButton("Start fresh switch", "secondary", () => {
+    state.lab.console.engine = createLabEngine("access");
+    state.lab.console.device = "access";
+    state.lab.visualNetwork = createVisualNetwork();
+    renderLab();
+    showToast("A fresh local simulated switch is ready. Configure it manually from the terminal.");
+  }));
   controls.append(labButton("Reset device", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; renderLab(); showToast("The simulated device was reset to its starting state."); }));
   controls.append(labButton("Open focused terminal", "secondary", () => { state.lab.screen = "cli"; renderLab(); }));
   terminalPane.append(controls);
@@ -3250,7 +3310,7 @@ function renderLabDeviceVisual(engine) {
 
 function renderLabCoach(engine) {
   const coach = labCreate("aside", "lab-coach-pane");
-  const guidance = getLabGuidance(engine);
+  const guidance = getTrainingRouteGuidance(engine) || getLabGuidance(engine);
   coach.append(labCreate("span", "lab-pane-kicker", "Guidance"));
   coach.append(labCreate("h4", "", guidance.title));
   coach.append(labCreate("p", "lab-coach-copy", guidance.explanation));
@@ -3268,6 +3328,25 @@ function renderLabCoach(engine) {
   });
   coach.append(milestones);
   return coach;
+}
+
+function getTrainingRouteGuidance(engine) {
+  const route = currentTrainingRoute();
+  if (!route?.steps?.length) return null;
+  const normalize = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+  const used = new Set(engine.commands.map(normalize));
+  const isComplete = (step) => [step.command, ...(step.alternatives || [])].some((command) => used.has(normalize(command)));
+  const nextIndex = route.steps.findIndex((step) => !isComplete(step));
+  const complete = nextIndex === -1;
+  const step = complete ? null : route.steps[nextIndex];
+  return {
+    title: complete ? "Full Configuration Verified" : `Guided Route: ${route.label}`,
+    explanation: complete ? "You manually completed every route checkpoint. Review the actual simulated switch state, then decide whether to save or reset for another attempt." : `Step ${nextIndex + 1} of ${route.steps.length}: ${step.why}`,
+    command: complete ? "show running-config" : step.command,
+    why: complete ? "A final read-only review confirms the state before you preserve it." : "Type this command yourself in the terminal. You may use an approved alternative when one is shown.",
+    safety: "This is an offline browser simulation. The coach does not execute commands or make changes for you.",
+    milestones: route.steps.map((item, index) => [`${index + 1}. ${item.command}`, isComplete(item)])
+  };
 }
 
 function getLabGuidance(engine) {
