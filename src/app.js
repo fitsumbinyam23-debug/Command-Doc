@@ -2673,7 +2673,15 @@ function renderLabMissionPath() {
   const completedCount = SIMULATOR_MISSIONS.filter((mission) => completed[mission.id]).length;
   const section = labCreate("section", "lab-mission-path");
   const heading = labCreate("div", "lab-mission-heading");
-  heading.append(labCreate("div", "lab-card-kicker", "Complete training path"), labCreate("h4", "", "Learn the Full Switch Workflow"), labCreate("p", "", `${completedCount} of ${SIMULATOR_MISSIONS.length} simulator missions complete on this browser.`));
+  const foundationCount = labFoundationLessons().length;
+  const configurationCount = state.lab.lessons.filter((lesson) => isConfigurationLesson(lesson)).length;
+  heading.append(
+    labCreate("div", "lab-card-kicker", "Guided console missions"),
+    labCreate("h4", "", "6 Hands-on Switch Missions"),
+    labCreate("p", "", `${completedCount} of ${SIMULATOR_MISSIONS.length} console missions complete. These are practical simulations, separate from the course lessons.`),
+    labCreate("p", "lab-mission-library-note", `${foundationCount} Foundation lessons and ${configurationCount} Configuration lessons are available in the course library.`),
+    labButton(`Open all ${state.lab.lessons.length} course lessons`, "secondary", () => { state.lab.screen = "lessons"; renderLab(); })
+  );
   section.append(heading);
   const grid = labCreate("div", "lab-mission-grid");
   SIMULATOR_MISSIONS.forEach((mission, index) => {
