@@ -19,6 +19,7 @@
       this.mode = "exec";
       this.selectedInterface = this.seed.interface;
       this.transcript = [];
+      this.commands = [];
       this.logs = [`%LINK-3-UPDOWN: ${this.seed.interface} initialized for offline practice`];
       this.state = {
         hostname: this.seed.hostname,
@@ -47,6 +48,7 @@
 
     execute(raw) {
       const command = normalize(raw);
+      this.commands.push(command);
       if (!command) return this.result(false, "Enter a command first.", "input");
       if (/(write erase|erase startup-config|delete flash:|format|reload|reboot|factory reset)/.test(command)) {
         return this.result(false, "Safety stop: destructive commands are intentionally blocked in Lab Mode. Use rollback or reset the simulated device instead.", "danger");
@@ -68,6 +70,7 @@
       if (/^show cdp neighbors/.test(command)) return this.result(true, `Device ID       Local Intrfce   Platform\nCORE-SW         ${this.selectedInterface}      C9300`, "show");
       if (/^show mac address-table/.test(command)) return this.result(true, `Vlan    Mac Address       Type       Ports\n${this.current().vlan}      0011.2233.4455    DYNAMIC    ${this.selectedInterface}`, "show");
       if (/^display irf$/.test(command)) return this.result(true, "MemberID  Role      Priority  Status\n1         Master    32        Ready\n2         Standby   31        Ready", "show");
+      if (/^display irf-port(?: configuration)?$/.test(command)) return this.result(true, this.state.irfDown ? "MemberID  IRF-Port1                         IRF-Port2\n1         Ten-GigabitEthernet1/0/49 DOWN     UP\n2         Ten-GigabitEthernet2/0/49 DOWN     UP" : "MemberID  IRF-Port1                         IRF-Port2\n1         Ten-GigabitEthernet1/0/49 UP       UP\n2         Ten-GigabitEthernet2/0/49 UP       UP", "show");
       if (/^display irf topology/.test(command)) return this.result(true, this.state.irfDown ? "Topology Info\nMember 1  IRF-Port1 DOWN  IRF-Port2 UP\nMember 2  IRF-Port1 DOWN  IRF-Port2 UP" : "Topology Info\nMember 1  IRF-Port1 UP  IRF-Port2 UP\nMember 2  IRF-Port1 UP  IRF-Port2 UP", "show");
       if (/^show interface brief/.test(command)) return this.result(true, `Interface  Status  Speed\n${this.selectedInterface}     ${this.state.lacpDown ? "down" : "up"}      1G`, "show");
       if (/^(write memory|wr mem|copy running-config startup-config|save)$/.test(command)) return this.result(true, this.verify() ? "Simulated configuration saved after verification." : "Safety warning: verification has not passed. Do not save an unverified simulated change.", this.verify() ? "save" : "warning");
@@ -79,6 +82,9 @@
       const current = this.current();
       if (/^switchport mode access$/.test(command)) { current.mode = "access"; return this.result(true, "Simulated switchport mode set to access.", "config"); }
       if (/^switchport access vlan \d+$/.test(command)) { current.vlan = Number(command.match(/\d+$/)[0]); return this.result(true, `Simulated access VLAN set to ${current.vlan}.`, "config"); }
+      if (/^port link-type access$/.test(command)) { current.mode = "access"; return this.result(true, "Simulated Comware port link type set to access.", "config"); }
+      if (/^port access vlan \d+$/.test(command)) { current.vlan = Number(command.match(/\d+$/)[0]); return this.result(true, `Simulated Comware access VLAN set to ${current.vlan}.`, "config"); }
+      if (/^vlan access \d+$/.test(command)) { current.vlan = Number(command.match(/\d+$/)[0]); return this.result(true, `Simulated Aruba access VLAN set to ${current.vlan}.`, "config"); }
       if (/^description\s+/.test(command)) { current.description = raw.trim().slice("description".length).trim(); return this.result(true, `Simulated description set to ${current.description}.`, "config"); }
       if (/^(no shutdown|undo shutdown)$/.test(command)) { current.shutdown = false; current.connected = true; return this.result(true, "Simulated interface enabled. Verify the link and VLAN.", "config"); }
       if (/^shutdown$/.test(command)) { current.shutdown = true; return this.result(true, "Simulated interface administratively down. This is reversible with no shutdown.", "config"); }
