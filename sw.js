@@ -1,14 +1,14 @@
 "use strict";
 
-const CACHE_NAME = "command-doctor-2026-07-lab-8";
+const CACHE_NAME = "command-doctor-2026-07-lab-10";
 const OFFLINE_ASSETS = [
   "./",
   "./index.html",
   "./refresh.html",
   "./sw-refresh.js",
-  "./styles.css?v=2026.07-lab.8",
-  "./src/app.js?v=2026.07-lab.8",
-  "./src/lab-engine.js?v=2026.07-lab.8",
+  "./styles.css?v=2026.07-lab.10",
+  "./src/app.js?v=2026.07-lab.10",
+  "./src/lab-engine.js?v=2026.07-lab.10",
   "./data/commands/admin_commands.json",
   "./data/commands/aruba_cx.json",
   "./data/commands/cisco_ios.json",
@@ -22,6 +22,7 @@ const OFFLINE_ASSETS = [
   "./data/labs/stages.json",
   "./data/labs/sections.json",
   "./data/labs/curriculum.json",
+  "./data/labs/curriculum_vendor_tracks.json",
   "./data/labs/lessons/foundation.json",
   "./data/labs/lessons/foundation_extended.json",
   "./data/labs/lessons/configuration.json",
@@ -68,6 +69,18 @@ self.addEventListener("fetch", (event) => {
     || /\.(?:js|css)$/.test(url.pathname);
 
   if (isAppShell) {
+    event.respondWith(
+      fetch(event.request).then((response) => {
+        if (response?.ok) {
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+        }
+        return response;
+      }).catch(() => caches.match(event.request, { ignoreSearch: true }))
+    );
+    return;
+  }
+
+  if (url.pathname.includes("/data/labs/")) {
     event.respondWith(
       fetch(event.request).then((response) => {
         if (response?.ok) {
