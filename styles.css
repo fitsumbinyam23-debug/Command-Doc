@@ -162,6 +162,11 @@ button:disabled {
 
 .lab-console-panel h3, .lab-console-panel p { margin: 0; }
 .lab-device-select { max-width: 100%; }
+.lab-device-setup { display: grid; gap: 12px; padding: 16px; border: 1px solid #9bcfbd; border-radius: var(--radius); background: #f2fbf7; }
+.lab-device-setup p { color: var(--ink-soft); line-height: 1.5; }
+.lab-device-setup-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.lab-setup-field { display: grid; gap: 6px; min-width: 0; color: var(--muted); font-size: .76rem; font-weight: 900; text-transform: uppercase; }
+.lab-setup-field input { min-width: 0; padding: 10px; font: .86rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-transform: none; }
 .lab-simulator-workspace { display: grid; grid-template-columns: minmax(210px, 0.75fr) minmax(360px, 1.45fr) minmax(250px, 0.9fr); gap: 14px; align-items: stretch; }
 .lab-device-pane, .lab-terminal-pane, .lab-coach-pane { min-width: 0; display: grid; align-content: start; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel-soft); }
 .lab-pane-kicker, .lab-terminal-label, .lab-control-label { color: var(--muted); font-size: 0.74rem; font-weight: 900; letter-spacing: 0; text-transform: uppercase; }
@@ -1281,6 +1286,10 @@ input {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .lab-device-setup-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .lab-mission-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1297,7 +1306,8 @@ input {
 
   .lab-simulator-workspace,
   .lab-mission-grid,
-  .lab-config-grid {
+  .lab-config-grid,
+  .lab-device-setup-grid {
     grid-template-columns: 1fr;
   }
 
