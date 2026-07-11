@@ -34,6 +34,15 @@ const LAB_FILES = {
 
 const LAB_PROGRESS_KEY = "commandDoctorLabProgress";
 
+const SIMULATOR_MISSIONS = [
+  { id: "first-check", device: "warehouse", phase: "Foundation", title: "Read a Healthy Access Port", description: "Use a known-good scanner port as a reference before making changes elsewhere.", command: "show interface status" },
+  { id: "access-vlan", device: "hq", phase: "Configuration", title: "Correct an Access VLAN", description: "Diagnose and repair the Finance-PC port with a controlled VLAN change.", command: "show interface status" },
+  { id: "port-recovery", device: "branch", phase: "Configuration", title: "Recover a Disabled Port", description: "Identify an administratively down port, enable it, then verify service state.", command: "show interface status" },
+  { id: "switch-verification", device: "hq", phase: "Verification", title: "Verify Before Saving", description: "Read the running interface configuration and decide whether it is safe to save or roll back.", command: "show running-config interface Gi1/0/24" },
+  { id: "irf-investigation", device: "irf", phase: "Stacking", title: "Investigate an HP IRF Link", description: "Collect IRF topology and port evidence without guessing at a stack reset.", command: "display irf topology" },
+  { id: "lacp-investigation", device: "aruba", phase: "Troubleshooting", title: "Investigate an Aruba LACP Member", description: "Read member state and collect the focused evidence required for a safe next action.", command: "show interface brief" }
+];
+
 const VENDOR_LABELS = {
   cisco_ios: "Cisco IOS",
   hp_comware: "HP Comware",
@@ -351,6 +360,7 @@ const state = {
     scenarioScore: 0,
     console: {
       device: "hq",
+      missionId: "access-vlan",
       mode: "exec",
       activeInterface: "Gi1/0/24",
       vlan: "31",
@@ -2394,6 +2404,7 @@ function defaultLabProgress() {
     foundationFinalScore: null,
     configurationCompleted: false,
     scenarioScores: {},
+    simulatorMissions: {},
     lastLessonId: ""
   };
 }
@@ -2571,7 +2582,7 @@ function renderLabConsole() {
   });
   selector.value = state.lab.console.device;
   selector.addEventListener("change", () => {
-    state.lab.console = { device: selector.value, mode: "exec", activeInterface: deviceProfile(selector.value).port, vlan: deviceProfile(selector.value).vlan, description: deviceProfile(selector.value).endpoint, transcript: [], engine: createLabEngine(selector.value) };
+    startLabMission(SIMULATOR_MISSIONS.find((mission) => mission.device === selector.value) || { device: selector.value });
     renderLab();
   });
   const engine = getLabEngine();
@@ -2600,8 +2611,59 @@ function renderLabConsole() {
   controls.append(labButton("Reset device", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; renderLab(); showToast("The simulated device was reset to its starting state."); }));
   terminalPane.append(controls);
   workspace.append(terminalPane, renderLabCoach(engine));
-  consolePanel.append(workspace);
+  consolePanel.append(workspace, renderLabMissionPath());
   els.labRoot.append(consolePanel);
+}
+
+function renderLabMissionPath() {
+  const completed = state.lab.progress.simulatorMissions || {};
+  const completedCount = SIMULATOR_MISSIONS.filter((mission) => completed[mission.id]).length;
+  const section = labCreate("section", "lab-mission-path");
+  const heading = labCreate("div", "lab-mission-heading");
+  heading.append(labCreate("div", "lab-card-kicker", "Complete training path"), labCreate("h4", "", "Learn the Full Switch Workflow"), labCreate("p", "", `${completedCount} of ${SIMULATOR_MISSIONS.length} simulator missions complete on this browser.`));
+  section.append(heading);
+  const grid = labCreate("div", "lab-mission-grid");
+  SIMULATOR_MISSIONS.forEach((mission, index) => {
+    const active = state.lab.console.missionId === mission.id;
+    const card = labCreate("article", `lab-mission-card ${active ? "is-active" : ""} ${completed[mission.id] ? "is-complete" : ""}`);
+    const meta = labCreate("div", "lab-mission-meta");
+    meta.append(labCreate("span", "", `${index + 1}. ${mission.phase}`), labCreate("span", "", completed[mission.id] ? "Complete" : active ? "In progress" : "Ready"));
+    card.append(meta, labCreate("h5", "", mission.title), labCreate("p", "", mission.description));
+    const command = labCreate("code", "lab-mission-command", mission.command);
+    card.append(command, labButton(active ? "Current mission" : completed[mission.id] ? "Practice again" : "Start mission", "secondary", () => startLabMission(mission)));
+    grid.append(card);
+  });
+  section.append(grid);
+  return section;
+}
+
+function startLabMission(mission) {
+  const device = mission.device || "hq";
+  state.lab.console = {
+    device,
+    missionId: mission.id || (SIMULATOR_MISSIONS.find((item) => item.device === device)?.id || ""),
+    mode: "exec",
+    activeInterface: deviceProfile(device).port,
+    vlan: deviceProfile(device).vlan,
+    description: deviceProfile(device).endpoint,
+    transcript: [],
+    engine: createLabEngine(device)
+  };
+  renderLab();
+}
+
+function currentLabMission() {
+  return SIMULATOR_MISSIONS.find((mission) => mission.id === state.lab.console.missionId) || null;
+}
+
+function labMissionComplete(mission, engine) {
+  if (!mission) return false;
+  const used = (test) => engine.commands.some((command) => test.test(command));
+  if (mission.id === "first-check") return used(/^(show interface status|show interfaces status|sh int status)$/);
+  if (mission.id === "access-vlan" || mission.id === "port-recovery" || mission.id === "switch-verification") return engine.verify() && used(/^show running-config interface/);
+  if (mission.id === "irf-investigation") return used(/^display irf topology$/) && used(/^display irf-port/);
+  if (mission.id === "lacp-investigation") return used(/^show interface brief$/) && used(/^show lacp interfaces$/);
+  return false;
 }
 
 function renderLabDeviceVisual(engine) {
@@ -2679,7 +2741,15 @@ function getLabGuidance(engine) {
   const targetNeedsEnable = Boolean(engine.seed.shutdown);
 
   if (!checked) return { title: "Start With Evidence", explanation: `The simulated ${engine.seed.hostname} has a training condition: ${engine.seed.issue}. Read its current state before making a change.`, command: checkCommand, why: "A read-only check shows the current port or stack state without changing anything.", safety: "Do not configure or save until the observed output supports the change.", milestones: [["Read current state", false], ["Enter configuration only when justified", false], ["Verify the result", false], ["Save or roll back", false]] };
-  if (engine.seed.vendor === "HP Comware" || engine.seed.vendor === "ArubaOS-CX") return { title: "Interpret Before Change", explanation: engine.seed.vendor === "HP Comware" ? "The IRF output identifies a simulated physical stack-link fault. In a real incident, record the member and affected IRF port, then inspect the approved physical path rather than guessing a configuration change." : "The interface brief shows the simulated LACP condition. Confirm the LAG partner and intended port-channel before changing the member interface.", command: engine.seed.vendor === "HP Comware" ? "display irf-port" : "show interface brief", why: "This provides the detail required for an accurate ticket and an approved next action.", safety: "Do not reset a stack or change LACP membership during an active incident without an approved change plan.", milestones: [["Read current state", true], ["Collect focused evidence", false], ["Record safe next action", false], ["Create ticket summary", false]] };
+  if (engine.seed.vendor === "HP Comware") {
+    const focused = used(/^display irf-port/);
+    return { title: focused ? "IRF Evidence Collected" : "Investigate the IRF Port", explanation: focused ? "You have collected both topology and IRF-port evidence. The simulated fault points to the stack-link path, so the next production step would be an approved physical inspection and a clear ticket." : "The IRF topology shows a simulated stack-link fault. Collect the IRF-port detail before deciding the safe next action.", command: focused ? "rollback" : "display irf-port", why: focused ? "Reset the simulation when you are ready to repeat the investigation." : "This identifies the affected member and IRF port without changing stack state.", safety: "Do not reset a stack or change IRF membership during an active incident without an approved change plan.", milestones: [["Read current state", true], ["Collect focused evidence", focused], ["Record safe next action", focused], ["Create ticket summary", focused]] };
+  }
+  if (engine.seed.vendor === "ArubaOS-CX") {
+    const focused = used(/^show lacp interfaces$/);
+    return { title: focused ? "LACP Evidence Collected" : "Inspect the LACP Member", explanation: focused ? "The simulated member and LACP state have been collected. Use this evidence to confirm the partner, bundle, and approved remediation before touching configuration." : "The interface brief shows the simulated LACP condition. Collect the LACP member state before proposing a change.", command: focused ? "rollback" : "show lacp interfaces", why: focused ? "Reset the simulation when you are ready to practice the investigation again." : "This adds the bundle-level evidence needed to distinguish a local port issue from an aggregation mismatch.", safety: "Do not change LACP membership during an active incident without an approved change plan.", milestones: [["Read current state", true], ["Collect LACP evidence", focused], ["Record safe next action", focused], ["Create ticket summary", focused]] };
+  }
+  if (!targetNeedsVlan && !targetNeedsEnable) return { title: "Healthy Reference Confirmed", explanation: `${engine.selectedInterface} is the known-good comparison port. Its observed status and VLAN provide a baseline for troubleshooting another access port.`, command: "show vlan brief", why: "A healthy reference lets you compare expected VLAN membership before changing a faulty port.", safety: "Do not alter a healthy reference port simply to make outputs match.", milestones: [["Read current state", true], ["Confirm expected VLAN", false], ["Use as comparison", false], ["Keep configuration unchanged", true]] };
   if (!configured) return { title: "Make the Controlled Change", explanation: targetNeedsEnable ? `${engine.selectedInterface} is administratively down. Enter configuration mode and enable the simulated port.` : `The port is on VLAN ${current.vlan}; the intended training VLAN is ${engine.seed.targetVlan}. Enter configuration mode, select the interface, then apply the VLAN change.`, command: engine.mode === "exec" ? configureCommand : engine.mode === "config" ? `interface ${engine.seed.interface}` : targetNeedsEnable ? "no shutdown" : vlanCommand, why: engine.mode === "exec" ? "Configuration mode is required before changing a port." : engine.mode === "config" ? "Select only the intended interface before making a change." : "Apply only the approved correction to the selected simulated port.", safety: "Confirm the interface, VLAN, and change approval before continuing.", milestones: [["Read current state", true], ["Enter configuration only when justified", engine.mode !== "exec"], ["Apply minimal change", false], ["Verify the result", false], ["Save or roll back", false]] };
   if (engine.mode !== "exec") return { title: "Return and Verify", explanation: "The simulated change is staged. Leave configuration mode and inspect the running interface configuration before you consider saving it.", command: "end", why: "Verification should be performed from privileged EXEC mode using a read-only show command.", safety: "A successful command is not proof of a correct change. Verify the expected port state.", milestones: [["Read current state", true], ["Enter configuration only when justified", true], ["Apply minimal change", true], ["Verify the result", false], ["Save or roll back", false]] };
   if (!verified) return { title: "Verify the Intended State", explanation: `The simulated port now has VLAN ${current.vlan}${current.shutdown ? " and is shut down" : ""}. Confirm its active configuration before saving.`, command: `show running-config interface ${engine.selectedInterface}`, why: "The running configuration proves the interface has the intended access VLAN and administrative state.", safety: "Never save based only on the configuration command response.", milestones: [["Read current state", true], ["Enter configuration only when justified", true], ["Apply minimal change", true], ["Verify the result", false], ["Save or roll back", false]] };
@@ -2718,6 +2788,12 @@ function runLabConsoleCommand(input) {
   if (engine) {
     engine.transcript.push(`${prompt} ${command}\n${result.output}${result.diff ? `\n\nConfiguration diff\n${result.diff}` : ""}`);
     if (engine.transcript.length > 8) engine.transcript.shift();
+    const mission = currentLabMission();
+    if (labMissionComplete(mission, engine) && !state.lab.progress.simulatorMissions[mission.id]) {
+      state.lab.progress.simulatorMissions[mission.id] = true;
+      saveLabProgress();
+      showToast(`${mission.title} completed. Choose the next mission when you are ready.`);
+    }
   } else {
     state.lab.console.transcript.push(`${prompt} ${command}\n${result.output}`);
   }
