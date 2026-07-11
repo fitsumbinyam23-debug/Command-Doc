@@ -51,6 +51,34 @@
       return this.seed.vendor === "HP Comware" ? `<${this.state.hostname}>` : `${this.state.hostname}#`;
     }
 
+    setTrainingProfile(profile = {}) {
+      const hostname = String(profile.hostname || this.seed.hostname).trim() || this.seed.hostname;
+      const interfaceName = String(profile.interface || this.seed.interface).trim() || this.seed.interface;
+      const endpoint = String(profile.endpoint || this.seed.endpoint).trim() || this.seed.endpoint;
+      const targetVlan = String(profile.targetVlan || this.seed.targetVlan).trim() || this.seed.targetVlan;
+      const currentVlan = String(profile.currentVlan || targetVlan).trim() || targetVlan;
+      this.seed = { ...this.seed, hostname, interface: interfaceName, endpoint, description: endpoint, targetVlan, vlan: currentVlan };
+      this.mode = "exec";
+      this.selectedInterface = interfaceName;
+      this.selectedVlan = null;
+      this.commands = [];
+      this.transcript = [];
+      this.state.hostname = hostname;
+      this.state.interfaces = {
+        [interfaceName]: {
+          description: endpoint,
+          vlan: currentVlan,
+          shutdown: Boolean(this.seed.shutdown),
+          connected: !this.seed.irfDown,
+          mode: this.seed.trunk ? "trunk" : "access"
+        }
+      };
+      this.state.vlans = [...new Set([currentVlan, targetVlan])];
+      this.state.vlanNames = Object.fromEntries(this.state.vlans.map((vlan) => [vlan, vlan === targetVlan ? "TARGET-VLAN" : "CURRENT-VLAN"]));
+      this.baseline = clone(this.state);
+      return this.result(true, `Simulated training device ${hostname} is ready. Use read-only commands before configuration.`, "profile");
+    }
+
     execute(raw) {
       const command = normalize(raw);
       this.commands.push(command);
