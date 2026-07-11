@@ -24,7 +24,7 @@ const FLOW_FILES = [
 const LAB_FILES = {
   stages: "data/labs/stages.json",
   sections: "data/labs/sections.json",
-  curriculum: "data/labs/curriculum.json",
+  curriculum: "data/labs/curriculum_vendor_tracks.json",
   scenarios: "data/labs/scenarios/scenarios.json"
 };
 
@@ -363,6 +363,7 @@ const state = {
     practicePassed: false,
     quizSelection: null,
     scenarioScore: 0,
+    vendorTrack: "all",
     console: {
       device: "access",
       missionId: "access-vlan",
@@ -541,6 +542,9 @@ async function loadKnowledge() {
   }
 
   renderCommandLookup();
+  if (document.getElementById("labView")?.classList.contains("active")) {
+    renderLab();
+  }
   setBusy(false);
 }
 
@@ -2509,7 +2513,7 @@ function renderLabDashboard() {
 
   const labActions = labCreate("div", "lab-dashboard-actions");
   labActions.append(
-    labButton("Open Lesson Library", "primary", () => { state.lab.screen = "lessons"; renderLab(); }),
+    labButton("Choose a Switch-Type Lesson", "primary", () => { state.lab.screen = "lessons"; renderLab(); }),
     labButton("Open Trainer Controls", "secondary", () => switchView("admin"))
   );
   els.labRoot.append(labActions);
@@ -2577,6 +2581,25 @@ function renderLabDashboard() {
 function renderLabLessonLibrary() {
   const heading = labCreate("section", "lab-lesson-library-heading");
   heading.append(labCreate("div", "lab-card-kicker", "Lesson library"), labCreate("h3", "", "Guided Lessons From First Checks to Stacking"), labCreate("p", "", "Choose a topic to study its meaning, good and bad output, safe next commands, and a simulated practice task."));
+  const track = document.createElement("select");
+  track.className = "lab-track-select";
+  track.setAttribute("aria-label", "Switch type learning track");
+  [
+    ["all", "All learning tracks"],
+    ["Cisco IOS", "Cisco IOS switch track"],
+    ["HP Comware", "HP Comware switch track"],
+    ["ArubaOS-CX", "ArubaOS-CX switch track"],
+    ["Windows CMD", "Windows endpoint track"],
+    ["Linux", "Linux endpoint track"]
+  ].forEach(([value, label]) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    track.append(option);
+  });
+  track.value = state.lab.vendorTrack;
+  track.addEventListener("change", () => { state.lab.vendorTrack = track.value; renderLab(); });
+  heading.append(labCreate("label", "lab-control-label", "Choose what you want to learn"), track);
   heading.append(labButton("Back to Interactive Lab", "secondary", () => { state.lab.screen = "dashboard"; renderLab(); }));
   els.labRoot.append(heading);
 
@@ -2586,7 +2609,15 @@ function renderLabLessonLibrary() {
     const group = labCreate("section", "lab-lesson-library-group");
     group.append(labCreate("h4", "", title), labCreate("p", "", copy));
     const grid = labCreate("div", "lab-section-grid");
-    state.lab.sections.filter((section) => section.stage === stage).forEach((section) => grid.append(renderLabSectionCard(section)));
+    const matchingSections = state.lab.sections.filter((section) => section.stage === stage && section.lesson_ids.some((id) => {
+      const lesson = state.lab.lessons.find((item) => item.id === id);
+      return lesson && (state.lab.vendorTrack === "all" || lesson.vendor === state.lab.vendorTrack);
+    }));
+    if (matchingSections.length) {
+      matchingSections.forEach((section) => grid.append(renderLabSectionCard(section, state.lab.vendorTrack)));
+    } else {
+      grid.append(labCreate("p", "lab-coming-soon", `No ${state.lab.vendorTrack === "all" ? "" : state.lab.vendorTrack + " "}lessons are available in this stage yet.`));
+    }
     group.append(grid);
     els.labRoot.append(group);
   });
@@ -2918,8 +2949,10 @@ function simulateLabCommand(command) {
   return "Unknown simulated command. Try show interface status, show vlan brief, show running-config interface <port>, configure terminal, display irf, or display irf topology.";
 }
 
-function renderLabSectionCard(section) {
-  const lessons = section.lesson_ids.map((id) => state.lab.lessons.find((lesson) => lesson.id === id)).filter(Boolean);
+function renderLabSectionCard(section, vendorTrack = "all") {
+  const lessons = section.lesson_ids
+    .map((id) => state.lab.lessons.find((lesson) => lesson.id === id))
+    .filter((lesson) => lesson && (vendorTrack === "all" || lesson.vendor === vendorTrack));
   const percent = labProgressPercent(lessons);
   const card = labCreate("article", "lab-section-card");
   card.append(labCreate("h4", "", section.title));
