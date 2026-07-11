@@ -3064,6 +3064,7 @@ function renderLabConsole() {
   consolePanel.append(labCreate("div", "lab-card-kicker", "Simulated switch console"));
   consolePanel.append(labCreate("h3", "", "Interactive Switch Lab"));
   consolePanel.append(labCreate("p", "", "Work through a realistic check, configuration, verification, and rollback on an imaginary device. The coach updates after every command; nothing leaves this browser."));
+  consolePanel.append(renderManualRouteSelector());
   const engine = getLabEngine();
   const setup = labCreate("section", "lab-device-setup");
   setup.append(labCreate("div", "lab-card-kicker", "Build your simulated device"));
@@ -3071,11 +3072,11 @@ function renderLabConsole() {
   const setupGrid = labCreate("div", "lab-device-setup-grid");
   const setupInputs = {};
   [
-    ["Switch name", "hostname", engine.state.hostname],
-    ["Port name", "interface", engine.selectedInterface],
-    ["Endpoint label", "endpoint", engine.current().description],
-    ["Current VLAN", "currentVlan", engine.current().vlan],
-    ["Target VLAN", "targetVlan", engine.seed.targetVlan]
+    ["Switch name", "hostname", String(engine.state.hostname).includes("<") ? "TRAINING-SWITCH" : engine.state.hostname],
+    ["Port name", "interface", String(engine.selectedInterface).includes("<") ? "GigabitEthernet1/0/1" : engine.selectedInterface],
+    ["Endpoint label", "endpoint", String(engine.current().description).includes("<") ? "PC-1" : engine.current().description],
+    ["Current VLAN", "currentVlan", String(engine.current().vlan).includes("<") ? "1" : engine.current().vlan],
+    ["Target VLAN", "targetVlan", String(engine.seed.targetVlan).includes("<") ? "20" : engine.seed.targetVlan]
   ].forEach(([label, key, value]) => {
     const field = labCreate("label", "lab-setup-field");
     field.append(labCreate("span", "", label));
@@ -3143,19 +3144,49 @@ function renderLabConsole() {
   terminalPane.append(terminal, row);
   const controls = labCreate("div", "lab-console-actions");
   controls.append(labButton("Run simulated command", "primary", () => runLabConsoleCommand(input)));
-  controls.append(labButton("Start fresh switch", "secondary", () => {
-    state.lab.console.engine = createLabEngine("access");
-    state.lab.console.device = "access";
-    state.lab.visualNetwork = createVisualNetwork();
-    renderLab();
-    showToast("A fresh local simulated switch is ready. Configure it manually from the terminal.");
-  }));
+  controls.append(labButton("Start fresh switch", "secondary", startFreshTrainingSwitch));
   controls.append(labButton("Reset device", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; renderLab(); showToast("The simulated device was reset to its starting state."); }));
   controls.append(labButton("Open focused terminal", "secondary", () => { state.lab.screen = "cli"; renderLab(); }));
   terminalPane.append(controls);
   workspace.append(terminalPane, renderLabCoach(engine));
   consolePanel.append(workspace);
   els.labRoot.append(consolePanel);
+}
+
+function renderManualRouteSelector() {
+  const route = currentTrainingRoute();
+  const panel = labCreate("section", "lab-manual-route-panel");
+  panel.append(labCreate("strong", "", "Manual CLI training path"));
+  panel.append(labCreate("span", "", `${PLAYGROUND_TASKS.length} routes are available. Select one, then type every command yourself.`));
+  const select = document.createElement("select");
+  select.setAttribute("aria-label", "Manual CLI training path");
+  [...new Set(PLAYGROUND_TASKS.map((item) => item.category))].forEach((category) => {
+    const group = document.createElement("optgroup");
+    group.label = category;
+    PLAYGROUND_TASKS.filter((item) => item.category === category).forEach((item) => {
+      const option = document.createElement("option");
+      option.value = item.id;
+      option.textContent = item.label;
+      group.append(option);
+    });
+    select.append(group);
+  });
+  select.value = route.id;
+  select.addEventListener("change", () => { state.lab.playgroundTaskId = select.value; startFreshTrainingSwitch(); });
+  panel.append(select, labButton("Start selected route", "primary", startFreshTrainingSwitch));
+  return panel;
+}
+
+function startFreshTrainingSwitch() {
+  const route = currentTrainingRoute();
+  const engine = createLabEngine(route.device === "irf" ? "irf" : route.device === "trunk" ? "trunk" : "access");
+  if (engine?.setTrainingProfile) engine.setTrainingProfile({ hostname: "TRAINING-SWITCH", interface: "GigabitEthernet1/0/1", endpoint: "PC-1", currentVlan: "1", targetVlan: "20" });
+  state.lab.console.engine = engine;
+  state.lab.console.device = route.device === "irf" ? "irf" : route.device === "trunk" ? "trunk" : "access";
+  state.lab.visualNetwork = createVisualNetwork();
+  state.lab.visualNetwork.hostname = "TRAINING-SWITCH";
+  renderLab();
+  showToast(`${route.label} is ready. Configure the fresh simulated switch manually.`);
 }
 
 function renderLabCliWorkspace() {
