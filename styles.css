@@ -531,7 +531,50 @@ button:disabled {
 .topology-port-anchor { justify-self: end; padding: 3px 7px; border: 1px solid #4b6775; border-radius: 2px; color: #244c59; background: #eaf5f4; font: 700 .7rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 .topology-workspace-status { margin-top: 10px; color: #5e6d7b; font-size: .82rem; font-weight: 700; }
 
+/* Release 21: one interactive topology surface, shared with the Lab state. */
+.visual-topology-host { min-width: 0; }
+.visual-playground-grid { grid-template-columns: minmax(0, 1fr); }
+.topology-workspace { border-radius: 8px; }
+.topology-workspace-content { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 12px; align-items: start; }
+.topology-selection-panel { display: grid; gap: 9px; min-height: 190px; padding: 14px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel-soft); }
+.topology-selection-panel p { margin: 0; color: var(--muted); line-height: 1.45; }
+.topology-detail-row { padding-bottom: 7px; border-bottom: 1px solid var(--line); color: var(--ink); font-size: .84rem; overflow-wrap: anywhere; }
+.topology-selection-actions { display: grid; gap: 8px; }
+.topology-toolbar .is-active { border-color: var(--accent); background: #e8f5f2; color: var(--accent-dark); }
+.topology-canvas { min-height: 650px; }
+.topology-stage { width: 1200px; height: 650px; min-width: 1200px; min-height: 650px; }
+.topology-cables { width: 1200px; height: 650px; pointer-events: auto; }
+.topology-cable { pointer-events: stroke; cursor: pointer; }
+.topology-cable.is-selected { stroke: #e59a12; stroke-width: 8; }
+.topology-node { cursor: default; }
+.topology-switch { width: 470px; height: 235px; padding: 13px 16px; }
+.topology-switch-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; font: 700 .88rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.topology-switch-title span { color: #a9cfcd; font-size: .68rem; }
+.topology-switch-indicators { display: flex; gap: 12px; margin: 8px 0; }
+.topology-indicator { display: inline-flex; align-items: center; gap: 5px; color: #acc9c7; font-size: .64rem; font-weight: 800; }
+.topology-indicator i, .topology-port-led { width: 7px; height: 7px; border-radius: 50%; background: #50646a; }
+.topology-indicator.is-on i { background: #53d3ae; box-shadow: 0 0 5px rgba(83,211,174,.8); }
+.topology-switch-utility { display: flex; gap: 8px; margin-bottom: 9px; }
+.topology-console-port, .topology-uplink-port { padding: 3px 6px; border: 1px solid #52737c; border-radius: 2px; color: #b9d9d7; font: .62rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.topology-uplink-port { margin-left: auto; color: #d9eeb2; border-color: #82985a; }
+.topology-uplink-port + .topology-uplink-port { margin-left: 0; }
+.topology-switch-ports { gap: 8px 6px; }
+.topology-port-item { display: grid; justify-items: center; gap: 3px; min-width: 0; }
+.topology-port-led { display: block; width: 6px; height: 6px; }
+.topology-port-item.is-connected .topology-port-led { background: #52d9a4; box-shadow: 0 0 5px rgba(82,217,164,.75); }
+.topology-port-socket { width: 24px; height: 16px; min-width: 0; padding: 0; border: 2px solid #6f8c94; border-radius: 1px; background: #071218; }
+.topology-port-socket:hover, .topology-port-item.is-selected .topology-port-socket { border-color: #f4ce51; background: #1c333b; }
+.topology-port-number { color: #bcd6d5; font: .58rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.topology-endpoint { width: 180px; min-height: 108px; padding: 13px; }
+.topology-endpoint.is-locked, .topology-switch.is-locked { opacity: .78; }
+.topology-endpoint-socket { justify-self: end; width: 31px; height: 15px; min-width: 0; padding: 0; border: 2px solid #52717a; border-radius: 2px; background: #e4f2f0; }
+.topology-endpoint-socket:hover { border-color: var(--accent); background: #cfe9e4; }
+.topology-socket-label { justify-self: end; color: #426272; font: .62rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
 @media (max-width: 720px) {
+  .topology-workspace-content { grid-template-columns: 1fr; }
+  .topology-selection-panel { min-height: 0; }
+  .topology-toolbar > * { flex: 1 1 calc(50% - 8px); }
   .visual-next-step {
     grid-template-columns: 1fr;
   }
