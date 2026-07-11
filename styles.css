@@ -192,6 +192,21 @@ button:disabled {
 .lab-milestones li::before { counter-increment: lab-step; content: counter(lab-step); display: inline-grid; place-items: center; flex: 0 0 20px; height: 20px; border: 1px solid var(--line); border-radius: 50%; font-size: .7rem; font-weight: 800; }
 .lab-milestones li.is-complete { color: var(--green); font-weight: 800; }
 .lab-milestones li.is-complete::before { border-color: var(--green); background: rgba(28, 134, 97, .11); content: "OK"; font-size: .58rem; }
+.lab-mission-path { display: grid; gap: 14px; padding-top: 4px; }
+.lab-mission-heading { display: grid; gap: 5px; max-width: 72ch; }
+.lab-mission-heading h4, .lab-mission-heading p { margin: 0; }
+.lab-mission-heading h4 { font-size: 1.08rem; }
+.lab-mission-heading p { color: var(--muted); }
+.lab-mission-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.lab-mission-card { display: grid; align-content: start; gap: 10px; min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius); background: #ffffff; }
+.lab-mission-card.is-active { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.lab-mission-card.is-complete { background: #f2fbf7; border-color: #9bcfbd; }
+.lab-mission-meta { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: .74rem; font-weight: 800; text-transform: uppercase; }
+.lab-mission-card.is-complete .lab-mission-meta span:last-child { color: var(--green); }
+.lab-mission-card h5, .lab-mission-card p { margin: 0; }
+.lab-mission-card h5 { font-size: .96rem; }
+.lab-mission-card p { color: var(--ink-soft); font-size: .86rem; line-height: 1.45; }
+.lab-mission-command { display: block; padding: 8px; border-radius: 4px; background: #162831; color: #dcfff4; overflow-wrap: anywhere; font: 700 .75rem/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
 .status-stack {
   margin-top: auto;
@@ -1255,6 +1270,10 @@ input {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .lab-mission-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .lab-terminal-pane {
     grid-column: 1 / -1;
   }
@@ -1262,6 +1281,11 @@ input {
 
 @media (max-width: 640px) {
   .paste-suggestion-list {
+    grid-template-columns: 1fr;
+  }
+
+  .lab-simulator-workspace,
+  .lab-mission-grid {
     grid-template-columns: 1fr;
   }
 
