@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "command-doctor-2026-07-lab-18";
+const CACHE_NAME = "command-doctor-2026-07-lab-19";
 const OFFLINE_ASSETS = [
   "./",
   "./index.html",
