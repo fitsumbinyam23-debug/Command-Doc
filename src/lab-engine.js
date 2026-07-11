@@ -123,6 +123,7 @@
       }
       if (this.mode === "interface") return this.executeInterfaceCommand(raw, command);
       if (/^(show interface status|show interfaces status|sh int status)$/.test(command)) return this.result(true, this.interfaceStatus(), "show");
+      if (/^show interfaces?(?:\s+\S+)?$/.test(command)) return this.result(true, this.interfaceDetail(raw), "show");
       if (/^(show vlan brief|sh vlan brief)$/.test(command)) return this.result(true, this.vlanBrief(), "show");
       if (/^show running-config interface/.test(command)) return this.result(true, this.runningInterface(), "verify");
       if (/^show interfaces trunk/.test(command)) return this.result(true, `Port        Mode         Encapsulation  Status\n<TRUNK_PORT>  on           802.1q         trunking`, "show");
@@ -133,6 +134,7 @@
       if (/^display irf configuration$/.test(command)) return this.result(true, `IRF Configuration\n${this.state.irfMembers.map((member) => `irf member ${member.id} priority ${member.priority}`).join("\n")}`, "show");
       if (/^display irf-port(?: configuration)?$/.test(command)) return this.result(true, this.state.irfDown ? "MemberID  IRF-Port1       IRF-Port2\n<STACK_MEMBER_ID>  <IRF_PORT> DOWN  UP" : "MemberID  IRF-Port1       IRF-Port2\n<STACK_MEMBER_ID>  <IRF_PORT> UP  UP", "show");
       if (/^display irf topology/.test(command)) return this.result(true, this.state.irfDown ? "Topology Info\nMember <STACK_MEMBER_ID>  <IRF_PORT> DOWN" : "Topology Info\nMember <STACK_MEMBER_ID>  <IRF_PORT> UP", "show");
+      if (/^display interface(?:\s+\S+)?$/.test(command)) return this.result(true, this.interfaceDetail(raw), "show");
       if (/^show interface brief/.test(command)) return this.result(true, `Interface  Status  Speed\n${this.selectedInterface}     ${this.state.lacpDown ? "down" : "up"}      1G`, "show");
       if (/^show lacp interfaces$/.test(command)) return this.result(true, this.state.lacpDown ? `Interface  Bundle  State       Partner\n${this.selectedInterface}     <LAG_ID>   blocked     <UPLINK_DEVICE>\n\nMember is not selected for the simulated LAG.` : `Interface  Bundle  State       Partner\n${this.selectedInterface}     <LAG_ID>   selected    <UPLINK_DEVICE>`, "show");
       if (/^show running-config$/.test(command)) return this.result(true, this.runningConfig(), "verify");
@@ -180,6 +182,19 @@
     }
     rollback() { this.state = clone(this.baseline); this.mode = "exec"; this.selectedInterface = this.seed.interface; this.selectedVlan = null; }
     interfaceStatus() { const current = this.current(); const status = current.shutdown ? "disabled" : current.connected ? "connected" : "notconnect"; return `Port        Name              Status     Vlan\n${this.selectedInterface}  ${current.description || "-"}  ${status}  ${current.vlan}`; }
+    interfaceDetail(raw) {
+      const words = raw.trim().split(/\s+/);
+      const requested = words.slice(2).join(" ");
+      const interfaceName = requested && !/^(brief|status)$/i.test(requested) ? requested : this.selectedInterface;
+      const current = this.state.interfaces[interfaceName] || this.current();
+      const link = current.shutdown ? "administratively down" : current.connected ? "up" : "down";
+      const protocol = current.shutdown || !current.connected ? "down" : "up";
+      if (this.seed.vendor === "HP Comware") {
+        return `${interfaceName} current state: ${link.toUpperCase()}\nLine protocol current state: ${protocol.toUpperCase()}\nDescription: ${current.description || "-"}\nPort link-type: ${current.mode}\nPVID: ${current.vlan}\nSpeed: <SPEED>\nInput errors: 0\nOutput errors: 0`;
+      }
+      return `${interfaceName} is ${link}, line protocol is ${protocol}\n  Description: ${current.description || "-"}\n  Hardware is Simulated Ethernet, address is <MAC_ADDRESS>\n  MTU <MTU> bytes, BW <BANDWIDTH> Kbit/sec\n  Full-duplex, <SPEED>, media type is simulated\n  switchport mode ${current.mode}\n  access VLAN ${current.vlan}\n  0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored\n  0 output errors, 0 collisions, 0 interface resets`;
+    }
+    bootOutput() { return `Booting simulated ${this.seed.vendor} device...\nLoading local training configuration...\nSystem ready. No real device is connected.\n\n${this.prompt()}`; }
     vlanBrief() { const current = this.current(); return `VLAN Name             Status    Ports\n${this.state.vlans.map((vlan) => `${String(vlan).padEnd(18)} ${String(this.state.vlanNames[vlan]).padEnd(22)} active    ${vlan === current.vlan ? this.selectedInterface : ""}`).join("\n")}`; }
     runningInterface() { const current = this.current(); return `interface ${this.selectedInterface}\n description ${current.description}\n switchport mode ${current.mode}\n${current.mode === "trunk" ? ` switchport trunk allowed vlan ${current.allowedVlans || "<VLAN_ID>"}` : ` switchport access vlan ${current.vlan}`}\n ${current.shutdown ? "shutdown" : "no shutdown"}`; }
     runningConfig() { return `hostname ${this.state.hostname}\n${this.state.stackMembers.map((member) => `switch ${member.id} priority ${member.priority}`).join("\n")}\n${this.state.vlans.map((vlan) => `vlan ${vlan}\n name ${this.state.vlanNames[vlan]}`).join("\n")}\n${this.runningInterface()}`; }
