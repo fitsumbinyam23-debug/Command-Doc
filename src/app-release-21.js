@@ -3174,12 +3174,6 @@ function renderLabConsole() {
     showToast("Your simulated device details were applied locally.");
   }));
   consolePanel.append(setup);
-  const topologyHost = labCreate("div", "lab-topology-host");
-  const topologyNetwork = visualNetwork();
-  const topologyOptions = { onChange: () => { syncEngineFromVisual(); } };
-  if (window.CommandDoctorTopology) window.CommandDoctorTopology.render(topologyHost, topologyNetwork, topologyOptions);
-  else topologyHost.dispatchEvent(new CustomEvent("commanddoctor:render-topology", { bubbles: true, detail: { container: topologyHost, network: topologyNetwork, options: topologyOptions } }));
-  consolePanel.append(topologyHost);
   const selector = document.createElement("select");
   selector.className = "lab-device-select";
   [
@@ -3199,8 +3193,7 @@ function renderLabConsole() {
     startLabMission(SIMULATOR_MISSIONS.find((mission) => mission.device === selector.value) || { device: selector.value });
     renderLab();
   });
-  const workspace = labCreate("div", "lab-simulator-workspace");
-  workspace.append(renderLabDeviceVisual(engine));
+  const workspace = labCreate("div", "lab-simulator-workspace lab-console-only-workspace");
 
   const terminalPane = labCreate("section", "lab-terminal-pane");
   terminalPane.append(labCreate("label", "lab-control-label", "Simulated device"), selector);
