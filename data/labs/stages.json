@@ -1,8 +1,8 @@
 {
-  "knowledge_base_version": "2026.07-lab.1",
+  "knowledge_base_version": "2026.07-lab.14",
   "stages": [
     {"id":"foundation","title":"Basic Foundation","status":"available","description":"Learn safe checking and troubleshooting commands."},
     {"id":"configuration","title":"Configuration Lab","status":"locked","description":"Practice simulated configuration after passing Basic Foundation."},
-    {"id":"scenarios","title":"Final Scenarios","status":"locked","description":"Solve full simulated IT and network problems from start to finish."}
+    {"id":"playground","title":"Playground","status":"locked","description":"Practice safely on an imaginary switch with a local stateful terminal."}
   ]
 }
