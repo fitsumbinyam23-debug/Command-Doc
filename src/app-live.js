@@ -2628,14 +2628,52 @@ function renderLabConsole() {
   consolePanel.append(labCreate("div", "lab-card-kicker", "Simulated switch console"));
   consolePanel.append(labCreate("h3", "", "Interactive Switch Lab"));
   consolePanel.append(labCreate("p", "", "Work through a realistic check, configuration, verification, and rollback on an imaginary device. The coach updates after every command; nothing leaves this browser."));
+  const engine = getLabEngine();
+  const setup = labCreate("section", "lab-device-setup");
+  setup.append(labCreate("div", "lab-card-kicker", "Build your simulated device"));
+  setup.append(labCreate("p", "", "Choose the local training values you want to practice. These details exist only in this browser and never reach a real device."));
+  const setupGrid = labCreate("div", "lab-device-setup-grid");
+  const setupInputs = {};
+  [
+    ["Switch name", "hostname", engine.state.hostname],
+    ["Port name", "interface", engine.selectedInterface],
+    ["Endpoint label", "endpoint", engine.current().description],
+    ["Current VLAN", "currentVlan", engine.current().vlan],
+    ["Target VLAN", "targetVlan", engine.seed.targetVlan]
+  ].forEach(([label, key, value]) => {
+    const field = labCreate("label", "lab-setup-field");
+    field.append(labCreate("span", "", label));
+    const input = document.createElement("input");
+    input.value = value;
+    input.spellcheck = false;
+    input.setAttribute("aria-label", label);
+    setupInputs[key] = input;
+    field.append(input);
+    setupGrid.append(field);
+  });
+  setup.append(setupGrid);
+  setup.append(labButton("Apply device details", "primary", () => {
+    const profile = Object.fromEntries(Object.entries(setupInputs).map(([key, input]) => [key, input.value.trim()]));
+    if (Object.values(profile).some((value) => !value)) {
+      showToast("Enter all simulated device details before applying them.");
+      return;
+    }
+    engine.setTrainingProfile(profile);
+    state.lab.console.activeInterface = profile.interface;
+    state.lab.console.vlan = profile.currentVlan;
+    state.lab.console.description = profile.endpoint;
+    renderLab();
+    showToast("Your simulated device details were applied locally.");
+  }));
+  consolePanel.append(setup);
   const selector = document.createElement("select");
   selector.className = "lab-device-select";
   [
-    ["access", "<SWITCH_NAME> | Cisco access switch"],
-    ["disabled", "<SWITCH_NAME> | Cisco disabled-port scenario"],
-    ["trunk", "<SWITCH_NAME> | Cisco trunk scenario"],
-    ["irf", "<SWITCH_NAME> | HP Comware IRF scenario"],
-    ["aruba", "<SWITCH_NAME> | ArubaOS-CX LACP scenario"]
+    ["access", "Cisco IOS access-port practice"],
+    ["disabled", "Cisco IOS disabled-port practice"],
+    ["trunk", "Cisco IOS trunk practice"],
+    ["irf", "HP Comware IRF practice"],
+    ["aruba", "ArubaOS-CX LACP practice"]
   ].forEach(([value, label]) => {
     const option = document.createElement("option");
     option.value = value;
@@ -2647,7 +2685,6 @@ function renderLabConsole() {
     startLabMission(SIMULATOR_MISSIONS.find((mission) => mission.device === selector.value) || { device: selector.value });
     renderLab();
   });
-  const engine = getLabEngine();
   const workspace = labCreate("div", "lab-simulator-workspace");
   workspace.append(renderLabDeviceVisual(engine));
 
@@ -2759,16 +2796,15 @@ function labMissionComplete(mission, engine) {
 }
 
 function renderLabDeviceVisual(engine) {
-  const profile = deviceProfile(state.lab.console.device);
   const current = engine.current();
   const pane = labCreate("section", "lab-device-pane");
-  pane.append(labCreate("span", "lab-pane-kicker", `${profile.vendor} - simulated hardware`));
-  pane.append(labCreate("h4", "", profile.name));
+  pane.append(labCreate("span", "lab-pane-kicker", `${engine.seed.vendor} - simulated hardware`));
+  pane.append(labCreate("h4", "", engine.state.hostname));
   pane.append(labCreate("p", "lab-device-issue", `Training condition: ${engine.seed.issue}`));
 
   const switchFace = labCreate("div", "switch-face");
   const switchHead = labCreate("div", "switch-face-head");
-  switchHead.append(labCreate("strong", "", profile.name), labCreate("span", "switch-power", "POWER"));
+  switchHead.append(labCreate("strong", "", engine.state.hostname), labCreate("span", "switch-power", "POWER"));
   switchFace.append(switchHead);
   const ports = labCreate("div", "switch-ports");
   const focusPort = Math.min(Number(String(engine.selectedInterface).split("/").at(-1)) || 1, 24);
