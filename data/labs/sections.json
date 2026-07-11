@@ -7,10 +7,12 @@
     {"id":"ip-arp","stage":"foundation","title":"IP / ARP / Gateway","description":"Connect addressing, ARP, and the default gateway.","difficulty":"Intermediate","lesson_ids":["cisco-ip-arp"]},
     {"id":"neighbors","stage":"foundation","title":"Neighbor Discovery / CDP / LLDP","description":"Learn how switches discover simulated neighbors.","difficulty":"Intermediate","lesson_ids":["cisco-neighbors"]},
     {"id":"trunk","stage":"foundation","title":"Trunk / Uplink / STP / EtherChannel","description":"Read trunk, spanning-tree, and aggregation evidence safely.","difficulty":"Intermediate","lesson_ids":["cisco-trunk-stp"]},
+    {"id":"hp-comware","stage":"foundation","title":"HP Comware Switch Fundamentals","description":"Use Comware display commands to identify the switch and read interfaces safely.","difficulty":"Beginner","lesson_ids":["hp-version","hp-interface-brief"]},
+    {"id":"aruba-cx","stage":"foundation","title":"ArubaOS-CX Switch Fundamentals","description":"Use ArubaOS-CX commands to identify the switch and read interface or LACP evidence safely.","difficulty":"Beginner","lesson_ids":["aruba-version","aruba-interface-brief"]},
     {"id":"windows","stage":"foundation","title":"Windows Network Troubleshooting","description":"Read adapter, address, gateway, and DNS output.","difficulty":"Beginner","lesson_ids":["windows-ipconfig"]},
     {"id":"linux","stage":"foundation","title":"Linux Network Troubleshooting","description":"Read Linux interface and route state safely.","difficulty":"Intermediate","lesson_ids":["linux-network"]},
     {"id":"stack","stage":"foundation","title":"Stack / IRF / VSF Basics","description":"Check stack members and redundancy links.","difficulty":"Intermediate","lesson_ids":["hp-irf","hp-irf-topology"]},
     {"id":"safety","stage":"foundation","title":"Dangerous Commands / Safety","description":"Recognize commands that can interrupt service or erase data.","difficulty":"Beginner","lesson_ids":["safety-dangerous-commands"]},
-    {"id":"configuration-core","stage":"configuration","title":"Configuration Practice","description":"Configure, verify, save, and roll back safely in the local simulation.","difficulty":"Intermediate","lesson_ids":["cisco-configure-access-port","cisco-configure-trunk","cisco-description","cisco-shutdown-safety","cisco-save-verify","cisco-rollback"]}
+    {"id":"configuration-core","stage":"configuration","title":"Configuration Practice","description":"Configure, verify, save, and roll back safely in the local simulation.","difficulty":"Intermediate","lesson_ids":["cisco-configure-access-port","cisco-configure-trunk","cisco-description","cisco-shutdown-safety","cisco-save-verify","cisco-rollback","hp-configure-access","aruba-configure-access"]}
   ]
 }
