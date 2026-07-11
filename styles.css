@@ -1782,3 +1782,56 @@ input {
     min-height: 220px;
   }
 }
+
+
+.lab-route-status,
+.visual-next-step {
+  border: 1px solid #8bcfc4;
+  border-left: 4px solid #087b75;
+  background: #f0fbf8;
+  padding: 14px;
+  display: grid;
+  gap: 7px;
+}
+
+.lab-route-status p,
+.visual-next-step p {
+  margin: 0;
+  max-width: 68ch;
+}
+
+.visual-next-step {
+  margin: 0 0 16px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.visual-next-step strong,
+.visual-next-step span,
+.visual-next-step p {
+  grid-column: 1;
+}
+
+.visual-next-step button {
+  grid-column: 2;
+  grid-row: 1 / span 3;
+  align-self: center;
+}
+
+.visual-selection-label {
+  color: #526277;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .visual-next-step {
+    grid-template-columns: 1fr;
+  }
+
+  .visual-next-step button {
+    grid-column: 1;
+    grid-row: auto;
+    width: 100%;
+  }
+}
