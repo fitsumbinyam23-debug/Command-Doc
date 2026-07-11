@@ -51,7 +51,19 @@
     if (!value || typeof value !== "object" || !Array.isArray(value.nodes) || !Array.isArray(value.cables)) return false;
     if (!value.nodes.every((node) => node && typeof node.id === "string" && typeof node.type === "string" && Number.isFinite(Number(node.x)) && Number.isFinite(Number(node.y)))) return false;
     if (!value.cables.every((cable) => cable && typeof cable.id === "string" && typeof cable.endpointId === "string" && typeof cable.switchPort === "string")) return false;
-    return true;
+    const nodeIds = new Set(value.nodes.map((node) => node.id));
+    const endpointIds = new Set(value.nodes.filter((node) => node.type === "endpoint").map((node) => node.id));
+    const cableIds = new Set();
+    const usedEndpoints = new Set();
+    const usedPorts = new Set();
+    return value.cables.every((cable) => {
+      if (cableIds.has(cable.id) || usedEndpoints.has(cable.endpointId) || usedPorts.has(cable.switchPort)) return false;
+      if (!nodeIds.has(cable.endpointId) || !endpointIds.has(cable.endpointId) || !/^GigabitEthernet1\/0\/(?:[1-9]|1\d|2[0-4])$/.test(cable.switchPort)) return false;
+      cableIds.add(cable.id);
+      usedEndpoints.add(cable.endpointId);
+      usedPorts.add(cable.switchPort);
+      return true;
+    });
   }
 
   function loadSavedTopology() {
@@ -147,7 +159,7 @@
 
   function persist(network, topology, onChange) {
     applyCablesToNetwork(network, topology);
-    saveTopology(topology);
+    topology.saveState = saveTopology(topology) ? "Autosaved locally" : "Local save failed. Changes remain in this page until storage is available.";
     onChange(network, topology);
   }
 
@@ -167,7 +179,7 @@
   function cableAnchor(node, index) {
     const column = (index - 1) % 12;
     const row = index <= 12 ? 0 : 1;
-    return { x: node.x + 47 + column * 31.5, y: node.y + 133 + row * 53 };
+    return { x: node.x + 33 + column * 36.7, y: node.y + 125 + row * 46.7 };
   }
 
   function selectNode(network, topology, id, onChange) {
@@ -301,7 +313,11 @@
       item.append(create("i", "topology-port-led"));
       const socket = button("", "topology-port-socket", () => {
         network.selectedPort = name;
-        if (topology.tool === "cable" && topology.cableStartId) connectCable(network, topology, topology.cableStartId, name);
+        if (topology.tool === "cable" && topology.cableStartId && !connectCable(network, topology, topology.cableStartId, name)) {
+          topology.notice = `${name} is already connected. Choose an available RJ45 socket.`;
+        } else {
+          topology.notice = "";
+        }
         onChange(network, topology);
       });
       socket.setAttribute("aria-label", `${name} RJ45 socket, ${port?.connectedDeviceId ? "connected" : "available"}`);
@@ -415,7 +431,9 @@
     canvas.setAttribute("role", "application");
     canvas.setAttribute("aria-label", "Simulated network topology canvas");
     content.append(canvas, renderSelectionPanel(network, topology, onChange, rerender));
-    workspace.append(content, create("div", "topology-workspace-status", `Autosaved locally | ${topology.cables.length} cable${topology.cables.length === 1 ? "" : "s"} | ${topology.nodes.length} device${topology.nodes.length === 1 ? "" : "s"}`));
+    const saved = topology.saveState || "Autosaved locally";
+    workspace.append(content, create("div", "topology-workspace-status", `${saved} | ${topology.cables.length} cable${topology.cables.length === 1 ? "" : "s"} | ${topology.nodes.length} device${topology.nodes.length === 1 ? "" : "s"}`));
+    if (topology.notice) workspace.append(create("p", "topology-notice", topology.notice));
     renderInto(canvas, network, topology, onChange, rerender);
     container.append(workspace);
   }
