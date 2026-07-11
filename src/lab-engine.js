@@ -2,20 +2,20 @@
 
 (() => {
   const DEVICE_SEEDS = {
-    hq: { hostname: "HQ-ACC-01", vendor: "Cisco IOS", interface: "Gi1/0/24", endpoint: "Finance-PC", vlan: 30, targetVlan: 31, description: "Finance-PC", issue: "Wrong access VLAN" },
-    branch: { hostname: "BRANCH-ACC-02", vendor: "Cisco IOS", interface: "Gi1/0/12", endpoint: "Reception-PC", vlan: 20, targetVlan: 20, description: "Reception-PC", issue: "Administratively down port", shutdown: true },
-    warehouse: { hostname: "WH-ACC-03", vendor: "Cisco IOS", interface: "Gi1/0/8", endpoint: "Scanner-07", vlan: 50, targetVlan: 50, description: "Scanner-07", issue: "Healthy reference port" },
-    irf: { hostname: "CORE-IRF-01", vendor: "HP Comware", interface: "Ten-GigabitEthernet1/0/49", endpoint: "IRF-Port1", vlan: 30, targetVlan: 30, description: "IRF uplink", issue: "IRF link down", irfDown: true },
-    aruba: { hostname: "EDGE-CX-01", vendor: "ArubaOS-CX", interface: "1/1/10", endpoint: "Training-AP", vlan: 40, targetVlan: 40, description: "Training-AP", issue: "LACP member not selected", lacpDown: true }
+    access: { hostname: "<SWITCH_NAME>", vendor: "Cisco IOS", interface: "<ACCESS_PORT>", endpoint: "<DEVICE_NAME>", vlan: "<CURRENT_VLAN_ID>", targetVlan: "<VLAN_ID>", description: "<DEVICE_NAME>", issue: "Incorrect simulated access VLAN" },
+    disabled: { hostname: "<SWITCH_NAME>", vendor: "Cisco IOS", interface: "<ACCESS_PORT>", endpoint: "<DEVICE_NAME>", vlan: "<VLAN_ID>", targetVlan: "<VLAN_ID>", description: "<DEVICE_NAME>", issue: "Administratively down simulated port", shutdown: true },
+    trunk: { hostname: "<SWITCH_NAME>", vendor: "Cisco IOS", interface: "<TRUNK_PORT>", endpoint: "<UPLINK_DEVICE>", vlan: "<VLAN_ID>", targetVlan: "<VLAN_ID>", description: "<UPLINK_DEVICE>", issue: "Simulated trunk configuration review", trunk: true },
+    irf: { hostname: "<SWITCH_NAME>", vendor: "HP Comware", interface: "<IRF_PORT>", endpoint: "<STACK_MEMBER_ID>", vlan: "<VLAN_ID>", targetVlan: "<VLAN_ID>", description: "<IRF_PORT>", issue: "Simulated IRF link down", irfDown: true },
+    aruba: { hostname: "<SWITCH_NAME>", vendor: "ArubaOS-CX", interface: "<ACCESS_PORT>", endpoint: "<DEVICE_NAME>", vlan: "<VLAN_ID>", targetVlan: "<VLAN_ID>", description: "<DEVICE_NAME>", issue: "Simulated LACP member not selected", lacpDown: true }
   };
 
   const normalize = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
   const clone = (value) => JSON.parse(JSON.stringify(value));
 
   class SimulatedDeviceEngine {
-    constructor(deviceId = "hq") {
+    constructor(deviceId = "access") {
       this.deviceId = deviceId;
-      this.seed = clone(DEVICE_SEEDS[deviceId] || DEVICE_SEEDS.hq);
+      this.seed = clone(DEVICE_SEEDS[deviceId] || DEVICE_SEEDS.access);
       this.mode = "exec";
       this.selectedInterface = this.seed.interface;
       this.selectedVlan = null;
@@ -34,10 +34,10 @@
             mode: "access"
           }
         },
-        vlans: [1, 20, 30, 31, 40, 50],
-        vlanNames: { 1: "default", 20: "USERS", 30: "FINANCE", 31: "FINANCE-VOICE", 40: "WLAN", 50: "SCANNERS" },
-        stackMembers: [{ id: 1, role: "Active", priority: 10 }, { id: 2, role: "Standby", priority: 5 }],
-        irfMembers: [{ id: 1, role: "Master", priority: 32 }, { id: 2, role: "Standby", priority: 31 }],
+        vlans: ["<VLAN_ID>", "<CURRENT_VLAN_ID>"],
+        vlanNames: { "<VLAN_ID>": "<VLAN_NAME>", "<CURRENT_VLAN_ID>": "<CURRENT_VLAN_NAME>" },
+        stackMembers: [{ id: "<STACK_MEMBER_ID>", role: "Active", priority: "<PRIORITY>" }, { id: "<STANDBY_MEMBER_ID>", role: "Standby", priority: "<STANDBY_PRIORITY>" }],
+        irfMembers: [{ id: "<STACK_MEMBER_ID>", role: "Master", priority: "<PRIORITY>" }, { id: "<STANDBY_MEMBER_ID>", role: "Standby", priority: "<STANDBY_PRIORITY>" }],
         irfDown: Boolean(this.seed.irfDown),
         lacpDown: Boolean(this.seed.lacpDown)
       };
@@ -66,25 +66,25 @@
         this.state.hostname = raw.trim().split(/\s+/).slice(1).join("-").toUpperCase();
         return this.result(true, `Simulated device name changed to ${this.state.hostname}.`, "config");
       }
-      if (this.mode === "config" && /^vlan\s+\d+$/.test(command)) {
-        this.selectedVlan = Number(command.match(/\d+$/)[0]);
+      if (this.mode === "config" && /^vlan\s+\S+$/.test(command)) {
+        this.selectedVlan = raw.trim().split(/\s+/).at(-1);
         if (!this.state.vlans.includes(this.selectedVlan)) this.state.vlans.push(this.selectedVlan);
         this.state.vlanNames[this.selectedVlan] ||= `VLAN-${this.selectedVlan}`;
         this.mode = "vlan";
         return this.result(true, `Selected simulated VLAN ${this.selectedVlan}.`, "config");
       }
-      if (this.mode === "config" && /^switch\s+\d+\s+priority\s+\d+$/.test(command)) {
-        const [, memberId, priority] = command.match(/^switch\s+(\d+)\s+priority\s+(\d+)$/);
-        const member = this.state.stackMembers.find((item) => item.id === Number(memberId));
+      if (this.mode === "config" && /^switch\s+\S+\s+priority\s+\S+$/.test(command)) {
+        const [, memberId, priority] = raw.trim().match(/^switch\s+(\S+)\s+priority\s+(\S+)$/i);
+        const member = this.state.stackMembers.find((item) => String(item.id).toLowerCase() === memberId.toLowerCase());
         if (!member) return this.result(false, `Switch member ${memberId} is not present in this simulation.`, "warning");
-        member.priority = Number(priority);
+        member.priority = priority;
         return this.result(true, `Simulated Cisco stack member ${memberId} priority set to ${priority}.`, "config");
       }
-      if (this.mode === "config" && /^irf\s+member\s+\d+\s+priority\s+\d+$/.test(command)) {
-        const [, memberId, priority] = command.match(/^irf\s+member\s+(\d+)\s+priority\s+(\d+)$/);
-        const member = this.state.irfMembers.find((item) => item.id === Number(memberId));
+      if (this.mode === "config" && /^irf\s+member\s+\S+\s+priority\s+\S+$/.test(command)) {
+        const [, memberId, priority] = raw.trim().match(/^irf\s+member\s+(\S+)\s+priority\s+(\S+)$/i);
+        const member = this.state.irfMembers.find((item) => String(item.id).toLowerCase() === memberId.toLowerCase());
         if (!member) return this.result(false, `IRF member ${memberId} is not present in this simulation.`, "warning");
-        member.priority = Number(priority);
+        member.priority = priority;
         return this.result(true, `Simulated IRF member ${memberId} priority set to ${priority}.`, "config");
       }
       if (this.mode === "config" && /^interface\s+/.test(command)) {
@@ -97,16 +97,16 @@
       if (/^(show interface status|show interfaces status|sh int status)$/.test(command)) return this.result(true, this.interfaceStatus(), "show");
       if (/^(show vlan brief|sh vlan brief)$/.test(command)) return this.result(true, this.vlanBrief(), "show");
       if (/^show running-config interface/.test(command)) return this.result(true, this.runningInterface(), "verify");
-      if (/^show interfaces trunk/.test(command)) return this.result(true, "Port        Mode         Encapsulation  Status\nGi1/0/48  on           802.1q         trunking", "show");
-      if (/^show cdp neighbors/.test(command)) return this.result(true, `Device ID       Local Intrfce   Platform\nCORE-SW         ${this.selectedInterface}      C9300`, "show");
-      if (/^show mac address-table/.test(command)) return this.result(true, `Vlan    Mac Address       Type       Ports\n${this.current().vlan}      0011.2233.4455    DYNAMIC    ${this.selectedInterface}`, "show");
-      if (/^show switch$/.test(command)) return this.result(true, `Switch/Stack Mac Address : 0011.2233.4455\n\nSwitch#  Role      Priority  State\n${this.state.stackMembers.map((member) => `${member.id}${member.role === "Active" ? "*" : " "}        ${member.role.padEnd(8)} ${String(member.priority).padEnd(8)} Ready`).join("\n")}`, "show");
+      if (/^show interfaces trunk/.test(command)) return this.result(true, `Port        Mode         Encapsulation  Status\n<TRUNK_PORT>  on           802.1q         trunking`, "show");
+      if (/^show cdp neighbors/.test(command)) return this.result(true, `Device ID       Local Intrfce   Platform\n<UPLINK_DEVICE>         ${this.selectedInterface}      <PLATFORM>`, "show");
+      if (/^show mac address-table/.test(command)) return this.result(true, `Vlan    Mac Address       Type       Ports\n${this.current().vlan}      <MAC_ADDRESS>    DYNAMIC    ${this.selectedInterface}`, "show");
+      if (/^show switch$/.test(command)) return this.result(true, `Switch/Stack Mac Address : <MAC_ADDRESS>\n\nSwitch#  Role      Priority  State\n${this.state.stackMembers.map((member) => `${member.id}${member.role === "Active" ? "*" : " "}        ${member.role.padEnd(8)} ${String(member.priority).padEnd(8)} Ready`).join("\n")}`, "show");
       if (/^display irf$/.test(command)) return this.result(true, `MemberID  Role      Priority  Status\n${this.state.irfMembers.map((member) => `${member.id}         ${member.role.padEnd(9)} ${String(member.priority).padEnd(8)} Ready`).join("\n")}`, "show");
       if (/^display irf configuration$/.test(command)) return this.result(true, `IRF Configuration\n${this.state.irfMembers.map((member) => `irf member ${member.id} priority ${member.priority}`).join("\n")}`, "show");
-      if (/^display irf-port(?: configuration)?$/.test(command)) return this.result(true, this.state.irfDown ? "MemberID  IRF-Port1                         IRF-Port2\n1         Ten-GigabitEthernet1/0/49 DOWN     UP\n2         Ten-GigabitEthernet2/0/49 DOWN     UP" : "MemberID  IRF-Port1                         IRF-Port2\n1         Ten-GigabitEthernet1/0/49 UP       UP\n2         Ten-GigabitEthernet2/0/49 UP       UP", "show");
-      if (/^display irf topology/.test(command)) return this.result(true, this.state.irfDown ? "Topology Info\nMember 1  IRF-Port1 DOWN  IRF-Port2 UP\nMember 2  IRF-Port1 DOWN  IRF-Port2 UP" : "Topology Info\nMember 1  IRF-Port1 UP  IRF-Port2 UP\nMember 2  IRF-Port1 UP  IRF-Port2 UP", "show");
+      if (/^display irf-port(?: configuration)?$/.test(command)) return this.result(true, this.state.irfDown ? "MemberID  IRF-Port1       IRF-Port2\n<STACK_MEMBER_ID>  <IRF_PORT> DOWN  UP" : "MemberID  IRF-Port1       IRF-Port2\n<STACK_MEMBER_ID>  <IRF_PORT> UP  UP", "show");
+      if (/^display irf topology/.test(command)) return this.result(true, this.state.irfDown ? "Topology Info\nMember <STACK_MEMBER_ID>  <IRF_PORT> DOWN" : "Topology Info\nMember <STACK_MEMBER_ID>  <IRF_PORT> UP", "show");
       if (/^show interface brief/.test(command)) return this.result(true, `Interface  Status  Speed\n${this.selectedInterface}     ${this.state.lacpDown ? "down" : "up"}      1G`, "show");
-      if (/^show lacp interfaces$/.test(command)) return this.result(true, this.state.lacpDown ? `Interface  Bundle  State       Partner\n${this.selectedInterface}     lag10   blocked     EDGE-DIST-01\n\nMember is not selected for the simulated LAG.` : `Interface  Bundle  State       Partner\n${this.selectedInterface}     lag10   selected    EDGE-DIST-01`, "show");
+      if (/^show lacp interfaces$/.test(command)) return this.result(true, this.state.lacpDown ? `Interface  Bundle  State       Partner\n${this.selectedInterface}     <LAG_ID>   blocked     <UPLINK_DEVICE>\n\nMember is not selected for the simulated LAG.` : `Interface  Bundle  State       Partner\n${this.selectedInterface}     <LAG_ID>   selected    <UPLINK_DEVICE>`, "show");
       if (/^show running-config$/.test(command)) return this.result(true, this.runningConfig(), "verify");
       if (/^(write memory|wr mem|copy running-config startup-config|save)$/.test(command)) return this.result(true, this.verify() ? "Simulated configuration saved after verification." : "Safety warning: verification has not passed. Do not save an unverified simulated change.", this.verify() ? "save" : "warning");
       if (/^(rollback|reset simulated device)$/.test(command)) { this.rollback(); return this.result(true, "Simulated device rolled back to its baseline.", "rollback"); }
@@ -116,13 +116,16 @@
     executeInterfaceCommand(raw, command) {
       const current = this.current();
       if (/^switchport mode access$/.test(command)) { current.mode = "access"; return this.result(true, "Simulated switchport mode set to access.", "config"); }
-      if (/^switchport access vlan \d+$/.test(command)) { current.vlan = Number(command.match(/\d+$/)[0]); return this.result(true, `Simulated access VLAN set to ${current.vlan}.`, "config"); }
+      if (/^switchport mode trunk$/.test(command)) { current.mode = "trunk"; return this.result(true, "Simulated switchport mode set to trunk. Verify allowed VLANs before saving.", "config"); }
+      if (/^switchport trunk allowed vlan\s+.+$/.test(command)) { current.allowedVlans = raw.trim().split(/\s+/).slice(4).join(" "); return this.result(true, `Simulated trunk allowed VLANs set to ${current.allowedVlans}.`, "config"); }
+      if (/^switchport access vlan \S+$/.test(command)) { current.vlan = raw.trim().split(/\s+/).at(-1); return this.result(true, `Simulated access VLAN set to ${current.vlan}.`, "config"); }
       if (/^port link-type access$/.test(command)) { current.mode = "access"; return this.result(true, "Simulated Comware port link type set to access.", "config"); }
-      if (/^port access vlan \d+$/.test(command)) { current.vlan = Number(command.match(/\d+$/)[0]); return this.result(true, `Simulated Comware access VLAN set to ${current.vlan}.`, "config"); }
-      if (/^vlan access \d+$/.test(command)) { current.vlan = Number(command.match(/\d+$/)[0]); return this.result(true, `Simulated Aruba access VLAN set to ${current.vlan}.`, "config"); }
+      if (/^port access vlan \S+$/.test(command)) { current.vlan = raw.trim().split(/\s+/).at(-1); return this.result(true, `Simulated Comware access VLAN set to ${current.vlan}.`, "config"); }
+      if (/^vlan access \S+$/.test(command)) { current.vlan = raw.trim().split(/\s+/).at(-1); return this.result(true, `Simulated Aruba access VLAN set to ${current.vlan}.`, "config"); }
       if (/^description\s+/.test(command)) { current.description = raw.trim().slice("description".length).trim(); return this.result(true, `Simulated description set to ${current.description}.`, "config"); }
       if (/^(no shutdown|undo shutdown)$/.test(command)) { current.shutdown = false; current.connected = true; return this.result(true, "Simulated interface enabled. Verify the link and VLAN.", "config"); }
       if (/^shutdown$/.test(command)) { current.shutdown = true; return this.result(true, "Simulated interface administratively down. This is reversible with no shutdown.", "config"); }
+      if (/^default interface\s+/.test(command)) { this.state.interfaces[this.selectedInterface] = clone(this.baseline.interfaces[this.selectedInterface] || { description: "", vlan: "<VLAN_ID>", shutdown: false, connected: true, mode: "access" }); return this.result(true, "Simulated interface returned to its baseline state. Verify before saving.", "rollback"); }
       if (/^exit$/.test(command)) { this.mode = "config"; return this.result(true, "Exit interface configuration mode.", "config"); }
       return this.result(false, "That command is not appropriate in simulated interface configuration mode.", "warning");
     }
@@ -149,8 +152,8 @@
     }
     rollback() { this.state = clone(this.baseline); this.mode = "exec"; this.selectedInterface = this.seed.interface; this.selectedVlan = null; }
     interfaceStatus() { const current = this.current(); const status = current.shutdown ? "disabled" : current.connected ? "connected" : "notconnect"; return `Port        Name              Status     Vlan\n${this.selectedInterface}  ${current.description || "-"}  ${status}  ${current.vlan}`; }
-    vlanBrief() { const current = this.current(); return `VLAN Name             Status    Ports\n${this.state.vlans.sort((a, b) => a - b).map((vlan) => `${String(vlan).padEnd(4)} ${String(this.state.vlanNames[vlan]).padEnd(16)} active    ${vlan === current.vlan ? this.selectedInterface : ""}`).join("\n")}`; }
-    runningInterface() { const current = this.current(); return `interface ${this.selectedInterface}\n description ${current.description}\n switchport mode ${current.mode}\n switchport access vlan ${current.vlan}\n ${current.shutdown ? "shutdown" : "no shutdown"}`; }
+    vlanBrief() { const current = this.current(); return `VLAN Name             Status    Ports\n${this.state.vlans.map((vlan) => `${String(vlan).padEnd(18)} ${String(this.state.vlanNames[vlan]).padEnd(22)} active    ${vlan === current.vlan ? this.selectedInterface : ""}`).join("\n")}`; }
+    runningInterface() { const current = this.current(); return `interface ${this.selectedInterface}\n description ${current.description}\n switchport mode ${current.mode}\n${current.mode === "trunk" ? ` switchport trunk allowed vlan ${current.allowedVlans || "<VLAN_ID>"}` : ` switchport access vlan ${current.vlan}`}\n ${current.shutdown ? "shutdown" : "no shutdown"}`; }
     runningConfig() { return `hostname ${this.state.hostname}\n${this.state.stackMembers.map((member) => `switch ${member.id} priority ${member.priority}`).join("\n")}\n${this.state.vlans.map((vlan) => `vlan ${vlan}\n name ${this.state.vlanNames[vlan]}`).join("\n")}\n${this.runningInterface()}`; }
     result(ok, output, kind) { return { ok, output, kind, prompt: this.prompt(), diff: this.diff(), verified: this.verify() }; }
   }
