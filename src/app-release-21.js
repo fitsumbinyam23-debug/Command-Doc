@@ -2875,7 +2875,7 @@ function renderVisualNetworkPlayground() {
 }
 
 function renderVisualNextStep(network) {
-  const connected = network.ports.filter((port) => port.connectedDeviceId).length;
+  const connected = Object.values(network.ports).filter((port) => port.connectedDeviceId).length;
   const panel = labCreate("section", "visual-next-step");
   panel.append(
     labCreate("strong", "", "Topology status"),
