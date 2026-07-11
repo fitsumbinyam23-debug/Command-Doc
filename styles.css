@@ -145,6 +145,10 @@ button:disabled {
 }
 
 .lab-trainer-button { justify-self: start; }
+.lab-dashboard-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.lab-lesson-library-heading, .lab-lesson-library-group { display: grid; gap: 12px; }
+.lab-lesson-library-heading h3, .lab-lesson-library-heading p, .lab-lesson-library-group h4, .lab-lesson-library-group p { margin: 0; }
+.lab-lesson-library-heading p, .lab-lesson-library-group > p { color: var(--muted); }
 
 .lab-console-panel {
   display: grid;
