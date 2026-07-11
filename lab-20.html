@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Command Doctor</title>
+    <link rel="stylesheet" href="styles.css?v=2026.07-lab.18">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary">
+        <div class="brand">
+          <div class="brand-mark">CD</div>
+          <div>
+            <h1>Command Doctor</h1>
+            <p>Offline CLI diagnosis</p>
+          </div>
+        </div>
+
+        <nav class="nav-tabs" aria-label="Views">
+          <button class="nav-tab active" type="button" data-view="diagnose">Diagnose</button>
+          <button class="nav-tab" type="button" data-view="lab">Lab Mode</button>
+          <button class="nav-tab" type="button" data-view="history">History</button>
+          <button class="nav-tab" type="button" data-view="knowledge">Knowledge</button>
+          <button class="nav-tab" type="button" data-view="admin">Trainer Controls</button>
+        </nav>
+
+        <div class="status-stack">
+          <span class="badge badge-green">Works Offline</span>
+          <span class="badge" id="kbVersion">KB loading</span>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <section class="view active" id="diagnoseView" aria-labelledby="diagnoseTitle">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Technician Console</p>
+              <h2 id="diagnoseTitle">Command Lookup</h2>
+            </div>
+            <div class="heading-actions">
+              <button class="secondary" id="loadSampleBtn" type="button">Load Example</button>
+              <button class="secondary" id="clearBtn" type="button">Clear</button>
+            </div>
+          </div>
+
+          <section class="input-grid">
+            <div class="diagnose-workspace">
+              <div class="input-panel">
+                <label for="cliOutput">Paste Output Evidence</label>
+                <textarea id="cliOutput" spellcheck="false" placeholder="Paste full command output here when you want diagnosis"></textarea>
+              </div>
+
+              <section class="paste-suggestions" id="pasteSuggestions" hidden aria-live="polite">
+                <div class="paste-suggestions-head">
+                  <strong>Matching Commands</strong>
+                  <span>Choose a command to view its details</span>
+                </div>
+                <div class="paste-suggestion-list" id="pasteSuggestionList"></div>
+              </section>
+
+              <section class="lookup-detail-panel" id="lookupDetailPanel" aria-live="polite"></section>
+            </div>
+
+            <div class="control-panel">
+              <label for="commandSearch">Command Lookup</label>
+              <input id="commandSearch" autocomplete="off" placeholder="sh vlan, display ?, ip route">
+              <label for="vendorSelect">Vendor</label>
+              <select id="vendorSelect">
+                <option value="auto">Auto Detect</option>
+                <option value="cisco_ios">Cisco IOS</option>
+                <option value="hp_comware">HP Comware</option>
+                <option value="aruba_cx">ArubaOS-CX</option>
+                <option value="windows_cmd">Windows CMD</option>
+                <option value="linux">Linux</option>
+              </select>
+              <div class="lookup-results" id="lookupResults"></div>
+              <button class="secondary" id="explainCommandBtn" type="button">Explain Command</button>
+
+              <label for="exampleSelect">Example Output</label>
+              <select id="exampleSelect"></select>
+              <button class="secondary" id="analyzeExampleBtn" type="button">Diagnose Example</button>
+
+              <button class="primary" id="diagnoseBtn" type="button">Diagnose</button>
+
+              <div class="mini-metrics" aria-live="polite">
+                <div>
+                  <span>Detected Vendor</span>
+                  <strong id="detectedVendor">-</strong>
+                </div>
+                <div>
+                  <span>Detected Command</span>
+                  <strong id="detectedCommand">-</strong>
+                </div>
+                <div>
+                  <span>Status</span>
+                  <strong id="detectedStatus">-</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="results-toolbar" id="resultsToolbar" hidden>
+            <button class="secondary" id="copyCommandsBtn" type="button">Copy Commands</button>
+            <button class="secondary" id="copyTicketBtn" type="button">Copy Ticket</button>
+            <button class="secondary" id="copyReportBtn" type="button">Copy Report</button>
+          </section>
+
+          <section class="results-grid" id="resultsGrid" aria-live="polite">
+            <div class="empty-state">
+              <h3>No analysis yet</h3>
+              <p>Command Doctor is ready.</p>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="labView" aria-labelledby="labTitle">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Offline Simulated Training</p>
+              <h2 id="labTitle">Lab Mode</h2>
+              <p class="page-intro">Learn to check, understand, troubleshoot, configure, verify, and explain commands without touching a real device.</p>
+            </div>
+          </div>
+          <div id="labRoot" class="lab-root" aria-live="polite"></div>
+        </section>
+
+        <section class="view" id="historyView" aria-labelledby="historyTitle">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Local Browser Storage</p>
+              <h2 id="historyTitle">History</h2>
+            </div>
+            <button class="secondary danger-text" id="clearHistoryBtn" type="button">Clear History</button>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </section>
+
+        <section class="view" id="knowledgeView" aria-labelledby="knowledgeTitle">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Local Files</p>
+              <h2 id="knowledgeTitle">Knowledge Base</h2>
+            </div>
+          </div>
+          <div class="knowledge-grid" id="knowledgeGrid"></div>
+        </section>
+
+        <section class="view" id="adminView" aria-labelledby="adminTitle">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Local Browser Controls</p>
+              <h2 id="adminTitle">Trainer Controls</h2>
+              <p class="page-intro">Review the full offline course and command catalog on this browser.</p>
+            </div>
+          </div>
+          <div id="adminRoot" class="admin-root"></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="src/lab-engine.js?v=2026.07-lab.18" defer></script>
+    <script src="src/app-release-20.js?v=2026.07-lab.20" defer></script>
+  </body>
+</html>
