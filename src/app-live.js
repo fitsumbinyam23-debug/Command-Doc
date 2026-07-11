@@ -2553,8 +2553,8 @@ function renderLabDashboard() {
 function renderLabConsole() {
   const consolePanel = labCreate("section", "lab-console-panel");
   consolePanel.append(labCreate("div", "lab-card-kicker", "Simulated switch console"));
-  consolePanel.append(labCreate("h3", "", "Practice From First Check to Change and Verification"));
-  consolePanel.append(labCreate("p", "", "Choose an imaginary device. Commands only change the local simulation and never reach a real network."));
+  consolePanel.append(labCreate("h3", "", "Interactive Switch Lab"));
+  consolePanel.append(labCreate("p", "", "Work through a realistic check, configuration, verification, and rollback on an imaginary device. The coach updates after every command; nothing leaves this browser."));
   const selector = document.createElement("select");
   selector.className = "lab-device-select";
   [
@@ -2574,13 +2574,17 @@ function renderLabConsole() {
     state.lab.console = { device: selector.value, mode: "exec", activeInterface: deviceProfile(selector.value).port, vlan: deviceProfile(selector.value).vlan, description: deviceProfile(selector.value).endpoint, transcript: [], engine: createLabEngine(selector.value) };
     renderLab();
   });
-  consolePanel.append(selector);
-
-  const terminal = labCreate("div", "lab-console-terminal");
   const engine = getLabEngine();
+  const workspace = labCreate("div", "lab-simulator-workspace");
+  workspace.append(renderLabDeviceVisual(engine));
+
+  const terminalPane = labCreate("section", "lab-terminal-pane");
+  terminalPane.append(labCreate("label", "lab-control-label", "Simulated device"), selector);
+  terminalPane.append(labCreate("div", "lab-terminal-label", "Console"));
+  const terminal = labCreate("div", "lab-console-terminal");
   const transcript = engine.transcript.length
     ? engine.transcript.join("\n\n")
-    : "Choose a device, then start with a read-only command such as show interface status or display irf.";
+    : `${consolePrompt()}\nChoose the simulated device, then begin with the safe read-only command shown by the coach.`;
   terminal.append(labCreate("pre", "lab-console-output", transcript));
   const row = labCreate("div", "lab-console-input-row");
   row.append(labCreate("span", "lab-console-prompt", consolePrompt()));
@@ -2590,12 +2594,96 @@ function renderLabConsole() {
   input.setAttribute("aria-label", "Simulated switch command");
   input.addEventListener("keydown", (event) => { if (event.key === "Enter") runLabConsoleCommand(input); });
   row.append(input);
-  consolePanel.append(terminal, row);
+  terminalPane.append(terminal, row);
   const controls = labCreate("div", "lab-console-actions");
   controls.append(labButton("Run simulated command", "primary", () => runLabConsoleCommand(input)));
-  controls.append(labButton("Clear console", "secondary", () => { state.lab.console.transcript = []; renderLab(); }));
-  consolePanel.append(controls);
+  controls.append(labButton("Reset device", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; renderLab(); showToast("The simulated device was reset to its starting state."); }));
+  terminalPane.append(controls);
+  workspace.append(terminalPane, renderLabCoach(engine));
+  consolePanel.append(workspace);
   els.labRoot.append(consolePanel);
+}
+
+function renderLabDeviceVisual(engine) {
+  const profile = deviceProfile(state.lab.console.device);
+  const current = engine.current();
+  const pane = labCreate("section", "lab-device-pane");
+  pane.append(labCreate("span", "lab-pane-kicker", `${profile.vendor} - simulated hardware`));
+  pane.append(labCreate("h4", "", profile.name));
+  pane.append(labCreate("p", "lab-device-issue", `Training condition: ${engine.seed.issue}`));
+
+  const switchFace = labCreate("div", "switch-face");
+  const switchHead = labCreate("div", "switch-face-head");
+  switchHead.append(labCreate("strong", "", profile.name), labCreate("span", "switch-power", "POWER"));
+  switchFace.append(switchHead);
+  const ports = labCreate("div", "switch-ports");
+  const focusPort = Math.min(Number(String(engine.selectedInterface).split("/").at(-1)) || 1, 24);
+  for (let index = 1; index <= 24; index += 1) {
+    const isActive = index === focusPort;
+    const port = labCreate("button", `switch-port ${isActive ? (current.shutdown || !current.connected ? "is-down" : "is-active") : ""}`, "");
+    port.type = "button";
+    port.title = isActive ? `${engine.selectedInterface}: ${current.shutdown ? "administratively down" : current.connected ? "connected" : "link down"}` : `Simulated port ${index}`;
+    port.setAttribute("aria-label", port.title);
+    port.addEventListener("click", () => {
+      showToast(isActive ? `${engine.selectedInterface}: ${current.shutdown ? "administratively down" : current.connected ? `connected on VLAN ${current.vlan}` : "link down"}` : `Port ${index} is not part of this training task.`);
+    });
+    ports.append(port);
+  }
+  switchFace.append(ports);
+  switchFace.append(labCreate("small", "switch-interface-label", `Focus port: ${engine.selectedInterface}`));
+  pane.append(switchFace);
+
+  const status = labCreate("dl", "lab-device-status");
+  [["Endpoint", engine.seed.endpoint], ["Port status", current.shutdown ? "Administratively down" : current.connected ? "Connected" : "Link down"], ["Access VLAN", String(current.vlan)], ["Change status", engine.verify() ? "Verified" : "Needs verification"]].forEach(([label, value]) => {
+    const row = labCreate("div", "lab-device-status-row");
+    row.append(labCreate("dt", "", label), labCreate("dd", "", value));
+    status.append(row);
+  });
+  pane.append(status);
+  return pane;
+}
+
+function renderLabCoach(engine) {
+  const coach = labCreate("aside", "lab-coach-pane");
+  const guidance = getLabGuidance(engine);
+  coach.append(labCreate("span", "lab-pane-kicker", "Guidance"));
+  coach.append(labCreate("h4", "", guidance.title));
+  coach.append(labCreate("p", "lab-coach-copy", guidance.explanation));
+  const next = labCreate("div", "lab-next-command");
+  next.append(labCreate("span", "", "Recommended next command"), labCreate("code", "", guidance.command));
+  coach.append(next);
+  coach.append(labCreate("p", "lab-coach-why", guidance.why));
+  const safety = labCreate("div", "lab-safety-note");
+  safety.append(labCreate("strong", "", "Safety check"), labCreate("span", "", guidance.safety));
+  coach.append(safety);
+  const milestones = labCreate("ol", "lab-milestones");
+  guidance.milestones.forEach(([label, done]) => {
+    const item = labCreate("li", done ? "is-complete" : "", label);
+    milestones.append(item);
+  });
+  coach.append(milestones);
+  return coach;
+}
+
+function getLabGuidance(engine) {
+  const used = (test) => engine.commands.some((command) => test.test(command));
+  const current = engine.current();
+  const isCisco = engine.seed.vendor === "Cisco IOS";
+  const checkCommand = engine.seed.vendor === "HP Comware" ? "display irf topology" : engine.seed.vendor === "ArubaOS-CX" ? "show interface brief" : "show interface status";
+  const checked = used(/^(show interface status|show interfaces status|sh int status|display irf topology|show interface brief)$/);
+  const configured = current.vlan !== engine.baseline.interfaces[engine.selectedInterface]?.vlan || current.shutdown !== engine.baseline.interfaces[engine.selectedInterface]?.shutdown;
+  const verified = used(/^(show running-config interface|show interface status|show interfaces status|sh int status|display irf topology|show interface brief)/) && engine.verify();
+  const configureCommand = engine.seed.vendor === "HP Comware" ? "system-view" : "configure terminal";
+  const vlanCommand = isCisco ? `switchport access vlan ${engine.seed.targetVlan}` : engine.seed.vendor === "HP Comware" ? `port access vlan ${engine.seed.targetVlan}` : `vlan access ${engine.seed.targetVlan}`;
+  const targetNeedsVlan = engine.seed.vlan !== engine.seed.targetVlan;
+  const targetNeedsEnable = Boolean(engine.seed.shutdown);
+
+  if (!checked) return { title: "Start With Evidence", explanation: `The simulated ${engine.seed.hostname} has a training condition: ${engine.seed.issue}. Read its current state before making a change.`, command: checkCommand, why: "A read-only check shows the current port or stack state without changing anything.", safety: "Do not configure or save until the observed output supports the change.", milestones: [["Read current state", false], ["Enter configuration only when justified", false], ["Verify the result", false], ["Save or roll back", false]] };
+  if (engine.seed.vendor === "HP Comware" || engine.seed.vendor === "ArubaOS-CX") return { title: "Interpret Before Change", explanation: engine.seed.vendor === "HP Comware" ? "The IRF output identifies a simulated physical stack-link fault. In a real incident, record the member and affected IRF port, then inspect the approved physical path rather than guessing a configuration change." : "The interface brief shows the simulated LACP condition. Confirm the LAG partner and intended port-channel before changing the member interface.", command: engine.seed.vendor === "HP Comware" ? "display irf-port" : "show interface brief", why: "This provides the detail required for an accurate ticket and an approved next action.", safety: "Do not reset a stack or change LACP membership during an active incident without an approved change plan.", milestones: [["Read current state", true], ["Collect focused evidence", false], ["Record safe next action", false], ["Create ticket summary", false]] };
+  if (!configured) return { title: "Make the Controlled Change", explanation: targetNeedsEnable ? `${engine.selectedInterface} is administratively down. Enter configuration mode and enable the simulated port.` : `The port is on VLAN ${current.vlan}; the intended training VLAN is ${engine.seed.targetVlan}. Enter configuration mode, select the interface, then apply the VLAN change.`, command: engine.mode === "exec" ? configureCommand : engine.mode === "config" ? `interface ${engine.seed.interface}` : targetNeedsEnable ? "no shutdown" : vlanCommand, why: engine.mode === "exec" ? "Configuration mode is required before changing a port." : engine.mode === "config" ? "Select only the intended interface before making a change." : "Apply only the approved correction to the selected simulated port.", safety: "Confirm the interface, VLAN, and change approval before continuing.", milestones: [["Read current state", true], ["Enter configuration only when justified", engine.mode !== "exec"], ["Apply minimal change", false], ["Verify the result", false], ["Save or roll back", false]] };
+  if (engine.mode !== "exec") return { title: "Return and Verify", explanation: "The simulated change is staged. Leave configuration mode and inspect the running interface configuration before you consider saving it.", command: "end", why: "Verification should be performed from privileged EXEC mode using a read-only show command.", safety: "A successful command is not proof of a correct change. Verify the expected port state.", milestones: [["Read current state", true], ["Enter configuration only when justified", true], ["Apply minimal change", true], ["Verify the result", false], ["Save or roll back", false]] };
+  if (!verified) return { title: "Verify the Intended State", explanation: `The simulated port now has VLAN ${current.vlan}${current.shutdown ? " and is shut down" : ""}. Confirm its active configuration before saving.`, command: `show running-config interface ${engine.selectedInterface}`, why: "The running configuration proves the interface has the intended access VLAN and administrative state.", safety: "Never save based only on the configuration command response.", milestones: [["Read current state", true], ["Enter configuration only when justified", true], ["Apply minimal change", true], ["Verify the result", false], ["Save or roll back", false]] };
+  return { title: "Verified - Choose Save or Rollback", explanation: `The simulated ${engine.selectedInterface} now meets the training target. You can practice a safe save acknowledgement or roll the device back and try again.`, command: "write memory", why: "The simulator permits a save only after verification. Use rollback to return to the starting condition.", safety: "In production, save only after approval and validation of the connected service.", milestones: [["Read current state", true], ["Enter configuration only when justified", true], ["Apply minimal change", true], ["Verify the result", true], ["Save or roll back", false]] };
 }
 
 function deviceProfile(device) {
