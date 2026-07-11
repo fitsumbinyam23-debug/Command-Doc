@@ -361,6 +361,7 @@ const state = {
     activeStageId: "foundation",
     activeSectionId: "",
     playgroundTaskId: "free-practice",
+    visualNetwork: null,
     activeLessonId: "",
     practiceInput: "",
     practicePassed: false,
@@ -2569,6 +2570,8 @@ function renderLabDashboard() {
     stages.append(card);
   });
   els.labRoot.append(stages);
+  renderLabConsole();
+  renderVisualNetworkPlayground();
 }
 
 function renderLabBreadcrumb(items) {
@@ -2708,6 +2711,254 @@ function renderLabPlayground() {
   actions.append(labButton("Reset Playground", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; renderLab(); showToast("The local simulated switch was reset."); }));
   verification.append(checklist, ticket, actions);
   els.labRoot.append(verification);
+}
+
+function createVisualNetwork() {
+  const ports = {};
+  for (let index = 1; index <= 24; index += 1) {
+    const name = `GigabitEthernet1/0/${index}`;
+    ports[name] = { name, description: "", vlan: "1", mode: "access", adminUp: true, connectedDeviceId: "", cable: "disconnected", speed: "auto", duplex: "auto", voiceVlan: "", allowedVlans: "all", errorDisabled: false, lastActivity: "Never" };
+  }
+  return {
+    hostname: "SIM-SWITCH",
+    vendor: "Cisco IOS",
+    ports,
+    vlans: { "1": { name: "DEFAULT" } },
+    devices: [
+      { id: "pc-1", name: "PC-1", type: "Desktop PC", mac: "02:00:00:00:00:01", ip: "", mask: "255.255.255.0", gateway: "", method: "static", port: "", lastPing: "Not tested" },
+      { id: "pc-2", name: "PC-2", type: "Laptop", mac: "02:00:00:00:00:02", ip: "", mask: "255.255.255.0", gateway: "", method: "static", port: "", lastPing: "Not tested" }
+    ],
+    macs: [],
+    selectedPort: "GigabitEthernet1/0/1",
+    selectedDeviceId: "pc-1",
+    selectedVlan: "",
+    traffic: "",
+    saved: false
+  };
+}
+
+function visualNetwork() {
+  if (!state.lab.visualNetwork) state.lab.visualNetwork = createVisualNetwork();
+  return state.lab.visualNetwork;
+}
+
+function visualPort(network, name = network.selectedPort) {
+  return network.ports[name] || null;
+}
+
+function visualDevice(network, id = network.selectedDeviceId) {
+  return network.devices.find((device) => device.id === id) || null;
+}
+
+function visualPortIsUp(port) {
+  return Boolean(port && port.adminUp && !port.errorDisabled && port.connectedDeviceId && port.cable === "good");
+}
+
+function visualMacRefresh(network) {
+  network.macs = network.devices.flatMap((device) => {
+    const port = visualPort(network, device.port);
+    return device.port && visualPortIsUp(port) && network.vlans[port.vlan] ? [{ vlan: port.vlan, mac: device.mac, type: "Dynamic", interface: port.name, age: "0" }] : [];
+  });
+}
+
+function syncEngineFromVisual() {
+  const network = visualNetwork();
+  const engine = getLabEngine();
+  if (!engine) return;
+  engine.state.hostname = network.hostname;
+  engine.state.interfaces = Object.fromEntries(Object.values(network.ports).map((port) => [port.name, {
+    description: port.description,
+    vlan: port.vlan,
+    shutdown: !port.adminUp,
+    connected: Boolean(port.connectedDeviceId),
+    mode: port.mode,
+    allowedVlans: port.allowedVlans,
+    voiceVlan: port.voiceVlan
+  }]));
+  engine.state.vlans = Object.keys(network.vlans);
+  engine.state.vlanNames = Object.fromEntries(Object.entries(network.vlans).map(([id, vlan]) => [id, vlan.name]));
+}
+
+function recordVisualCommands(commands, message) {
+  const engine = getLabEngine();
+  if (!engine) return;
+  commands.forEach((command) => {
+    engine.commands.push(command.toLowerCase());
+    engine.transcript.push(`${consolePrompt()} ${command}\n${message}`);
+  });
+  if (engine.transcript.length > 8) engine.transcript.splice(0, engine.transcript.length - 8);
+  syncEngineFromVisual();
+}
+
+function renderVisualNetworkPlayground() {
+  const network = visualNetwork();
+  visualMacRefresh(network);
+  const panel = labCreate("section", "visual-playground");
+  const heading = labCreate("div", "visual-playground-heading");
+  heading.append(labCreate("div", "lab-card-kicker", "Offline simulated training"));
+  heading.append(labCreate("h3", "", "Visual Network Playground"));
+  heading.append(labCreate("p", "", "Build a small topology, configure the local simulated switch through the CLI or visual controls, and test connectivity. It never connects to real equipment."));
+  panel.append(heading);
+
+  const grid = labCreate("div", "visual-playground-grid");
+  grid.append(renderVisualDeviceTray(network), renderVisualSwitch(network), renderVisualDetails(network));
+  panel.append(grid, renderVisualVerification(network));
+  els.labRoot.append(panel);
+}
+
+function renderVisualDeviceTray(network) {
+  const tray = labCreate("aside", "visual-device-tray");
+  tray.append(labCreate("strong", "", "Device tray"), labCreate("p", "", "Add a device, select it, then connect it to a selected switch port."));
+  const types = ["Desktop PC", "Laptop", "IP Phone", "Printer", "Wireless AP", "Server", "Switch", "Router"];
+  types.forEach((type) => tray.append(labButton(`Add ${type}`, "secondary visual-tray-button", () => addVisualDevice(type))));
+  const devices = labCreate("div", "visual-device-list");
+  network.devices.forEach((device) => {
+    const item = labButton(`${device.name}\n${device.port ? device.port : "Not connected"}`, `visual-device ${device.id === network.selectedDeviceId ? "is-selected" : ""}`, () => { network.selectedDeviceId = device.id; renderLab(); });
+    item.draggable = true;
+    item.addEventListener("dragstart", (event) => event.dataTransfer?.setData("text/plain", device.id));
+    devices.append(item);
+  });
+  tray.append(devices);
+  return tray;
+}
+
+function addVisualDevice(type) {
+  const network = visualNetwork();
+  const number = network.devices.length + 1;
+  const id = `${type.toLowerCase().replace(/[^a-z]+/g, "-")}-${number}`;
+  network.devices.push({ id, name: `${type.replace(/\s+/g, "-").toUpperCase()}-${number}`, type, mac: `02:00:00:00:00:${String(number).padStart(2, "0")}`, ip: "", mask: "255.255.255.0", gateway: "", method: "static", port: "", lastPing: "Not tested" });
+  network.selectedDeviceId = id;
+  renderLab();
+}
+
+function renderVisualSwitch(network) {
+  const switchPane = labCreate("section", "visual-switch-pane");
+  const head = labCreate("div", "visual-switch-head");
+  head.append(labCreate("strong", "", network.hostname), labCreate("span", "", "SIM-24P | SYSTEM ON"));
+  switchPane.append(head, labCreate("p", "visual-switch-caption", "24-port local simulated Cisco IOS switch"));
+  const chassis = labCreate("div", "visual-switch-chassis");
+  const consolePort = labCreate("span", "visual-console-port", "CONSOLE");
+  chassis.append(consolePort);
+  const ports = labCreate("div", "visual-port-grid");
+  Object.values(network.ports).forEach((port, index) => {
+    const button = labButton(`Gi1/0/${index + 1}`, `visual-port ${port.name === network.selectedPort ? "is-selected" : ""} ${visualPortIsUp(port) ? "is-up" : port.errorDisabled || !port.adminUp ? "is-warning" : ""}`, () => { network.selectedPort = port.name; renderLab(); });
+    button.setAttribute("title", `${port.name}: ${visualPortIsUp(port) ? "link up" : "link down"}`);
+    button.addEventListener("dragover", (event) => event.preventDefault());
+    button.addEventListener("drop", (event) => { event.preventDefault(); network.selectedDeviceId = event.dataTransfer?.getData("text/plain") || network.selectedDeviceId; connectSelectedVisualDevice(); });
+    ports.append(button);
+  });
+  chassis.append(ports);
+  switchPane.append(chassis);
+  const cables = labCreate("div", "visual-cables");
+  network.devices.filter((device) => device.port).forEach((device) => cables.append(labCreate("span", `visual-cable ${visualPortIsUp(visualPort(network, device.port)) ? "is-up" : "is-down"}`, `${device.name} to ${device.port}`)));
+  switchPane.append(cables);
+  return switchPane;
+}
+
+function renderVisualDetails(network) {
+  const panel = labCreate("aside", "visual-detail-pane");
+  const port = visualPort(network);
+  const device = visualDevice(network);
+  panel.append(labCreate("strong", "", "Port details"));
+  if (port) {
+    [["Interface", port.name], ["Description", port.description || "-"], ["Physical", port.connectedDeviceId ? "Connected" : "Disconnected"], ["Admin", port.adminUp ? "Up" : "Shutdown"], ["Operational", visualPortIsUp(port) ? "Up" : "Down"], ["Mode", port.mode], ["Access VLAN", port.vlan], ["Connected device", device?.port === port.name ? device.name : "-"], ["Learned MAC", network.macs.find((mac) => mac.interface === port.name)?.mac || "-"], ["Cable test", port.cable], ["Last activity", port.lastActivity]].forEach(([label, value]) => panel.append(labCreate("div", "visual-detail-row", `${label}: ${value}`)));
+  }
+  const actions = labCreate("div", "visual-actions");
+  actions.append(labButton("Connect selected device", "primary", connectSelectedVisualDevice));
+  actions.append(labButton("Disconnect cable", "secondary", disconnectVisualCable));
+  actions.append(labButton(port?.adminUp ? "Shut down port" : "Enable port", "secondary", toggleVisualPort));
+  actions.append(labButton("Run cable test", "secondary", runVisualCableTest));
+  panel.append(actions);
+  if (device) panel.append(renderVisualDeviceConfig(network, device));
+  return panel;
+}
+
+function renderVisualDeviceConfig(network, device) {
+  const config = labCreate("div", "visual-device-config");
+  config.append(labCreate("strong", "", `${device.name} configuration`));
+  const fields = {};
+  [["IP address", "ip"], ["Subnet mask", "mask"], ["Default gateway", "gateway"]].forEach(([label, key]) => {
+    const field = labCreate("label", "lab-setup-field");
+    field.append(labCreate("span", "", label));
+    const input = document.createElement("input");
+    input.value = device[key];
+    fields[key] = input;
+    field.append(input);
+    config.append(field);
+  });
+  config.append(labButton("Apply device IP settings", "secondary", () => { Object.entries(fields).forEach(([key, input]) => { device[key] = input.value.trim(); }); recordVisualCommands([`! ${device.name} IP configured locally`], `Updated ${device.name} local IP settings.`); renderLab(); }));
+  const target = document.createElement("select");
+  target.setAttribute("aria-label", "Ping target");
+  network.devices.filter((item) => item.id !== device.id).forEach((item) => { const option = document.createElement("option"); option.value = item.id; option.textContent = item.name; target.append(option); });
+  config.append(target, labButton("Ping selected device", "primary", () => runVisualPing(device.id, target.value)));
+  return config;
+}
+
+function connectSelectedVisualDevice() {
+  const network = visualNetwork();
+  const port = visualPort(network);
+  const device = visualDevice(network);
+  if (!port || !device) return;
+  if (port.connectedDeviceId && port.connectedDeviceId !== device.id) { showToast("Disconnect the existing simulated cable first."); return; }
+  if (device.port && device.port !== port.name) visualPort(network, device.port).connectedDeviceId = "";
+  port.connectedDeviceId = device.id;
+  port.cable = "good";
+  device.port = port.name;
+  port.lastActivity = "Cable connected";
+  visualMacRefresh(network);
+  recordVisualCommands([`interface ${port.name}`, "no shutdown"], `${device.name} connected to ${port.name} in the local simulation.`);
+  renderLab();
+}
+
+function disconnectVisualCable() {
+  const network = visualNetwork(); const port = visualPort(network); if (!port) return;
+  const device = visualDevice(network, port.connectedDeviceId); if (device) device.port = "";
+  port.connectedDeviceId = ""; port.cable = "disconnected"; port.lastActivity = "Cable disconnected";
+  visualMacRefresh(network); recordVisualCommands([`interface ${port.name}`, "! cable disconnected"], `Cable removed from ${port.name}.`); renderLab();
+}
+
+function toggleVisualPort() {
+  const network = visualNetwork(); const port = visualPort(network); if (!port) return;
+  port.adminUp = !port.adminUp; port.lastActivity = port.adminUp ? "Port enabled" : "Port shut down";
+  visualMacRefresh(network); recordVisualCommands([`interface ${port.name}`, port.adminUp ? "no shutdown" : "shutdown"], `Simulated port ${port.adminUp ? "enabled" : "shut down"}.`); renderLab();
+}
+
+function runVisualCableTest() {
+  const network = visualNetwork(); const port = visualPort(network); if (!port) return;
+  const output = port.cable === "good" ? `Cable test ${port.name}: Good. All simulated pairs normal.` : `Cable test ${port.name}: Open pair. Estimated simulated distance to fault: 12 meters.`;
+  port.lastActivity = output; recordVisualCommands([`test cable-diagnostics tdr interface ${port.name}`], output); renderLab();
+}
+
+function sameVisualSubnet(a, b) {
+  const parts = (value) => String(value || "").split(".");
+  const left = parts(a.ip); const right = parts(b.ip);
+  return left.length === 4 && right.length === 4 && left.slice(0, 3).join(".") === right.slice(0, 3).join(".");
+}
+
+function runVisualPing(sourceId, targetId) {
+  const network = visualNetwork(); const source = visualDevice(network, sourceId); const target = visualDevice(network, targetId); const sourcePort = visualPort(network, source?.port); const targetPort = visualPort(network, target?.port);
+  const ok = source && target && source.ip && target.ip && visualPortIsUp(sourcePort) && visualPortIsUp(targetPort) && sourcePort.vlan === targetPort.vlan && sameVisualSubnet(source, target);
+  const message = ok ? `Ping success: ${source.name} reached ${target.name}. Simulated packet travelled through ${sourcePort.name} and ${targetPort.name}.` : "Ping failed: check cable, port status, VLAN, and IP subnet in the local simulation.";
+  if (source) source.lastPing = message; if (target) target.lastPing = message;
+  if (sourcePort) sourcePort.lastActivity = "Ping tested"; if (targetPort) targetPort.lastActivity = "Ping tested";
+  visualMacRefresh(network); recordVisualCommands([`ping ${target?.ip || "<DESTINATION_IP>"}`], message); showToast(message); renderLab();
+}
+
+function renderVisualVerification(network) {
+  const checks = [
+    [network.devices.some((device) => device.port), "Physical connection checked"],
+    [Object.values(network.ports).some((port) => port.lastActivity.includes("Port") || port.lastActivity.includes("Ping")), "Port status checked"],
+    [Object.values(network.ports).some((port) => port.vlan !== "1"), "VLAN configured"],
+    [network.macs.length > 0, "MAC address learned"],
+    [network.devices.some((device) => device.ip), "IP configuration checked"],
+    [network.devices.some((device) => device.lastPing.startsWith("Ping success")), "Ping tested successfully"]
+  ];
+  const panel = labCreate("section", "visual-verification");
+  panel.append(labCreate("strong", "", "Verification checklist"));
+  checks.forEach(([done, label]) => panel.append(labCreate("span", done ? "is-complete" : "", `${done ? "Done" : "Next"}: ${label}`)));
+  panel.append(labCreate("p", "", "Ticket summary: This is a local browser simulation. Record only the simulated evidence you have verified."));
+  panel.append(labButton("Reset visual topology", "secondary", () => { state.lab.visualNetwork = createVisualNetwork(); syncEngineFromVisual(); renderLab(); }));
+  return panel;
 }
 
 function renderLabLessonLibrary() {
@@ -3077,6 +3328,8 @@ function runLabConsoleCommand(input) {
   const engine = getLabEngine();
   const prompt = consolePrompt();
   let result = engine ? engine.execute(command) : { output: simulateLabCommand(command), diff: "Simulator engine unavailable." };
+  const visualResult = syncVisualCliCommand(command, engine);
+  if (visualResult) result = { ...result, ok: visualResult.ok, kind: visualResult.kind || result.kind, output: visualResult.output, diff: "" };
   if (engine && !result.ok && result.kind === "unknown") {
     const known = findKnownLabCommand(command);
     if (known) {
@@ -3102,6 +3355,89 @@ function runLabConsoleCommand(input) {
   }
   input.value = "";
   renderLab();
+}
+
+function syncVisualCliCommand(command, engine) {
+  const network = visualNetwork();
+  const lower = command.toLowerCase();
+  const selectedPort = () => visualPort(network, engine?.selectedInterface || network.selectedPort);
+  const interfaceMatch = command.match(/^interface\s+(GigabitEthernet1\/0\/\d+)$/i);
+  if (interfaceMatch) {
+    network.selectedPort = interfaceMatch[1];
+    if (engine) engine.selectedInterface = interfaceMatch[1];
+    syncEngineFromVisual();
+    return { ok: true, kind: "config", output: `Selected local simulated interface ${interfaceMatch[1]}.` };
+  }
+  const vlanMatch = command.match(/^vlan\s+(\d+)$/i);
+  if (vlanMatch && engine?.mode === "vlan") {
+    const id = vlanMatch[1];
+    network.vlans[id] ||= { name: `VLAN-${id}` };
+    network.selectedVlan = id;
+    syncEngineFromVisual();
+    return { ok: true, kind: "config", output: `Created or selected local simulated VLAN ${id}.` };
+  }
+  if (/^name\s+/.test(lower) && engine?.mode === "vlan" && network.selectedVlan) {
+    network.vlans[network.selectedVlan] ||= {};
+    network.vlans[network.selectedVlan].name = command.slice(5).trim().toUpperCase();
+    syncEngineFromVisual();
+    return { ok: true, kind: "config", output: `Named local simulated VLAN ${network.selectedVlan} ${network.vlans[network.selectedVlan].name}.` };
+  }
+  const port = selectedPort();
+  if (port && /^description\s+/.test(lower) && engine?.mode === "interface") {
+    port.description = command.slice(12).trim(); port.lastActivity = "Description updated"; syncEngineFromVisual();
+    return { ok: true, kind: "config", output: `Description set on ${port.name}.` };
+  }
+  const accessMatch = command.match(/^switchport access vlan\s+(\d+)$/i);
+  if (port && accessMatch && engine?.mode === "interface") {
+    const id = accessMatch[1];
+    if (!network.vlans[id]) return { ok: false, kind: "warning", output: `VLAN ${id} does not exist in the local simulation. Create it first.` };
+    port.vlan = id; port.mode = "access"; port.lastActivity = `Access VLAN ${id} applied`; visualMacRefresh(network); syncEngineFromVisual();
+    return { ok: true, kind: "config", output: `${port.name} is now a local access port in VLAN ${id}.` };
+  }
+  if (port && /^switchport mode access$/i.test(command) && engine?.mode === "interface") { port.mode = "access"; syncEngineFromVisual(); return { ok: true, kind: "config", output: `${port.name} set to access mode.` }; }
+  if (port && /^switchport mode trunk$/i.test(command) && engine?.mode === "interface") { port.mode = "trunk"; syncEngineFromVisual(); return { ok: true, kind: "config", output: `${port.name} set to trunk mode.` }; }
+  if (port && /^switchport trunk allowed vlan\s+/.test(lower) && engine?.mode === "interface") { port.allowedVlans = command.split(/\s+/).slice(4).join(" "); syncEngineFromVisual(); return { ok: true, kind: "config", output: `${port.name} allowed VLANs set to ${port.allowedVlans}.` }; }
+  if (port && /^shutdown$/i.test(command) && engine?.mode === "interface") { port.adminUp = false; port.lastActivity = "Port shut down"; visualMacRefresh(network); syncEngineFromVisual(); return { ok: true, kind: "config", output: `${port.name} administratively down in the local simulation.` }; }
+  if (port && /^no shutdown$/i.test(command) && engine?.mode === "interface") { port.adminUp = true; port.lastActivity = "Port enabled"; visualMacRefresh(network); syncEngineFromVisual(); return { ok: true, kind: "config", output: `${port.name} administratively enabled in the local simulation.` }; }
+  if (/^show interfaces? status$/i.test(command) || /^show interface status$/i.test(command)) return { ok: true, kind: "show", output: visualInterfaceStatus(network) };
+  const detailMatch = command.match(/^show interface\s+(GigabitEthernet1\/0\/\d+)$/i);
+  if (detailMatch) return { ok: true, kind: "show", output: visualInterfaceDetail(network, detailMatch[1]) };
+  if (/^show vlan brief$/i.test(command)) return { ok: true, kind: "show", output: visualVlanBrief(network) };
+  if (/^show mac address-table(?: interface .+)?$/i.test(command)) return { ok: true, kind: "show", output: visualMacTable(network) };
+  if (/^show running-config interface/i.test(command)) return { ok: true, kind: "show", output: visualRunningInterface(network, port?.name || network.selectedPort) };
+  if (/^show running-config$/i.test(command)) return { ok: true, kind: "show", output: Object.keys(network.ports).filter((name) => { const item = visualPort(network, name); return item.description || item.vlan !== "1" || !item.adminUp; }).map((name) => visualRunningInterface(network, name)).join("\n\n") || "! No local simulated interface changes" };
+  if (/^show ip interface brief$/i.test(command)) return { ok: true, kind: "show", output: network.devices.map((device) => `${device.name.padEnd(14)} ${device.ip || "unassigned"}  ${device.port || "down"}`).join("\n") };
+  if (/^show interfaces trunk$/i.test(command)) return { ok: true, kind: "show", output: Object.values(network.ports).filter((item) => item.mode === "trunk").map((item) => `${item.name}  trunking  allowed ${item.allowedVlans}`).join("\n") || "No local simulated trunk ports." };
+  if (/^ping\s+/i.test(command)) {
+    const source = visualDevice(network); const target = network.devices.find((device) => device.ip === command.split(/\s+/).at(-1));
+    if (!source || !target) return { ok: false, kind: "warning", output: "Choose a simulated source device and use a configured local IP address." };
+    runVisualPing(source.id, target.id);
+    return { ok: true, kind: "show", output: source.lastPing };
+  }
+  if (/^(write memory|copy running-config startup-config)$/i.test(command)) { network.saved = true; return { ok: true, kind: "save", output: "Local simulated running configuration saved." }; }
+  return null;
+}
+
+function visualInterfaceStatus(network) {
+  return `Port                 Name                 Status       Vlan\n${Object.values(network.ports).map((port) => `${port.name.padEnd(21)} ${(port.description || "-").padEnd(20)} ${(visualPortIsUp(port) ? "connected" : port.adminUp ? "notconnect" : "disabled").padEnd(12)} ${port.vlan}`).join("\n")}`;
+}
+
+function visualInterfaceDetail(network, name) {
+  const port = visualPort(network, name); if (!port) return `Interface ${name} is not present in this local simulation.`;
+  return `${port.name} is ${visualPortIsUp(port) ? "up" : port.adminUp ? "down" : "administratively down"}, line protocol is ${visualPortIsUp(port) ? "up" : "down"}\n Description: ${port.description || "-"}\n switchport mode ${port.mode}\n access VLAN ${port.vlan}\n speed ${port.speed}, duplex ${port.duplex}\n cable test ${port.cable}`;
+}
+
+function visualVlanBrief(network) {
+  return `VLAN  Name                 Status    Ports\n${Object.entries(network.vlans).map(([id, vlan]) => `${id.padEnd(5)} ${String(vlan.name).padEnd(20)} active    ${Object.values(network.ports).filter((port) => port.mode === "access" && port.vlan === id).map((port) => port.name).join(", ") || "-"}`).join("\n")}`;
+}
+
+function visualMacTable(network) {
+  return `Vlan  Mac Address          Type       Ports\n${network.macs.map((entry) => `${entry.vlan.padEnd(5)} ${entry.mac.padEnd(20)} ${entry.type.padEnd(10)} ${entry.interface}`).join("\n") || "No dynamic MAC addresses learned."}`;
+}
+
+function visualRunningInterface(network, name) {
+  const port = visualPort(network, name); if (!port) return "";
+  return `interface ${port.name}\n description ${port.description || "-"}\n switchport mode ${port.mode}\n${port.mode === "trunk" ? ` switchport trunk allowed vlan ${port.allowedVlans}` : ` switchport access vlan ${port.vlan}`}\n ${port.adminUp ? "no shutdown" : "shutdown"}`;
 }
 
 function findKnownLabCommand(rawCommand) {
