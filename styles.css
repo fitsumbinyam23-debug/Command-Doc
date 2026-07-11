@@ -207,6 +207,13 @@ button:disabled {
 .lab-mission-card h5 { font-size: .96rem; }
 .lab-mission-card p { color: var(--ink-soft); font-size: .86rem; line-height: 1.45; }
 .lab-mission-command { display: block; padding: 8px; border-radius: 4px; background: #162831; color: #dcfff4; overflow-wrap: anywhere; font: 700 .75rem/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.lab-config-library { display: grid; gap: 14px; padding-top: 4px; }
+.lab-config-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.lab-config-card { display: grid; align-content: start; gap: 10px; min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel-soft); }
+.lab-config-card h5, .lab-config-card p { margin: 0; }
+.lab-config-card h5 { font-size: .96rem; }
+.lab-config-card p { color: var(--ink-soft); font-size: .86rem; line-height: 1.45; }
+.lab-config-sequence { min-height: 92px; margin: 0; padding: 10px; border-radius: 4px; background: #162831; color: #dcfff4; white-space: pre-wrap; overflow-wrap: anywhere; font: .8rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
 .status-stack {
   margin-top: auto;
@@ -1285,7 +1292,8 @@ input {
   }
 
   .lab-simulator-workspace,
-  .lab-mission-grid {
+  .lab-mission-grid,
+  .lab-config-grid {
     grid-template-columns: 1fr;
   }
 
