@@ -24,31 +24,28 @@ const FLOW_FILES = [
 const LAB_FILES = {
   stages: "data/labs/stages.json",
   sections: "data/labs/sections.json",
-  foundationLessons: "data/labs/lessons/foundation.json",
-  foundationExtendedLessons: "data/labs/lessons/foundation_extended.json",
-  configurationLessons: "data/labs/lessons/configuration.json",
-  configurationExtendedLessons: "data/labs/lessons/configuration_extended.json",
-  quizzes: "data/labs/quizzes/lesson-quizzes.json",
-  extendedQuizzes: "data/labs/quizzes/extended-quizzes.json",
+  curriculum: "data/labs/curriculum.json",
   scenarios: "data/labs/scenarios/scenarios.json"
 };
 
 const LAB_PROGRESS_KEY = "commandDoctorLabProgress";
 
 const SIMULATOR_MISSIONS = [
-  { id: "first-check", device: "warehouse", phase: "Foundation", title: "Read a Healthy Access Port", description: "Use a known-good scanner port as a reference before making changes elsewhere.", command: "show interface status" },
-  { id: "access-vlan", device: "hq", phase: "Configuration", title: "Correct an Access VLAN", description: "Diagnose and repair the Finance-PC port with a controlled VLAN change.", command: "show interface status" },
-  { id: "port-recovery", device: "branch", phase: "Configuration", title: "Recover a Disabled Port", description: "Identify an administratively down port, enable it, then verify service state.", command: "show interface status" },
-  { id: "switch-verification", device: "hq", phase: "Verification", title: "Verify Before Saving", description: "Read the running interface configuration and decide whether it is safe to save or roll back.", command: "show running-config interface Gi1/0/24" },
-  { id: "irf-investigation", device: "irf", phase: "Stacking", title: "Investigate an HP IRF Link", description: "Collect IRF topology and port evidence without guessing at a stack reset.", command: "display irf topology" },
-  { id: "lacp-investigation", device: "aruba", phase: "Troubleshooting", title: "Investigate an Aruba LACP Member", description: "Read member state and collect the focused evidence required for a safe next action.", command: "show interface brief" }
+  { id: "first-check", device: "access", phase: "Foundation", title: "Read an Access Port", description: "Use a safe read-only command to understand the simulated endpoint state.", command: "show interface status" },
+  { id: "access-vlan", device: "access", phase: "Configuration", title: "Correct an Access VLAN", description: "Diagnose and repair a simulated access port with a controlled VLAN change.", command: "show interface status" },
+  { id: "port-recovery", device: "disabled", phase: "Configuration", title: "Recover a Disabled Port", description: "Identify a simulated administratively down port, enable it, then verify the result.", command: "show interface status" },
+  { id: "switch-verification", device: "access", phase: "Verification", title: "Verify Before Saving", description: "Read simulated interface configuration and choose save or rollback based on evidence.", command: "show running-config interface <ACCESS_PORT>" },
+  { id: "irf-investigation", device: "irf", phase: "Stacking", title: "Investigate an IRF Link", description: "Collect simulated IRF topology and port evidence without changing stack state.", command: "display irf topology" },
+  { id: "lacp-investigation", device: "aruba", phase: "Troubleshooting", title: "Investigate an LACP Member", description: "Read simulated member state before proposing an approved correction.", command: "show interface brief" }
 ];
 
 const CONFIGURATION_DRILLS = [
-  { title: "Rename a Cisco Switch", device: "hq", purpose: "Set and verify the simulated device hostname.", commands: ["configure terminal", "hostname HQ-TRAIN-01", "end", "show running-config"] },
-  { title: "Create and Name a VLAN", device: "hq", purpose: "Create VLAN 60 and give it a meaningful name.", commands: ["configure terminal", "vlan 60", "name TRAINING-USERS", "end", "show vlan brief"] },
-  { title: "Set Cisco Stack Priority", device: "hq", purpose: "Practice the stack-member priority command and verify the member roles.", commands: ["configure terminal", "switch 1 priority 15", "end", "show switch"] },
-  { title: "Set HP IRF Member Priority", device: "irf", purpose: "Practice the Comware IRF priority command and verify the saved running state.", commands: ["system-view", "irf member 1 priority 32", "return", "display irf configuration"] }
+  { title: "Rename a Simulated Switch", device: "access", purpose: "Set and verify the simulated device hostname.", commands: ["configure terminal", "hostname <SWITCH_NAME>", "end", "show running-config"] },
+  { title: "Create and Name a VLAN", device: "access", purpose: "Create and name an approved simulated VLAN.", commands: ["configure terminal", "vlan <VLAN_ID>", "name <VLAN_NAME>", "end", "show vlan brief"] },
+  { title: "Configure an Access Port", device: "access", purpose: "Set the simulated access port, then verify before saving.", commands: ["configure terminal", "interface <ACCESS_PORT>", "switchport mode access", "switchport access vlan <VLAN_ID>", "no shutdown", "end", "show running-config interface <ACCESS_PORT>"] },
+  { title: "Configure a Trunk Port", device: "trunk", purpose: "Practice a simulated trunk workflow and verify allowed VLANs.", commands: ["configure terminal", "interface <TRUNK_PORT>", "switchport mode trunk", "switchport trunk allowed vlan <VLAN_ID>", "end", "show interfaces trunk"] },
+  { title: "Set Cisco Stack Priority", device: "access", purpose: "Practice the simulated stack-member priority command and verify member roles.", commands: ["configure terminal", "switch <STACK_MEMBER_ID> priority <PRIORITY>", "end", "show switch"] },
+  { title: "Set HP IRF Member Priority", device: "irf", purpose: "Practice simulated Comware IRF priority and verify the configuration.", commands: ["system-view", "irf member <STACK_MEMBER_ID> priority <PRIORITY>", "return", "display irf configuration"] }
 ];
 
 const VENDOR_LABELS = {
@@ -367,12 +364,12 @@ const state = {
     quizSelection: null,
     scenarioScore: 0,
     console: {
-      device: "hq",
+      device: "access",
       missionId: "access-vlan",
       mode: "exec",
-      activeInterface: "Gi1/0/24",
-      vlan: "31",
-      description: "Finance-PC",
+      activeInterface: "<ACCESS_PORT>",
+      vlan: "<VLAN_ID>",
+      description: "<DEVICE_NAME>",
       transcript: [],
       engine: null
     }
@@ -527,14 +524,9 @@ async function loadKnowledge() {
   ]));
   state.lab.stages = labData.stages?.stages || [];
   state.lab.sections = labData.sections?.sections || [];
-  state.lab.lessons = [
-    ...(labData.foundationLessons?.lessons || []),
-    ...(labData.foundationExtendedLessons?.lessons || []),
-    ...(labData.configurationLessons?.lessons || []),
-    ...(labData.configurationExtendedLessons?.lessons || [])
-  ];
-  state.lab.quizzes = { ...(labData.quizzes?.quizzes || {}), ...(labData.extendedQuizzes?.quizzes || {}) };
-  state.lab.foundationFinalQuiz = labData.quizzes?.foundation_final || [];
+  state.lab.lessons = labData.curriculum?.lessons || [];
+  state.lab.quizzes = labData.curriculum?.quizzes || {};
+  state.lab.foundationFinalQuiz = labData.curriculum?.foundation_final || [];
   state.lab.scenarios = labData.scenarios?.scenarios || [];
   state.lab.progress = loadLabProgress();
   migrateLabProgress();
@@ -2608,11 +2600,11 @@ function renderLabConsole() {
   const selector = document.createElement("select");
   selector.className = "lab-device-select";
   [
-    ["hq", "HQ-ACC-01 | Cisco access switch"],
-    ["branch", "BRANCH-ACC-02 | Cisco branch switch"],
-    ["warehouse", "WH-ACC-03 | Cisco warehouse switch"],
-    ["irf", "CORE-IRF-01 | HP Comware IRF stack"],
-    ["aruba", "EDGE-CX-01 | ArubaOS-CX edge switch"]
+    ["access", "<SWITCH_NAME> | Cisco access switch"],
+    ["disabled", "<SWITCH_NAME> | Cisco disabled-port scenario"],
+    ["trunk", "<SWITCH_NAME> | Cisco trunk scenario"],
+    ["irf", "<SWITCH_NAME> | HP Comware IRF scenario"],
+    ["aruba", "<SWITCH_NAME> | ArubaOS-CX LACP scenario"]
   ].forEach(([value, label]) => {
     const option = document.createElement("option");
     option.value = value;
@@ -2703,7 +2695,7 @@ function renderLabMissionPath() {
 }
 
 function startLabMission(mission) {
-  const device = mission.device || "hq";
+  const device = mission.device || "access";
   state.lab.console = {
     device,
     missionId: mission.id || (SIMULATOR_MISSIONS.find((item) => item.device === device)?.id || ""),
@@ -2823,13 +2815,13 @@ function getLabGuidance(engine) {
 
 function deviceProfile(device) {
   const profiles = {
-    hq: { name: "HQ-ACC-01", vendor: "Cisco IOS", port: "Gi1/0/24", endpoint: "Finance-PC", vlan: "31" },
-    branch: { name: "BRANCH-ACC-02", vendor: "Cisco IOS", port: "Gi1/0/12", endpoint: "Reception-PC", vlan: "20" },
-    warehouse: { name: "WH-ACC-03", vendor: "Cisco IOS", port: "Gi1/0/8", endpoint: "Scanner-07", vlan: "50" },
-    irf: { name: "CORE-IRF-01", vendor: "HP Comware", port: "GigabitEthernet1/0/24", endpoint: "Distribution-Uplink", vlan: "30" },
-    aruba: { name: "EDGE-CX-01", vendor: "ArubaOS-CX", port: "1/1/10", endpoint: "Training-AP", vlan: "40" }
+    access: { name: "<SWITCH_NAME>", vendor: "Cisco IOS", port: "<ACCESS_PORT>", endpoint: "<DEVICE_NAME>", vlan: "<VLAN_ID>" },
+    disabled: { name: "<SWITCH_NAME>", vendor: "Cisco IOS", port: "<ACCESS_PORT>", endpoint: "<DEVICE_NAME>", vlan: "<VLAN_ID>" },
+    trunk: { name: "<SWITCH_NAME>", vendor: "Cisco IOS", port: "<TRUNK_PORT>", endpoint: "<UPLINK_DEVICE>", vlan: "<VLAN_ID>" },
+    irf: { name: "<SWITCH_NAME>", vendor: "HP Comware", port: "<IRF_PORT>", endpoint: "<STACK_MEMBER_ID>", vlan: "<VLAN_ID>" },
+    aruba: { name: "<SWITCH_NAME>", vendor: "ArubaOS-CX", port: "<ACCESS_PORT>", endpoint: "<DEVICE_NAME>", vlan: "<VLAN_ID>" }
   };
-  return profiles[device] || profiles.hq;
+  return profiles[device] || profiles.access;
 }
 
 function consolePrompt() {
@@ -2910,9 +2902,9 @@ function simulateLabCommand(command) {
   if (/^(show interface status|show interfaces status|sh int status)$/.test(lower)) return `Port        Name              Status     Vlan\n${consoleState.activeInterface}  ${consoleState.description}  connected  ${consoleState.vlan}`;
   if (/^(show vlan brief|sh vlan brief)$/.test(lower)) return `VLAN  Name        Status    Ports\n${consoleState.vlan}    TRAINING-${consoleState.vlan}  active    ${consoleState.activeInterface}`;
   if (/^show running-config interface/.test(lower)) return `interface ${consoleState.activeInterface}\n description ${consoleState.description}\n switchport access vlan ${consoleState.vlan}\n no shutdown`;
-  if (/^show cdp neighbors/.test(lower)) return `Device ID       Local Intrfce   Platform\nCORE-SW         ${consoleState.activeInterface}      C9300`;
-  if (/^display irf$/.test(lower)) return "MemberID  Role     Priority\n1         Master   32\n2         Standby  31";
-  if (/^display irf topology/.test(lower)) return "Topology Info\nMember 1  IRF-Port1 UP  IRF-Port2 UP\nMember 2  IRF-Port1 UP  IRF-Port2 UP";
+  if (/^show cdp neighbors/.test(lower)) return `Device ID       Local Intrfce   Platform\n<UPLINK_DEVICE>         ${consoleState.activeInterface}      <PLATFORM>`;
+  if (/^display irf$/.test(lower)) return "MemberID  Role     Priority\n<STACK_MEMBER_ID>         Master   <PRIORITY>";
+  if (/^display irf topology/.test(lower)) return "Topology Info\nMember <STACK_MEMBER_ID>  <IRF_PORT> UP";
   if (/^show interface brief/.test(lower)) return `Interface  Status  Speed\n${profile.port}     up      1G`;
   if (/^(write memory|copy running-config startup-config|save)$/.test(lower)) return "Simulated configuration saved. In real work, save only after approved verification.";
   const knownCommand = state.commands.find((item) => normalizeCommandText(item.command) === normalizeCommandText(command));
