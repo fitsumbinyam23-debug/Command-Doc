@@ -447,6 +447,28 @@ button:disabled {
   background: #ffffff;
 }
 
+.lab-manual-route-panel {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(280px, 1.5fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin: 4px 0 2px;
+  padding: 14px;
+  border: 1px solid #8ec8bc;
+  border-radius: var(--radius);
+  background: #f1fbf8;
+}
+
+.lab-manual-route-panel strong {
+  color: var(--ink);
+}
+
+.lab-manual-route-panel span {
+  color: var(--ink-soft);
+  font-size: .84rem;
+  line-height: 1.4;
+}
+
 .lab-playground-task-copy {
   display: grid;
   gap: 5px;
@@ -1010,6 +1032,10 @@ button:disabled {
 
   .lab-playground-taskbar,
   .lab-playground-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .lab-manual-route-panel {
     grid-template-columns: 1fr;
   }
 
