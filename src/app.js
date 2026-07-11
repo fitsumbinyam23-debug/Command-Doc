@@ -358,6 +358,9 @@ const state = {
     scenarios: [],
     progress: null,
     screen: "dashboard",
+    activeStageId: "foundation",
+    activeSectionId: "",
+    playgroundTaskId: "free-practice",
     activeLessonId: "",
     practiceInput: "",
     practicePassed: false,
@@ -2458,7 +2461,24 @@ function labFoundationComplete() {
 function labStageUnlocked(stageId) {
   if (stageId === "foundation") return true;
   if (stageId === "configuration") return labConfigurationUnlocked();
-  return labConfigurationUnlocked() && state.lab.progress.configurationCompleted;
+  if (stageId === "playground") return labPlaygroundUnlocked();
+  return false;
+}
+
+const PLAYGROUND_REQUIRED_SECTIONS = ["interface", "vlan", "mac", "safety"];
+
+function labSectionLessons(sectionId) {
+  const section = state.lab.sections.find((item) => item.id === sectionId);
+  return (section?.lesson_ids || []).map((id) => state.lab.lessons.find((item) => item.id === id)).filter(Boolean);
+}
+
+function labSectionComplete(sectionId) {
+  const lessons = labSectionLessons(sectionId);
+  return lessons.length > 0 && lessons.every((lesson) => state.lab.progress.completedLessons[lesson.id]);
+}
+
+function labPlaygroundUnlocked() {
+  return PLAYGROUND_REQUIRED_SECTIONS.every(labSectionComplete);
 }
 
 function labProgressPercent(lessons) {
@@ -2500,6 +2520,18 @@ function renderLab() {
     renderLabCliWorkspace();
     return;
   }
+  if (state.lab.screen === "stage") {
+    renderLabStagePage();
+    return;
+  }
+  if (state.lab.screen === "section") {
+    renderLabSectionPage();
+    return;
+  }
+  if (state.lab.screen === "playground") {
+    renderLabPlayground();
+    return;
+  }
   if (state.lab.screen === "lessons") {
     renderLabLessonLibrary();
     return;
@@ -2508,78 +2540,174 @@ function renderLab() {
 }
 
 function renderLabDashboard() {
+  const heading = labCreate("section", "lab-home-heading");
+  heading.append(labCreate("div", "lab-card-kicker", "Offline simulated training"));
+  heading.append(labCreate("h3", "", "Lab Mode"));
+  heading.append(labCreate("p", "", "Learn one topic at a time, then practice safely on a local simulated switch."));
+  els.labRoot.append(heading);
+
   const intro = labCreate("div", "lab-banner");
-  intro.append(
-    labCreate("strong", "lab-banner-title", "100% simulated practice"),
-    labCreate("span", "lab-banner-copy", "Nothing in Lab Mode runs on a real device. Type commands, read evidence, and learn the safe next step.")
-  );
+  intro.append(labCreate("strong", "lab-banner-title", "100% simulated practice"), labCreate("span", "lab-banner-copy", "Nothing here runs on a real device. Commands, outputs, and changes stay in this browser."));
   els.labRoot.append(intro);
 
-  const labActions = labCreate("div", "lab-dashboard-actions");
-  labActions.append(
-    labButton("Choose a Switch-Type Lesson", "primary", () => { state.lab.screen = "lessons"; renderLab(); }),
-    labButton("Open Trainer Controls", "secondary", () => switchView("admin"))
-  );
-  els.labRoot.append(labActions);
-  renderLabConsole();
-
   const stages = labCreate("div", "lab-stage-grid");
-  state.lab.stages.forEach((stage) => {
-    const unlocked = labStageUnlocked(stage.id);
+  const stageOrder = ["foundation", "configuration", "playground"];
+  stageOrder.forEach((id) => {
+    const stage = state.lab.stages.find((item) => item.id === id) || { id, title: id, description: "" };
+    const unlocked = labStageUnlocked(id);
+    const complete = id === "foundation" ? labFoundationComplete() : id === "configuration" ? state.lab.progress.configurationCompleted : false;
+    const status = complete ? "Completed" : unlocked ? "Available" : "Locked";
     const card = labCreate("article", `lab-stage-card ${unlocked ? "" : "is-locked"}`);
-    const status = unlocked ? (stage.id === "foundation" ? "Available" : "Unlocked") : "Locked";
     card.append(labCreate("span", `lab-status ${unlocked ? "available" : "locked"}`, status));
     card.append(labCreate("h3", "", stage.title));
     card.append(labCreate("p", "", stage.description));
-    if (stage.id === "foundation") {
-      card.append(labCreate("div", "lab-stage-metric", `${labProgressPercent(labFoundationLessons())}% complete`));
-    } else if (stage.id === "configuration") {
-      card.append(labCreate("div", "lab-stage-metric", labConfigurationUnlocked() ? "Ready for simulated configuration" : "Pass the Foundation final quiz"));
-    } else {
-      card.append(labCreate("div", "lab-stage-metric", state.lab.progress.configurationCompleted ? "Ready for final scenarios" : "Complete Configuration Lab"));
-    }
-    if (unlocked) {
-      card.append(labButton(stage.id === "scenarios" ? "Open scenarios" : "Open stage", "secondary", () => openLabStage(stage.id)));
-    } else {
-      card.append(labCreate("span", "lab-lock-note", "Complete the previous stage to unlock"));
-    }
+    const metric = id === "foundation" ? `${labProgressPercent(labFoundationLessons())}% complete` : id === "configuration" ? (labConfigurationUnlocked() ? "Ready for guided configuration" : "Pass the Foundation checkpoint") : (unlocked ? "Ready for free practice" : "Complete four safety foundations");
+    card.append(labCreate("div", "lab-stage-metric", metric));
+    const button = labButton("Open", unlocked ? "primary" : "secondary", () => openLabStage(id));
+    button.disabled = !unlocked;
+    card.append(button);
     stages.append(card);
   });
   els.labRoot.append(stages);
+}
 
-  const foundationHeading = labCreate("div", "lab-section-heading");
-  foundationHeading.append(labCreate("h3", "", "Basic Foundation"), labCreate("p", "", "Check first. Understand the evidence. Build safe troubleshooting habits."));
-  els.labRoot.append(foundationHeading);
-  const sectionGrid = labCreate("div", "lab-section-grid");
-  state.lab.sections.filter((section) => section.stage === "foundation").forEach((section) => sectionGrid.append(renderLabSectionCard(section)));
-  els.labRoot.append(sectionGrid);
-
-  const finalQuiz = labCreate("article", "lab-final-card");
-  finalQuiz.append(labCreate("div", "lab-card-kicker", "Foundation checkpoint"));
-  finalQuiz.append(labCreate("h3", "", "Stage 1 Final Quiz"));
-  finalQuiz.append(labCreate("p", "", labFoundationComplete() ? "All sample foundation lessons are complete. Pass with 80% to unlock Configuration Lab." : "Complete the available foundation lessons before taking the final quiz."));
-  if (state.lab.progress.foundationFinalScore !== null) {
-    finalQuiz.append(labCreate("strong", "lab-score", `Last score: ${state.lab.progress.foundationFinalScore}%`));
-  }
-  const quizButton = labButton(labFoundationComplete() ? "Take final quiz" : "Locked until lessons are complete", labFoundationComplete() ? "primary" : "secondary", () => {
-    if (labFoundationComplete()) { state.lab.screen = "final-quiz"; renderLab(); }
+function renderLabBreadcrumb(items) {
+  const trail = labCreate("nav", "lab-breadcrumb", "");
+  trail.setAttribute("aria-label", "Lab navigation");
+  items.forEach((item, index) => {
+    if (index) trail.append(labCreate("span", "", ">"));
+    const button = labButton(item.label, "lab-breadcrumb-link", () => { state.lab.screen = item.screen; renderLab(); });
+    button.disabled = !item.screen;
+    trail.append(button);
   });
-  quizButton.disabled = !labFoundationComplete();
-  finalQuiz.append(quizButton);
-  els.labRoot.append(finalQuiz);
+  els.labRoot.append(trail);
+}
 
-  if (labConfigurationUnlocked()) {
-    const configHeading = labCreate("div", "lab-section-heading");
-    configHeading.append(labCreate("h3", "", "Configuration Lab"), labCreate("p", "", "Practice a controlled simulated change, verify it, and learn the rollback."));
-    els.labRoot.append(configHeading);
-    const configGrid = labCreate("div", "lab-section-grid");
-    state.lab.sections.filter((section) => section.stage === "configuration").forEach((section) => configGrid.append(renderLabSectionCard(section)));
-    els.labRoot.append(configGrid);
-    const config = labCreate("article", "lab-unlock-card");
-    config.append(labCreate("strong", "", "Configuration Lab unlocked. You are now ready to practice simulated configuration."));
-    config.append(labButton("Open Configuration Lab", "secondary", () => openLabStage("configuration")));
-    els.labRoot.append(config);
+function renderLabStagePage() {
+  const stageId = state.lab.activeStageId;
+  const stage = state.lab.stages.find((item) => item.id === stageId);
+  if (!stage || !labStageUnlocked(stageId)) { state.lab.screen = "dashboard"; renderLab(); return; }
+  renderLabBreadcrumb([{ label: "Lab Mode", screen: "dashboard" }, { label: stage.title }]);
+  const header = labCreate("section", "lab-page-header");
+  header.append(labCreate("div", "lab-card-kicker", stageId === "foundation" ? "Learning path" : "Guided configuration"));
+  header.append(labCreate("h3", "", stage.title));
+  header.append(labCreate("p", "", stage.description));
+  els.labRoot.append(header);
+  const grid = labCreate("div", "lab-section-grid");
+  state.lab.sections.filter((section) => section.stage === stageId).forEach((section) => grid.append(renderLabStageSectionCard(section)));
+  els.labRoot.append(grid);
+  if (stageId === "foundation" && labFoundationComplete()) {
+    const checkpoint = labCreate("section", "lab-unlock-card");
+    checkpoint.append(labCreate("strong", "", "Foundation checkpoint ready"), labCreate("span", "", "Pass with 80% or higher to unlock the Configuration Lab."));
+    checkpoint.append(labButton("Take Foundation Quiz", "primary", () => { state.lab.screen = "final-quiz"; renderLab(); }));
+    els.labRoot.append(checkpoint);
   }
+}
+
+function renderLabStageSectionCard(section) {
+  const lessons = labSectionLessons(section.id);
+  const percent = labProgressPercent(lessons);
+  const card = labCreate("article", "lab-section-card");
+  card.append(labCreate("h4", "", section.title), labCreate("p", "", section.description));
+  card.append(labCreate("div", "lab-section-meta", `${lessons.length} lesson${lessons.length === 1 ? "" : "s"} | ${percent}% complete`));
+  const track = labCreate("div", "lab-progress-track");
+  const fill = labCreate("span", "lab-progress-fill");
+  fill.style.width = `${percent}%`;
+  track.append(fill);
+  card.append(track);
+  const label = percent === 100 ? "Review" : percent > 0 ? "Continue" : "Start";
+  card.append(labButton(label, "secondary", () => { state.lab.activeSectionId = section.id; state.lab.screen = "section"; renderLab(); }));
+  return card;
+}
+
+function renderLabSectionPage() {
+  const section = state.lab.sections.find((item) => item.id === state.lab.activeSectionId);
+  if (!section) { state.lab.screen = "dashboard"; renderLab(); return; }
+  const stage = state.lab.stages.find((item) => item.id === section.stage);
+  renderLabBreadcrumb([{ label: "Lab Mode", screen: "dashboard" }, { label: stage?.title || "Stage", screen: "stage" }, { label: section.title }]);
+  const header = labCreate("section", "lab-page-header");
+  header.append(labCreate("div", "lab-card-kicker", section.difficulty), labCreate("h3", "", section.title), labCreate("p", "", section.description));
+  els.labRoot.append(header);
+  const list = labCreate("div", "lab-lesson-list");
+  labSectionLessons(section.id).forEach((lesson) => {
+    const complete = Boolean(state.lab.progress.completedLessons[lesson.id]);
+    const score = state.lab.progress.lessonScores[lesson.id];
+    const row = labCreate("article", "lab-lesson-row");
+    const copy = labCreate("div", "lab-lesson-row-copy");
+    copy.append(labCreate("h4", "", lesson.title));
+    copy.append(labCreate("p", "", `${lesson.vendor} | ${lesson.difficulty} | ${complete ? `Completed${score !== undefined ? ` (${score}%)` : ""}` : "Not completed"}`));
+    row.append(copy, labButton(complete ? "Review lesson" : "Start lesson", "secondary", () => openLabLesson(lesson.id)));
+    list.append(row);
+  });
+  els.labRoot.append(list);
+}
+
+const PLAYGROUND_TASKS = [
+  { id: "free-practice", label: "Free Practice", device: "access", goal: "Explore safe read-only commands and local configuration changes.", hint: "Start with show interface status or show vlan brief." },
+  { id: "access-port", label: "Configure Access Port", device: "access", goal: "Set a simulated access port description, access VLAN, and verify it.", hint: "Read the port state before entering configuration mode." },
+  { id: "create-vlan", label: "Create VLAN", device: "access", goal: "Create a local simulated VLAN, give it a name, verify it, then save.", hint: "Create the VLAN before assigning it to a port." },
+  { id: "trunk-port", label: "Configure Trunk Port", device: "trunk", goal: "Configure a simulated trunk and verify its allowed VLANs.", hint: "Use a show command to inspect the existing trunk first." },
+  { id: "wrong-vlan", label: "Fix Wrong VLAN", device: "access", goal: "Inspect a simulated port, correct its VLAN, then confirm the result.", hint: "Use interface status and running configuration as evidence." },
+  { id: "recover-port", label: "Recover Shutdown Port", device: "disabled", goal: "Identify an administratively disabled simulated port and recover it safely.", hint: "Check port status before making the change." }
+];
+
+function renderLabPlayground() {
+  if (!labPlaygroundUnlocked()) { state.lab.screen = "dashboard"; renderLab(); return; }
+  renderLabBreadcrumb([{ label: "Lab Mode", screen: "dashboard" }, { label: "Playground" }]);
+  const task = PLAYGROUND_TASKS.find((item) => item.id === state.lab.playgroundTaskId) || PLAYGROUND_TASKS[0];
+  const header = labCreate("section", "lab-page-header");
+  header.append(labCreate("div", "lab-card-kicker", "Simulated switch playground"));
+  header.append(labCreate("h3", "", "Practice on a local imaginary switch"));
+  header.append(labCreate("p", "", "Choose one task, work in the terminal, then verify the result. Nothing connects to a network or changes a real device."));
+  els.labRoot.append(header);
+
+  const taskBar = labCreate("section", "lab-playground-taskbar");
+  const selectorField = labCreate("label", "lab-setup-field");
+  selectorField.append(labCreate("span", "", "Scenario"));
+  const selector = document.createElement("select");
+  selector.setAttribute("aria-label", "Playground scenario");
+  PLAYGROUND_TASKS.forEach((item) => {
+    const option = document.createElement("option");
+    option.value = item.id;
+    option.textContent = item.label;
+    selector.append(option);
+  });
+  selector.value = task.id;
+  selector.addEventListener("change", () => {
+    const next = PLAYGROUND_TASKS.find((item) => item.id === selector.value) || PLAYGROUND_TASKS[0];
+    state.lab.playgroundTaskId = next.id;
+    startLabMission(SIMULATOR_MISSIONS.find((mission) => mission.device === next.device) || { device: next.device });
+    renderLab();
+  });
+  selectorField.append(selector);
+  taskBar.append(selectorField);
+  const taskCopy = labCreate("div", "lab-playground-task-copy");
+  taskCopy.append(labCreate("strong", "", task.label), labCreate("span", "", task.goal));
+  taskBar.append(taskCopy);
+  els.labRoot.append(taskBar);
+
+  renderLabConsole();
+  const engine = getLabEngine();
+  const verification = labCreate("section", "lab-playground-summary");
+  const commands = engine.commands.join(" ").toLowerCase();
+  const checked = /show|display/.test(commands);
+  const configured = /configure terminal|system-view|switchport|port access|vlan /.test(commands);
+  const saved = /write memory|copy running-config startup-config|save force/.test(commands);
+  const checklist = labCreate("div", "lab-summary-field");
+  checklist.append(labCreate("strong", "", "Verification checklist"));
+  [
+    [checked, "Read the simulated current state"],
+    [configured, "Made a local simulated change"],
+    [checked && configured, "Verified with a show or display command"],
+    [saved, "Saved only after verification"]
+  ].forEach(([done, label]) => checklist.append(labCreate("span", done ? "is-complete" : "", `${done ? "Done" : "Next"}: ${label}`)));
+  const ticket = labCreate("div", "lab-summary-field");
+  ticket.append(labCreate("strong", "", "Ticket summary"));
+  ticket.append(labCreate("p", "", configured && checked ? `Simulated task in progress: ${task.label}. Local switch state was checked and a simulated change was made on ${engine.selectedInterface}. Verification ${checked ? "is recorded" : "is still required"}.` : `Simulated task selected: ${task.label}. No diagnosis or device change is claimed until simulated output and verification are present.`));
+  const actions = labCreate("div", "lab-summary-actions");
+  actions.append(labButton("Reset Playground", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; renderLab(); showToast("The local simulated switch was reset."); }));
+  verification.append(checklist, ticket, actions);
+  els.labRoot.append(verification);
 }
 
 function renderLabLessonLibrary() {
@@ -2712,16 +2840,16 @@ function renderLabConsole() {
   const controls = labCreate("div", "lab-console-actions");
   controls.append(labButton("Run simulated command", "primary", () => runLabConsoleCommand(input)));
   controls.append(labButton("Reset device", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; renderLab(); showToast("The simulated device was reset to its starting state."); }));
-  controls.append(labButton("Open full CLI workspace", "secondary", () => { state.lab.screen = "cli"; renderLab(); }));
+  controls.append(labButton("Open focused terminal", "secondary", () => { state.lab.screen = "cli"; renderLab(); }));
   terminalPane.append(controls);
   workspace.append(terminalPane, renderLabCoach(engine));
-  consolePanel.append(workspace, renderLabConfigurationLibrary(), renderLabMissionPath());
+  consolePanel.append(workspace);
   els.labRoot.append(consolePanel);
 }
 
 function renderLabCliWorkspace() {
   const engine = getLabEngine();
-  els.labRoot.append(labButton("Back to Interactive Lab", "secondary lab-back-button", () => { state.lab.screen = "dashboard"; renderLab(); }));
+  els.labRoot.append(labButton("Back to Playground", "secondary lab-back-button", () => { state.lab.screen = labPlaygroundUnlocked() ? "playground" : "dashboard"; renderLab(); }));
   const workspace = labCreate("section", "lab-cli-workspace");
   const header = labCreate("div", "lab-cli-workspace-head");
   header.append(labCreate("div", "lab-card-kicker", "Simulated command line interface"));
@@ -3046,21 +3174,13 @@ function renderLabSectionCard(section, vendorTrack = "all") {
 
 function openLabStage(stageId) {
   if (!labStageUnlocked(stageId)) return;
-  if (stageId === "scenarios") {
-    state.lab.screen = "scenario";
-    state.lab.activeLessonId = state.lab.scenarios[0]?.id || "";
-  } else {
-    const stageLessons = state.lab.lessons.filter((lesson) => {
-      const section = state.lab.sections.find((item) => item.id === lesson.section_id);
-      return section?.stage === stageId;
-    });
-    const nextLesson = stageLessons.find((lesson) => !state.lab.progress.completedLessons[lesson.id]) || stageLessons[0];
-    if (nextLesson) {
-      openLabLesson(nextLesson.id);
-      return;
-    }
-    state.lab.screen = "dashboard";
+  if (stageId === "playground") {
+    state.lab.screen = "playground";
+    renderLab();
+    return;
   }
+  state.lab.activeStageId = stageId;
+  state.lab.screen = "stage";
   renderLab();
 }
 
@@ -3083,7 +3203,9 @@ function openLabLesson(lessonId) {
 function renderLabLesson() {
   const lesson = state.lab.lessons.find((item) => item.id === state.lab.activeLessonId);
   if (!lesson) { state.lab.screen = "dashboard"; renderLab(); return; }
-  els.labRoot.append(labButton("Back to Lab Dashboard", "secondary lab-back-button", () => { state.lab.screen = "dashboard"; renderLab(); }));
+  const section = state.lab.sections.find((item) => item.id === lesson.section_id);
+  const stage = state.lab.stages.find((item) => item.id === section?.stage);
+  renderLabBreadcrumb([{ label: "Lab Mode", screen: "dashboard" }, { label: stage?.title || "Stage", screen: "stage" }, { label: section?.title || "Section", screen: "section" }, { label: lesson.title }]);
   const header = labCreate("div", "lab-lesson-header");
   header.append(labCreate("div", "lab-card-kicker", `${lesson.vendor} | ${lesson.difficulty}`));
   header.append(labCreate("h3", "", lesson.title));
