@@ -2852,11 +2852,51 @@ function renderVisualNetworkPlayground() {
   heading.append(labCreate("h3", "", "Visual Network Playground"));
   heading.append(labCreate("p", "", "Build a small topology, configure the local simulated switch through the CLI or visual controls, and test connectivity. It never connects to real equipment."));
   panel.append(heading);
+  panel.append(renderVisualNextStep(network));
 
   const grid = labCreate("div", "visual-playground-grid");
   grid.append(renderVisualDeviceTray(network), renderVisualSwitch(network), renderVisualDetails(network));
   panel.append(grid, renderVisualVerification(network));
   els.labRoot.append(panel);
+}
+
+function renderVisualNextStep(network) {
+  const connected = network.devices.filter((device) => device.port);
+  const panel = labCreate("section", "visual-next-step");
+  panel.append(labCreate("strong", "", "What to do now"));
+
+  if (!connected.length) {
+    panel.append(labCreate("span", "", "Step 1: connect the first endpoint"));
+    panel.append(labCreate("p", "", "PC-1 is selected. Connect it to GigabitEthernet1/0/1 to create the first local cable."));
+    panel.append(labButton("Connect PC-1 to GigabitEthernet1/0/1", "primary", () => {
+      network.selectedDeviceId = "pc-1";
+      network.selectedPort = "GigabitEthernet1/0/1";
+      connectSelectedVisualDevice();
+    }));
+  } else if (connected.length === 1) {
+    panel.append(labCreate("span", "", "Step 2: choose the second endpoint"));
+    panel.append(labCreate("p", "", "Select PC-2 and GigabitEthernet1/0/2, then use the clearly labeled Connect button in Port details."));
+    panel.append(labButton("Select PC-2 and GigabitEthernet1/0/2", "primary", () => {
+      network.selectedDeviceId = "pc-2";
+      network.selectedPort = "GigabitEthernet1/0/2";
+      renderLab();
+    }));
+  } else if (connected.some((device) => !device.ip)) {
+    panel.append(labCreate("span", "", "Step 3: configure endpoint addresses"));
+    panel.append(labCreate("p", "", "Select each connected endpoint and give both devices addresses in the same subnet, for example 192.168.10.10 and 192.168.10.11."));
+    panel.append(labButton("Open PC-1 IP settings", "primary", () => {
+      network.selectedDeviceId = "pc-1";
+      renderLab();
+    }));
+  } else {
+    panel.append(labCreate("span", "", "Step 4: test the local topology"));
+    panel.append(labCreate("p", "", "Open PC-1, choose PC-2 as the ping target, then run the local simulated ping test."));
+    panel.append(labButton("Open PC-1 ping test", "primary", () => {
+      network.selectedDeviceId = "pc-1";
+      renderLab();
+    }));
+  }
+  return panel;
 }
 
 function renderVisualDeviceTray(network) {
@@ -2871,7 +2911,7 @@ function renderVisualDeviceTray(network) {
     item.addEventListener("dragstart", (event) => event.dataTransfer?.setData("text/plain", device.id));
     devices.append(item);
   });
-  tray.append(devices);
+  tray.append(labCreate("span", "visual-selection-label", `Selected device: ${visualDevice(network)?.name || "none"}`), devices);
   return tray;
 }
 
@@ -2904,7 +2944,7 @@ function renderVisualSwitch(network) {
   switchPane.append(chassis);
   const cables = labCreate("div", "visual-cables");
   network.devices.filter((device) => device.port).forEach((device) => cables.append(labCreate("span", `visual-cable ${visualPortIsUp(visualPort(network, device.port)) ? "is-up" : "is-down"}`, `${device.name} to ${device.port}`)));
-  switchPane.append(cables);
+  switchPane.append(cables, labCreate("span", "visual-selection-label", `Target port: ${visualPort(network)?.name || "none"}`));
   return switchPane;
 }
 
@@ -2917,7 +2957,7 @@ function renderVisualDetails(network) {
     [["Interface", port.name], ["Description", port.description || "-"], ["Physical", port.connectedDeviceId ? "Connected" : "Disconnected"], ["Admin", port.adminUp ? "Up" : "Shutdown"], ["Operational", visualPortIsUp(port) ? "Up" : "Down"], ["Mode", port.mode], ["Access VLAN", port.vlan], ["Connected device", device?.port === port.name ? device.name : "-"], ["Learned MAC", network.macs.find((mac) => mac.interface === port.name)?.mac || "-"], ["Cable test", port.cable], ["Last activity", port.lastActivity]].forEach(([label, value]) => panel.append(labCreate("div", "visual-detail-row", `${label}: ${value}`)));
   }
   const actions = labCreate("div", "visual-actions");
-  actions.append(labButton("Connect selected device", "primary", connectSelectedVisualDevice));
+  actions.append(labButton(`Connect ${device?.name || "selected device"}`, "primary", connectSelectedVisualDevice));
   actions.append(labButton("Disconnect cable", "secondary", disconnectVisualCable));
   actions.append(labButton(port?.adminUp ? "Shut down port" : "Enable port", "secondary", toggleVisualPort));
   actions.append(labButton("Run cable test", "secondary", runVisualCableTest));
@@ -3126,6 +3166,12 @@ function renderLabConsole() {
   workspace.append(renderLabDeviceVisual(engine));
 
   const terminalPane = labCreate("section", "lab-terminal-pane");
+  const activeRoute = currentTrainingRoute();
+  const routeGuide = getTrainingRouteGuidance(engine)?.command || getLabGuidance(engine).command;
+  const routeStatus = labCreate("section", "lab-route-status");
+  routeStatus.append(labCreate("strong", "", `Route: ${activeRoute.label}`));
+  routeStatus.append(labCreate("p", "", `Step 1: type ${routeGuide} below, then press Enter or Run simulated command.`));
+  terminalPane.append(routeStatus);
   terminalPane.append(labCreate("label", "lab-control-label", "Simulated device"), selector);
   terminalPane.append(labCreate("div", "lab-terminal-label", "Console"));
   const terminal = labCreate("div", "lab-console-terminal");
@@ -3139,6 +3185,7 @@ function renderLabConsole() {
   input.className = "lab-terminal-input";
   input.placeholder = "Type a simulated command";
   input.setAttribute("aria-label", "Simulated switch command");
+  input.id = "labTerminalInput";
   input.addEventListener("keydown", (event) => { if (event.key === "Enter") runLabConsoleCommand(input); });
   row.append(input);
   terminalPane.append(terminal, row);
@@ -3151,13 +3198,21 @@ function renderLabConsole() {
   workspace.append(terminalPane, renderLabCoach(engine));
   consolePanel.append(workspace);
   els.labRoot.append(consolePanel);
+  if (state.lab.console.focusRequested) {
+    state.lab.console.focusRequested = false;
+    window.setTimeout(() => {
+      const terminalInput = document.getElementById("labTerminalInput");
+      terminalInput?.scrollIntoView({ behavior: "smooth", block: "center" });
+      terminalInput?.focus();
+    }, 0);
+  }
 }
 
 function renderManualRouteSelector() {
   const route = currentTrainingRoute();
   const panel = labCreate("section", "lab-manual-route-panel");
   panel.append(labCreate("strong", "", "Manual CLI training path"));
-  panel.append(labCreate("span", "", `${PLAYGROUND_TASKS.length} routes are available. Select one, then type every command yourself.`));
+  panel.append(labCreate("span", "", `${PLAYGROUND_TASKS.length} routes are available. Choose a route, press Start selected route, then type every command yourself in Step 1.`));
   const select = document.createElement("select");
   select.setAttribute("aria-label", "Manual CLI training path");
   [...new Set(PLAYGROUND_TASKS.map((item) => item.category))].forEach((category) => {
@@ -3172,21 +3227,22 @@ function renderManualRouteSelector() {
     select.append(group);
   });
   select.value = route.id;
-  select.addEventListener("change", () => { state.lab.playgroundTaskId = select.value; startFreshTrainingSwitch(); });
+  select.addEventListener("change", () => { state.lab.playgroundTaskId = select.value; renderLab(); });
   panel.append(select, labButton("Start selected route", "primary", startFreshTrainingSwitch));
   return panel;
 }
 
 function startFreshTrainingSwitch() {
   const route = currentTrainingRoute();
-  const engine = createLabEngine(route.device === "irf" ? "irf" : route.device === "trunk" ? "trunk" : "access");
+  const engine = createLabEngine(route.device);
   if (engine?.setTrainingProfile) engine.setTrainingProfile({ hostname: "TRAINING-SWITCH", interface: "GigabitEthernet1/0/1", endpoint: "PC-1", currentVlan: "1", targetVlan: "20" });
   state.lab.console.engine = engine;
-  state.lab.console.device = route.device === "irf" ? "irf" : route.device === "trunk" ? "trunk" : "access";
+  state.lab.console.device = route.device;
+  state.lab.console.focusRequested = true;
   state.lab.visualNetwork = createVisualNetwork();
   state.lab.visualNetwork.hostname = "TRAINING-SWITCH";
   renderLab();
-  showToast(`${route.label} is ready. Configure the fresh simulated switch manually.`);
+  showToast(`${route.label} is ready. Step 1 is waiting in the console.`);
 }
 
 function renderLabCliWorkspace() {
