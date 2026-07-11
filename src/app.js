@@ -9,7 +9,8 @@ const COMMAND_FILES = [
   "data/commands/admin_commands.json",
   "data/commands/platform_commands.json",
   "data/commands/network_commands_extended.json",
-  "data/commands/vendor_learning_extended.json"
+  "data/commands/vendor_learning_extended.json",
+  "data/commands/switch_configuration_extended.json"
 ];
 
 const FLOW_FILES = [
@@ -474,6 +475,7 @@ async function loadKnowledge() {
   const commandResults = await Promise.allSettled(COMMAND_FILES.map(loadJson));
   const loadedFiles = [];
   const commands = [];
+  const commandKeys = new Set();
 
   commandResults.forEach((result, index) => {
     if (result.status !== "fulfilled") {
@@ -491,6 +493,9 @@ async function loadKnowledge() {
       file.commands.forEach((command) => {
         const commandVendorKey = command.vendor_key || file.vendor_key;
         const commandVendorLabel = command.vendor_label || file.vendor;
+        const key = `${commandVendorKey || "unknown"}:${normalizeCommandText(command.command)}`;
+        if (commandKeys.has(key)) return;
+        commandKeys.add(key);
         commands.push({
           ...command,
           vendor_key: commandVendorKey,
@@ -2495,6 +2500,10 @@ function renderLab() {
     renderLabScenario();
     return;
   }
+  if (state.lab.screen === "lessons") {
+    renderLabLessonLibrary();
+    return;
+  }
   renderLabDashboard();
 }
 
@@ -2506,7 +2515,12 @@ function renderLabDashboard() {
   );
   els.labRoot.append(intro);
 
-  els.labRoot.append(labButton("Open Trainer Controls", "secondary lab-trainer-button", () => switchView("admin")));
+  const labActions = labCreate("div", "lab-dashboard-actions");
+  labActions.append(
+    labButton("Open Lesson Library", "primary", () => { state.lab.screen = "lessons"; renderLab(); }),
+    labButton("Open Trainer Controls", "secondary", () => switchView("admin"))
+  );
+  els.labRoot.append(labActions);
   renderLabConsole();
 
   const stages = labCreate("div", "lab-stage-grid");
@@ -2566,6 +2580,24 @@ function renderLabDashboard() {
     config.append(labButton("Open Configuration Lab", "secondary", () => openLabStage("configuration")));
     els.labRoot.append(config);
   }
+}
+
+function renderLabLessonLibrary() {
+  const heading = labCreate("section", "lab-lesson-library-heading");
+  heading.append(labCreate("div", "lab-card-kicker", "Lesson library"), labCreate("h3", "", "Guided Lessons From First Checks to Stacking"), labCreate("p", "", "Choose a topic to study its meaning, good and bad output, safe next commands, and a simulated practice task."));
+  heading.append(labButton("Back to Interactive Lab", "secondary", () => { state.lab.screen = "dashboard"; renderLab(); }));
+  els.labRoot.append(heading);
+
+  ["foundation", "configuration"].forEach((stage) => {
+    const title = stage === "foundation" ? "Foundation Lessons" : "Configuration Lessons";
+    const copy = stage === "foundation" ? "Read evidence before changing anything." : "Practice controlled changes, verification, and rollback.";
+    const group = labCreate("section", "lab-lesson-library-group");
+    group.append(labCreate("h4", "", title), labCreate("p", "", copy));
+    const grid = labCreate("div", "lab-section-grid");
+    state.lab.sections.filter((section) => section.stage === stage).forEach((section) => grid.append(renderLabSectionCard(section)));
+    group.append(grid);
+    els.labRoot.append(group);
+  });
 }
 
 function renderLabConsole() {
@@ -2817,7 +2849,18 @@ function runLabConsoleCommand(input) {
   }
   const engine = getLabEngine();
   const prompt = consolePrompt();
-  const result = engine ? engine.execute(command) : { output: simulateLabCommand(command), diff: "Simulator engine unavailable." };
+  let result = engine ? engine.execute(command) : { output: simulateLabCommand(command), diff: "Simulator engine unavailable." };
+  if (engine && !result.ok && result.kind === "unknown") {
+    const known = findKnownLabCommand(command);
+    if (known) {
+      result = {
+        ...result,
+        ok: true,
+        kind: "catalog",
+        output: `Recognized offline command: ${known.command}\n${known.meaning}\n\nThis command is available for study in Command Lookup. A device-specific simulated response has not been authored for this practice device yet.`
+      };
+    }
+  }
   if (engine) {
     engine.transcript.push(`${prompt} ${command}\n${result.output}${result.diff ? `\n\nConfiguration diff\n${result.diff}` : ""}`);
     if (engine.transcript.length > 8) engine.transcript.shift();
@@ -2832,6 +2875,17 @@ function runLabConsoleCommand(input) {
   }
   input.value = "";
   renderLab();
+}
+
+function findKnownLabCommand(rawCommand) {
+  const normalized = normalizeCommandText(rawCommand);
+  return state.commands.find((item) => {
+    const template = normalizeCommandText(item.command);
+    if (template === normalized) return true;
+    if (!template.includes("<")) return false;
+    const expression = `^${template.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/<[^>]+>/g, "[^ ]+")}$`;
+    return new RegExp(expression).test(normalized);
+  }) || null;
 }
 
 function createLabEngine(device) {
