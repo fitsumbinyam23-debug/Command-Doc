@@ -2496,6 +2496,10 @@ function renderLab() {
     renderLabScenario();
     return;
   }
+  if (state.lab.screen === "cli") {
+    renderLabCliWorkspace();
+    return;
+  }
   if (state.lab.screen === "lessons") {
     renderLabLessonLibrary();
     return;
@@ -2708,10 +2712,42 @@ function renderLabConsole() {
   const controls = labCreate("div", "lab-console-actions");
   controls.append(labButton("Run simulated command", "primary", () => runLabConsoleCommand(input)));
   controls.append(labButton("Reset device", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; renderLab(); showToast("The simulated device was reset to its starting state."); }));
+  controls.append(labButton("Open full CLI workspace", "secondary", () => { state.lab.screen = "cli"; renderLab(); }));
   terminalPane.append(controls);
   workspace.append(terminalPane, renderLabCoach(engine));
   consolePanel.append(workspace, renderLabConfigurationLibrary(), renderLabMissionPath());
   els.labRoot.append(consolePanel);
+}
+
+function renderLabCliWorkspace() {
+  const engine = getLabEngine();
+  els.labRoot.append(labButton("Back to Interactive Lab", "secondary lab-back-button", () => { state.lab.screen = "dashboard"; renderLab(); }));
+  const workspace = labCreate("section", "lab-cli-workspace");
+  const header = labCreate("div", "lab-cli-workspace-head");
+  header.append(labCreate("div", "lab-card-kicker", "Simulated command line interface"));
+  header.append(labCreate("h3", "", engine.state.hostname));
+  header.append(labCreate("p", "", `${engine.seed.vendor} training console. All commands and outputs remain local to this browser.`));
+  workspace.append(header);
+
+  const terminal = labCreate("div", "lab-cli-terminal");
+  const transcript = engine.transcript.length ? engine.transcript.join("\n\n") : engine.bootOutput();
+  terminal.append(labCreate("pre", "lab-cli-output", transcript));
+  const row = labCreate("div", "lab-cli-input-row");
+  row.append(labCreate("span", "lab-console-prompt", consolePrompt()));
+  const input = document.createElement("input");
+  input.className = "lab-terminal-input";
+  input.placeholder = "Enter a simulated command";
+  input.setAttribute("aria-label", "Full simulated switch command");
+  input.addEventListener("keydown", (event) => { if (event.key === "Enter") runLabConsoleCommand(input); });
+  row.append(input);
+  terminal.append(row);
+  workspace.append(terminal);
+
+  const actions = labCreate("div", "lab-console-actions");
+  actions.append(labButton("Run command", "primary", () => runLabConsoleCommand(input)));
+  actions.append(labButton("Clear terminal", "secondary", () => { engine.transcript = []; renderLab(); }));
+  actions.append(labButton("Reset simulated device", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; renderLab(); showToast("The simulated device was reset."); }));
+  els.labRoot.append(workspace, actions);
 }
 
 function renderLabConfigurationLibrary() {
