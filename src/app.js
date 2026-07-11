@@ -2658,13 +2658,9 @@ function renderLabConfigurationLibrary() {
     const sequence = labCreate("pre", "lab-config-sequence", drill.commands.join("\n"));
     card.append(sequence);
     const device = deviceProfile(drill.device);
-    card.append(labButton(`Open ${device.name}`, "secondary", () => {
-      if (state.lab.console.device === drill.device) {
-        showToast(`Use the command sequence shown for ${drill.title}.`);
-        return;
-      }
+    card.append(labButton(`Load ${drill.title}`, "secondary", () => {
       startLabMission({ device: drill.device, id: "" });
-      showToast(`${device.name} loaded for ${drill.title}.`);
+      showToast(`${drill.title} loaded in the simulated console.`);
     }));
     grid.append(card);
   });
