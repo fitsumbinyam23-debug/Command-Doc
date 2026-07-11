@@ -43,6 +43,13 @@ const SIMULATOR_MISSIONS = [
   { id: "lacp-investigation", device: "aruba", phase: "Troubleshooting", title: "Investigate an Aruba LACP Member", description: "Read member state and collect the focused evidence required for a safe next action.", command: "show interface brief" }
 ];
 
+const CONFIGURATION_DRILLS = [
+  { title: "Rename a Cisco Switch", device: "hq", purpose: "Set and verify the simulated device hostname.", commands: ["configure terminal", "hostname HQ-TRAIN-01", "end", "show running-config"] },
+  { title: "Create and Name a VLAN", device: "hq", purpose: "Create VLAN 60 and give it a meaningful name.", commands: ["configure terminal", "vlan 60", "name TRAINING-USERS", "end", "show vlan brief"] },
+  { title: "Set Cisco Stack Priority", device: "hq", purpose: "Practice the stack-member priority command and verify the member roles.", commands: ["configure terminal", "switch 1 priority 15", "end", "show switch"] },
+  { title: "Set HP IRF Member Priority", device: "irf", purpose: "Practice the Comware IRF priority command and verify the saved running state.", commands: ["system-view", "irf member 1 priority 32", "return", "display irf configuration"] }
+];
+
 const VENDOR_LABELS = {
   cisco_ios: "Cisco IOS",
   hp_comware: "HP Comware",
@@ -2611,8 +2618,34 @@ function renderLabConsole() {
   controls.append(labButton("Reset device", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; renderLab(); showToast("The simulated device was reset to its starting state."); }));
   terminalPane.append(controls);
   workspace.append(terminalPane, renderLabCoach(engine));
-  consolePanel.append(workspace, renderLabMissionPath());
+  consolePanel.append(workspace, renderLabConfigurationLibrary(), renderLabMissionPath());
   els.labRoot.append(consolePanel);
+}
+
+function renderLabConfigurationLibrary() {
+  const section = labCreate("section", "lab-config-library");
+  const heading = labCreate("div", "lab-mission-heading");
+  heading.append(labCreate("div", "lab-card-kicker", "Configuration practice"), labCreate("h4", "", "System, VLAN, and Stack Configuration"), labCreate("p", "", "Choose a drill, follow the displayed sequence in the simulated console, then use the final show command to prove the change."));
+  section.append(heading);
+  const grid = labCreate("div", "lab-config-grid");
+  CONFIGURATION_DRILLS.forEach((drill) => {
+    const card = labCreate("article", "lab-config-card");
+    card.append(labCreate("h5", "", drill.title), labCreate("p", "", drill.purpose));
+    const sequence = labCreate("pre", "lab-config-sequence", drill.commands.join("\n"));
+    card.append(sequence);
+    const device = deviceProfile(drill.device);
+    card.append(labButton(`Open ${device.name}`, "secondary", () => {
+      if (state.lab.console.device === drill.device) {
+        showToast(`Use the command sequence shown for ${drill.title}.`);
+        return;
+      }
+      startLabMission({ device: drill.device, id: "" });
+      showToast(`${device.name} loaded for ${drill.title}.`);
+    }));
+    grid.append(card);
+  });
+  section.append(grid);
+  return section;
 }
 
 function renderLabMissionPath() {
