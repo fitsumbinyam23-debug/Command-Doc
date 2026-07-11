@@ -83,7 +83,7 @@
       const command = normalize(raw);
       this.commands.push(command);
       if (!command) return this.result(false, "Enter a command first.", "input");
-      if (/(write erase|erase startup-config|delete flash:|format|reload|reboot|factory reset)/.test(command)) {
+      if (/(write erase|erase startup-config|reset saved-configuration|delete flash:|format|reload|reboot|factory reset)/.test(command)) {
         return this.result(false, "Safety stop: destructive commands are intentionally blocked in Lab Mode. Use rollback or reset the simulated device instead.", "danger");
       }
       if (/^(configure terminal|conf t|system-view)$/.test(command)) { this.mode = "config"; return this.result(true, "Enter configuration mode. Changes affect only this local simulation.", "config"); }
@@ -123,22 +123,32 @@
       }
       if (this.mode === "interface") return this.executeInterfaceCommand(raw, command);
       if (/^(show interface status|show interfaces status|sh int status)$/.test(command)) return this.result(true, this.interfaceStatus(), "show");
+      if (/^show version$/.test(command)) return this.result(true, `Simulated ${this.seed.vendor} software\nDevice: ${this.state.hostname}\nPlatform: <SIMULATED_PLATFORM>\nNo real device is connected.`, "show");
       if (/^show interfaces?(?:\s+\S+)?$/.test(command)) return this.result(true, this.interfaceDetail(raw), "show");
       if (/^(show vlan brief|sh vlan brief)$/.test(command)) return this.result(true, this.vlanBrief(), "show");
       if (/^show running-config interface/.test(command)) return this.result(true, this.runningInterface(), "verify");
+      if (/^show startup-config$/.test(command)) return this.result(true, `Simulated startup configuration\n${this.runningConfig()}`, "show");
       if (/^show interfaces trunk/.test(command)) return this.result(true, `Port        Mode         Encapsulation  Status\n<TRUNK_PORT>  on           802.1q         trunking`, "show");
       if (/^show cdp neighbors/.test(command)) return this.result(true, `Device ID       Local Intrfce   Platform\n<UPLINK_DEVICE>         ${this.selectedInterface}      <PLATFORM>`, "show");
+      if (/^show lldp neighbors/.test(command)) return this.result(true, `Local Interface  Chassis ID       Port ID\n${this.selectedInterface}       <SIMULATED_NEIGHBOR>  <REMOTE_PORT>`, "show");
       if (/^show mac address-table/.test(command)) return this.result(true, `Vlan    Mac Address       Type       Ports\n${this.current().vlan}      <MAC_ADDRESS>    DYNAMIC    ${this.selectedInterface}`, "show");
       if (/^show switch$/.test(command)) return this.result(true, `Switch/Stack Mac Address : <MAC_ADDRESS>\n\nSwitch#  Role      Priority  State\n${this.state.stackMembers.map((member) => `${member.id}${member.role === "Active" ? "*" : " "}        ${member.role.padEnd(8)} ${String(member.priority).padEnd(8)} Ready`).join("\n")}`, "show");
       if (/^display irf$/.test(command)) return this.result(true, `MemberID  Role      Priority  Status\n${this.state.irfMembers.map((member) => `${member.id}         ${member.role.padEnd(9)} ${String(member.priority).padEnd(8)} Ready`).join("\n")}`, "show");
       if (/^display irf configuration$/.test(command)) return this.result(true, `IRF Configuration\n${this.state.irfMembers.map((member) => `irf member ${member.id} priority ${member.priority}`).join("\n")}`, "show");
       if (/^display irf-port(?: configuration)?$/.test(command)) return this.result(true, this.state.irfDown ? "MemberID  IRF-Port1       IRF-Port2\n<STACK_MEMBER_ID>  <IRF_PORT> DOWN  UP" : "MemberID  IRF-Port1       IRF-Port2\n<STACK_MEMBER_ID>  <IRF_PORT> UP  UP", "show");
       if (/^display irf topology/.test(command)) return this.result(true, this.state.irfDown ? "Topology Info\nMember <STACK_MEMBER_ID>  <IRF_PORT> DOWN" : "Topology Info\nMember <STACK_MEMBER_ID>  <IRF_PORT> UP", "show");
+      if (/^display version$/.test(command)) return this.result(true, `Simulated ${this.seed.vendor} software\nDevice: ${this.state.hostname}\nPlatform: <SIMULATED_PLATFORM>\nNo real device is connected.`, "show");
+      if (/^display current-configuration(?: interface)?/.test(command)) return this.result(true, /interface/.test(command) ? this.runningInterface() : this.runningConfig(), "show");
+      if (/^display saved-configuration$/.test(command)) return this.result(true, `Simulated saved configuration\n${this.runningConfig()}`, "show");
+      if (/^display vlan(?:\s+\S+)?$/.test(command)) return this.result(true, this.vlanBrief(), "show");
+      if (/^display interface brief$/.test(command)) return this.result(true, this.interfaceStatus(), "show");
+      if (/^display mac-address(?: interface)?/.test(command)) return this.result(true, `VLAN  MAC Address       Type       Interface\n${this.current().vlan}     <MAC_ADDRESS>    Dynamic    ${this.selectedInterface}`, "show");
+      if (/^display lldp neighbor-information/.test(command)) return this.result(true, `Local Interface  Neighbor        Remote Port\n${this.selectedInterface}       <SIMULATED_NEIGHBOR>  <REMOTE_PORT>`, "show");
       if (/^display interface(?:\s+\S+)?$/.test(command)) return this.result(true, this.interfaceDetail(raw), "show");
       if (/^show interface brief/.test(command)) return this.result(true, `Interface  Status  Speed\n${this.selectedInterface}     ${this.state.lacpDown ? "down" : "up"}      1G`, "show");
       if (/^show lacp interfaces$/.test(command)) return this.result(true, this.state.lacpDown ? `Interface  Bundle  State       Partner\n${this.selectedInterface}     <LAG_ID>   blocked     <UPLINK_DEVICE>\n\nMember is not selected for the simulated LAG.` : `Interface  Bundle  State       Partner\n${this.selectedInterface}     <LAG_ID>   selected    <UPLINK_DEVICE>`, "show");
       if (/^show running-config$/.test(command)) return this.result(true, this.runningConfig(), "verify");
-      if (/^(write memory|wr mem|copy running-config startup-config|save)$/.test(command)) return this.result(true, this.verify() ? "Simulated configuration saved after verification." : "Safety warning: verification has not passed. Do not save an unverified simulated change.", this.verify() ? "save" : "warning");
+      if (/^(write memory|wr mem|copy running-config startup-config|save|save force)$/.test(command)) return this.result(true, this.verify() ? "Simulated configuration saved after verification." : "Safety warning: verification has not passed. Do not save an unverified simulated change.", this.verify() ? "save" : "warning");
       if (/^(rollback|reset simulated device)$/.test(command)) { this.rollback(); return this.result(true, "Simulated device rolled back to its baseline.", "rollback"); }
       return this.result(false, "Unknown for this simulated device. Use a supported show/display command, configure terminal, interface <port>, switchport access vlan <vlan>, description <text>, no shutdown, end, or rollback.", "unknown");
     }
