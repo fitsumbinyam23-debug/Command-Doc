@@ -29,6 +29,8 @@ const LAB_FILES = {
 };
 
 const LAB_PROGRESS_KEY = "commandDoctorLabProgress";
+const VISUAL_NETWORK_STORAGE_KEY = "command-doctor.visual-network";
+const VISUAL_NETWORK_SCHEMA_VERSION = 3;
 
 const SIMULATOR_MISSIONS = [
   { id: "first-check", device: "access", phase: "Foundation", title: "Read an Access Port", description: "Use a safe read-only command to understand the simulated endpoint state.", command: "show interface status" },
@@ -373,9 +375,9 @@ const state = {
       device: "access",
       missionId: "access-vlan",
       mode: "exec",
-      activeInterface: "<ACCESS_PORT>",
-      vlan: "<VLAN_ID>",
-      description: "<DEVICE_NAME>",
+      activeInterface: "GigabitEthernet1/0/1",
+      vlan: "1",
+      description: "PC-1",
       transcript: [],
       engine: null
     }
@@ -2794,13 +2796,14 @@ function createVisualNetwork() {
     ports[name] = { name, description: "", vlan: "1", mode: "access", adminUp: true, connectedDeviceId: "", cable: "disconnected", speed: "auto", duplex: "auto", voiceVlan: "", allowedVlans: "all", errorDisabled: false, lastActivity: "Never" };
   }
   return {
-    hostname: "SIM-SWITCH",
+    schemaVersion: VISUAL_NETWORK_SCHEMA_VERSION,
+    hostname: "TRAINING-SWITCH",
     vendor: "Cisco IOS",
     ports,
     vlans: { "1": { name: "DEFAULT" } },
     devices: [
-      { id: "pc-1", name: "PC-1", type: "Desktop PC", mac: "02:00:00:00:00:01", ip: "", mask: "255.255.255.0", gateway: "", method: "static", port: "", lastPing: "Not tested" },
-      { id: "pc-2", name: "PC-2", type: "Laptop", mac: "02:00:00:00:00:02", ip: "", mask: "255.255.255.0", gateway: "", method: "static", port: "", lastPing: "Not tested" }
+      { id: "pc-1", name: "PC-1", type: "Desktop PC", mac: "02:CD:00:00:00:01", ip: "", mask: "255.255.255.0", gateway: "", method: "static", port: "", lastPing: "Not tested" },
+      { id: "laptop-1", name: "Laptop-1", type: "Laptop", mac: "02:CD:00:00:00:02", ip: "", mask: "255.255.255.0", gateway: "", method: "static", port: "", lastPing: "Not tested" }
     ],
     macs: [],
     selectedPort: "GigabitEthernet1/0/1",
@@ -2815,18 +2818,42 @@ function createVisualNetwork() {
 
 function visualNetwork() {
   if (!state.lab.visualNetwork) {
+    let recoveryMessage = "";
+    let savedSchemaVersion = 0;
     try {
-      const saved = JSON.parse(window.localStorage.getItem("command-doctor.visual-network") || "null");
-      state.lab.visualNetwork = saved && saved.ports && Array.isArray(saved.devices) ? saved : createVisualNetwork();
+      const saved = JSON.parse(window.localStorage.getItem(VISUAL_NETWORK_STORAGE_KEY) || "null");
+      savedSchemaVersion = Number(saved?.schemaVersion) || 0;
+      if (saved && saved.ports && Array.isArray(saved.devices)) {
+        state.lab.visualNetwork = saved;
+        state.lab.visualNetwork.schemaVersion = VISUAL_NETWORK_SCHEMA_VERSION;
+      } else if (saved) {
+        state.lab.visualNetwork = createVisualNetwork();
+        recoveryMessage = "Saved simulator data was invalid and was replaced with a fresh local switch.";
+      } else {
+        state.lab.visualNetwork = createVisualNetwork();
+      }
     } catch {
       state.lab.visualNetwork = createVisualNetwork();
+      recoveryMessage = "Saved simulator data could not be read. A fresh local switch was created.";
     }
+    const network = state.lab.visualNetwork;
+    const legacyTopology = window.CommandDoctorTopology?.loadSavedTopology?.();
+    if (legacyTopology && (!network.topology || savedSchemaVersion < VISUAL_NETWORK_SCHEMA_VERSION)) network.topology = legacyTopology;
+    if (window.CommandDoctorTopology?.ensureTopology) window.CommandDoctorTopology.ensureTopology(network);
+    if (recoveryMessage) network.topology.notice = recoveryMessage;
+    if (saveVisualNetwork(network) && legacyTopology) window.localStorage.removeItem("command-doctor.phase1.topology");
   }
   return state.lab.visualNetwork;
 }
 
 function saveVisualNetwork(network) {
-  try { window.localStorage.setItem("command-doctor.visual-network", JSON.stringify(network)); } catch { /* Local persistence is optional. */ }
+  try {
+    network.schemaVersion = VISUAL_NETWORK_SCHEMA_VERSION;
+    window.localStorage.setItem(VISUAL_NETWORK_STORAGE_KEY, JSON.stringify(network));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function visualPort(network, name = network.selectedPort) {
@@ -2886,9 +2913,10 @@ function renderVisualNetworkPlayground() {
   panel.append(heading);
   const topologyHost = labCreate("div", "visual-topology-host");
   const topologyOptions = {
-    onChange: () => {
-      visualMacRefresh(network);
+    onChange: (changedNetwork) => {
+      visualMacRefresh(changedNetwork);
       syncEngineFromVisual();
+      return saveVisualNetwork(changedNetwork);
     }
   };
   if (window.CommandDoctorTopology) {
@@ -3167,7 +3195,7 @@ function renderVisualVerification(network) {
   panel.append(labCreate("strong", "", "Verification checklist"));
   checks.forEach(([done, label]) => panel.append(labCreate("span", done ? "is-complete" : "", `${done ? "Done" : "Next"}: ${label}`)));
   panel.append(labCreate("p", "", "Ticket summary: This is a local browser simulation. Record only the simulated evidence you have verified."));
-  panel.append(labButton("Reset visual topology", "secondary", () => { state.lab.visualNetwork = createVisualNetwork(); syncEngineFromVisual(); renderLab(); }));
+  panel.append(labButton("Reset visual topology", "secondary", () => { state.lab.visualNetwork = createVisualNetwork(); window.CommandDoctorTopology?.ensureTopology?.(state.lab.visualNetwork); saveVisualNetwork(state.lab.visualNetwork); syncEngineFromVisual(); renderLab(); }));
   return panel;
 }
 
@@ -3302,11 +3330,13 @@ function renderLabConsole() {
   input.id = "labTerminalInput";
   input.placeholder = "Type a simulated command";
   input.setAttribute("aria-label", "Simulated switch command");
-  input.addEventListener("keydown", (event) => { if (event.key === "Enter") runLabConsoleCommand(input); });
+  bindTerminalKeyboard(input, engine, terminal);
   row.append(input);
-  terminalPane.append(terminal, row);
+  terminal.append(row);
+  terminal.addEventListener("pointerdown", (event) => { if (event.target !== input) queueTerminalFocus(input, terminal); });
+  terminalPane.append(terminal);
   const controls = labCreate("div", "lab-console-actions");
-  controls.append(labButton("Run simulated command", "primary", () => runLabConsoleCommand(input)));
+  controls.append(labButton("Run simulated command", "secondary", () => runLabConsoleCommand(input)));
   controls.append(labButton("Start fresh switch", "secondary", startFreshTrainingSwitch));
   controls.append(labButton("Reset device", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; renderLab(); showToast("The simulated device was reset to its starting state."); }));
   controls.append(labButton("Open focused terminal", "secondary", () => { state.lab.screen = "cli"; renderLab(); }));
@@ -3314,10 +3344,40 @@ function renderLabConsole() {
   workspace.append(terminalPane, renderLabCoach(engine));
   consolePanel.append(workspace);
   els.labRoot.append(consolePanel);
-  if (state.lab.console.focusRequested) {
-    state.lab.console.focusRequested = false;
-    setTimeout(() => { input.scrollIntoView({ behavior: "smooth", block: "center" }); input.focus(); }, 0);
-  }
+  state.lab.console.focusRequested = false;
+  queueTerminalFocus(input, terminal);
+}
+
+function queueTerminalFocus(input, terminal) {
+  window.setTimeout(() => {
+    if (!input.isConnected) return;
+    if (state.lab.console.autoScroll !== false) terminal.scrollTop = terminal.scrollHeight;
+    input.focus({ preventScroll: true });
+  }, 0);
+}
+
+function appendTerminalHelp(engine, value) {
+  const command = value.trim();
+  const suggestions = ["show interfaces status", "show vlan brief", "show running-config", "configure terminal", "display irf", "rollback"]
+    .filter((item) => !command || item.startsWith(command.toLowerCase()));
+  engine.transcript.push(`${consolePrompt()} ${command}?\n${suggestions.length ? suggestions.join("\n") : "No local completion is available."}`);
+  if (engine.transcript.length > 150) engine.transcript.splice(0, engine.transcript.length - 150);
+}
+
+function bindTerminalKeyboard(input, engine, terminal) {
+  input.addEventListener("keydown", (event) => {
+    const history = engine.commands || [];
+    state.lab.console.historyIndex ??= history.length;
+    if (event.key === "Enter") { event.preventDefault(); runLabConsoleCommand(input); return; }
+    if (event.key === "ArrowUp") { event.preventDefault(); state.lab.console.historyIndex = Math.max(0, state.lab.console.historyIndex - 1); input.value = history[state.lab.console.historyIndex] || ""; return; }
+    if (event.key === "ArrowDown") { event.preventDefault(); state.lab.console.historyIndex = Math.min(history.length, state.lab.console.historyIndex + 1); input.value = history[state.lab.console.historyIndex] || ""; return; }
+    if (event.ctrlKey && event.key.toLowerCase() === "l") { event.preventDefault(); engine.transcript = []; state.lab.console.focusRequested = true; renderLab(); return; }
+    if (event.ctrlKey && event.key.toLowerCase() === "c") { event.preventDefault(); input.value = ""; return; }
+    if (event.ctrlKey && event.key.toLowerCase() === "z") { event.preventDefault(); input.value = engine.seed.vendor === "HP Comware" ? "return" : "end"; runLabConsoleCommand(input); return; }
+    if (event.key === "Tab") { event.preventDefault(); const value = input.value.trim().toLowerCase(); const match = ["show interfaces status", "show vlan brief", "show running-config", "configure terminal", "display irf", "display irf topology"].find((item) => item.startsWith(value)); if (match) input.value = `${match} `; return; }
+    if (event.key === "?" && !event.ctrlKey && !event.metaKey) { event.preventDefault(); appendTerminalHelp(engine, input.value); state.lab.console.focusRequested = true; renderLab(); return; }
+  });
+  terminal.addEventListener("scroll", () => { state.lab.console.autoScroll = terminal.scrollHeight - terminal.scrollTop - terminal.clientHeight < 32; });
 }
 
 function renderManualRouteSelector() {
@@ -3354,13 +3414,26 @@ function startFreshTrainingSwitch() {
   state.lab.console.focusRequested = true;
   state.lab.visualNetwork = createVisualNetwork();
   state.lab.visualNetwork.hostname = "TRAINING-SWITCH";
+  window.CommandDoctorTopology?.ensureTopology?.(state.lab.visualNetwork);
+  saveVisualNetwork(state.lab.visualNetwork);
   renderLab();
   showToast(`${route.label} is ready. Step 1 is waiting in the console.`);
 }
 
 function renderLabCliWorkspace() {
   const engine = getLabEngine();
-  els.labRoot.append(labButton("Back to Playground", "secondary lab-back-button", () => { state.lab.screen = labPlaygroundUnlocked() ? "playground" : "dashboard"; renderLab(); }));
+  const toolbar = labCreate("div", "lab-focused-toolbar");
+  toolbar.append(labButton("Back to Lab", "secondary", () => { state.lab.screen = labPlaygroundUnlocked() ? "playground" : "dashboard"; state.lab.console.focusRequested = true; renderLab(); }));
+  const selector = document.createElement("select");
+  selector.setAttribute("aria-label", "Focused terminal device");
+  [["access", "Cisco IOS"], ["disabled", "Cisco IOS disabled port"], ["trunk", "Cisco IOS trunk"], ["irf", "HP Comware"], ["aruba", "ArubaOS-CX"]].forEach(([value, label]) => { const option = document.createElement("option"); option.value = value; option.textContent = label; selector.append(option); });
+  selector.value = state.lab.console.device;
+  selector.addEventListener("change", () => { startLabMission(SIMULATOR_MISSIONS.find((mission) => mission.device === selector.value) || { device: selector.value }); });
+  toolbar.append(selector);
+  toolbar.append(labButton("Clear terminal", "secondary", () => { engine.transcript = []; state.lab.console.focusRequested = true; renderLab(); }));
+  toolbar.append(labButton("Reset device", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; state.lab.console.focusRequested = true; renderLab(); }));
+  toolbar.append(labButton("Start fresh switch", "secondary", startFreshTrainingSwitch));
+  els.labRoot.append(toolbar);
   const workspace = labCreate("section", "lab-cli-workspace");
   const header = labCreate("div", "lab-cli-workspace-head");
   header.append(labCreate("div", "lab-card-kicker", "Simulated command line interface"));
@@ -3377,16 +3450,14 @@ function renderLabCliWorkspace() {
   input.className = "lab-terminal-input";
   input.placeholder = "Enter a simulated command";
   input.setAttribute("aria-label", "Full simulated switch command");
-  input.addEventListener("keydown", (event) => { if (event.key === "Enter") runLabConsoleCommand(input); });
+  bindTerminalKeyboard(input, engine, terminal);
   row.append(input);
   terminal.append(row);
+  terminal.addEventListener("pointerdown", (event) => { if (event.target !== input) queueTerminalFocus(input, terminal); });
   workspace.append(terminal);
-
-  const actions = labCreate("div", "lab-console-actions");
-  actions.append(labButton("Run command", "primary", () => runLabConsoleCommand(input)));
-  actions.append(labButton("Clear terminal", "secondary", () => { engine.transcript = []; renderLab(); }));
-  actions.append(labButton("Reset simulated device", "secondary", () => { engine.rollback(); engine.transcript = []; engine.commands = []; renderLab(); showToast("The simulated device was reset."); }));
-  els.labRoot.append(workspace, actions);
+  els.labRoot.append(workspace);
+  state.lab.console.focusRequested = false;
+  queueTerminalFocus(input, terminal);
 }
 
 function renderLabConfigurationLibrary() {
@@ -3580,11 +3651,11 @@ function getLabGuidance(engine) {
 
 function deviceProfile(device) {
   const profiles = {
-    access: { name: "<SWITCH_NAME>", vendor: "Cisco IOS", port: "<ACCESS_PORT>", endpoint: "<DEVICE_NAME>", vlan: "<VLAN_ID>" },
-    disabled: { name: "<SWITCH_NAME>", vendor: "Cisco IOS", port: "<ACCESS_PORT>", endpoint: "<DEVICE_NAME>", vlan: "<VLAN_ID>" },
-    trunk: { name: "<SWITCH_NAME>", vendor: "Cisco IOS", port: "<TRUNK_PORT>", endpoint: "<UPLINK_DEVICE>", vlan: "<VLAN_ID>" },
-    irf: { name: "<SWITCH_NAME>", vendor: "HP Comware", port: "<IRF_PORT>", endpoint: "<STACK_MEMBER_ID>", vlan: "<VLAN_ID>" },
-    aruba: { name: "<SWITCH_NAME>", vendor: "ArubaOS-CX", port: "<ACCESS_PORT>", endpoint: "<DEVICE_NAME>", vlan: "<VLAN_ID>" }
+    access: { name: "TRAINING-SWITCH", vendor: "Cisco IOS", port: "GigabitEthernet1/0/1", endpoint: "PC-1", vlan: "1" },
+    disabled: { name: "TRAINING-SWITCH", vendor: "Cisco IOS", port: "GigabitEthernet1/0/1", endpoint: "PC-1", vlan: "20" },
+    trunk: { name: "TRAINING-SWITCH", vendor: "Cisco IOS", port: "GigabitEthernet1/0/24", endpoint: "UPLINK-SWITCH", vlan: "20" },
+    irf: { name: "COMWARE-LAB", vendor: "HP Comware", port: "GigabitEthernet1/0/24", endpoint: "1", vlan: "1" },
+    aruba: { name: "ARUBA-LAB", vendor: "ArubaOS-CX", port: "GigabitEthernet1/0/1", endpoint: "PC-1", vlan: "1" }
   };
   return profiles[device] || profiles.access;
 }
@@ -3622,7 +3693,7 @@ function runLabConsoleCommand(input) {
   }
   if (engine) {
     engine.transcript.push(`${prompt} ${command}\n${result.output}${result.diff ? `\n\nConfiguration diff\n${result.diff}` : ""}`);
-    if (engine.transcript.length > 8) engine.transcript.shift();
+    if (engine.transcript.length > 150) engine.transcript.splice(0, engine.transcript.length - 150);
     const mission = currentLabMission();
     if (labMissionComplete(mission, engine) && !state.lab.progress.simulatorMissions[mission.id]) {
       state.lab.progress.simulatorMissions[mission.id] = true;
@@ -3633,6 +3704,8 @@ function runLabConsoleCommand(input) {
     state.lab.console.transcript.push(`${prompt} ${command}\n${result.output}`);
   }
   input.value = "";
+  state.lab.console.historyIndex = engine?.commands?.length || 0;
+  state.lab.console.focusRequested = true;
   renderLab();
 }
 
@@ -3752,16 +3825,16 @@ function simulateLabCommand(command) {
   if (/^(show interface status|show interfaces status|sh int status)$/.test(lower)) return `Port        Name              Status     Vlan\n${consoleState.activeInterface}  ${consoleState.description}  connected  ${consoleState.vlan}`;
   if (/^(show vlan brief|sh vlan brief)$/.test(lower)) return `VLAN  Name        Status    Ports\n${consoleState.vlan}    TRAINING-${consoleState.vlan}  active    ${consoleState.activeInterface}`;
   if (/^show running-config interface/.test(lower)) return `interface ${consoleState.activeInterface}\n description ${consoleState.description}\n switchport access vlan ${consoleState.vlan}\n no shutdown`;
-  if (/^show cdp neighbors/.test(lower)) return `Device ID       Local Intrfce   Platform\n<UPLINK_DEVICE>         ${consoleState.activeInterface}      <PLATFORM>`;
-  if (/^display irf$/.test(lower)) return "MemberID  Role     Priority\n<STACK_MEMBER_ID>         Master   <PRIORITY>";
-  if (/^display irf topology/.test(lower)) return "Topology Info\nMember <STACK_MEMBER_ID>  <IRF_PORT> UP";
+  if (/^show cdp neighbors/.test(lower)) return `Device ID       Local Intrfce             Platform\nUPLINK-SWITCH   ${consoleState.activeInterface}  CD-SW24`;
+  if (/^display irf$/.test(lower)) return "MemberID  Role     Priority\n1         Master   10";
+  if (/^display irf topology/.test(lower)) return "Topology Info\nMember 1  GigabitEthernet1/0/24 UP";
   if (/^show interface brief/.test(lower)) return `Interface  Status  Speed\n${profile.port}     up      1G`;
   if (/^(write memory|copy running-config startup-config|save)$/.test(lower)) return "Simulated configuration saved. In real work, save only after approved verification.";
   const knownCommand = state.commands.find((item) => normalizeCommandText(item.command) === normalizeCommandText(command));
   if (knownCommand) {
     return `Recognized offline command: ${knownCommand.command}\n${knownCommand.meaning}\n\nThis command is available in Command Lookup. A detailed device-specific simulation has not been authored for this device yet.`;
   }
-  return "Unknown simulated command. Try show interface status, show vlan brief, show running-config interface <port>, configure terminal, display irf, or display irf topology.";
+  return "Unknown simulated command. Try show interface status, show vlan brief, show running-config interface GigabitEthernet1/0/1, configure terminal, display irf, or display irf topology.";
 }
 
 function renderLabSectionCard(section, vendorTrack = "all") {
