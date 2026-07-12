@@ -1842,6 +1842,121 @@ input {
   transform: translateY(0);
 }
 
+.home-root,
+.learn-root,
+.library-root {
+  max-width: 1160px;
+}
+
+.home-hero {
+  padding: 10px 0 22px;
+}
+
+.home-hero h2 {
+  margin: 6px 0 10px;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+}
+
+.home-hero p:not(.eyebrow) {
+  max-width: 700px;
+  color: var(--muted);
+  font-size: 1.08rem;
+  line-height: 1.65;
+}
+
+.home-action-grid,
+.library-grid,
+.learn-track-grid,
+.lab-workspace-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.home-action-card,
+.library-card,
+.learn-track-card,
+.lab-workspace-card {
+  display: flex;
+  min-height: 230px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow-soft);
+}
+
+.home-action-card h3,
+.library-card h3,
+.learn-track-card h3,
+.lab-workspace-card h3 {
+  margin: 0;
+}
+
+.home-action-card p,
+.library-card p,
+.learn-track-card p,
+.lab-workspace-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.home-action-card button,
+.library-card button,
+.learn-track-card button,
+.lab-workspace-card button {
+  width: 100%;
+  margin-top: auto;
+}
+
+.home-status-strip,
+.learn-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+  color: var(--muted);
+}
+
+.learn-track-panel,
+.library-intro,
+.lab-workspace-intro {
+  margin-bottom: 18px;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.learn-track-panel h3,
+.library-intro h3,
+.lab-workspace-intro h3 {
+  margin: 4px 0 8px;
+}
+
+.learn-track-card.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.lab-workspace-card code {
+  margin-top: auto;
+}
+
+@media (max-width: 980px) {
+  .home-action-grid,
+  .library-grid,
+  .learn-track-grid,
+  .lab-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 980px) {
   .app-shell {
     grid-template-columns: 1fr;
