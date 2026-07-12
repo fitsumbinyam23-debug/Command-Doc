@@ -1,7 +1,10 @@
 (function () {
   "use strict";
 
-  const STORAGE_KEY = "command-doctor.phase1.topology";
+  // Legacy key used before the full visual-network state was persisted together.
+  // New writes are performed by the app through one versioned simulator snapshot.
+  const LEGACY_STORAGE_KEY = "command-doctor.phase1.topology";
+  const TOPOLOGY_SCHEMA_VERSION = 3;
   const GRID = 20;
   const STAGE_WIDTH = 1200;
   const STAGE_HEIGHT = 650;
@@ -44,7 +47,8 @@
 
   function initialTopology(network) {
     return {
-      version: 2,
+      version: TOPOLOGY_SCHEMA_VERSION,
+      identity: { nextDeviceId: 1, nextMac: 1, nameCounters: {} },
       zoom: 1,
       grid: true,
       tool: "select",
@@ -75,25 +79,30 @@
     });
   }
 
+  function migrateTopology(value) {
+    if (!value || typeof value !== "object") return null;
+    const migrated = JSON.parse(JSON.stringify(value));
+    migrated.version = TOPOLOGY_SCHEMA_VERSION;
+    migrated.identity ||= { nextDeviceId: 1, nextMac: 1, nameCounters: {} };
+    migrated.identity.nextDeviceId = Math.max(1, Number(migrated.identity.nextDeviceId) || 1);
+    migrated.identity.nextMac = Math.max(1, Number(migrated.identity.nextMac) || 1);
+    migrated.identity.nameCounters ||= {};
+    return validTopology(migrated) ? migrated : null;
+  }
+
   function loadSavedTopology() {
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
+      const raw = window.localStorage.getItem(LEGACY_STORAGE_KEY);
       const saved = raw ? JSON.parse(raw) : null;
-      return validTopology(saved) ? saved : null;
+      return migrateTopology(saved);
     } catch {
       return null;
     }
   }
 
-  function saveTopology(topology) {
-    try {
-      if (!validTopology(topology)) return false;
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(topology));
-      return true;
-    } catch {
-      return false;
-    }
-  }
+  // Retained as a validation helper for callers from earlier releases. New state is
+  // persisted through the single visual-network snapshot owned by app-release-21.
+  function saveTopology(topology) { return Boolean(migrateTopology(topology)); }
 
   function nodeById(topology, id) {
     return topology.nodes.find((node) => node.id === id) || null;
@@ -113,18 +122,91 @@
     return node.deviceType || "Desktop PC";
   }
 
-  function nextMac(index) {
-    return `02:00:00:00:01:${String(index + 10).padStart(2, "0")}`;
+  function profileForType(type) {
+    return ENDPOINT_PROFILES.find((item) => item.type === type) || ENDPOINT_PROFILES[0];
+  }
+
+  function identityState(topology) {
+    topology.identity ||= { nextDeviceId: 1, nextMac: 1, nameCounters: {} };
+    topology.identity.nextDeviceId = Math.max(1, Number(topology.identity.nextDeviceId) || 1);
+    topology.identity.nextMac = Math.max(1, Number(topology.identity.nextMac) || 1);
+    topology.identity.nameCounters ||= {};
+    return topology.identity;
+  }
+
+  function usedDeviceIds(network, topology) {
+    return new Set([...(network.devices || []).map((device) => device.id), ...(topology.nodes || []).map((node) => node.id)]);
+  }
+
+  function createUniqueDeviceId(network, topology, type) {
+    const profile = profileForType(type);
+    const identity = identityState(topology);
+    const ids = usedDeviceIds(network, topology);
+    let id = "";
+    do { id = `${profile.idPrefix}-${identity.nextDeviceId++}`; } while (ids.has(id));
+    return id;
+  }
+
+  function createUniqueDeviceName(network, topology, type) {
+    const profile = profileForType(type);
+    const identity = identityState(topology);
+    const names = new Set((network.devices || []).map((device) => String(device.name || "").trim().toLowerCase()));
+    let number = Math.max(1, Number(identity.nameCounters[profile.prefix]) || 1);
+    let name = "";
+    do { name = `${profile.prefix}-${number++}`; } while (names.has(name.toLowerCase()));
+    identity.nameCounters[profile.prefix] = number;
+    return name;
+  }
+
+  function createUniqueMacAddress(network, topology) {
+    const identity = identityState(topology);
+    const macs = new Set((network.devices || []).map((device) => String(device.mac || "").toLowerCase()));
+    let mac = "";
+    do {
+      const value = identity.nextMac++;
+      const hex = value.toString(16).padStart(6, "0");
+      mac = `02:CD:${hex.slice(0, 2)}:${hex.slice(2, 4)}:${hex.slice(4, 6)}`;
+    } while (macs.has(mac.toLowerCase()));
+    return mac;
+  }
+
+  function validateDeviceIdentity(network) {
+    const ids = new Set(); const names = new Set(); const macs = new Set();
+    return (network.devices || []).every((device) => {
+      const id = String(device.id || ""); const name = String(device.name || "").trim().toLowerCase(); const mac = String(device.mac || "").toLowerCase();
+      if (!id || !name || !mac || ids.has(id) || names.has(name) || macs.has(mac)) return false;
+      ids.add(id); names.add(name); macs.add(mac); return true;
+    });
+  }
+
+  function repairDeviceIdentity(network, topology) {
+    const identity = identityState(topology);
+    const usedIds = new Set(); const usedNames = new Set(); const usedMacs = new Set();
+    network.devices.forEach((device) => {
+      const type = device.type || "Desktop PC";
+      const profile = profileForType(type);
+      if (!device.id || usedIds.has(device.id)) device.id = createUniqueDeviceId({ devices: network.devices.filter((item) => item !== device) }, topology, type);
+      usedIds.add(device.id);
+      const baseName = String(device.name || "").trim() || createUniqueDeviceName({ devices: network.devices.filter((item) => item !== device) }, topology, type);
+      let candidate = baseName; let suffix = 2;
+      while (usedNames.has(candidate.toLowerCase())) candidate = `${baseName}-${suffix++}`;
+      device.name = candidate;
+      usedNames.add(candidate.toLowerCase());
+      if (!device.mac || usedMacs.has(String(device.mac).toLowerCase())) device.mac = createUniqueMacAddress({ devices: network.devices.filter((item) => item !== device) }, topology);
+      usedMacs.add(String(device.mac).toLowerCase());
+      const match = device.name.match(new RegExp(`^${profile.prefix}-(\\d+)$`, "i"));
+      if (match) identity.nameCounters[profile.prefix] = Math.max(Number(identity.nameCounters[profile.prefix]) || 1, Number(match[1]) + 1);
+    });
   }
 
   function hydrateSavedDevices(network, topology) {
-    topology.nodes.filter((node) => node.type === "endpoint").forEach((node, index) => {
+    topology.nodes.filter((node) => node.type === "endpoint").forEach((node) => {
       if (deviceById(network, node.id)) return;
       network.devices.push({
         id: node.id,
-        name: node.name || `PC-${index + 1}`,
+        name: node.name || createUniqueDeviceName(network, topology, savedDeviceType(node)),
         type: savedDeviceType(node),
-        mac: nextMac(index),
+        mac: createUniqueMacAddress(network, topology),
         ip: "",
         mask: "255.255.255.0",
         gateway: "",
@@ -136,8 +218,8 @@
   }
 
   function ensureTopology(network) {
-    const topology = validTopology(network.topology) ? network.topology : (loadSavedTopology() || initialTopology(network));
-    topology.version = 2;
+    const topology = migrateTopology(network.topology) || loadSavedTopology() || initialTopology(network);
+    topology.version = TOPOLOGY_SCHEMA_VERSION;
     topology.zoom = Math.min(1.4, Math.max(0.6, Number(topology.zoom) || 1));
     topology.grid = topology.grid !== false;
     topology.tool = ["select", "move", "cable"].includes(topology.tool) ? topology.tool : "select";
@@ -146,6 +228,7 @@
     topology.cableStartId ||= "";
     if (!nodeById(topology, "switch-1")) topology.nodes.push(defaultNode("switch-1", "switch", network.hostname || "SIM-SWITCH", 390, 165));
     hydrateSavedDevices(network, topology);
+    repairDeviceIdentity(network, topology);
     network.devices.forEach((device, index) => {
       const node = nodeById(topology, device.id);
       if (node?.type === "endpoint") node.deviceType ||= device.type;
@@ -153,6 +236,10 @@
     });
     const endpointIds = new Set(network.devices.map((device) => device.id));
     topology.nodes = topology.nodes.filter((node) => node.id === "switch-1" || endpointIds.has(node.id));
+    topology.nodes.filter((node) => node.type === "endpoint").forEach((node) => {
+      const device = deviceById(network, node.id);
+      if (device) { node.name = device.name; node.deviceType = device.type; }
+    });
     topology.cables = topology.cables.filter((cable) => endpointIds.has(cable.endpointId) && network.ports[cable.switchPort]);
     topology.cables.forEach((cable) => window.CommandDoctorDiagnostics?.ensureCableModel(cable));
     applyCablesToNetwork(network, topology);
@@ -181,8 +268,9 @@
 
   function persist(network, topology, onChange) {
     applyCablesToNetwork(network, topology);
-    topology.saveState = saveTopology(topology) ? "Autosaved locally" : "Local save failed. Changes remain in this page until storage is available.";
-    onChange(network, topology);
+    network.topology = topology;
+    const saved = onChange(network, topology);
+    topology.saveState = saved === false ? "Local save failed. Changes remain in this page until storage is available." : "Autosaved locally";
   }
 
   function snap(value, enabled) {
@@ -247,16 +335,15 @@
   }
 
   function addEndpoint(network, topology, type = "Desktop PC") {
-    const profile = ENDPOINT_PROFILES.find((item) => item.type === type) || ENDPOINT_PROFILES[0];
+    const profile = profileForType(type);
     const existing = network.devices.find((device) => device.type === profile.type && !nodeById(topology, device.id));
-    const number = topology.nodes.filter((node) => node.type === "endpoint" && deviceById(network, node.id)?.type === profile.type).length + 1;
-    const id = existing?.id || `${profile.idPrefix}-${Date.now()}`;
-    const device = existing || { id, name: `${profile.prefix}-${number}`, type: profile.type, mac: `02:00:00:00:02:${String(topology.nodes.length + 10).padStart(2, "0")}`, ip: "", mask: "255.255.255.0", gateway: "", method: "static", port: "", lastPing: "Not tested" };
+    const device = existing || { id: createUniqueDeviceId(network, topology, profile.type), name: createUniqueDeviceName(network, topology, profile.type), type: profile.type, mac: createUniqueMacAddress(network, topology), ip: "", mask: "255.255.255.0", gateway: "", method: "static", port: "", lastPing: "Not tested" };
     if (!existing) network.devices.push(device);
-    topology.nodes.push(defaultNode(id, "endpoint", device.name, 90, 80 + (number - 1) * 135, device.type));
-    topology.selectedId = id;
+    const number = topology.nodes.filter((node) => node.type === "endpoint").length;
+    topology.nodes.push(defaultNode(device.id, "endpoint", device.name, 90, 80 + (number % 4) * 135, device.type));
+    topology.selectedId = device.id;
     topology.selectedCableId = "";
-    network.selectedDeviceId = id;
+    network.selectedDeviceId = device.id;
   }
 
   function renameSelected(network, topology) {
@@ -265,6 +352,10 @@
     const next = window.prompt("Device name", node.name);
     const name = String(next || "").trim();
     if (!name || name === node.name) return false;
+    if (network.devices.some((device) => device.id !== node.id && String(device.name || "").trim().toLowerCase() === name.toLowerCase())) {
+      topology.notice = `"${name}" is already in use. Choose a unique device name.`;
+      return false;
+    }
     node.name = name;
     const device = deviceById(network, node.id);
     if (device) device.name = name;
@@ -424,30 +515,69 @@
 
   function bindMovement(canvas, topology, network, onChange, rerender) {
     let dragging = null;
+    let redrawFrame = 0;
+    const redrawCables = () => {
+      if (redrawFrame) return;
+      redrawFrame = window.requestAnimationFrame(() => {
+        redrawFrame = 0;
+        const svg = canvas.querySelector(".topology-cables");
+        if (svg) { svg.replaceChildren(); renderCables(svg, network, topology, onChange); }
+      });
+    };
     canvas.addEventListener("pointerdown", (event) => {
       if (topology.tool !== "move" || event.target.closest("button") || event.target.closest(".topology-cable")) return;
       const element = event.target.closest(".topology-node");
       const node = element && nodeById(topology, element.dataset.nodeId);
       if (!node || node.locked) return;
+      topology.selectedId = node.id;
+      topology.selectedCableId = "";
       dragging = { node, startX: event.clientX, startY: event.clientY, x: node.x, y: node.y };
       canvas.setPointerCapture?.(event.pointerId);
+      canvas.classList.add("is-dragging");
+      event.preventDefault();
     });
     canvas.addEventListener("pointermove", (event) => {
       if (!dragging) return;
       const zoom = topology.zoom || 1;
-      dragging.node.x = Math.max(0, Math.min(STAGE_WIDTH - dragging.node.width, snap(dragging.x + (event.clientX - dragging.startX) / zoom, topology.grid)));
-      dragging.node.y = Math.max(0, Math.min(STAGE_HEIGHT - dragging.node.height, snap(dragging.y + (event.clientY - dragging.startY) / zoom, topology.grid)));
+      const stage = canvas.querySelector(".topology-stage");
+      const width = Math.max(STAGE_WIDTH, stage?.clientWidth || 0);
+      const height = Math.max(STAGE_HEIGHT, stage?.clientHeight || 0);
+      dragging.node.x = Math.max(0, Math.min(width - dragging.node.width, snap(dragging.x + (event.clientX - dragging.startX) / zoom, topology.grid)));
+      dragging.node.y = Math.max(0, Math.min(height - dragging.node.height, snap(dragging.y + (event.clientY - dragging.startY) / zoom, topology.grid)));
       const element = canvas.querySelector(`[data-node-id="${dragging.node.id}"]`);
       if (element) element.style.transform = `translate(${dragging.node.x}px, ${dragging.node.y}px)`;
-      const svg = canvas.querySelector(".topology-cables");
-      if (svg) { svg.replaceChildren(); renderCables(svg, network, topology, onChange); }
+      redrawCables();
     });
     canvas.addEventListener("pointerup", () => {
       if (!dragging) return;
       dragging = null;
+      canvas.classList.remove("is-dragging");
       persist(network, topology, onChange);
       rerender();
     });
+    canvas.addEventListener("pointercancel", () => { if (dragging) { dragging = null; canvas.classList.remove("is-dragging"); persist(network, topology, onChange); rerender(); } });
+  }
+
+  function resetLayout(topology) {
+    const sw = nodeById(topology, "switch-1");
+    if (sw) { sw.x = Math.round((STAGE_WIDTH - sw.width) / 2); sw.y = Math.round((STAGE_HEIGHT - sw.height) / 2); }
+    const endpoints = topology.nodes.filter((node) => node.type === "endpoint");
+    endpoints.forEach((node, index) => {
+      const left = index % 2 === 0;
+      node.x = left ? 70 : STAGE_WIDTH - node.width - 70;
+      node.y = 65 + Math.floor(index / 2) * 145;
+    });
+  }
+
+  function fitTopologyToCanvas(topology, canvas) {
+    const nodes = topology.nodes || [];
+    if (!nodes.length || !canvas) return;
+    const left = Math.min(...nodes.map((node) => node.x)); const top = Math.min(...nodes.map((node) => node.y));
+    const right = Math.max(...nodes.map((node) => node.x + node.width)); const bottom = Math.max(...nodes.map((node) => node.y + node.height));
+    const availableWidth = Math.max(320, canvas.clientWidth - 80); const availableHeight = Math.max(260, canvas.clientHeight - 80);
+    topology.zoom = Math.max(0.6, Math.min(1.4, Math.min(availableWidth / Math.max(1, right - left), availableHeight / Math.max(1, bottom - top))));
+    canvas.scrollLeft = Math.max(0, (left * topology.zoom) - 30);
+    canvas.scrollTop = Math.max(0, (top * topology.zoom) - 30);
   }
 
   function renderInto(canvas, network, topology, onChange, rerender) {
@@ -456,7 +586,7 @@
       persist(network, topology, onChange);
       rerender();
     };
-    const stage = create("div", `topology-stage ${topology.grid ? "has-grid" : ""}`);
+    const stage = create("div", `topology-stage ${topology.grid ? "has-grid" : ""} ${topology.tool === "move" ? "is-move" : ""}`);
     stage.style.transform = `scale(${topology.zoom})`;
     stage.style.transformOrigin = "top left";
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -484,8 +614,9 @@
     ENDPOINT_PROFILES.forEach((profile) => palette.append(button(`Add ${profile.type}`, "topology-tray-item", () => { addEndpoint(network, topology, profile.type); persist(network, topology, onChange); rerender(); })));
     tray.append(palette);
     workspace.append(tray);
+    let canvas;
     const toolbar = create("div", "topology-toolbar");
-    const setTool = (tool) => { topology.tool = tool; topology.cableStartId = ""; persist(network, topology, onChange); rerender(); };
+    const setTool = (tool) => { topology.tool = tool; topology.cableStartId = ""; topology.notice = tool === "move" ? "Move mode: drag a device to reposition it." : ""; persist(network, topology, onChange); rerender(); };
     toolbar.append(
       button("Select tool", `secondary ${topology.tool === "select" ? "is-active" : ""}`, () => setTool("select")),
       button("Move tool", `secondary ${topology.tool === "move" ? "is-active" : ""}`, () => setTool("move")),
@@ -498,13 +629,14 @@
       button("Zoom out", "icon-button", () => { topology.zoom = Math.max(0.6, topology.zoom - 0.1); persist(network, topology, onChange); rerender(); }),
       button("Zoom in", "icon-button", () => { topology.zoom = Math.min(1.4, topology.zoom + 0.1); persist(network, topology, onChange); rerender(); }),
       button("Reset zoom", "secondary", () => { topology.zoom = 1; persist(network, topology, onChange); rerender(); }),
-      button("Fit to screen", "secondary", () => { topology.zoom = 0.85; persist(network, topology, onChange); rerender(); }),
+      button("Fit to screen", "secondary", () => { fitTopologyToCanvas(topology, canvas); persist(network, topology, onChange); rerender(); }),
+      button("Reset layout", "secondary", () => { resetLayout(topology); persist(network, topology, onChange); rerender(); }),
       button(topology.grid ? "Hide grid" : "Show grid", "secondary", () => { topology.grid = !topology.grid; persist(network, topology, onChange); rerender(); }),
       button("Clear topology", "secondary", () => { if (window.confirm("Clear local endpoints and cables?")) { network.devices = network.devices.filter((device) => !topology.nodes.some((node) => node.id === device.id && node.type === "endpoint")); network.topology = initialTopology(network); persist(network, network.topology, onChange); rerender(); } })
     );
     workspace.append(toolbar);
     const content = create("div", "topology-workspace-content");
-    const canvas = create("div", "topology-canvas");
+    canvas = create("div", "topology-canvas");
     canvas.setAttribute("role", "application");
     canvas.setAttribute("aria-label", "Simulated network topology canvas");
     content.append(canvas, renderSelectionPanel(network, topology, onChange, rerender));
@@ -515,7 +647,7 @@
     container.append(workspace);
   }
 
-  window.CommandDoctorTopology = { render, ensureTopology, applyCablesToNetwork, saveTopology, loadSavedTopology, validTopology };
+  window.CommandDoctorTopology = { render, ensureTopology, applyCablesToNetwork, saveTopology, loadSavedTopology, validTopology, migrateTopology, createUniqueDeviceId, createUniqueDeviceName, createUniqueMacAddress, validateDeviceIdentity };
   document.addEventListener("commanddoctor:render-topology", (event) => {
     const detail = event.detail || {};
     if (detail.container && detail.network) render(detail.container, detail.network, detail.options || {});
