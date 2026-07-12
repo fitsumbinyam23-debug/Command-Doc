@@ -18,11 +18,11 @@
         </div>
 
         <nav class="nav-tabs" aria-label="Views">
-          <button class="nav-tab active" type="button" data-view="diagnose">Diagnose</button>
-          <button class="nav-tab" type="button" data-view="lab">Lab Mode</button>
-          <button class="nav-tab" type="button" data-view="history">History</button>
-          <button class="nav-tab" type="button" data-view="knowledge">Knowledge</button>
-          <button class="nav-tab" type="button" data-view="admin">Trainer Controls</button>
+          <button class="nav-tab active" type="button" data-view="home">Home</button>
+          <button class="nav-tab" type="button" data-view="diagnose">Diagnose</button>
+          <button class="nav-tab" type="button" data-view="learn">Learn</button>
+          <button class="nav-tab" type="button" data-view="lab">Switch Lab</button>
+          <button class="nav-tab" type="button" data-view="library">Library</button>
         </nav>
 
         <div class="status-stack">
@@ -32,7 +32,11 @@
       </aside>
 
       <main class="main-panel">
-        <section class="view active" id="diagnoseView" aria-labelledby="diagnoseTitle">
+        <section class="view active" id="homeView" aria-labelledby="homeTitle">
+          <div id="homeRoot" class="home-root" aria-live="polite"></div>
+        </section>
+
+        <section class="view" id="diagnoseView" aria-labelledby="diagnoseTitle">
           <div class="page-heading">
             <div>
               <p class="eyebrow">Technician Console</p>
@@ -118,11 +122,33 @@
           <div class="page-heading">
             <div>
               <p class="eyebrow">Offline Simulated Training</p>
-              <h2 id="labTitle">Lab Mode</h2>
-              <p class="page-intro">Learn to check, understand, troubleshoot, configure, verify, and explain commands without touching a real device.</p>
+              <h2 id="labTitle">Switch Lab</h2>
+              <p class="page-intro">Choose one simulated workspace at a time. Nothing connects to a real device.</p>
             </div>
           </div>
           <div id="labRoot" class="lab-root" aria-live="polite"></div>
+        </section>
+
+        <section class="view" id="learnView" aria-labelledby="learnTitle">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Structured Offline Learning</p>
+              <h2 id="learnTitle">Learn</h2>
+              <p class="page-intro">Choose a vendor track, work through lessons, and practise each command in the local simulator.</p>
+            </div>
+          </div>
+          <div id="learnRoot" class="learn-root" aria-live="polite"></div>
+        </section>
+
+        <section class="view" id="libraryView" aria-labelledby="libraryTitle">
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Offline Reference And Review</p>
+              <h2 id="libraryTitle">Library</h2>
+              <p class="page-intro">Find commands, review local knowledge, revisit saved reports, or open instructor controls.</p>
+            </div>
+          </div>
+          <div id="libraryRoot" class="library-root" aria-live="polite"></div>
         </section>
 
         <section class="view" id="historyView" aria-labelledby="historyTitle">
@@ -160,9 +186,9 @@
     </div>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <script src="src/lab-engine.js?v=2026.07-lab.31" defer></script>
-    <script src="src/diagnostics-engine.js?v=2026.07-lab.31"></script>
-    <script src="src/topology-workspace.js?v=2026.07-lab.31"></script>
-    <script src="src/app-release-21.js?v=2026.07-lab.31" defer></script>
+    <script src="src/lab-engine.js?v=2026.07-lab.32" defer></script>
+    <script src="src/diagnostics-engine.js?v=2026.07-lab.32"></script>
+    <script src="src/topology-workspace.js?v=2026.07-lab.32"></script>
+    <script src="src/app-release-21.js?v=2026.07-lab.32" defer></script>
   </body>
 </html>
