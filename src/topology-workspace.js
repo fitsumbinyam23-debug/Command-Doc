@@ -415,7 +415,9 @@
     panel.dataset.nodeId = node.id;
     panel.setAttribute("aria-label", `${node.name} endpoint`);
     panel.addEventListener("click", () => { if (topology.tool === "select") selectNode(network, topology, node.id, onChange); });
-    panel.append(create("strong", "", node.name), create("span", "topology-endpoint-type", device?.type || "Desktop PC"), create("span", `topology-status ${device?.port ? "is-up" : ""}`, device?.port ? `Linked: ${device.port}` : "No cable"));
+    const handle = create("div", "topology-drag-handle topology-endpoint-drag-area");
+    handle.append(create("span", "topology-drag-grip", "|| Move"), create("strong", "", node.name));
+    panel.append(handle, create("span", "topology-endpoint-type", device?.type || "Desktop PC"), create("span", `topology-status ${device?.port ? "is-up" : ""}`, device?.port ? `Linked: ${device.port}` : "No cable"));
     const socket = button("", "topology-endpoint-socket", () => {
       if (topology.tool !== "cable") return;
       topology.cableStartId = node.id;
@@ -435,8 +437,8 @@
     panel.dataset.nodeId = node.id;
     panel.setAttribute("aria-label", `${node.name} simulated switch`);
     panel.addEventListener("click", () => { if (topology.tool === "select") selectNode(network, topology, node.id, onChange); });
-    const top = create("div", "topology-switch-title");
-    top.append(create("strong", "", node.name), create("span", "", "CD-SW24"));
+    const top = create("div", "topology-switch-title topology-drag-handle topology-switch-drag-area");
+    top.append(create("span", "topology-drag-grip", "|| Move"), create("strong", "", node.name), create("span", "", "CD-SW24"));
     const indicators = create("div", "topology-switch-indicators");
     [["PWR", true], ["SYS", true], ["STACK", false]].forEach(([label, active]) => {
       const indicator = create("span", `topology-indicator ${active ? "is-on" : ""}`);
@@ -531,8 +533,8 @@
       if (!node || node.locked) return;
       topology.selectedId = node.id;
       topology.selectedCableId = "";
-      dragging = { node, startX: event.clientX, startY: event.clientY, x: node.x, y: node.y };
-      canvas.setPointerCapture?.(event.pointerId);
+      dragging = { node, element, startX: event.clientX, startY: event.clientY, x: node.x, y: node.y };
+      element.setPointerCapture?.(event.pointerId);
       canvas.classList.add("is-dragging");
       event.preventDefault();
     });
