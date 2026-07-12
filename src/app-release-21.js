@@ -359,6 +359,7 @@ const state = {
     progress: null,
     screen: "dashboard",
     activeStageId: "foundation",
+    diagnosticsMode: false,
     activeSectionId: "",
     playgroundTaskId: "free-practice",
     visualNetwork: null,
@@ -396,7 +397,19 @@ async function init() {
   await loadKnowledge();
   renderKnowledge();
   renderHistory();
+  state.lab.diagnosticsMode = new URLSearchParams(window.location.search).get("advanced") === "diagnostics";
+  if (state.lab.diagnosticsMode) {
+    els.navTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === "lab"));
+    els.views.forEach((view) => view.classList.toggle("active", view.id === "labView"));
+  }
   renderLab();
+  if (state.lab.diagnosticsMode) {
+    window.setTimeout(() => {
+      const workspace = document.querySelector(".topology-workspace");
+      workspace?.classList.add("diagnostics-focus");
+      workspace?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 0);
+  }
   registerServiceWorker();
 }
 
@@ -466,7 +479,7 @@ function bindEvents() {
   els.copyReportBtn.addEventListener("click", () => copyCurrent("report"));
   els.clearHistoryBtn.addEventListener("click", clearHistory);
   els.navTabs.forEach((tab) => {
-    tab.addEventListener("click", () => switchView(tab.dataset.view));
+    tab.addEventListener("click", () => switchView(tab.dataset.view, { resetLab: tab.dataset.view === "lab" }));
   });
   populateExamples();
 }
@@ -2541,12 +2554,6 @@ function renderLab() {
 }
 
 function renderLabDashboard() {
-  const heading = labCreate("section", "lab-home-heading");
-  heading.append(labCreate("div", "lab-card-kicker", "Offline simulated training"));
-  heading.append(labCreate("h3", "", "Lab Mode"));
-  heading.append(labCreate("p", "", "Learn one topic at a time, then practice safely on a local simulated switch."));
-  els.labRoot.append(heading);
-
   const intro = labCreate("div", "lab-banner");
   intro.append(labCreate("strong", "lab-banner-title", "100% simulated practice"), labCreate("span", "lab-banner-copy", "Nothing here runs on a real device. Commands, outputs, and changes stay in this browser."));
   els.labRoot.append(intro);
@@ -2564,7 +2571,8 @@ function renderLabDashboard() {
     card.append(labCreate("p", "", stage.description));
     const metric = id === "foundation" ? `${labProgressPercent(labFoundationLessons())}% complete` : id === "configuration" ? (labConfigurationUnlocked() ? "Ready for guided configuration" : "Pass the Foundation checkpoint") : (unlocked ? "Ready for free practice" : "Complete four safety foundations");
     card.append(labCreate("div", "lab-stage-metric", metric));
-    const button = labButton("Open", unlocked ? "primary" : "secondary", () => openLabStage(id));
+    const stageLabel = stage.title || id;
+    const button = labButton(`Open ${stageLabel}`, unlocked ? "primary" : "secondary", () => openLabStage(id));
     button.disabled = !unlocked;
     card.append(button);
     stages.append(card);
@@ -2574,16 +2582,29 @@ function renderLabDashboard() {
   renderVisualNetworkPlayground();
 }
 
+function labNavigate(destination) {
+  if (destination.stageId !== undefined) state.lab.activeStageId = destination.stageId;
+  if (destination.sectionId !== undefined) state.lab.activeSectionId = destination.sectionId;
+  if (destination.lessonId !== undefined) state.lab.activeLessonId = destination.lessonId;
+  state.lab.screen = destination.screen || "dashboard";
+  renderLab();
+}
+
 function renderLabBreadcrumb(items) {
+  const navigation = labCreate("div", "lab-page-navigation");
+  navigation.append(labButton("Back to Lab Mode", "secondary lab-back-button", () => labNavigate({ screen: "dashboard" })));
   const trail = labCreate("nav", "lab-breadcrumb", "");
   trail.setAttribute("aria-label", "Lab navigation");
   items.forEach((item, index) => {
     if (index) trail.append(labCreate("span", "", ">"));
-    const button = labButton(item.label, "lab-breadcrumb-link", () => { state.lab.screen = item.screen; renderLab(); });
-    button.disabled = !item.screen;
-    trail.append(button);
+    if (!item.screen) {
+      trail.append(labCreate("span", "lab-breadcrumb-current", item.label));
+      return;
+    }
+    trail.append(labButton(item.label, "lab-breadcrumb-link", () => labNavigate(item)));
   });
-  els.labRoot.append(trail);
+  navigation.append(trail);
+  els.labRoot.append(navigation);
 }
 
 function renderLabStagePage() {
@@ -2627,7 +2648,7 @@ function renderLabSectionPage() {
   const section = state.lab.sections.find((item) => item.id === state.lab.activeSectionId);
   if (!section) { state.lab.screen = "dashboard"; renderLab(); return; }
   const stage = state.lab.stages.find((item) => item.id === section.stage);
-  renderLabBreadcrumb([{ label: "Lab Mode", screen: "dashboard" }, { label: stage?.title || "Stage", screen: "stage" }, { label: section.title }]);
+  renderLabBreadcrumb([{ label: "Lab Mode", screen: "dashboard" }, { label: stage?.title || "Stage", screen: "stage", stageId: section.stage }, { label: section.title }]);
   const header = labCreate("section", "lab-page-header");
   header.append(labCreate("div", "lab-card-kicker", section.difficulty), labCreate("h3", "", section.title), labCreate("p", "", section.description));
   els.labRoot.append(header);
@@ -2786,13 +2807,26 @@ function createVisualNetwork() {
     selectedDeviceId: "pc-1",
     selectedVlan: "",
     traffic: "",
+    diagnostics: [],
+    lastDiagnosticScan: "",
     saved: false
   };
 }
 
 function visualNetwork() {
-  if (!state.lab.visualNetwork) state.lab.visualNetwork = createVisualNetwork();
+  if (!state.lab.visualNetwork) {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem("command-doctor.visual-network") || "null");
+      state.lab.visualNetwork = saved && saved.ports && Array.isArray(saved.devices) ? saved : createVisualNetwork();
+    } catch {
+      state.lab.visualNetwork = createVisualNetwork();
+    }
+  }
   return state.lab.visualNetwork;
+}
+
+function saveVisualNetwork(network) {
+  try { window.localStorage.setItem("command-doctor.visual-network", JSON.stringify(network)); } catch { /* Local persistence is optional. */ }
 }
 
 function visualPort(network, name = network.selectedPort) {
@@ -2804,14 +2838,12 @@ function visualDevice(network, id = network.selectedDeviceId) {
 }
 
 function visualPortIsUp(port) {
-  return Boolean(port && port.adminUp && !port.errorDisabled && port.connectedDeviceId && port.cable === "good");
+  const diagnostics = window.CommandDoctorDiagnostics;
+  return diagnostics ? diagnostics.portOperational(visualNetwork(), port) : Boolean(port && port.adminUp && !port.errorDisabled && port.connectedDeviceId && port.cable === "good");
 }
 
 function visualMacRefresh(network) {
-  network.macs = network.devices.flatMap((device) => {
-    const port = visualPort(network, device.port);
-    return device.port && visualPortIsUp(port) && network.vlans[port.vlan] ? [{ vlan: port.vlan, mac: device.mac, type: "Dynamic", interface: port.name, age: "0" }] : [];
-  });
+  window.CommandDoctorDiagnostics?.invalidateMacs(network);
 }
 
 function syncEngineFromVisual() {
@@ -2849,7 +2881,7 @@ function renderVisualNetworkPlayground() {
   const panel = labCreate("section", "visual-playground");
   const heading = labCreate("div", "visual-playground-heading");
   heading.append(labCreate("div", "lab-card-kicker", "Offline simulated training"));
-  heading.append(labCreate("h3", "", "Visual Network Playground"));
+  heading.append(labCreate("h3", "", state.lab.diagnosticsMode ? "Advanced Diagnostics Mode" : "Visual Network Playground"));
   heading.append(labCreate("p", "", "Build a small topology, configure the local simulated switch through the CLI or visual controls, and test connectivity. It never connects to real equipment."));
   panel.append(heading);
   const topologyHost = labCreate("div", "visual-topology-host");
@@ -2866,11 +2898,62 @@ function renderVisualNetworkPlayground() {
   }
   panel.append(topologyHost);
   panel.append(renderVisualNextStep(network));
+  panel.append(renderDiagnosticResults(network));
 
   const grid = labCreate("div", "visual-playground-grid");
   grid.append(renderVisualDetails(network));
   panel.append(grid, renderVisualVerification(network));
   els.labRoot.append(panel);
+}
+
+function runTopologyDiagnostic(network) {
+  network.diagnostics = window.CommandDoctorDiagnostics?.scan(network) || [];
+  network.lastDiagnosticScan = new Date().toLocaleTimeString();
+  if (network.topology) {
+    network.topology.lastDiagnosticScan = network.lastDiagnosticScan;
+    window.CommandDoctorTopology?.saveTopology(network.topology);
+  }
+  return network.diagnostics;
+}
+
+function renderDiagnosticResults(network) {
+  if (state.lab.diagnosticsMode && !network.lastDiagnosticScan) runTopologyDiagnostic(network);
+  const results = network.diagnostics?.length ? network.diagnostics : runTopologyDiagnostic(network);
+  const filters = ["All", "Critical", "Warning", "Passed", "Physical", "Layer 2", "Layer 3", "Connectivity"];
+  network.diagnosticFilter ||= "All";
+  const visible = results.filter((item) => network.diagnosticFilter === "All" || item.severity === network.diagnosticFilter || item.category === network.diagnosticFilter);
+  const counts = Object.fromEntries(["Critical", "Warning", "Passed"].map((severity) => [severity, results.filter((item) => item.severity === severity).length]));
+  const score = results.length ? Math.round((counts.Passed / results.length) * 100) : 100;
+  const panel = labCreate("section", "diagnostic-results-panel");
+  const heading = labCreate("div", "diagnostic-results-heading");
+  heading.append(labCreate("div", "lab-card-kicker", "Offline topology scan"), labCreate("h4", "", "Diagnostic Results"));
+  heading.append(labButton("Run full diagnostic", "secondary", () => { runTopologyDiagnostic(network); renderLab(); }));
+  panel.append(heading);
+  const metrics = labCreate("div", "diagnostic-metrics");
+  [["Health score", `${score}%`], ["Critical", counts.Critical], ["Warnings", counts.Warning], ["Passed", counts.Passed], ["Last scan", network.lastDiagnosticScan || "Not scanned"]].forEach(([label, value]) => {
+    const item = labCreate("div", "diagnostic-metric");
+    item.append(labCreate("span", "", label), labCreate("strong", "", String(value)));
+    metrics.append(item);
+  });
+  panel.append(metrics);
+  const filterRow = labCreate("div", "diagnostic-filters");
+  filters.forEach((filter) => filterRow.append(labButton(filter, `secondary ${network.diagnosticFilter === filter ? "is-active" : ""}`, () => { network.diagnosticFilter = filter; renderLab(); })));
+  panel.append(filterRow);
+  const list = labCreate("div", "diagnostic-findings");
+  visible.forEach((finding) => {
+    const item = labButton(`${finding.severity} | ${finding.category} | ${finding.device}\n${finding.finding}\n${finding.evidence}\nNext: ${finding.nextCheck}`, `diagnostic-finding is-${finding.severity.toLowerCase()}`, () => {
+      network.selectedDeviceId = finding.target.deviceId || network.selectedDeviceId;
+      network.selectedPort = finding.target.port || network.selectedPort;
+      if (network.topology) {
+        network.topology.selectedId = finding.target.deviceId || "";
+        network.topology.selectedCableId = finding.target.cableId || "";
+      }
+      renderLab();
+    });
+    list.append(item);
+  });
+  panel.append(list);
+  return panel;
 }
 
 function renderVisualNextStep(network) {
@@ -3009,7 +3092,7 @@ function renderVisualDeviceConfig(network, device) {
     field.append(input);
     config.append(field);
   });
-  config.append(labButton("Apply device IP settings", "secondary", () => { Object.entries(fields).forEach(([key, input]) => { device[key] = input.value.trim(); }); recordVisualCommands([`! ${device.name} IP configured locally`], `Updated ${device.name} local IP settings.`); renderLab(); }));
+  config.append(labButton("Apply device IP settings", "secondary", () => { Object.entries(fields).forEach(([key, input]) => { device[key] = input.value.trim(); }); visualMacRefresh(network); network.traffic = `Updated ${device.name} local IP settings.`; network.diagnostics = []; saveVisualNetwork(network); showToast(`${device.name} IP settings saved locally. Run diagnostics to refresh findings.`); }));
   const target = document.createElement("select");
   target.setAttribute("aria-label", "Ping target");
   network.devices.filter((item) => item.id !== device.id).forEach((item) => { const option = document.createElement("option"); option.value = item.id; option.textContent = item.name; target.append(option); });
@@ -3060,11 +3143,15 @@ function sameVisualSubnet(a, b) {
 
 function runVisualPing(sourceId, targetId) {
   const network = visualNetwork(); const source = visualDevice(network, sourceId); const target = visualDevice(network, targetId); const sourcePort = visualPort(network, source?.port); const targetPort = visualPort(network, target?.port);
-  const ok = source && target && source.ip && target.ip && visualPortIsUp(sourcePort) && visualPortIsUp(targetPort) && sourcePort.vlan === targetPort.vlan && sameVisualSubnet(source, target);
-  const message = ok ? `Ping success: ${source.name} reached ${target.name}. Simulated packet travelled through ${sourcePort.name} and ${targetPort.name}.` : "Ping failed: check cable, port status, VLAN, and IP subnet in the local simulation.";
+  const outcome = window.CommandDoctorDiagnostics?.connectivity(network, source, target) || { ok: false, reason: "Diagnostics engine is unavailable.", command: "show interfaces status" };
+  if (outcome.ok) {
+    window.CommandDoctorDiagnostics.learnMac(network, source, "ARP before ping");
+    window.CommandDoctorDiagnostics.learnMac(network, target, "ARP reply before ping");
+  }
+  const message = outcome.ok ? `Ping success: ${source.name} reached ${target.name}. ARP learned both MAC addresses before ICMP.` : `Ping failed: ${outcome.reason} Next check: ${outcome.command}.`;
   if (source) source.lastPing = message; if (target) target.lastPing = message;
   if (sourcePort) sourcePort.lastActivity = "Ping tested"; if (targetPort) targetPort.lastActivity = "Ping tested";
-  visualMacRefresh(network); recordVisualCommands([`ping ${target?.ip || "<DESTINATION_IP>"}`], message); showToast(message); renderLab();
+  visualMacRefresh(network); syncEngineFromVisual(); network.traffic = message; showToast(message); renderLab();
 }
 
 function renderVisualVerification(network) {
@@ -3701,7 +3788,11 @@ function renderLabSectionCard(section, vendorTrack = "all") {
 }
 
 function openLabStage(stageId) {
-  if (!labStageUnlocked(stageId)) return;
+  if (!labStageUnlocked(stageId)) {
+    const requirement = stageId === "configuration" ? "Complete the Foundation checkpoint with 80% or higher first." : "Complete four Foundation lessons first.";
+    showToast(`${requirement} Trainer Controls can unlock local practice for review.`);
+    return;
+  }
   if (stageId === "playground") {
     state.lab.screen = "playground";
     renderLab();
@@ -3733,7 +3824,7 @@ function renderLabLesson() {
   if (!lesson) { state.lab.screen = "dashboard"; renderLab(); return; }
   const section = state.lab.sections.find((item) => item.id === lesson.section_id);
   const stage = state.lab.stages.find((item) => item.id === section?.stage);
-  renderLabBreadcrumb([{ label: "Lab Mode", screen: "dashboard" }, { label: stage?.title || "Stage", screen: "stage" }, { label: section?.title || "Section", screen: "section" }, { label: lesson.title }]);
+  renderLabBreadcrumb([{ label: "Lab Mode", screen: "dashboard" }, { label: stage?.title || "Stage", screen: "stage", stageId: section?.stage }, { label: section?.title || "Section", screen: "section", sectionId: lesson.section_id }, { label: lesson.title }]);
   const header = labCreate("div", "lab-lesson-header");
   header.append(labCreate("div", "lab-card-kicker", `${lesson.vendor} | ${lesson.difficulty}`));
   header.append(labCreate("h3", "", lesson.title));
@@ -3911,10 +4002,13 @@ function renderLabScenario() {
   els.labRoot.append(panel);
 }
 
-function switchView(viewName) {
+function switchView(viewName, options = {}) {
   els.navTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === viewName));
   els.views.forEach((view) => view.classList.toggle("active", view.id === `${viewName}View`));
-  if (viewName === "lab") renderLab();
+  if (viewName === "lab") {
+    if (options.resetLab) state.lab.screen = "dashboard";
+    renderLab();
+  }
   if (viewName === "admin") renderAdmin();
 }
 
