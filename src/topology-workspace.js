@@ -5,6 +5,14 @@
   const GRID = 20;
   const STAGE_WIDTH = 1200;
   const STAGE_HEIGHT = 650;
+  const ENDPOINT_PROFILES = [
+    { type: "Desktop PC", prefix: "PC", idPrefix: "pc" },
+    { type: "Laptop", prefix: "Laptop", idPrefix: "laptop" },
+    { type: "IP Phone", prefix: "Phone", idPrefix: "phone" },
+    { type: "Printer", prefix: "Printer", idPrefix: "printer" },
+    { type: "Wireless AP", prefix: "AP", idPrefix: "ap" },
+    { type: "Server", prefix: "Server", idPrefix: "server" }
+  ];
 
   function create(tag, className, text) {
     const element = document.createElement(tag);
@@ -20,12 +28,13 @@
     return element;
   }
 
-  function defaultNode(id, type, name, x, y) {
+  function defaultNode(id, type, name, x, y, deviceType = "") {
     const isSwitch = type === "switch";
     return {
       id, type, name, x, y,
       vendor: isSwitch ? "Cisco IOS" : "Generic endpoint",
       model: isSwitch ? "CD-SW24 simulated access switch" : "CD-ENDPOINT-1",
+      deviceType: isSwitch ? "" : deviceType,
       width: isSwitch ? 470 : 180,
       height: isSwitch ? 235 : 108,
       locked: false,
@@ -94,6 +103,16 @@
     return network.devices.find((device) => device.id === id) || null;
   }
 
+  function savedDeviceType(node) {
+    const name = String(node.name || "").toLowerCase();
+    if (name.startsWith("server")) return "Server";
+    if (name.startsWith("ap")) return "Wireless AP";
+    if (name.startsWith("phone")) return "IP Phone";
+    if (name.startsWith("printer")) return "Printer";
+    if (name.startsWith("laptop")) return "Laptop";
+    return node.deviceType || "Desktop PC";
+  }
+
   function nextMac(index) {
     return `02:00:00:00:01:${String(index + 10).padStart(2, "0")}`;
   }
@@ -104,7 +123,7 @@
       network.devices.push({
         id: node.id,
         name: node.name || `PC-${index + 1}`,
-        type: "Desktop PC",
+        type: savedDeviceType(node),
         mac: nextMac(index),
         ip: "",
         mask: "255.255.255.0",
@@ -128,7 +147,9 @@
     if (!nodeById(topology, "switch-1")) topology.nodes.push(defaultNode("switch-1", "switch", network.hostname || "SIM-SWITCH", 390, 165));
     hydrateSavedDevices(network, topology);
     network.devices.forEach((device, index) => {
-      if (device.port && !nodeById(topology, device.id)) topology.nodes.push(defaultNode(device.id, "endpoint", device.name, 80, 100 + index * 135));
+      const node = nodeById(topology, device.id);
+      if (node?.type === "endpoint") node.deviceType ||= device.type;
+      if (device.port && !node) topology.nodes.push(defaultNode(device.id, "endpoint", device.name, 80, 100 + index * 135, device.type));
     });
     const endpointIds = new Set(network.devices.map((device) => device.id));
     topology.nodes = topology.nodes.filter((node) => node.id === "switch-1" || endpointIds.has(node.id));
@@ -212,13 +233,14 @@
     return true;
   }
 
-  function addEndpoint(network, topology) {
-    const existing = network.devices.find((device) => !nodeById(topology, device.id));
-    const number = topology.nodes.filter((node) => node.type === "endpoint").length + 1;
-    const id = existing?.id || `pc-${Date.now()}`;
-    const device = existing || { id, name: `PC-${number}`, type: "Desktop PC", mac: `02:00:00:00:02:${String(number).padStart(2, "0")}`, ip: "", mask: "255.255.255.0", gateway: "", method: "static", port: "", lastPing: "Not tested" };
+  function addEndpoint(network, topology, type = "Desktop PC") {
+    const profile = ENDPOINT_PROFILES.find((item) => item.type === type) || ENDPOINT_PROFILES[0];
+    const existing = network.devices.find((device) => device.type === profile.type && !nodeById(topology, device.id));
+    const number = topology.nodes.filter((node) => node.type === "endpoint" && deviceById(network, node.id)?.type === profile.type).length + 1;
+    const id = existing?.id || `${profile.idPrefix}-${Date.now()}`;
+    const device = existing || { id, name: `${profile.prefix}-${number}`, type: profile.type, mac: `02:00:00:00:02:${String(topology.nodes.length + 10).padStart(2, "0")}`, ip: "", mask: "255.255.255.0", gateway: "", method: "static", port: "", lastPing: "Not tested" };
     if (!existing) network.devices.push(device);
-    topology.nodes.push(defaultNode(id, "endpoint", device.name, 90, 80 + (number - 1) * 135));
+    topology.nodes.push(defaultNode(id, "endpoint", device.name, 90, 80 + (number - 1) * 135, device.type));
     topology.selectedId = id;
     topology.selectedCableId = "";
     network.selectedDeviceId = id;
@@ -244,6 +266,20 @@
     network.devices = network.devices.filter((device) => device.id !== node.id);
     topology.selectedId = "";
     return true;
+  }
+
+  function inspectTopology(network, topology) {
+    const endpoints = topology.nodes.filter((node) => node.type === "endpoint");
+    const connected = topology.cables.filter((cable) => cable.state === "good");
+    const missing = endpoints.filter((node) => !topology.cables.some((cable) => cable.endpointId === node.id));
+    const portWarnings = topology.cables.filter((cable) => !network.ports[cable.switchPort]?.adminUp || network.ports[cable.switchPort]?.cable !== "good");
+    const checks = [
+      `${connected.length} cable${connected.length === 1 ? "" : "s"} connected`,
+      missing.length ? `${missing.length} endpoint${missing.length === 1 ? "" : "s"} not connected` : "All endpoints connected",
+      portWarnings.length ? `${portWarnings.length} port health warning${portWarnings.length === 1 ? "" : "s"}` : "Connected port health is good"
+    ];
+    const status = portWarnings.length ? "Warning" : missing.length ? "Ready" : endpoints.length ? "Healthy" : "Ready";
+    return { checkedAt: new Date().toLocaleTimeString(), status, checks };
   }
 
   function renderCables(svg, network, topology, onChange) {
@@ -349,7 +385,11 @@
       panel.append(button("Rename device", "secondary", () => { if (renameSelected(network, topology)) { persist(network, topology, onChange); rerender(); } }));
       return panel;
     }
-    panel.append(create("strong", "", "Topology tools"), create("p", "", topology.tool === "cable" ? (topology.cableStartId ? "Click a switch RJ45 socket to finish the cable." : "Click an endpoint Ethernet socket to begin a cable.") : "Use Select to inspect objects, Move to reposition devices, or Cable to connect sockets."));
+    const diagnostic = topology.lastDiagnostic || inspectTopology(network, topology);
+    panel.append(create("strong", "", "Topology health"), create("div", "topology-health-status", diagnostic.status));
+    diagnostic.checks.forEach((check) => panel.append(create("div", "topology-detail-row", check)));
+    panel.append(create("p", "", topology.tool === "cable" ? (topology.cableStartId ? "Click a switch RJ45 socket to finish the cable." : "Click an endpoint Ethernet socket to begin a cable.") : "Use Select to inspect objects, Move to reposition devices, or Cable to connect sockets."));
+    panel.append(button("Run full diagnostic", "secondary", () => { topology.lastDiagnostic = inspectTopology(network, topology); topology.notice = `Diagnostic complete: ${topology.lastDiagnostic.status}.`; persist(network, topology, onChange); rerender(); }));
     return panel;
   }
 
@@ -383,6 +423,10 @@
 
   function renderInto(canvas, network, topology, onChange, rerender) {
     canvas.replaceChildren();
+    const commitCanvasChange = () => {
+      persist(network, topology, onChange);
+      rerender();
+    };
     const stage = create("div", `topology-stage ${topology.grid ? "has-grid" : ""}`);
     stage.style.transform = `scale(${topology.zoom})`;
     stage.style.transformOrigin = "top left";
@@ -391,9 +435,9 @@
     svg.setAttribute("viewBox", `0 0 ${STAGE_WIDTH} ${STAGE_HEIGHT}`);
     svg.setAttribute("role", "group");
     svg.setAttribute("aria-label", "Interactive simulated Ethernet cables");
-    renderCables(svg, network, topology, onChange);
+    renderCables(svg, network, topology, commitCanvasChange);
     stage.append(svg);
-    topology.nodes.forEach((node) => stage.append(node.type === "switch" ? renderSwitch(node, network, topology, onChange) : renderEndpoint(node, network, topology, onChange)));
+    topology.nodes.forEach((node) => stage.append(node.type === "switch" ? renderSwitch(node, network, topology, commitCanvasChange) : renderEndpoint(node, network, topology, commitCanvasChange)));
     canvas.append(stage);
     bindMovement(canvas, topology, network, onChange, rerender);
   }
@@ -406,7 +450,10 @@
     const workspace = create("section", "topology-workspace");
     workspace.append(create("div", "lab-card-kicker", "Phase 1 topology workspace"), create("h4", "", "Build and connect a local simulated network"), create("p", "topology-intro", "Select, move, and cable are separate tools. Every device, cable, name, and position is saved only in this browser."));
     const tray = create("div", "topology-device-tray");
-    tray.append(create("strong", "", "Device tray"), create("span", "", "Add a local endpoint to the canvas."), button("Add Desktop PC", "topology-tray-item", () => { addEndpoint(network, topology); persist(network, topology, onChange); rerender(); }));
+    tray.append(create("strong", "", "Device tray"), create("span", "", "Add local endpoints, then cable them to the simulated switch."));
+    const palette = create("div", "topology-device-palette");
+    ENDPOINT_PROFILES.forEach((profile) => palette.append(button(`Add ${profile.type}`, "topology-tray-item", () => { addEndpoint(network, topology, profile.type); persist(network, topology, onChange); rerender(); })));
+    tray.append(palette);
     workspace.append(tray);
     const toolbar = create("div", "topology-toolbar");
     const setTool = (tool) => { topology.tool = tool; topology.cableStartId = ""; persist(network, topology, onChange); rerender(); };
@@ -414,6 +461,7 @@
       button("Select tool", `secondary ${topology.tool === "select" ? "is-active" : ""}`, () => setTool("select")),
       button("Move tool", `secondary ${topology.tool === "move" ? "is-active" : ""}`, () => setTool("move")),
       button("Cable tool", `secondary ${topology.tool === "cable" ? "is-active" : ""}`, () => setTool("cable")),
+      button("Run full diagnostic", "secondary", () => { topology.lastDiagnostic = inspectTopology(network, topology); topology.notice = `Diagnostic complete: ${topology.lastDiagnostic.status}.`; persist(network, topology, onChange); rerender(); }),
       button("Rename selected", "secondary", () => { if (renameSelected(network, topology)) { persist(network, topology, onChange); rerender(); } }),
       button(topology.selectedId && nodeById(topology, topology.selectedId)?.locked ? "Unlock selected" : "Lock selected", "secondary", () => { const node = nodeById(topology, topology.selectedId); if (node) { node.locked = !node.locked; persist(network, topology, onChange); rerender(); } }),
       button("Delete selected", "secondary", () => { if (deleteSelected(network, topology)) { persist(network, topology, onChange); rerender(); } }),
