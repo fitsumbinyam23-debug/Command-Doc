@@ -389,6 +389,19 @@ button:disabled {
   font-size: 0.82rem;
 }
 
+.lab-page-navigation {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.lab-breadcrumb-current {
+  color: var(--muted);
+  font-weight: 700;
+}
+
 .lab-breadcrumb-link {
   min-height: auto;
   padding: 0;
@@ -541,8 +554,28 @@ button:disabled {
 .topology-selection-panel p { margin: 0; color: var(--muted); line-height: 1.45; }
 .topology-detail-row { padding-bottom: 7px; border-bottom: 1px solid var(--line); color: var(--ink); font-size: .84rem; overflow-wrap: anywhere; }
 .topology-selection-actions { display: grid; gap: 8px; }
+.cable-diagnostic-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+.cable-diagnostic-table th, .cable-diagnostic-table td { padding: 5px 4px; border-bottom: 1px solid var(--line); text-align: left; }
+.cable-diagnostic-table th { color: var(--muted); font-size: .7rem; text-transform: uppercase; }
 .topology-health-status { width: max-content; padding: 4px 8px; border: 1px solid #9ccfc2; border-radius: 999px; color: #0b6e61; background: #e9f7f2; font-size: .76rem; font-weight: 800; }
 .topology-notice { margin: 10px 0 0; padding: 9px 11px; border-left: 3px solid #b77516; color: #774b09; background: #fff8e8; font-size: .84rem; }
+.diagnostics-focus { outline: 3px solid #0d8175; outline-offset: 4px; }
+.diagnostic-results-panel { margin-top: 16px; padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+.diagnostic-results-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.diagnostic-results-heading h4 { margin: 4px 0 0; }
+.diagnostic-metrics { display: grid; grid-template-columns: repeat(5, minmax(105px, 1fr)); gap: 8px; margin: 14px 0; }
+.diagnostic-metric { display: grid; gap: 4px; padding: 10px; border: 1px solid var(--line); background: var(--panel-soft); }
+.diagnostic-metric span { color: var(--muted); font-size: .76rem; font-weight: 700; }
+.diagnostic-metric strong { font-size: 1rem; }
+.diagnostic-filters { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 12px; }
+.diagnostic-filters .is-active { border-color: var(--accent); color: var(--accent-dark); background: #e8f5f2; }
+.diagnostic-findings { display: grid; gap: 8px; max-height: 420px; overflow: auto; }
+.diagnostic-finding { white-space: pre-line; padding: 10px 12px; border: 1px solid var(--line); border-left-width: 4px; text-align: left; color: var(--ink); background: #fff; font: inherit; line-height: 1.4; }
+.diagnostic-finding.is-critical { border-left-color: #c53d38; background: #fff4f3; }
+.diagnostic-finding.is-warning { border-left-color: #bd7b18; background: #fff9ed; }
+.diagnostic-finding.is-passed { border-left-color: #16836e; background: #f2fbf7; }
+.diagnostic-finding.is-info { border-left-color: #4b77a6; background: #f4f8fc; }
+@media (max-width: 760px) { .diagnostic-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .topology-toolbar .is-active { border-color: var(--accent); background: #e8f5f2; color: var(--accent-dark); }
 .topology-canvas { min-height: 650px; }
 .topology-stage { width: 1200px; height: 650px; min-width: 1200px; min-height: 650px; }
