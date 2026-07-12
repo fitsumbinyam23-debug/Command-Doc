@@ -405,6 +405,9 @@ async function init() {
     els.views.forEach((view) => view.classList.toggle("active", view.id === "labView"));
   }
   renderLab();
+  renderHome();
+  renderLearn();
+  renderLibrary();
   if (state.lab.diagnosticsMode) {
     window.setTimeout(() => {
       const workspace = document.querySelector(".topology-workspace");
@@ -453,6 +456,9 @@ function cacheElements() {
     "knowledgeGrid",
     "adminRoot",
     "labRoot",
+    "homeRoot",
+    "learnRoot",
+    "libraryRoot",
     "toast"
   ]) {
     els[id] = document.getElementById(id);
@@ -2536,6 +2542,14 @@ function renderLab() {
     renderLabCliWorkspace();
     return;
   }
+  if (state.lab.screen === "guided-cli") {
+    renderGuidedCliLab();
+    return;
+  }
+  if (state.lab.screen === "visual") {
+    renderVisualLab();
+    return;
+  }
   if (state.lab.screen === "stage") {
     renderLabStagePage();
     return;
@@ -2556,31 +2570,37 @@ function renderLab() {
 }
 
 function renderLabDashboard() {
-  const intro = labCreate("div", "lab-banner");
-  intro.append(labCreate("strong", "lab-banner-title", "100% simulated practice"), labCreate("span", "lab-banner-copy", "Nothing here runs on a real device. Commands, outputs, and changes stay in this browser."));
+  const intro = labCreate("section", "lab-workspace-intro");
+  intro.append(labCreate("div", "lab-card-kicker", "100% simulated practice"));
+  intro.append(labCreate("h3", "", "Choose a Switch Lab workspace"));
+  intro.append(labCreate("p", "", "Use one focused workspace at a time. Commands, topology changes, and training evidence stay only in this browser."));
   els.labRoot.append(intro);
 
-  const stages = labCreate("div", "lab-stage-grid");
-  const stageOrder = ["foundation", "configuration", "playground"];
-  stageOrder.forEach((id) => {
-    const stage = state.lab.stages.find((item) => item.id === id) || { id, title: id, description: "" };
-    const unlocked = labStageUnlocked(id);
-    const complete = id === "foundation" ? labFoundationComplete() : id === "configuration" ? state.lab.progress.configurationCompleted : false;
-    const status = complete ? "Completed" : unlocked ? "Available" : "Locked";
-    const card = labCreate("article", `lab-stage-card ${unlocked ? "" : "is-locked"}`);
-    card.append(labCreate("span", `lab-status ${unlocked ? "available" : "locked"}`, status));
-    card.append(labCreate("h3", "", stage.title));
-    card.append(labCreate("p", "", stage.description));
-    const metric = id === "foundation" ? `${labProgressPercent(labFoundationLessons())}% complete` : id === "configuration" ? (labConfigurationUnlocked() ? "Ready for guided configuration" : "Pass the Foundation checkpoint") : (unlocked ? "Ready for free practice" : "Complete four safety foundations");
-    card.append(labCreate("div", "lab-stage-metric", metric));
-    const stageLabel = stage.title || id;
-    const button = labButton(`Open ${stageLabel}`, unlocked ? "primary" : "secondary", () => openLabStage(id));
-    button.disabled = !unlocked;
-    card.append(button);
-    stages.append(card);
+  const workspaces = [
+    { title: "Guided CLI", description: "Follow a route with a large continuous switch terminal and concise coaching.", command: "Start with a guided scenario", action: () => { state.lab.screen = "guided-cli"; renderLab(); } },
+    { title: "Focused Terminal", description: "Open a near full-screen terminal for uninterrupted manual command practice.", command: "Continuous terminal session", action: () => { state.lab.screen = "cli"; renderLab(); } },
+    { title: "Visual Playground", description: "Build a small local topology, connect endpoints, inspect ports, and practise diagnostics.", command: "Drag devices and create cables", action: () => { state.lab.screen = "visual"; renderLab(); } }
+  ];
+  const grid = labCreate("div", "lab-workspace-grid");
+  workspaces.forEach((workspace) => {
+    const card = labCreate("article", "lab-workspace-card");
+    card.append(labCreate("div", "lab-card-kicker", "Switch Lab"));
+    card.append(labCreate("h3", "", workspace.title));
+    card.append(labCreate("p", "", workspace.description));
+    card.append(labCreate("code", "lab-command", workspace.command));
+    card.append(labButton(`Open ${workspace.title}`, "primary", workspace.action));
+    grid.append(card);
   });
-  els.labRoot.append(stages);
+  els.labRoot.append(grid);
+}
+
+function renderGuidedCliLab() {
+  els.labRoot.append(labButton("Back to Switch Lab", "secondary lab-back-button", () => { state.lab.screen = "dashboard"; renderLab(); }));
   renderLabConsole();
+}
+
+function renderVisualLab() {
+  els.labRoot.append(labButton("Back to Switch Lab", "secondary lab-back-button", () => { state.lab.screen = "dashboard"; renderLab(); }));
   renderVisualNetworkPlayground();
 }
 
@@ -4075,6 +4095,90 @@ function renderLabScenario() {
   els.labRoot.append(panel);
 }
 
+function renderHome() {
+  if (!els.homeRoot || !state.lab.progress) return;
+  els.homeRoot.replaceChildren();
+  const completed = Object.keys(state.lab.progress.completedLessons || {}).length;
+  const hero = labCreate("section", "home-hero");
+  hero.append(labCreate("p", "eyebrow", "Offline technician training"));
+  hero.append(labCreate("h2", "", "Command Doctor"));
+  hero.append(labCreate("p", "", "Diagnose pasted command output, learn vendor command workflows, and practise safely on a local simulated switch. Nothing here reaches a real device."));
+  const status = labCreate("div", "home-status-strip");
+  status.append(labCreate("span", "badge badge-green", "Works offline"));
+  status.append(labCreate("span", "badge", `${state.commands.length} local commands`));
+  status.append(labCreate("span", "badge", `${completed} lessons completed`));
+  hero.append(status);
+  els.homeRoot.append(hero);
+
+  const choices = [
+    ["Diagnose", "Paste command output to identify the command, see evidence, understand the result, and build a ticket-ready summary.", "Open Diagnose", () => switchView("diagnose")],
+    ["Learn", "Select a vendor track and work through structured command lessons before practising in the local simulator.", "Open Learn", () => switchView("learn")],
+    ["Switch Lab", "Use guided CLI practice, a focused terminal, or the visual local topology playground.", "Open Switch Lab", () => switchView("lab", { resetLab: true })]
+  ];
+  const grid = labCreate("div", "home-action-grid");
+  choices.forEach(([title, description, label, action]) => {
+    const card = labCreate("article", "home-action-card");
+    card.append(labCreate("div", "lab-card-kicker", "Command Doctor"));
+    card.append(labCreate("h3", "", title));
+    card.append(labCreate("p", "", description));
+    card.append(labButton(label, "primary", action));
+    grid.append(card);
+  });
+  els.homeRoot.append(grid);
+}
+
+function renderLearn() {
+  if (!els.learnRoot || !state.lab.progress) return;
+  els.learnRoot.replaceChildren();
+  const panel = labCreate("section", "learn-track-panel");
+  panel.append(labCreate("div", "lab-card-kicker", "Choose your active learning track"));
+  panel.append(labCreate("h3", "", "What do you want to learn?"));
+  panel.append(labCreate("p", "", "Your selection filters the course entry point. Existing lessons remain stored locally and your progress is preserved on this browser."));
+  els.learnRoot.append(panel);
+  const tracks = [
+    ["Cisco IOS", "Cisco IOS"], ["HP Comware", "HP Comware"], ["ArubaOS-CX", "ArubaOS-CX"], ["Windows CMD", "Windows CMD"], ["Linux", "Linux"], ["all", "All Tracks"]
+  ];
+  const grid = labCreate("div", "learn-track-grid");
+  tracks.forEach(([id, label]) => {
+    const count = id === "all" ? state.lab.lessons.length : state.lab.lessons.filter((lesson) => lesson.vendor === id).length;
+    const card = labCreate("article", `learn-track-card ${state.lab.vendorTrack === id ? "is-active" : ""}`);
+    card.append(labCreate("div", "lab-card-kicker", state.lab.vendorTrack === id ? "Active track" : "Learning track"));
+    card.append(labCreate("h3", "", label));
+    card.append(labCreate("p", "", count ? `${count} available local lesson${count === 1 ? "" : "s"} in the current curriculum.` : "No local lessons are classified in this track yet. Its commands remain available in the Library."));
+    card.append(labButton(state.lab.vendorTrack === id ? "Current Track" : `Choose ${label}`, state.lab.vendorTrack === id ? "secondary" : "primary", () => { state.lab.vendorTrack = id; renderLearn(); }));
+    grid.append(card);
+  });
+  els.learnRoot.append(grid);
+  const summary = labCreate("section", "learn-summary");
+  summary.append(labButton("Continue Course", "primary", () => { state.lab.screen = "lessons"; switchView("lab"); }));
+  summary.append(labButton("Open Practice Library", "secondary", () => switchView("library")));
+  els.learnRoot.append(summary);
+}
+
+function renderLibrary() {
+  if (!els.libraryRoot) return;
+  els.libraryRoot.replaceChildren();
+  const intro = labCreate("section", "library-intro");
+  intro.append(labCreate("div", "lab-card-kicker", "Reference and review"));
+  intro.append(labCreate("h3", "", "Use the local library when you need a command, a saved diagnosis, or course administration."));
+  els.libraryRoot.append(intro);
+  const entries = [
+    ["Command Lookup", "Search the local knowledge base or paste an exact command and output for explanation and diagnosis.", "Open Command Lookup", () => switchView("diagnose")],
+    ["Knowledge Base", "Browse the offline command catalog that powers lookup and explanations.", "Open Knowledge Base", () => switchView("knowledge")],
+    ["Saved Reports", "Review diagnoses saved only in this browser.", "Open History", () => switchView("history")],
+    ["Instructor Mode", "Unlock local review content or reset local learning progress. This is intentionally outside the student navigation.", "Open Instructor Mode", () => switchView("admin")]
+  ];
+  const grid = labCreate("div", "library-grid");
+  entries.forEach(([title, description, label, action]) => {
+    const card = labCreate("article", "library-card");
+    card.append(labCreate("h3", "", title));
+    card.append(labCreate("p", "", description));
+    card.append(labButton(label, "secondary", action));
+    grid.append(card);
+  });
+  els.libraryRoot.append(grid);
+}
+
 function switchView(viewName, options = {}) {
   els.navTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === viewName));
   els.views.forEach((view) => view.classList.toggle("active", view.id === `${viewName}View`));
@@ -4082,6 +4186,9 @@ function switchView(viewName, options = {}) {
     if (options.resetLab) state.lab.screen = "dashboard";
     renderLab();
   }
+  if (viewName === "home") renderHome();
+  if (viewName === "learn") renderLearn();
+  if (viewName === "library") renderLibrary();
   if (viewName === "admin") renderAdmin();
 }
 
