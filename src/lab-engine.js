@@ -1,12 +1,16 @@
 "use strict";
 
 (() => {
+  const DEFAULT_PROFILE = {
+    hostname: "TRAINING-SWITCH", accessPort: "GigabitEthernet1/0/1", secondAccessPort: "GigabitEthernet1/0/2",
+    trunkPort: "GigabitEthernet1/0/24", endpoint: "PC-1", currentVlan: "1", targetVlan: "20", stackMember: "1", priority: "10"
+  };
   const DEVICE_SEEDS = {
-    access: { hostname: "<SWITCH_NAME>", vendor: "Cisco IOS", interface: "<ACCESS_PORT>", endpoint: "<DEVICE_NAME>", vlan: "<CURRENT_VLAN_ID>", targetVlan: "<VLAN_ID>", description: "<DEVICE_NAME>", issue: "Incorrect simulated access VLAN" },
-    disabled: { hostname: "<SWITCH_NAME>", vendor: "Cisco IOS", interface: "<ACCESS_PORT>", endpoint: "<DEVICE_NAME>", vlan: "<VLAN_ID>", targetVlan: "<VLAN_ID>", description: "<DEVICE_NAME>", issue: "Administratively down simulated port", shutdown: true },
-    trunk: { hostname: "<SWITCH_NAME>", vendor: "Cisco IOS", interface: "<TRUNK_PORT>", endpoint: "<UPLINK_DEVICE>", vlan: "<VLAN_ID>", targetVlan: "<VLAN_ID>", description: "<UPLINK_DEVICE>", issue: "Simulated trunk configuration review", trunk: true },
-    irf: { hostname: "<SWITCH_NAME>", vendor: "HP Comware", interface: "<IRF_PORT>", endpoint: "<STACK_MEMBER_ID>", vlan: "<VLAN_ID>", targetVlan: "<VLAN_ID>", description: "<IRF_PORT>", issue: "Simulated IRF link down", irfDown: true },
-    aruba: { hostname: "<SWITCH_NAME>", vendor: "ArubaOS-CX", interface: "<ACCESS_PORT>", endpoint: "<DEVICE_NAME>", vlan: "<VLAN_ID>", targetVlan: "<VLAN_ID>", description: "<DEVICE_NAME>", issue: "Simulated LACP member not selected", lacpDown: true }
+    access: { hostname: DEFAULT_PROFILE.hostname, vendor: "Cisco IOS", interface: DEFAULT_PROFILE.accessPort, endpoint: DEFAULT_PROFILE.endpoint, vlan: DEFAULT_PROFILE.currentVlan, targetVlan: DEFAULT_PROFILE.targetVlan, description: DEFAULT_PROFILE.endpoint, issue: "Incorrect simulated access VLAN" },
+    disabled: { hostname: DEFAULT_PROFILE.hostname, vendor: "Cisco IOS", interface: DEFAULT_PROFILE.accessPort, endpoint: DEFAULT_PROFILE.endpoint, vlan: DEFAULT_PROFILE.targetVlan, targetVlan: DEFAULT_PROFILE.targetVlan, description: DEFAULT_PROFILE.endpoint, issue: "Administratively down simulated port", shutdown: true },
+    trunk: { hostname: DEFAULT_PROFILE.hostname, vendor: "Cisco IOS", interface: DEFAULT_PROFILE.trunkPort, endpoint: "UPLINK-SWITCH", vlan: DEFAULT_PROFILE.currentVlan, targetVlan: DEFAULT_PROFILE.targetVlan, description: "Uplink to distribution switch", issue: "Simulated trunk configuration review", trunk: true },
+    irf: { hostname: "COMWARE-LAB", vendor: "HP Comware", interface: "GigabitEthernet1/0/24", endpoint: DEFAULT_PROFILE.stackMember, vlan: DEFAULT_PROFILE.currentVlan, targetVlan: DEFAULT_PROFILE.targetVlan, description: "IRF port", issue: "Simulated IRF link down", irfDown: true },
+    aruba: { hostname: "ARUBA-LAB", vendor: "ArubaOS-CX", interface: DEFAULT_PROFILE.accessPort, endpoint: DEFAULT_PROFILE.endpoint, vlan: DEFAULT_PROFILE.currentVlan, targetVlan: DEFAULT_PROFILE.targetVlan, description: DEFAULT_PROFILE.endpoint, issue: "Simulated LACP member not selected", lacpDown: true }
   };
 
   const normalize = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
@@ -34,10 +38,10 @@
             mode: "access"
           }
         },
-        vlans: ["<VLAN_ID>", "<CURRENT_VLAN_ID>"],
-        vlanNames: { "<VLAN_ID>": "<VLAN_NAME>", "<CURRENT_VLAN_ID>": "<CURRENT_VLAN_NAME>" },
-        stackMembers: [{ id: "<STACK_MEMBER_ID>", role: "Active", priority: "<PRIORITY>" }, { id: "<STANDBY_MEMBER_ID>", role: "Standby", priority: "<STANDBY_PRIORITY>" }],
-        irfMembers: [{ id: "<STACK_MEMBER_ID>", role: "Master", priority: "<PRIORITY>" }, { id: "<STANDBY_MEMBER_ID>", role: "Standby", priority: "<STANDBY_PRIORITY>" }],
+        vlans: [DEFAULT_PROFILE.currentVlan, DEFAULT_PROFILE.targetVlan],
+        vlanNames: { [DEFAULT_PROFILE.currentVlan]: "DEFAULT", [DEFAULT_PROFILE.targetVlan]: "USERS" },
+        stackMembers: [{ id: DEFAULT_PROFILE.stackMember, role: "Active", priority: DEFAULT_PROFILE.priority }, { id: "2", role: "Standby", priority: "5" }],
+        irfMembers: [{ id: DEFAULT_PROFILE.stackMember, role: "Master", priority: DEFAULT_PROFILE.priority }, { id: "2", role: "Standby", priority: "5" }],
         irfDown: Boolean(this.seed.irfDown),
         lacpDown: Boolean(this.seed.lacpDown)
       };
@@ -123,34 +127,34 @@
       }
       if (this.mode === "interface") return this.executeInterfaceCommand(raw, command);
       if (/^(show interface status|show interfaces status|sh int status)$/.test(command)) return this.result(true, this.interfaceStatus(), "show");
-      if (/^show version$/.test(command)) return this.result(true, `Simulated ${this.seed.vendor} software\nDevice: ${this.state.hostname}\nPlatform: <SIMULATED_PLATFORM>\nNo real device is connected.`, "show");
+      if (/^show version$/.test(command)) return this.result(true, `Simulated ${this.seed.vendor} software\nDevice: ${this.state.hostname}\nPlatform: CD-SW24 local training switch\nNo real device is connected.`, "show");
       if (/^show interfaces?(?:\s+\S+)?$/.test(command)) return this.result(true, this.interfaceDetail(raw), "show");
       if (/^(show vlan brief|sh vlan brief)$/.test(command)) return this.result(true, this.vlanBrief(), "show");
       if (/^show running-config interface/.test(command)) return this.result(true, this.runningInterface(), "verify");
       if (/^show startup-config$/.test(command)) return this.result(true, `Simulated startup configuration\n${this.runningConfig()}`, "show");
-      if (/^show interfaces trunk/.test(command)) return this.result(true, `Port        Mode         Encapsulation  Status\n<TRUNK_PORT>  on           802.1q         trunking`, "show");
-      if (/^show cdp neighbors/.test(command)) return this.result(true, `Device ID       Local Intrfce   Platform\n<UPLINK_DEVICE>         ${this.selectedInterface}      <PLATFORM>`, "show");
-      if (/^show lldp neighbors/.test(command)) return this.result(true, `Local Interface  Chassis ID       Port ID\n${this.selectedInterface}       <SIMULATED_NEIGHBOR>  <REMOTE_PORT>`, "show");
-      if (/^show mac address-table/.test(command)) return this.result(true, `Vlan    Mac Address       Type       Ports\n${this.current().vlan}      <MAC_ADDRESS>    DYNAMIC    ${this.selectedInterface}`, "show");
-      if (/^show switch$/.test(command)) return this.result(true, `Switch/Stack Mac Address : <MAC_ADDRESS>\n\nSwitch#  Role      Priority  State\n${this.state.stackMembers.map((member) => `${member.id}${member.role === "Active" ? "*" : " "}        ${member.role.padEnd(8)} ${String(member.priority).padEnd(8)} Ready`).join("\n")}`, "show");
+      if (/^show interfaces trunk/.test(command)) return this.result(true, `Port                         Mode         Encapsulation  Status\n${DEFAULT_PROFILE.trunkPort}  on           802.1q         trunking`, "show");
+      if (/^show cdp neighbors/.test(command)) return this.result(true, `Device ID       Local Intrfce             Platform\nUPLINK-SWITCH   ${this.selectedInterface}  CD-SW24`, "show");
+      if (/^show lldp neighbors/.test(command)) return this.result(true, `Local Interface             Chassis ID       Port ID\n${this.selectedInterface}  UPLINK-SWITCH   Gi1/0/24`, "show");
+      if (/^show mac address-table/.test(command)) return this.result(true, `Vlan    Mac Address        Type       Ports\n${this.current().vlan}       02cd.0000.0001  DYNAMIC    ${this.selectedInterface}`, "show");
+      if (/^show switch$/.test(command)) return this.result(true, `Switch/Stack Mac Address : 02cd.0000.0001\n\nSwitch#  Role      Priority  State\n${this.state.stackMembers.map((member) => `${member.id}${member.role === "Active" ? "*" : " "}        ${member.role.padEnd(8)} ${String(member.priority).padEnd(8)} Ready`).join("\n")}`, "show");
       if (/^display irf$/.test(command)) return this.result(true, `MemberID  Role      Priority  Status\n${this.state.irfMembers.map((member) => `${member.id}         ${member.role.padEnd(9)} ${String(member.priority).padEnd(8)} Ready`).join("\n")}`, "show");
       if (/^display irf configuration$/.test(command)) return this.result(true, `IRF Configuration\n${this.state.irfMembers.map((member) => `irf member ${member.id} priority ${member.priority}`).join("\n")}`, "show");
-      if (/^display irf-port(?: configuration)?$/.test(command)) return this.result(true, this.state.irfDown ? "MemberID  IRF-Port1       IRF-Port2\n<STACK_MEMBER_ID>  <IRF_PORT> DOWN  UP" : "MemberID  IRF-Port1       IRF-Port2\n<STACK_MEMBER_ID>  <IRF_PORT> UP  UP", "show");
-      if (/^display irf topology/.test(command)) return this.result(true, this.state.irfDown ? "Topology Info\nMember <STACK_MEMBER_ID>  <IRF_PORT> DOWN" : "Topology Info\nMember <STACK_MEMBER_ID>  <IRF_PORT> UP", "show");
-      if (/^display version$/.test(command)) return this.result(true, `Simulated ${this.seed.vendor} software\nDevice: ${this.state.hostname}\nPlatform: <SIMULATED_PLATFORM>\nNo real device is connected.`, "show");
+      if (/^display irf-port(?: configuration)?$/.test(command)) return this.result(true, this.state.irfDown ? "MemberID  IRF-Port1                    IRF-Port2\n1         GigabitEthernet1/0/24 DOWN    UP" : "MemberID  IRF-Port1                    IRF-Port2\n1         GigabitEthernet1/0/24 UP      UP", "show");
+      if (/^display irf topology/.test(command)) return this.result(true, this.state.irfDown ? "Topology Info\nMember 1  GigabitEthernet1/0/24 DOWN" : "Topology Info\nMember 1  GigabitEthernet1/0/24 UP", "show");
+      if (/^display version$/.test(command)) return this.result(true, `Simulated ${this.seed.vendor} software\nDevice: ${this.state.hostname}\nPlatform: CD-SW24 local training switch\nNo real device is connected.`, "show");
       if (/^display current-configuration(?: interface)?/.test(command)) return this.result(true, /interface/.test(command) ? this.runningInterface() : this.runningConfig(), "show");
       if (/^display saved-configuration$/.test(command)) return this.result(true, `Simulated saved configuration\n${this.runningConfig()}`, "show");
       if (/^display vlan(?:\s+\S+)?$/.test(command)) return this.result(true, this.vlanBrief(), "show");
       if (/^display interface brief$/.test(command)) return this.result(true, this.interfaceStatus(), "show");
-      if (/^display mac-address(?: interface)?/.test(command)) return this.result(true, `VLAN  MAC Address       Type       Interface\n${this.current().vlan}     <MAC_ADDRESS>    Dynamic    ${this.selectedInterface}`, "show");
-      if (/^display lldp neighbor-information/.test(command)) return this.result(true, `Local Interface  Neighbor        Remote Port\n${this.selectedInterface}       <SIMULATED_NEIGHBOR>  <REMOTE_PORT>`, "show");
+      if (/^display mac-address(?: interface)?/.test(command)) return this.result(true, `VLAN  MAC Address        Type       Interface\n${this.current().vlan}     02cd.0000.0001  Dynamic    ${this.selectedInterface}`, "show");
+      if (/^display lldp neighbor-information/.test(command)) return this.result(true, `Local Interface             Neighbor        Remote Port\n${this.selectedInterface}  UPLINK-SWITCH   Gi1/0/24`, "show");
       if (/^display interface(?:\s+\S+)?$/.test(command)) return this.result(true, this.interfaceDetail(raw), "show");
       if (/^show interface brief/.test(command)) return this.result(true, `Interface  Status  Speed\n${this.selectedInterface}     ${this.state.lacpDown ? "down" : "up"}      1G`, "show");
-      if (/^show lacp interfaces$/.test(command)) return this.result(true, this.state.lacpDown ? `Interface  Bundle  State       Partner\n${this.selectedInterface}     <LAG_ID>   blocked     <UPLINK_DEVICE>\n\nMember is not selected for the simulated LAG.` : `Interface  Bundle  State       Partner\n${this.selectedInterface}     <LAG_ID>   selected    <UPLINK_DEVICE>`, "show");
+      if (/^show lacp interfaces$/.test(command)) return this.result(true, this.state.lacpDown ? `Interface  Bundle  State       Partner\n${this.selectedInterface}     1        blocked     UPLINK-SWITCH\n\nMember is not selected for the simulated LAG.` : `Interface  Bundle  State       Partner\n${this.selectedInterface}     1        selected    UPLINK-SWITCH`, "show");
       if (/^show running-config$/.test(command)) return this.result(true, this.runningConfig(), "verify");
       if (/^(write memory|wr mem|copy running-config startup-config|save|save force)$/.test(command)) return this.result(true, this.verify() ? "Simulated configuration saved after verification." : "Safety warning: verification has not passed. Do not save an unverified simulated change.", this.verify() ? "save" : "warning");
       if (/^(rollback|reset simulated device)$/.test(command)) { this.rollback(); return this.result(true, "Simulated device rolled back to its baseline.", "rollback"); }
-      return this.result(false, "Unknown for this simulated device. Use a supported show/display command, configure terminal, interface <port>, switchport access vlan <vlan>, description <text>, no shutdown, end, or rollback.", "unknown");
+      return this.result(false, "Unknown for this simulated device. Use a supported show/display command, configure terminal, interface GigabitEthernet1/0/1, switchport access vlan 20, description PC-1, no shutdown, end, or rollback.", "unknown");
     }
 
     executeInterfaceCommand(raw, command) {
@@ -165,7 +169,7 @@
       if (/^description\s+/.test(command)) { current.description = raw.trim().slice("description".length).trim(); return this.result(true, `Simulated description set to ${current.description}.`, "config"); }
       if (/^(no shutdown|undo shutdown)$/.test(command)) { current.shutdown = false; current.connected = true; return this.result(true, "Simulated interface enabled. Verify the link and VLAN.", "config"); }
       if (/^shutdown$/.test(command)) { current.shutdown = true; return this.result(true, "Simulated interface administratively down. This is reversible with no shutdown.", "config"); }
-      if (/^default interface\s+/.test(command)) { this.state.interfaces[this.selectedInterface] = clone(this.baseline.interfaces[this.selectedInterface] || { description: "", vlan: "<VLAN_ID>", shutdown: false, connected: true, mode: "access" }); return this.result(true, "Simulated interface returned to its baseline state. Verify before saving.", "rollback"); }
+      if (/^default interface\s+/.test(command)) { this.state.interfaces[this.selectedInterface] = clone(this.baseline.interfaces[this.selectedInterface] || { description: "", vlan: DEFAULT_PROFILE.currentVlan, shutdown: false, connected: true, mode: "access" }); return this.result(true, "Simulated interface returned to its baseline state. Verify before saving.", "rollback"); }
       if (/^exit$/.test(command)) { this.mode = "config"; return this.result(true, "Exit interface configuration mode.", "config"); }
       return this.result(false, "That command is not appropriate in simulated interface configuration mode.", "warning");
     }
@@ -175,7 +179,7 @@
         this.state.vlanNames[this.selectedVlan] = raw.trim().slice("name".length).trim().toUpperCase();
         return this.result(true, `Simulated VLAN ${this.selectedVlan} name set to ${this.state.vlanNames[this.selectedVlan]}.`, "config");
       }
-      return this.result(false, "Use name <vlan-name> or exit while in simulated VLAN configuration mode.", "warning");
+      return this.result(false, "Use name USERS or exit while in simulated VLAN configuration mode.", "warning");
     }
 
     current() { return this.state.interfaces[this.selectedInterface]; }
@@ -200,16 +204,16 @@
       const link = current.shutdown ? "administratively down" : current.connected ? "up" : "down";
       const protocol = current.shutdown || !current.connected ? "down" : "up";
       if (this.seed.vendor === "HP Comware") {
-        return `${interfaceName} current state: ${link.toUpperCase()}\nLine protocol current state: ${protocol.toUpperCase()}\nDescription: ${current.description || "-"}\nPort link-type: ${current.mode}\nPVID: ${current.vlan}\nSpeed: <SPEED>\nInput errors: 0\nOutput errors: 0`;
+        return `${interfaceName} current state: ${link.toUpperCase()}\nLine protocol current state: ${protocol.toUpperCase()}\nDescription: ${current.description || "-"}\nPort link-type: ${current.mode}\nPVID: ${current.vlan}\nSpeed: 1G\nInput errors: 0\nOutput errors: 0`;
       }
-      return `${interfaceName} is ${link}, line protocol is ${protocol}\n  Description: ${current.description || "-"}\n  Hardware is Simulated Ethernet, address is <MAC_ADDRESS>\n  MTU <MTU> bytes, BW <BANDWIDTH> Kbit/sec\n  Full-duplex, <SPEED>, media type is simulated\n  switchport mode ${current.mode}\n  access VLAN ${current.vlan}\n  0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored\n  0 output errors, 0 collisions, 0 interface resets`;
+      return `${interfaceName} is ${link}, line protocol is ${protocol}\n  Description: ${current.description || "-"}\n  Hardware is Simulated Ethernet, address is 02cd.0000.0001\n  MTU 1500 bytes, BW 1000000 Kbit/sec\n  Full-duplex, 1000Mb/s, media type is simulated\n  switchport mode ${current.mode}\n  access VLAN ${current.vlan}\n  0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored\n  0 output errors, 0 collisions, 0 interface resets`;
     }
     bootOutput() { return `Booting simulated ${this.seed.vendor} device...\nLoading local training configuration...\nSystem ready. No real device is connected.\n\n${this.prompt()}`; }
     vlanBrief() { const current = this.current(); return `VLAN Name             Status    Ports\n${this.state.vlans.map((vlan) => `${String(vlan).padEnd(18)} ${String(this.state.vlanNames[vlan]).padEnd(22)} active    ${vlan === current.vlan ? this.selectedInterface : ""}`).join("\n")}`; }
-    runningInterface() { const current = this.current(); return `interface ${this.selectedInterface}\n description ${current.description}\n switchport mode ${current.mode}\n${current.mode === "trunk" ? ` switchport trunk allowed vlan ${current.allowedVlans || "<VLAN_ID>"}` : ` switchport access vlan ${current.vlan}`}\n ${current.shutdown ? "shutdown" : "no shutdown"}`; }
+    runningInterface() { const current = this.current(); return `interface ${this.selectedInterface}\n description ${current.description}\n switchport mode ${current.mode}\n${current.mode === "trunk" ? ` switchport trunk allowed vlan ${current.allowedVlans || DEFAULT_PROFILE.targetVlan}` : ` switchport access vlan ${current.vlan}`}\n ${current.shutdown ? "shutdown" : "no shutdown"}`; }
     runningConfig() { return `hostname ${this.state.hostname}\n${this.state.stackMembers.map((member) => `switch ${member.id} priority ${member.priority}`).join("\n")}\n${this.state.vlans.map((vlan) => `vlan ${vlan}\n name ${this.state.vlanNames[vlan]}`).join("\n")}\n${this.runningInterface()}`; }
     result(ok, output, kind) { return { ok, output, kind, prompt: this.prompt(), diff: this.diff(), verified: this.verify() }; }
   }
 
-  window.CommandDoctorLabEngine = { SimulatedDeviceEngine, DEVICE_SEEDS };
+  window.CommandDoctorLabEngine = { SimulatedDeviceEngine, DEVICE_SEEDS, DEFAULT_PROFILE };
 })();
