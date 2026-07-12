@@ -2857,7 +2857,6 @@ function renderVisualNetworkPlayground() {
     onChange: () => {
       visualMacRefresh(network);
       syncEngineFromVisual();
-      renderLab();
     }
   };
   if (window.CommandDoctorTopology) {
