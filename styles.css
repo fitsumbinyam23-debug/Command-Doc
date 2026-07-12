@@ -501,6 +501,7 @@ button:disabled {
 .topology-toolbar button { min-height: 38px; }
 .topology-device-tray { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 14px 0; padding: 10px 12px; border: 1px solid #d3e1e4; background: #f6fbfb; }
 .topology-device-tray span { color: #5d6e7e; font-size: .86rem; }
+.topology-device-palette { display: flex; flex: 1 1 420px; flex-wrap: wrap; gap: 8px; }
 .topology-tray-item { padding: 8px 12px; border: 1px solid #35616c; border-radius: 4px; color: #103542; background: #fff; font-weight: 700; cursor: grab; }
 .topology-canvas { position: relative; min-height: 600px; overflow: auto; border: 1px solid #b9ced4; background: #edf4f5; }
 .topology-stage { position: relative; width: 1200px; height: 620px; min-width: 1200px; min-height: 620px; }
@@ -540,6 +541,8 @@ button:disabled {
 .topology-selection-panel p { margin: 0; color: var(--muted); line-height: 1.45; }
 .topology-detail-row { padding-bottom: 7px; border-bottom: 1px solid var(--line); color: var(--ink); font-size: .84rem; overflow-wrap: anywhere; }
 .topology-selection-actions { display: grid; gap: 8px; }
+.topology-health-status { width: max-content; padding: 4px 8px; border: 1px solid #9ccfc2; border-radius: 999px; color: #0b6e61; background: #e9f7f2; font-size: .76rem; font-weight: 800; }
+.topology-notice { margin: 10px 0 0; padding: 9px 11px; border-left: 3px solid #b77516; color: #774b09; background: #fff8e8; font-size: .84rem; }
 .topology-toolbar .is-active { border-color: var(--accent); background: #e8f5f2; color: var(--accent-dark); }
 .topology-canvas { min-height: 650px; }
 .topology-stage { width: 1200px; height: 650px; min-width: 1200px; min-height: 650px; }
