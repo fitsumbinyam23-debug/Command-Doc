@@ -154,6 +154,7 @@
     const endpointIds = new Set(network.devices.map((device) => device.id));
     topology.nodes = topology.nodes.filter((node) => node.id === "switch-1" || endpointIds.has(node.id));
     topology.cables = topology.cables.filter((cable) => endpointIds.has(cable.endpointId) && network.ports[cable.switchPort]);
+    topology.cables.forEach((cable) => window.CommandDoctorDiagnostics?.ensureCableModel(cable));
     applyCablesToNetwork(network, topology);
     network.topology = topology;
     return topology;
@@ -216,7 +217,19 @@
     const occupied = topology.cables.find((cable) => cable.switchPort === switchPort && cable.endpointId !== endpointId);
     if (occupied) return false;
     topology.cables = topology.cables.filter((cable) => cable.endpointId !== endpointId);
-    const cable = { id: `cable-${endpointId}`, type: "Copper Ethernet", endpointId, switchPort, state: "good" };
+    const cable = {
+      id: `cable-${endpointId}`,
+      type: "Copper Ethernet",
+      endpointId,
+      switchPort,
+      state: "good",
+      pairs: { "1-2": { state: "Good" }, "3-6": { state: "Good" }, "4-5": { state: "Good" }, "7-8": { state: "Good" } },
+      length: 12,
+      faultDistance: null,
+      speed: "1 Gbps",
+      duplex: "full",
+      intermittent: false
+    };
     topology.cables.push(cable);
     topology.selectedCableId = cable.id;
     topology.selectedId = "";
@@ -372,9 +385,25 @@
       const endpoint = nodeById(topology, cable.endpointId);
       panel.append(create("strong", "", "Cable details"));
       [["Cable ID", cable.id], ["Type", cable.type], ["Endpoint", endpoint?.name || cable.endpointId], ["Switch port", cable.switchPort], ["State", cable.state]].forEach(([label, value]) => panel.append(create("div", "topology-detail-row", `${label}: ${value}`)));
+      const report = window.CommandDoctorDiagnostics?.cableReport(network, cable);
+      if (report) {
+        const table = create("table", "cable-diagnostic-table");
+        const head = document.createElement("thead");
+        head.innerHTML = "<tr><th>Pair</th><th>State</th></tr>";
+        const body = document.createElement("tbody");
+        Object.entries(report.pairs).forEach(([pair, pairResult]) => {
+          const row = document.createElement("tr");
+          row.append(create("td", "", pair), create("td", "", pairResult.state));
+          body.append(row);
+        });
+        table.append(head, body);
+        panel.append(create("div", "topology-detail-row", `Length: ${report.length}m | Fault distance: ${report.faultDistance ?? "-"} | ${report.speed} ${report.duplex}`), table);
+      }
       const actions = create("div", "topology-selection-actions");
       actions.append(button("Disconnect cable", "secondary", () => { if (disconnectCable(network, topology, cable.id)) { persist(network, topology, onChange); rerender(); } }));
-      actions.append(button("Run cable diagnostic", "secondary", () => { const port = network.ports[cable.switchPort]; if (port) port.lastActivity = `Cable diagnostic: ${cable.state}`; persist(network, topology, onChange); rerender(); }));
+      actions.append(button("Run cable diagnostic", "secondary", () => { const port = network.ports[cable.switchPort]; if (port) port.lastActivity = `Cable diagnostic: ${report?.linkImpact || cable.state}`; persist(network, topology, onChange); rerender(); }));
+      actions.append(button("Inject open pair", "secondary", () => { window.CommandDoctorDiagnostics?.ensureCableModel(cable); cable.pairs["3-6"].state = "Open"; cable.faultDistance = 18; cable.state = "fault"; cable.speed = "100 Mbps"; persist(network, topology, onChange); rerender(); }));
+      actions.append(button("Repair cable", "secondary", () => { window.CommandDoctorDiagnostics?.ensureCableModel(cable); Object.values(cable.pairs).forEach((pair) => { pair.state = "Good"; }); cable.faultDistance = null; cable.state = "good"; cable.speed = "1 Gbps"; persist(network, topology, onChange); rerender(); }));
       panel.append(actions);
       return panel;
     }
