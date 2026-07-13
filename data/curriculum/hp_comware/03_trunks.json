@@ -1,0 +1,60 @@
+{
+  "module_id": "hp_comware-trunks",
+  "vendor": "hp_comware",
+  "title": "9. Trunks",
+  "topic": "trunks",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "hp_comware-trunks",
+      "title": "HP Comware — Trunks",
+      "vendor": "hp_comware",
+      "topic": "trunks",
+      "simulation_support": [
+        "explanation_only",
+        "partially_simulated"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "hp_port_link_type_trunk",
+          "command": "port link-type trunk",
+          "aliases": [],
+          "purpose": "Sets a Comware Layer 2 port to trunk mode.",
+          "safety_level": "High - can change VLAN forwarding.",
+          "verification_commands": [
+            "display current-configuration interface <interface>"
+          ],
+          "rollback_commands": [
+            "undo <command>"
+          ],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "hp_port_trunk_permit",
+          "command": "port trunk permit vlan <vlan-list>",
+          "aliases": [],
+          "purpose": "Allows selected VLANs on a Comware trunk port.",
+          "safety_level": "High - can interrupt VLAN services.",
+          "verification_commands": [],
+          "rollback_commands": [
+            "undo <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        }
+      ]
+    }
+  ]
+}
