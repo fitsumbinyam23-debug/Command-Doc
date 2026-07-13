@@ -1,0 +1,105 @@
+{
+  "module_id": "linux-device_information",
+  "vendor": "linux",
+  "title": "5. Device Information",
+  "topic": "device_information",
+  "level": 2,
+  "lessons": [
+    {
+      "lesson_id": "linux-device_information",
+      "title": "Linux — Device Information",
+      "vendor": "linux",
+      "topic": "device_information",
+      "simulation_support": [
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "linux_df_h",
+          "command": "df -h",
+          "aliases": [],
+          "purpose": "Shows Linux mounted filesystem usage in human-readable units.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "lsblk"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_lsblk",
+          "command": "lsblk",
+          "aliases": [],
+          "purpose": "Lists Linux block devices, partitions, sizes, types, and mount points.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "df -h"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_dmesg",
+          "command": "dmesg",
+          "aliases": [],
+          "purpose": "Shows Linux kernel messages, including hardware, driver, storage, and network events.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "journalctl -p err"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_journalctl_errors",
+          "command": "journalctl -p err",
+          "aliases": [],
+          "purpose": "Shows Linux systemd journal entries at error priority and above.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "dmesg"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_systemctl_status_networkmanager",
+          "command": "systemctl status NetworkManager",
+          "aliases": [],
+          "purpose": "Shows whether the Linux NetworkManager service is loaded, active, failed, and its recent log messages.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "journalctl -p err"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_journalctl_networkmanager",
+          "command": "journalctl -u NetworkManager",
+          "aliases": [],
+          "purpose": "Shows logs for the NetworkManager service on systems using it.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ip addr"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
