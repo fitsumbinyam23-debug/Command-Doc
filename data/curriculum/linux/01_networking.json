@@ -1,0 +1,97 @@
+{
+  "module_id": "linux-networking",
+  "vendor": "linux",
+  "title": "2. Networking",
+  "topic": "networking",
+  "level": 1,
+  "lessons": [
+    {
+      "lesson_id": "linux-networking",
+      "title": "Linux — Networking",
+      "vendor": "linux",
+      "topic": "networking",
+      "simulation_support": [
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "linux_ip_route",
+          "command": "ip route",
+          "aliases": [],
+          "purpose": "Shows the Linux routing table, including default gateway and connected routes.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ip addr",
+            "ping <gateway>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_ping",
+          "command": "ping",
+          "aliases": [],
+          "purpose": "Tests reachability to an IP address or hostname using ICMP echo.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ip addr",
+            "ip route"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_traceroute",
+          "command": "traceroute",
+          "aliases": [],
+          "purpose": "Shows hop-by-hop path toward a target.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ip route",
+            "ping <gateway>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_dig",
+          "command": "dig",
+          "aliases": [],
+          "purpose": "Queries DNS records and displays resolver response details.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ip route",
+            "ping <ip>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_resolvectl_status",
+          "command": "resolvectl status",
+          "aliases": [],
+          "purpose": "Shows DNS resolver state, servers, and per-link DNS configuration on systemd-resolved systems.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "dig <name>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
