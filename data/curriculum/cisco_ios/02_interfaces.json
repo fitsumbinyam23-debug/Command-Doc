@@ -1,0 +1,275 @@
+{
+  "module_id": "cisco_ios-interfaces",
+  "vendor": "cisco_ios",
+  "title": "3. Interfaces",
+  "topic": "interfaces",
+  "level": 2,
+  "lessons": [
+    {
+      "lesson_id": "cisco_ios-interfaces",
+      "title": "Cisco IOS — Interfaces",
+      "vendor": "cisco_ios",
+      "topic": "interfaces",
+      "simulation_support": [
+        "lookup_only",
+        "fully_simulated",
+        "partially_simulated",
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "cisco_show_interfaces",
+          "command": "show interfaces",
+          "aliases": [
+            "sh interfaces",
+            "sh interface",
+            "sh int"
+          ],
+          "purpose": "Shows detailed interface state, counters, errors, speed, duplex, and traffic.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface status",
+            "show running-config interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_mac_address_table",
+          "command": "show mac address-table",
+          "aliases": [
+            "sh mac address-table",
+            "sh mac add",
+            "sh mac-address-table"
+          ],
+          "purpose": "Shows MAC addresses learned by the switch and the interfaces where they were learned.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface <interface>",
+            "show vlan brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_cdp_neighbors",
+          "command": "show cdp neighbors",
+          "aliases": [
+            "sh cdp neighbors",
+            "sh cdp neigh"
+          ],
+          "purpose": "Shows Cisco Discovery Protocol neighbors visible from local interfaces.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show lldp neighbors",
+            "show interface status"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_lldp_neighbors",
+          "command": "show lldp neighbors",
+          "aliases": [
+            "sh lldp neighbors",
+            "sh lldp neigh"
+          ],
+          "purpose": "Shows LLDP neighbors visible from local interfaces.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface status",
+            "show cdp neighbors"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_spanning_tree",
+          "command": "show spanning-tree",
+          "aliases": [
+            "sh spanning-tree",
+            "sh span"
+          ],
+          "purpose": "Shows spanning-tree state, root bridge information, and port roles.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface status",
+            "show cdp neighbors"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_etherchannel_summary",
+          "command": "show etherchannel summary",
+          "aliases": [
+            "sh etherchannel summary",
+            "sh ether sum"
+          ],
+          "purpose": "Shows port-channel groups, protocol, and member-port bundle state.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface <interface>",
+            "show running-config interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_running_config_interface",
+          "command": "show running-config interface",
+          "aliases": [
+            "sh running-config interface",
+            "sh run interface",
+            "sh run int"
+          ],
+          "purpose": "Shows the active configuration applied to a specific interface.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface status",
+            "show interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "fully_simulated"
+        },
+        {
+          "command_id": "cisco_interface_config",
+          "command": "interface <interface>",
+          "aliases": [
+            "int <interface>"
+          ],
+          "purpose": "Enters configuration mode for a specific Cisco interface.",
+          "safety_level": "High - selects a production interface for possible changes.",
+          "verification_commands": [
+            "show running-config interface <interface>"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "cisco_shutdown",
+          "command": "shutdown",
+          "aliases": [],
+          "purpose": "Administratively disables the selected interface.",
+          "safety_level": "Critical - can disconnect users, APs, cameras, uplinks, or services.",
+          "verification_commands": [
+            "show interface status"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "cisco_no_shutdown",
+          "command": "no shutdown",
+          "aliases": [
+            "no shut"
+          ],
+          "purpose": "Administratively enables the selected interface.",
+          "safety_level": "High - can restore traffic or introduce an unexpected device to the network.",
+          "verification_commands": [
+            "show interface <interface>"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "cisco_show_ip_interface_brief",
+          "command": "show ip interface brief",
+          "aliases": [
+            "sh ip interface brief",
+            "sh ip int brief",
+            "sh ip int br"
+          ],
+          "purpose": "Summarizes interface IP addresses and their physical and protocol states.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interfaces"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "cisco_show_interfaces_counters_errors",
+          "command": "show interfaces counters errors",
+          "aliases": [],
+          "purpose": "Summarizes interface error counters on supported Catalyst platforms.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interfaces <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_power_inline",
+          "command": "show power inline",
+          "aliases": [],
+          "purpose": "Shows Power over Ethernet status, power draw, and allocation on supported switches.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interfaces <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_port_security_interface",
+          "command": "show port-security interface <interface>",
+          "aliases": [],
+          "purpose": "Shows port-security state, learned secure MACs, and violation information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show logging"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "cisco_interface_range",
+          "command": "interface range <interfaces>",
+          "aliases": [],
+          "purpose": "Selects multiple Cisco interfaces for a shared configuration.",
+          "safety_level": "High - applies later commands to multiple interfaces.",
+          "verification_commands": [
+            "show running-config interface <interface>"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "cisco_svi_ip_address",
+          "command": "ip address <ip-address> <mask>",
+          "aliases": [],
+          "purpose": "Assigns an IPv4 address to a selected Layer 3 or SVI interface.",
+          "safety_level": "High - can disconnect management or create an IP conflict.",
+          "verification_commands": [
+            "show ip interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        }
+      ]
+    }
+  ]
+}
