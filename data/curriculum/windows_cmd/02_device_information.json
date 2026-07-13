@@ -1,0 +1,84 @@
+{
+  "module_id": "windows_cmd-device_information",
+  "vendor": "windows_cmd",
+  "title": "4. Device Information",
+  "topic": "device_information",
+  "level": 2,
+  "lessons": [
+    {
+      "lesson_id": "windows_cmd-device_information",
+      "title": "Windows CMD — Device Information",
+      "vendor": "windows_cmd",
+      "topic": "device_information",
+      "simulation_support": [
+        "explanation_only",
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "windows_netsh_winsock_reset",
+          "command": "netsh winsock reset",
+          "aliases": [],
+          "purpose": "Resets the Windows Winsock catalog.",
+          "safety_level": "High - changes local network stack and usually requires reboot.",
+          "verification_commands": [
+            "ipconfig /all"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "windows_systeminfo",
+          "command": "systeminfo",
+          "aliases": [],
+          "purpose": "Shows Windows operating system, hardware, boot time, memory, domain, and hotfix summary information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ipconfig /all"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "windows_dir",
+          "command": "dir",
+          "aliases": [],
+          "purpose": "Lists Windows files and directories in the current path.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "systeminfo"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "windows_dism_scanhealth",
+          "command": "dism /online /cleanup-image /scanhealth",
+          "aliases": [],
+          "purpose": "Scans the online Windows component store for corruption without repairing it.",
+          "safety_level": "Low - read-only health scan; can take time and use system resources.",
+          "verification_commands": [
+            "sfc /verifyonly"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        }
+      ]
+    }
+  ]
+}
