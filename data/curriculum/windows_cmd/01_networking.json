@@ -1,0 +1,109 @@
+{
+  "module_id": "windows_cmd-networking",
+  "vendor": "windows_cmd",
+  "title": "2. Networking",
+  "topic": "networking",
+  "level": 1,
+  "lessons": [
+    {
+      "lesson_id": "windows_cmd-networking",
+      "title": "Windows CMD — Networking",
+      "vendor": "windows_cmd",
+      "topic": "networking",
+      "simulation_support": [
+        "lookup_only",
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "windows_ping",
+          "command": "ping",
+          "aliases": [],
+          "purpose": "Tests basic reachability to an IP address or hostname using ICMP echo.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ipconfig /all",
+            "tracert <ip>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "windows_tracert",
+          "command": "tracert",
+          "aliases": [],
+          "purpose": "Shows hop-by-hop path toward a target using TTL-limited probes.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ping <gateway>",
+            "route print"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "windows_nslookup",
+          "command": "nslookup",
+          "aliases": [],
+          "purpose": "Queries DNS for hostname resolution and shows the DNS server used.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ipconfig /all",
+            "ping <ip>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "windows_ipconfig_release",
+          "command": "ipconfig /release",
+          "aliases": [],
+          "purpose": "Releases the DHCP lease from Windows network adapters.",
+          "safety_level": "Medium - can disconnect the endpoint until DHCP renews.",
+          "verification_commands": [
+            "ipconfig /renew"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "windows_ipconfig_renew",
+          "command": "ipconfig /renew",
+          "aliases": [],
+          "purpose": "Requests a new DHCP lease for Windows network adapters.",
+          "safety_level": "Medium - can briefly interrupt endpoint connectivity.",
+          "verification_commands": [
+            "ipconfig /all"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "windows_pathping_host",
+          "command": "pathping <host>",
+          "aliases": [],
+          "purpose": "Traces a Windows network path and measures packet loss at each hop over time.",
+          "safety_level": "Safe diagnostic command; sends network probes and can take several minutes.",
+          "verification_commands": [
+            "tracert <host>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        }
+      ]
+    }
+  ]
+}
