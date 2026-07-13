@@ -1,0 +1,55 @@
+{
+  "module_id": "aruba_cx-switching",
+  "vendor": "aruba_cx",
+  "title": "8. Switching",
+  "topic": "switching",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "aruba_cx-switching",
+      "title": "ArubaOS-CX — Switching",
+      "vendor": "aruba_cx",
+      "topic": "switching",
+      "simulation_support": [
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "aruba_lacp_system_priority",
+          "command": "lacp system-priority <priority>",
+          "aliases": [],
+          "purpose": "Sets ArubaOS-CX system priority used by LACP selection.",
+          "safety_level": "High - can affect LAG negotiation.",
+          "verification_commands": [],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "aruba_stp_priority",
+          "command": "spanning-tree priority <priority>",
+          "aliases": [],
+          "purpose": "Sets the ArubaOS-CX bridge priority for spanning-tree election.",
+          "safety_level": "High - can change Layer 2 forwarding topology.",
+          "verification_commands": [
+            "show spanning-tree"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        }
+      ]
+    }
+  ]
+}
