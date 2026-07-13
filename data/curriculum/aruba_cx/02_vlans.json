@@ -11,8 +11,8 @@
       "vendor": "aruba_cx",
       "topic": "vlans",
       "simulation_support": [
-        "lookup_only",
-        "partially_simulated"
+        "output_simulation",
+        "simplified_state_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -39,7 +39,7 @@
             "show mac-address-table vlan <vlan>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "aruba_vlan_access",
@@ -53,7 +53,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "aruba_vlan",
@@ -67,7 +67,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         }
       ]
     }

@@ -11,10 +11,9 @@
       "vendor": "aruba_cx",
       "topic": "interfaces",
       "simulation_support": [
-        "fully_simulated",
-        "lookup_only",
-        "partially_simulated",
-        "explanation_only"
+        "full_state_simulation",
+        "output_simulation",
+        "simplified_state_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -41,7 +40,7 @@
             "show running-config interface <interface>"
           ],
           "rollback_commands": [],
-          "simulator_support": "fully_simulated"
+          "simulator_support": "full_state_simulation"
         },
         {
           "command_id": "aruba_show_interface",
@@ -54,7 +53,7 @@
             "show running-config interface <interface>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "aruba_show_running_config_interface",
@@ -67,7 +66,7 @@
             "show interface brief"
           ],
           "rollback_commands": [],
-          "simulator_support": "fully_simulated"
+          "simulator_support": "full_state_simulation"
         },
         {
           "command_id": "aruba_interface_config",
@@ -83,7 +82,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "aruba_shutdown",
@@ -97,7 +96,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "aruba_no_shutdown",
@@ -113,7 +112,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "aruba_show_ip_interface_brief",
@@ -125,31 +124,7 @@
             "show interface brief"
           ],
           "rollback_commands": [],
-          "simulator_support": "partially_simulated"
-        },
-        {
-          "command_id": "aruba_show_spanning_tree",
-          "command": "show spanning-tree",
-          "aliases": [],
-          "purpose": "Shows ArubaOS-CX spanning-tree instances, root information, port roles, and states.",
-          "safety_level": "Safe read-only command",
-          "verification_commands": [
-            "show events -r -n <count>"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "lookup_only"
-        },
-        {
-          "command_id": "aruba_show_lacp_interfaces",
-          "command": "show lacp interfaces",
-          "aliases": [],
-          "purpose": "Shows ArubaOS-CX LACP interface state, aggregation membership, and partner information.",
-          "safety_level": "Safe read-only command",
-          "verification_commands": [
-            "show interface brief"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "aruba_show_interface_error_statistics",
@@ -161,7 +136,7 @@
             "show interface <interface>"
           ],
           "rollback_commands": [],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "aruba_show_power_over_ethernet",
@@ -173,19 +148,7 @@
             "show interface <interface>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
-        },
-        {
-          "command_id": "aruba_lacp_mode_active",
-          "command": "lacp mode active",
-          "aliases": [],
-          "purpose": "Enables active LACP negotiation on an ArubaOS-CX member interface.",
-          "safety_level": "High - can affect aggregate link forwarding.",
-          "verification_commands": [
-            "show lacp interfaces"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "explanation_only"
+          "simulator_support": "output_simulation"
         }
       ]
     }

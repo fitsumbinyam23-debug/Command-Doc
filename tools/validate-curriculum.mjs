@@ -29,7 +29,7 @@ for (const command of commands) {
     aliasKeys.add(aliasKey);
   }
   if (command.changes_configuration && !command.safety_level) errors.push(`Configuration command lacks safety guidance: ${command.command_id}`);
-  if (command.simulator_support === "fully_simulated" && !appSource.toLowerCase().includes(String(command.canonical_command).toLowerCase())) warnings.push(`Fully simulated command needs handler review: ${command.command_id}`);
+  if (command.simulator_support === "full_state_simulation" && !appSource.toLowerCase().includes(String(command.canonical_command).toLowerCase())) warnings.push(`Full-state command needs handler review: ${command.command_id}`);
 }
 
 const routeIds = new Set();
@@ -48,7 +48,7 @@ for (const route of routes) {
   for (const lessonId of route.related_lesson_ids || []) if (!String(lessonId).startsWith(`${route.vendor}-`)) errors.push(`Cross-vendor lesson reference: ${route.route_id} -> ${lessonId}`);
   if (route.support_level === "full_state_simulation") {
     for (const commandId of [...required, ...(route.verification_command_ids || [])]) {
-      if (commands.find((item) => item.command_id === commandId)?.simulator_support !== "fully_simulated") errors.push(`Fully simulated route has non-full command: ${route.route_id} -> ${commandId}`);
+      if (commands.find((item) => item.command_id === commandId)?.simulator_support !== "full_state_simulation") errors.push(`Full-state route has non-full command: ${route.route_id} -> ${commandId}`);
     }
   }
 }

@@ -1,7 +1,7 @@
 {
   "module_id": "hp_comware-trunks",
   "vendor": "hp_comware",
-  "title": "9. Trunks",
+  "title": "12. Trunks",
   "topic": "trunks",
   "level": 3,
   "lessons": [
@@ -12,7 +12,7 @@
       "topic": "trunks",
       "simulation_support": [
         "explanation_only",
-        "partially_simulated"
+        "simplified_state_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -52,7 +52,7 @@
           "rollback_commands": [
             "undo <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         }
       ]
     }

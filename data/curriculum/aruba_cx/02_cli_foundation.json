@@ -1,18 +1,17 @@
 {
-  "module_id": "cisco_ios-cli_foundation",
-  "vendor": "cisco_ios",
-  "title": "6. Cli Foundation",
+  "module_id": "aruba_cx-cli_foundation",
+  "vendor": "aruba_cx",
+  "title": "5. Cli Foundation",
   "topic": "cli_foundation",
-  "level": 3,
+  "level": 2,
   "lessons": [
     {
-      "lesson_id": "cisco_ios-cli_foundation",
-      "title": "Cisco IOS — Cli Foundation",
-      "vendor": "cisco_ios",
+      "lesson_id": "aruba_cx-cli_foundation",
+      "title": "ArubaOS-CX — Cli Foundation",
+      "vendor": "aruba_cx",
       "topic": "cli_foundation",
       "simulation_support": [
-        "simplified_state_simulation",
-        "output_simulation"
+        "simplified_state_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -29,13 +28,13 @@
       ],
       "commands": [
         {
-          "command_id": "cisco_configure_terminal",
+          "command_id": "aruba_configure_terminal",
           "command": "configure terminal",
           "aliases": [
             "conf t",
             "config terminal"
           ],
-          "purpose": "Enters global configuration mode on a Cisco IOS device.",
+          "purpose": "Enters global configuration mode on ArubaOS-CX.",
           "safety_level": "High - enters configuration mode; later commands can affect production.",
           "verification_commands": [
             "show running-config"
@@ -44,18 +43,6 @@
             "no <command>"
           ],
           "simulator_support": "simplified_state_simulation"
-        },
-        {
-          "command_id": "cisco_show_ip_dhcp_binding",
-          "command": "show ip dhcp binding",
-          "aliases": [],
-          "purpose": "Lists DHCP leases maintained by a Cisco IOS DHCP server.",
-          "safety_level": "Safe read-only command",
-          "verification_commands": [
-            "show ip dhcp pool"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "output_simulation"
         }
       ]
     }

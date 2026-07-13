@@ -11,7 +11,7 @@
       "vendor": "linux",
       "topic": "interfaces",
       "simulation_support": [
-        "lookup_only",
+        "output_simulation",
         "explanation_only"
       ],
       "learning_sequence": [
@@ -39,7 +39,7 @@
             "ping <gateway>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "linux_ip_link_down",
@@ -107,7 +107,7 @@
             "ip addr"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "linux_ss_listening",
@@ -119,7 +119,7 @@
             "systemctl status <service>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "linux_ethtool_interface",
@@ -131,7 +131,7 @@
             "ip link"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         }
       ]
     }

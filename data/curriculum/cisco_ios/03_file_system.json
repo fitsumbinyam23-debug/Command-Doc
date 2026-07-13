@@ -1,15 +1,15 @@
 {
-  "module_id": "aruba_cx-mac_neighbors",
-  "vendor": "aruba_cx",
-  "title": "4. Mac Neighbors",
-  "topic": "mac_neighbors",
-  "level": 2,
+  "module_id": "cisco_ios-file_system",
+  "vendor": "cisco_ios",
+  "title": "10. File System",
+  "topic": "file_system",
+  "level": 3,
   "lessons": [
     {
-      "lesson_id": "aruba_cx-mac_neighbors",
-      "title": "ArubaOS-CX — Mac Neighbors",
-      "vendor": "aruba_cx",
-      "topic": "mac_neighbors",
+      "lesson_id": "cisco_ios-file_system",
+      "title": "Cisco IOS — File System",
+      "vendor": "cisco_ios",
+      "topic": "file_system",
       "simulation_support": [
         "output_simulation"
       ],
@@ -28,26 +28,29 @@
       ],
       "commands": [
         {
-          "command_id": "aruba_show_mac_address_table",
-          "command": "show mac-address-table",
-          "aliases": [],
-          "purpose": "Shows MAC addresses learned by the switch.",
+          "command_id": "cisco_dir_flash",
+          "command": "dir flash:",
+          "aliases": [
+            "dir flash"
+          ],
+          "purpose": "Lists files and free space in the Cisco flash filesystem.",
           "safety_level": "Safe read-only command",
           "verification_commands": [
-            "show interface <interface>",
-            "show vlan <vlan>"
+            "show file systems"
           ],
           "rollback_commands": [],
           "simulator_support": "output_simulation"
         },
         {
-          "command_id": "aruba_show_lldp_neighbor_info",
-          "command": "show lldp neighbor-info",
-          "aliases": [],
-          "purpose": "Shows LLDP neighbor details and local-to-remote interface mapping.",
+          "command_id": "cisco_show_file_systems",
+          "command": "show file systems",
+          "aliases": [
+            "sh file systems"
+          ],
+          "purpose": "Lists Cisco filesystems, prefixes, sizes, and access capabilities.",
           "safety_level": "Safe read-only command",
           "verification_commands": [
-            "show interface brief"
+            "dir flash:"
           ],
           "rollback_commands": [],
           "simulator_support": "output_simulation"

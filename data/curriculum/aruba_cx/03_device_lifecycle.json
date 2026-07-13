@@ -1,17 +1,17 @@
 {
-  "module_id": "aruba_cx-networking",
+  "module_id": "aruba_cx-device_lifecycle",
   "vendor": "aruba_cx",
-  "title": "8. Networking",
-  "topic": "networking",
+  "title": "7. Device Lifecycle",
+  "topic": "device_lifecycle",
   "level": 3,
   "lessons": [
     {
-      "lesson_id": "aruba_cx-networking",
-      "title": "ArubaOS-CX — Networking",
+      "lesson_id": "aruba_cx-device_lifecycle",
+      "title": "ArubaOS-CX — Device Lifecycle",
       "vendor": "aruba_cx",
-      "topic": "networking",
+      "topic": "device_lifecycle",
       "simulation_support": [
-        "output_simulation"
+        "explanation_only"
       ],
       "learning_sequence": [
         "Understand",
@@ -28,16 +28,16 @@
       ],
       "commands": [
         {
-          "command_id": "aruba_show_ip_route",
-          "command": "show ip route",
+          "command_id": "aruba_reload",
+          "command": "reload",
           "aliases": [],
-          "purpose": "Shows ArubaOS-CX IPv4 routes, their source, distance, metric, and next hop.",
-          "safety_level": "Safe read-only command",
+          "purpose": "Restarts the ArubaOS-CX device.",
+          "safety_level": "Critical - reboots the device and interrupts users.",
           "verification_commands": [
-            "show ip interface brief"
+            "show version"
           ],
           "rollback_commands": [],
-          "simulator_support": "output_simulation"
+          "simulator_support": "explanation_only"
         }
       ]
     }

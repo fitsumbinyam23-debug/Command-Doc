@@ -11,8 +11,8 @@
       "vendor": "cisco_ios",
       "topic": "vlans",
       "simulation_support": [
-        "fully_simulated",
-        "partially_simulated",
+        "full_state_simulation",
+        "simplified_state_simulation",
         "explanation_only"
       ],
       "learning_sequence": [
@@ -43,7 +43,7 @@
             "show mac address-table vlan <vlan>"
           ],
           "rollback_commands": [],
-          "simulator_support": "fully_simulated"
+          "simulator_support": "full_state_simulation"
         },
         {
           "command_id": "cisco_switchport_access_vlan",
@@ -59,7 +59,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "cisco_vlan_create",
@@ -73,7 +73,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "cisco_vlan_name",
@@ -97,7 +97,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "cisco_stp_root_primary",
@@ -109,7 +109,7 @@
             "show spanning-tree vlan <vlan-id>"
           ],
           "rollback_commands": [],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         }
       ]
     }

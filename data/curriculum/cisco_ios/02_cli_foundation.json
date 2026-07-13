@@ -1,9 +1,9 @@
 {
   "module_id": "cisco_ios-cli_foundation",
   "vendor": "cisco_ios",
-  "title": "6. Cli Foundation",
+  "title": "5. Cli Foundation",
   "topic": "cli_foundation",
-  "level": 3,
+  "level": 2,
   "lessons": [
     {
       "lesson_id": "cisco_ios-cli_foundation",
@@ -11,8 +11,8 @@
       "vendor": "cisco_ios",
       "topic": "cli_foundation",
       "simulation_support": [
-        "simplified_state_simulation",
-        "output_simulation"
+        "partially_simulated",
+        "lookup_only"
       ],
       "learning_sequence": [
         "Understand",
@@ -43,7 +43,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "simplified_state_simulation"
+          "simulator_support": "partially_simulated"
         },
         {
           "command_id": "cisco_show_ip_dhcp_binding",
@@ -55,7 +55,7 @@
             "show ip dhcp pool"
           ],
           "rollback_commands": [],
-          "simulator_support": "output_simulation"
+          "simulator_support": "lookup_only"
         }
       ]
     }

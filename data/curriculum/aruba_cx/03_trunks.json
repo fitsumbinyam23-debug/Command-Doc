@@ -1,7 +1,7 @@
 {
   "module_id": "aruba_cx-trunks",
   "vendor": "aruba_cx",
-  "title": "7. Trunks",
+  "title": "10. Trunks",
   "topic": "trunks",
   "level": 3,
   "lessons": [
@@ -11,7 +11,7 @@
       "vendor": "aruba_cx",
       "topic": "trunks",
       "simulation_support": [
-        "partially_simulated"
+        "simplified_state_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -39,7 +39,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "aruba_vlan_trunk_native",
@@ -51,7 +51,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         }
       ]
     }

@@ -11,7 +11,7 @@
       "vendor": "hp_comware",
       "topic": "mac_neighbors",
       "simulation_support": [
-        "lookup_only"
+        "output_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -41,7 +41,7 @@
             "display vlan <vlan>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_display_lldp_neighbor",
@@ -56,7 +56,7 @@
             "display interface brief"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_display_arp",
@@ -70,7 +70,7 @@
             "display mac-address"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         }
       ]
     }

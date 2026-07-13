@@ -12,7 +12,7 @@
       "topic": "device_information",
       "simulation_support": [
         "explanation_only",
-        "lookup_only"
+        "output_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -52,7 +52,7 @@
             "ipconfig /all"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "windows_dir",
@@ -64,7 +64,7 @@
             "systeminfo"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "windows_dism_scanhealth",

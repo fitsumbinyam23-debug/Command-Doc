@@ -1,0 +1,65 @@
+{
+  "module_id": "cisco_ios-switching",
+  "vendor": "cisco_ios",
+  "title": "5. Switching",
+  "topic": "switching",
+  "level": 2,
+  "lessons": [
+    {
+      "lesson_id": "cisco_ios-switching",
+      "title": "Cisco IOS — Switching",
+      "vendor": "cisco_ios",
+      "topic": "switching",
+      "simulation_support": [
+        "output_simulation"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "cisco_show_spanning_tree",
+          "command": "show spanning-tree",
+          "aliases": [
+            "sh spanning-tree",
+            "sh span"
+          ],
+          "purpose": "Shows spanning-tree state, root bridge information, and port roles.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface status",
+            "show cdp neighbors"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "output_simulation"
+        },
+        {
+          "command_id": "cisco_show_etherchannel_summary",
+          "command": "show etherchannel summary",
+          "aliases": [
+            "sh etherchannel summary",
+            "sh ether sum"
+          ],
+          "purpose": "Shows port-channel groups, protocol, and member-port bundle state.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface <interface>",
+            "show running-config interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "output_simulation"
+        }
+      ]
+    }
+  ]
+}

@@ -1,15 +1,15 @@
 {
-  "module_id": "cisco_ios-networking",
+  "module_id": "cisco_ios-diagnostics",
   "vendor": "cisco_ios",
-  "title": "11. Networking",
-  "topic": "networking",
+  "title": "9. Diagnostics",
+  "topic": "diagnostics",
   "level": 3,
   "lessons": [
     {
-      "lesson_id": "cisco_ios-networking",
-      "title": "Cisco IOS — Networking",
+      "lesson_id": "cisco_ios-diagnostics",
+      "title": "Cisco IOS — Diagnostics",
       "vendor": "cisco_ios",
-      "topic": "networking",
+      "topic": "diagnostics",
       "simulation_support": [
         "output_simulation"
       ],
@@ -28,15 +28,17 @@
       ],
       "commands": [
         {
-          "command_id": "cisco_show_ip_route",
-          "command": "show ip route",
+          "command_id": "cisco_show_diagnostic_result",
+          "command": "show diagnostic result",
           "aliases": [
-            "sh ip route"
+            "sh diagnostic result",
+            "sh diag result",
+            "show diag result"
           ],
-          "purpose": "Shows the IPv4 routing table and how each destination was learned.",
+          "purpose": "Shows available Cisco diagnostic test results and their pass, fail, or not-run state.",
           "safety_level": "Safe read-only command",
           "verification_commands": [
-            "show ip interface brief"
+            "show logging"
           ],
           "rollback_commands": [],
           "simulator_support": "output_simulation"

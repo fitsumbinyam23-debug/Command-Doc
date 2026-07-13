@@ -11,7 +11,7 @@
       "vendor": "linux",
       "topic": "device_information",
       "simulation_support": [
-        "lookup_only"
+        "output_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -37,7 +37,7 @@
             "lsblk"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "linux_lsblk",
@@ -49,7 +49,7 @@
             "df -h"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "linux_dmesg",
@@ -61,7 +61,7 @@
             "journalctl -p err"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "linux_journalctl_errors",
@@ -73,7 +73,7 @@
             "dmesg"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "linux_systemctl_status_networkmanager",
@@ -85,7 +85,7 @@
             "journalctl -p err"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "linux_journalctl_networkmanager",
@@ -97,7 +97,7 @@
             "ip addr"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         }
       ]
     }

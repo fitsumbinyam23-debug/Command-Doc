@@ -11,10 +11,8 @@
       "vendor": "aruba_cx",
       "topic": "device_information",
       "simulation_support": [
-        "lookup_only",
-        "fully_simulated",
-        "explanation_only",
-        "partially_simulated"
+        "output_simulation",
+        "simplified_state_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -40,36 +38,7 @@
             "show interface brief"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
-        },
-        {
-          "command_id": "aruba_write_memory",
-          "command": "write memory",
-          "aliases": [
-            "write mem",
-            "copy running-config startup-config"
-          ],
-          "purpose": "Saves the active ArubaOS-CX running configuration.",
-          "safety_level": "Medium - persists current changes; can preserve a mistake across reboot.",
-          "verification_commands": [
-            "show startup-config"
-          ],
-          "rollback_commands": [
-            "no <command>"
-          ],
-          "simulator_support": "fully_simulated"
-        },
-        {
-          "command_id": "aruba_reload",
-          "command": "reload",
-          "aliases": [],
-          "purpose": "Restarts the ArubaOS-CX device.",
-          "safety_level": "Critical - reboots the device and interrupts users.",
-          "verification_commands": [
-            "show version"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "explanation_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "aruba_show_system",
@@ -81,7 +50,7 @@
             "show version"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "aruba_show_flash",
@@ -93,7 +62,7 @@
             "show version"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "aruba_show_logging",
@@ -105,7 +74,7 @@
             "show system"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "aruba_show_events_reverse_count",
@@ -117,7 +86,7 @@
             "show system"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "aruba_show_system_resource_utilization",
@@ -129,7 +98,7 @@
             "show events -r -n <count>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "aruba_hostname",
@@ -143,7 +112,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         }
       ]
     }

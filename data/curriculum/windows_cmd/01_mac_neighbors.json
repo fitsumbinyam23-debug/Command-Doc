@@ -11,7 +11,7 @@
       "vendor": "windows_cmd",
       "topic": "mac_neighbors",
       "simulation_support": [
-        "lookup_only"
+        "output_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -38,7 +38,7 @@
             "arp -a"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "windows_arp_a",
@@ -51,7 +51,7 @@
             "ipconfig /all"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         }
       ]
     }

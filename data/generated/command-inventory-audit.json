@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-13T12:20:21.907Z",
+  "generated_at": "2026-07-13T15:07:36.324Z",
   "source_command_files": [
     "data/commands/cisco_ios.json",
     "data/commands/hp_comware.json",
@@ -38,9 +38,9 @@
     "trunks": 6
   },
   "commands_per_support_level": {
-    "lookup_only": 84,
-    "fully_simulated": 10,
-    "partially_simulated": 39,
+    "output_simulation": 84,
+    "full_state_simulation": 10,
+    "simplified_state_simulation": 39,
     "explanation_only": 30
   },
   "commands_used_by_cli_engine": 49,

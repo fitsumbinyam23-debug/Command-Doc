@@ -11,7 +11,7 @@
       "vendor": "windows_cmd",
       "topic": "networking",
       "simulation_support": [
-        "lookup_only",
+        "output_simulation",
         "explanation_only"
       ],
       "learning_sequence": [
@@ -39,7 +39,7 @@
             "tracert <ip>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "windows_tracert",
@@ -52,7 +52,20 @@
             "route print"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
+        },
+        {
+          "command_id": "windows_route_print",
+          "command": "route print",
+          "aliases": [],
+          "purpose": "Shows the Windows routing table and interface route metrics.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ipconfig /all",
+            "ping <gateway>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "windows_nslookup",
@@ -65,7 +78,7 @@
             "ping <ip>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "windows_ipconfig_release",

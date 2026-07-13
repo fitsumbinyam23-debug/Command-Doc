@@ -11,8 +11,8 @@
       "vendor": "windows_cmd",
       "topic": "interfaces",
       "simulation_support": [
-        "lookup_only",
-        "partially_simulated"
+        "simplified_state_simulation",
+        "output_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -29,19 +29,6 @@
       ],
       "commands": [
         {
-          "command_id": "windows_route_print",
-          "command": "route print",
-          "aliases": [],
-          "purpose": "Shows the Windows routing table and interface route metrics.",
-          "safety_level": "Safe read-only command",
-          "verification_commands": [
-            "ipconfig /all",
-            "ping <gateway>"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "lookup_only"
-        },
-        {
           "command_id": "windows_netsh_interface_show_interface",
           "command": "netsh interface show interface",
           "aliases": [],
@@ -52,7 +39,7 @@
             "ping <gateway>"
           ],
           "rollback_commands": [],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "windows_netsh_set_static_ip",
@@ -68,7 +55,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "windows_netsh_interface_disable",
@@ -84,7 +71,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "windows_netsh_interface_enable",
@@ -100,7 +87,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "windows_netstat_ano",
@@ -112,7 +99,7 @@
             "tasklist"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "windows_getmac_verbose",
@@ -124,7 +111,7 @@
             "ipconfig /all"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "windows_netsh_wlan_show_interfaces",
@@ -136,7 +123,7 @@
             "ipconfig /all"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "windows_netsh_ipv4_show_interfaces",
@@ -148,7 +135,7 @@
             "route print"
           ],
           "rollback_commands": [],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "windows_netsh_lan_show_interfaces",
@@ -160,7 +147,7 @@
             "ipconfig /all"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         }
       ]
     }

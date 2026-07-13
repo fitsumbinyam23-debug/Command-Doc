@@ -11,8 +11,8 @@
       "vendor": "hp_comware",
       "topic": "stacking",
       "simulation_support": [
-        "fully_simulated",
-        "lookup_only",
+        "full_state_simulation",
+        "output_simulation",
         "explanation_only"
       ],
       "learning_sequence": [
@@ -42,7 +42,7 @@
             "display logbuffer"
           ],
           "rollback_commands": [],
-          "simulator_support": "fully_simulated"
+          "simulator_support": "full_state_simulation"
         },
         {
           "command_id": "hp_display_irf_port",
@@ -57,7 +57,7 @@
             "display irf-port configuration"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_display_irf_port_configuration",
@@ -72,7 +72,7 @@
             "display irf topology"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_display_irf_topology",
@@ -87,7 +87,7 @@
             "display logbuffer"
           ],
           "rollback_commands": [],
-          "simulator_support": "fully_simulated"
+          "simulator_support": "full_state_simulation"
         },
         {
           "command_id": "hp_display_irf_configuration",
@@ -101,7 +101,7 @@
             "display irf"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_irf_member_priority",

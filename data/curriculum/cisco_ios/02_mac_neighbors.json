@@ -11,7 +11,7 @@
       "vendor": "cisco_ios",
       "topic": "mac_neighbors",
       "simulation_support": [
-        "lookup_only"
+        "output_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -41,7 +41,7 @@
             "show interface status"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "cisco_show_lldp_neighbors",
@@ -57,7 +57,7 @@
             "show cdp neighbors"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "cisco_show_ip_arp",
@@ -72,7 +72,7 @@
             "show interface <interface>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         }
       ]
     }

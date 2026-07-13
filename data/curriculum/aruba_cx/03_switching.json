@@ -1,7 +1,7 @@
 {
   "module_id": "aruba_cx-switching",
   "vendor": "aruba_cx",
-  "title": "8. Switching",
+  "title": "9. Switching",
   "topic": "switching",
   "level": 3,
   "lessons": [
@@ -11,6 +11,7 @@
       "vendor": "aruba_cx",
       "topic": "switching",
       "simulation_support": [
+        "output_simulation",
         "explanation_only"
       ],
       "learning_sequence": [
@@ -27,6 +28,42 @@
         "Complete"
       ],
       "commands": [
+        {
+          "command_id": "aruba_show_spanning_tree",
+          "command": "show spanning-tree",
+          "aliases": [],
+          "purpose": "Shows ArubaOS-CX spanning-tree instances, root information, port roles, and states.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show events -r -n <count>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "output_simulation"
+        },
+        {
+          "command_id": "aruba_show_lacp_interfaces",
+          "command": "show lacp interfaces",
+          "aliases": [],
+          "purpose": "Shows ArubaOS-CX LACP interface state, aggregation membership, and partner information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "output_simulation"
+        },
+        {
+          "command_id": "aruba_lacp_mode_active",
+          "command": "lacp mode active",
+          "aliases": [],
+          "purpose": "Enables active LACP negotiation on an ArubaOS-CX member interface.",
+          "safety_level": "High - can affect aggregate link forwarding.",
+          "verification_commands": [
+            "show lacp interfaces"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
         {
           "command_id": "aruba_lacp_system_priority",
           "command": "lacp system-priority <priority>",

@@ -117,7 +117,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -186,7 +186,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -247,7 +247,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -308,7 +308,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -369,7 +369,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -429,7 +429,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -488,7 +488,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -547,7 +547,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -606,7 +606,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -665,7 +665,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -724,7 +724,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -783,7 +783,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -842,7 +842,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -901,7 +901,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -960,7 +960,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -1019,7 +1019,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -1079,7 +1079,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -1140,7 +1140,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -1201,7 +1201,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -1262,7 +1262,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -1382,7 +1382,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -1443,7 +1443,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -1504,7 +1504,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -1565,7 +1565,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -1626,7 +1626,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -1693,7 +1693,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -1762,7 +1762,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -1825,7 +1825,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -1886,7 +1886,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -1953,7 +1953,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -2016,7 +2016,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -2077,7 +2077,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -2144,7 +2144,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -2213,7 +2213,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -2282,7 +2282,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -2963,7 +2963,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_port_security_interface"
@@ -3020,7 +3020,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_port_security_interface"
@@ -3077,7 +3077,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_port_security_interface"
@@ -3134,7 +3134,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_port_security_interface"
@@ -3191,7 +3191,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_port_security_interface"
@@ -3248,7 +3248,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_port_security_interface"
@@ -3305,7 +3305,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_port_security_interface"
@@ -3362,7 +3362,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_port_security_interface"
@@ -3419,7 +3419,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_port_security_interface"
@@ -3476,7 +3476,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_port_security_interface"
@@ -3533,7 +3533,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status"
@@ -3594,7 +3594,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -3656,7 +3656,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -3718,7 +3718,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -3780,7 +3780,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -3838,7 +3838,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status"
@@ -3895,7 +3895,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status"
@@ -3954,7 +3954,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -4014,7 +4014,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -4072,7 +4072,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status"
@@ -4424,7 +4424,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status"
@@ -4489,7 +4489,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -4668,7 +4668,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status"
@@ -4730,7 +4730,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_irf_topology",
@@ -4794,7 +4794,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_irf_topology",
@@ -4858,7 +4858,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_irf_topology",
@@ -4922,7 +4922,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_irf_topology",
@@ -4986,7 +4986,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_irf_topology",
@@ -5050,7 +5050,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_irf_topology",
@@ -5114,7 +5114,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_irf_topology",
@@ -5178,7 +5178,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_irf_topology",
@@ -5242,7 +5242,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_irf_topology",
@@ -5306,7 +5306,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_irf_topology",
@@ -5949,7 +5949,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -6011,7 +6011,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -6073,7 +6073,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -6135,7 +6135,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -6197,7 +6197,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -6259,7 +6259,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -6321,7 +6321,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -6383,7 +6383,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -6445,7 +6445,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -6507,7 +6507,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -6566,7 +6566,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_interface_brief",
@@ -6628,7 +6628,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_vlan",
@@ -6688,7 +6688,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_interface_brief",
@@ -6754,7 +6754,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_interface_brief",
@@ -6933,7 +6933,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_interface_brief"
@@ -6995,7 +6995,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_irf_topology",
@@ -7059,7 +7059,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_irf_topology",
@@ -7122,7 +7122,7 @@
         "hpe-5130",
         "hpe-5510"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "hp_display_current_configuration",
@@ -7181,7 +7181,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -7241,7 +7241,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_vlan_brief",
@@ -7301,7 +7301,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -7367,7 +7367,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -7615,7 +7615,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_running_config",
@@ -7674,7 +7674,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status",
@@ -7732,7 +7732,7 @@
         "cisco-catalyst-9300",
         "cisco-catalyst-9600"
       ],
-      "legacy_support_level": "partially_simulated",
+      "legacy_support_level": "simplified_state_simulation",
       "optional_command_ids": [],
       "allowed_commands": [
         "cisco_show_interface_status"

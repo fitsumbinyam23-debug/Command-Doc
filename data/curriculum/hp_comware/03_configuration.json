@@ -1,7 +1,7 @@
 {
   "module_id": "hp_comware-configuration",
   "vendor": "hp_comware",
-  "title": "6. Configuration",
+  "title": "7. Configuration",
   "topic": "configuration",
   "level": 3,
   "lessons": [
@@ -11,7 +11,8 @@
       "vendor": "hp_comware",
       "topic": "configuration",
       "simulation_support": [
-        "partially_simulated"
+        "full_state_simulation",
+        "explanation_only"
       ],
       "learning_sequence": [
         "Understand",
@@ -28,21 +29,34 @@
       ],
       "commands": [
         {
-          "command_id": "hp_system_view",
-          "command": "system-view",
+          "command_id": "hp_save",
+          "command": "save",
           "aliases": [
-            "sys",
-            "system-view"
+            "save force"
           ],
-          "purpose": "Enters Comware system configuration view.",
-          "safety_level": "High - enters configuration mode; later commands can affect production.",
+          "purpose": "Saves the current Comware configuration so it persists after reboot.",
+          "safety_level": "Medium - persists current changes; can preserve mistakes across reboot.",
           "verification_commands": [
-            "display current-configuration"
+            "display saved-configuration"
           ],
           "rollback_commands": [
             "undo <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "full_state_simulation"
+        },
+        {
+          "command_id": "hp_save_force",
+          "command": "save force",
+          "aliases": [],
+          "purpose": "Saves current Comware configuration without an interactive confirmation.",
+          "safety_level": "High - persists changes across reboot.",
+          "verification_commands": [
+            "display saved-configuration"
+          ],
+          "rollback_commands": [
+            "undo <command>"
+          ],
+          "simulator_support": "explanation_only"
         }
       ]
     }

@@ -11,9 +11,9 @@
       "vendor": "cisco_ios",
       "topic": "interfaces",
       "simulation_support": [
-        "fully_simulated",
-        "lookup_only",
-        "partially_simulated",
+        "full_state_simulation",
+        "output_simulation",
+        "simplified_state_simulation",
         "explanation_only"
       ],
       "learning_sequence": [
@@ -45,7 +45,7 @@
             "show running-config interface <interface>"
           ],
           "rollback_commands": [],
-          "simulator_support": "fully_simulated"
+          "simulator_support": "full_state_simulation"
         },
         {
           "command_id": "cisco_show_interfaces",
@@ -62,7 +62,7 @@
             "show running-config interface <interface>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "cisco_show_mac_address_table",
@@ -79,39 +79,7 @@
             "show vlan brief"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
-        },
-        {
-          "command_id": "cisco_show_spanning_tree",
-          "command": "show spanning-tree",
-          "aliases": [
-            "sh spanning-tree",
-            "sh span"
-          ],
-          "purpose": "Shows spanning-tree state, root bridge information, and port roles.",
-          "safety_level": "Safe read-only command",
-          "verification_commands": [
-            "show interface status",
-            "show cdp neighbors"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "lookup_only"
-        },
-        {
-          "command_id": "cisco_show_etherchannel_summary",
-          "command": "show etherchannel summary",
-          "aliases": [
-            "sh etherchannel summary",
-            "sh ether sum"
-          ],
-          "purpose": "Shows port-channel groups, protocol, and member-port bundle state.",
-          "safety_level": "Safe read-only command",
-          "verification_commands": [
-            "show interface <interface>",
-            "show running-config interface <interface>"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "cisco_show_running_config_interface",
@@ -128,7 +96,7 @@
             "show interface <interface>"
           ],
           "rollback_commands": [],
-          "simulator_support": "fully_simulated"
+          "simulator_support": "full_state_simulation"
         },
         {
           "command_id": "cisco_interface_config",
@@ -144,7 +112,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "cisco_shutdown",
@@ -158,7 +126,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "cisco_no_shutdown",
@@ -174,7 +142,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "cisco_show_ip_interface_brief",
@@ -190,7 +158,7 @@
             "show interfaces"
           ],
           "rollback_commands": [],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "cisco_show_interfaces_counters_errors",
@@ -202,7 +170,7 @@
             "show interfaces <interface>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "cisco_show_power_inline",
@@ -214,7 +182,7 @@
             "show interfaces <interface>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "cisco_show_port_security_interface",
@@ -226,7 +194,7 @@
             "show logging"
           ],
           "rollback_commands": [],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "cisco_interface_range",
@@ -240,7 +208,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "cisco_svi_ip_address",

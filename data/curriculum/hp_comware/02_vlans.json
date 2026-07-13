@@ -11,8 +11,8 @@
       "vendor": "hp_comware",
       "topic": "vlans",
       "simulation_support": [
-        "lookup_only",
-        "partially_simulated"
+        "output_simulation",
+        "simplified_state_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -41,7 +41,7 @@
             "display mac-address vlan <vlan>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_port_access_vlan",
@@ -57,7 +57,7 @@
           "rollback_commands": [
             "undo <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         },
         {
           "command_id": "hp_vlan",
@@ -71,7 +71,7 @@
           "rollback_commands": [
             "undo <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         }
       ]
     }

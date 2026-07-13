@@ -389,7 +389,7 @@ const state = {
     activePremiumCommandId: "",
     premiumLesson: { mode: "guided", prediction: "", evidence: "", entered: "", hintLevel: 0, confidence: "", verified: false },
     libraryTab: "lookup",
-    libraryFilters: { search: "", vendor: "", platform: "", topic: "", difficulty: "", routeType: "", support: "", status: "" },
+    libraryFilters: { search: "", vendor: "", operatingSystem: "", platform: "", modelFamily: "", topic: "", difficulty: "", routeType: "", support: "", status: "" },
     vendorProgress: {},
     console: {
       device: "access",
@@ -656,6 +656,37 @@ function activeCommandRegistry() {
 
 function persistSwitchRuntime() {
   state.lab.switchRuntime?.state?.persist();
+}
+
+function syncRuntimeFromEngine(engine, commandId = "cli") {
+  const shared = state.lab.switchRuntime?.state;
+  if (!shared || !engine?.state) return;
+  shared.running.system.hostname = engine.state.hostname || shared.running.system.hostname;
+  Object.entries(engine.state.interfaces || {}).forEach(([name, port]) => {
+    shared.running.interfaces[name] ||= { name, description: "", mode: "access", vlan: 1, admin_up: true, operational_up: false, connected_device: "", allowed_vlans: "", native_vlan: 1 };
+    const target = shared.running.interfaces[name];
+    target.description = port.description || "";
+    target.mode = port.mode || "access";
+    target.vlan = Number(port.vlan) || port.vlan || 1;
+    target.admin_up = !port.shutdown;
+    target.operational_up = Boolean(port.connected && !port.shutdown);
+    target.allowed_vlans = port.allowedVlans || "";
+  });
+  Object.entries(engine.state.vlanNames || {}).forEach(([id, name]) => { shared.running.vlans[id] = { name }; });
+  shared.running.logs = [...(engine.logs || [])];
+  persistSwitchRuntime();
+}
+
+function hydrateEngineFromRuntime(engine) {
+  const shared = state.lab.switchRuntime?.state;
+  if (!shared || !engine) return engine;
+  engine.state.hostname = shared.running.system.hostname;
+  engine.state.interfaces = Object.fromEntries(Object.entries(shared.running.interfaces || {}).map(([name, port]) => [name, {
+    description: port.description || "", vlan: String(port.vlan || 1), shutdown: !port.admin_up, connected: Boolean(port.operational_up), mode: port.mode || "access", allowedVlans: port.allowed_vlans || ""
+  }]));
+  engine.state.vlans = Object.keys(shared.running.vlans || {});
+  engine.state.vlanNames = Object.fromEntries(Object.entries(shared.running.vlans || {}).map(([id, vlan]) => [id, vlan.name || `VLAN-${id}`]));
+  return engine;
 }
 
 function setBusy(isBusy) {
@@ -2804,7 +2835,29 @@ function renderSwitchWorkbench() {
   const changes = runtime.state.changes();
   const pending = labCreate("section", "lab-detail-field");
   pending.append(labCreate("strong", "", `Pending Changes (${changes.length})`), labCreate("pre", "lab-output", changes.length ? changes.map((change) => `${change.field}: ${change.before ?? "-"} -> ${change.after}`).join("\n") : "No unsaved local configuration changes."));
-  pending.append(labButton("Save verified configuration", "secondary", () => { runtime.state.save("save"); persistSwitchRuntime(); renderLab(); showToast("Startup configuration was updated from the verified local running state."); }), labButton("Roll back pending changes", "secondary", () => { runtime.state.rollback(); persistSwitchRuntime(); renderLab(); showToast("Local running configuration was restored to its baseline."); }));
+  pending.append(
+    labButton("Save verified configuration", "secondary", () => {
+      runtime.state.save("save");
+      persistSwitchRuntime();
+      renderLab();
+      showToast("Startup configuration was updated from the verified local running state.");
+    }),
+    labButton("Roll back pending changes", "secondary", () => {
+      runtime.state.rollbackUnsaved();
+      hydrateEngineFromRuntime(getLabEngine());
+      persistSwitchRuntime();
+      renderLab();
+      showToast("Unsaved local changes were restored from the saved startup configuration.");
+    }),
+    labButton("Reset training switch", "secondary", () => {
+      if (!window.confirm("Reset the local training switch to its original factory baseline? Saved and running local changes will be replaced.")) return;
+      runtime.state.resetTraining();
+      hydrateEngineFromRuntime(getLabEngine());
+      persistSwitchRuntime();
+      renderLab();
+      showToast("The local training switch was reset to its original baseline.");
+    })
+  );
   inspector.append(pending);
   els.labRoot.append(inspector);
   renderVisualNetworkPlayground();
@@ -3177,6 +3230,7 @@ function syncEngineFromVisual() {
   }]));
   engine.state.vlans = Object.keys(network.vlans);
   engine.state.vlanNames = Object.fromEntries(Object.entries(network.vlans).map(([id, vlan]) => [id, vlan.name]));
+  syncRuntimeFromEngine(engine, "visual-sync");
 }
 
 function recordVisualCommands(commands, message) {
@@ -3555,7 +3609,7 @@ function renderLabConsole() {
   [
     ["Switch name", "hostname", String(engine.state.hostname).includes("<") ? "TRAINING-SWITCH" : engine.state.hostname],
     ["Port name", "interface", String(engine.selectedInterface).includes("<") ? "GigabitEthernet1/0/1" : engine.selectedInterface],
-    ["Endpoint label", "endpoint", String(engine.current().description).includes("<") ? "PC-1" : engine.current().description],
+    ["Endpoint label", "endpoint", String(engine.current().description || "").includes("<") || !engine.current().description ? "PC-1" : engine.current().description],
     ["Current VLAN", "currentVlan", String(engine.current().vlan).includes("<") ? "1" : engine.current().vlan],
     ["Target VLAN", "targetVlan", String(engine.seed.targetVlan).includes("<") ? "20" : engine.seed.targetVlan]
   ].forEach(([label, key, value]) => {
@@ -3608,10 +3662,11 @@ function renderLabConsole() {
   const terminalPane = labCreate("section", "lab-terminal-pane");
   terminalPane.append(labCreate("label", "lab-control-label", "Simulated device"), selector);
   const activeRoute = currentTrainingRoute();
-  const nextCommand = getTrainingRouteGuidance(engine)?.command || getLabGuidance(engine).command;
+  const routeGuidance = getTrainingRouteGuidance(engine);
+  const nextCommand = routeGuidance?.command || getLabGuidance(engine).command;
   const routeStatus = labCreate("section", "lab-route-status");
   routeStatus.append(labCreate("strong", "", `Route: ${activeRoute.label}`));
-  routeStatus.append(labCreate("p", "", `Step 1: type ${nextCommand} below, then press Enter or Run simulated command. Every command is entered by you.`));
+  routeStatus.append(labCreate("p", "", `Next step: type ${nextCommand} below, then press Enter or Run simulated command. Every command is entered by you.`));
   terminalPane.append(routeStatus);
   terminalPane.append(labCreate("div", "lab-terminal-label", "Console"));
   const terminal = labCreate("div", "lab-console-terminal");
@@ -3656,7 +3711,7 @@ function appendTerminalHelp(engine, value) {
   const command = value.trim();
   const registry = activeCommandRegistry();
   const suggestions = registry
-    ? registry.help(command).map((item) => `${item.syntax}  ${item.purpose}`)
+    ? registry.help(command)
     : ["show interfaces status", "show vlan brief", "show running-config", "configure terminal", "display irf", "rollback"].filter((item) => !command || item.startsWith(command.toLowerCase()));
   engine.transcript.push(`${consolePrompt()} ${command}?\n${suggestions.length ? suggestions.join("\n") : "No local completion is available for this profile."}`);
   if (engine.transcript.length > 150) engine.transcript.splice(0, engine.transcript.length - 150);
@@ -3903,6 +3958,9 @@ function getTrainingRouteGuidance(engine) {
   const nextIndex = route.steps.findIndex((step) => !isComplete(step));
   const complete = nextIndex === -1;
   const step = complete ? null : route.steps[nextIndex];
+  const commandNeedsInterfaceMode = /^(?:switchport|port access|port link-type|vlan access|description|shutdown|no shutdown|undo shutdown)\b/i.test(step?.command || "");
+  const commandNeedsConfigMode = /^(?:interface|vlan|hostname|sysname|switch \S+ priority|irf member)\b/i.test(step?.command || "");
+  if (!complete && ((commandNeedsInterfaceMode && engine.mode !== "interface") || (commandNeedsConfigMode && engine.mode !== "config"))) return null;
   return {
     title: complete ? "Full Configuration Verified" : `Guided Route: ${route.label}`,
     explanation: complete ? "You manually completed every route checkpoint. Review the actual simulated switch state, then decide whether to save or reset for another attempt." : `Step ${nextIndex + 1} of ${route.steps.length}: ${step.why}`,
@@ -3971,11 +4029,11 @@ function runLabConsoleCommand(input) {
   const engine = getLabEngine();
   const prompt = consolePrompt();
   const registry = activeCommandRegistry();
-  const catalogResolution = registry?.resolve(command);
-  if (catalogResolution?.status === "wrong_vendor") {
+  const catalogResolution = registry?.resolve(command, { mode: engine?.mode || "exec", privilege: "privileged" });
+  if (["wrong_vendor", "wrong_operating_system", "wrong_version", "wrong_model", "capability_missing", "feature_disabled", "license_unavailable", "wrong_mode", "insufficient_privilege"].includes(catalogResolution?.status)) {
     const expected = catalogResolution.command.vendor_label || catalogResolution.command.vendor;
     const actual = activeSwitchProfile()?.vendor_label || "the active training profile";
-    const output = `${command}\n\nThis is a ${expected} command, but the active profile is ${actual}. Change the switch profile or use the matching ${actual} syntax.`;
+    const output = `${command}\n\nThis command is unavailable for the active ${actual} profile: ${catalogResolution.status.replace(/_/g, " ")}. ${catalogResolution.status === "wrong_vendor" ? `It belongs to ${expected}.` : "Use a command supported by the selected profile and current CLI mode."}`;
     engine?.transcript.push(`${prompt} ${command}\n${output}`);
     input.value = "";
     state.lab.console.focusRequested = true;
@@ -3991,6 +4049,10 @@ function runLabConsoleCommand(input) {
     renderLab();
     return;
   }
+  // Capture the shared running state before any CLI or visual handler mutates it.
+  const runtimeBefore = state.lab.switchRuntime?.state
+    ? JSON.parse(JSON.stringify(state.lab.switchRuntime.state.running))
+    : {};
   let result = engine ? engine.execute(command) : { output: simulateLabCommand(command), diff: "Simulator engine unavailable." };
   const visualResult = syncVisualCliCommand(command, engine);
   if (visualResult) result = { ...result, ok: visualResult.ok, kind: visualResult.kind || result.kind, output: visualResult.output, diff: "" };
@@ -4008,7 +4070,19 @@ function runLabConsoleCommand(input) {
   if (engine) {
     engine.transcript.push(`${prompt} ${command}\n${result.output}${result.diff ? `\n\nConfiguration diff\n${result.diff}` : ""}`);
     if (state.lab.switchRuntime?.state) {
-      state.lab.switchRuntime.state.record({ command_id: catalogResolution?.command?.command_id || "unclassified", entered_text: command, success: Boolean(result.ok), state_before: {}, state_after: {}, changed_fields: result.kind === "config" ? ["simulated configuration"] : [], safety_result: result.ok ? "accepted" : "rejected" });
+      const shared = state.lab.switchRuntime.state;
+      const commandId = catalogResolution?.command?.command_id || "unclassified";
+      if (result.ok && result.kind === "save") {
+        shared.save(commandId);
+      } else if (result.ok && result.kind === "rollback") {
+        shared.rollbackUnsaved();
+        hydrateEngineFromRuntime(engine);
+      } else if (result.ok) {
+        syncRuntimeFromEngine(engine, commandId);
+      }
+      if (result.kind !== "save" && result.kind !== "rollback") {
+        shared.record({ command_id: commandId, canonical_command: catalogResolution?.command?.canonical_command || command, entered_text: command, entered_alias: Boolean(catalogResolution?.entered_alias), parsed_parameters: catalogResolution?.parsed_parameters || {}, mode_before: prompt.includes("config-if") ? "interface" : prompt.includes("config") ? "config" : "exec", mode_after: engine.mode || "exec", success: Boolean(result.ok), failure_type: result.ok ? "" : (catalogResolution?.status || result.kind || "command_rejected"), state_before: runtimeBefore, state_after: result.ok ? JSON.parse(JSON.stringify(shared.running)) : runtimeBefore, changed_fields: result.ok && result.kind === "config" ? ["simulated configuration"] : [], safety_result: result.ok ? "accepted" : "rejected", verification_result: result.verified ? "passed" : "not_run", save_result: "" });
+      }
       persistSwitchRuntime();
     }
     if (engine.transcript.length > 150) engine.transcript.splice(0, engine.transcript.length - 150);
@@ -4122,7 +4196,8 @@ function findKnownLabCommand(rawCommand) {
 }
 
 function createLabEngine(device) {
-  return window.CommandDoctorLabEngine ? new window.CommandDoctorLabEngine.SimulatedDeviceEngine(device) : null;
+  const engine = window.CommandDoctorLabEngine ? new window.CommandDoctorLabEngine.SimulatedDeviceEngine(device) : null;
+  return hydrateEngineFromRuntime(engine);
 }
 
 function getLabEngine() {
@@ -4684,7 +4759,7 @@ function renderGeneratedModule() {
     card.append(labCreate("h3", "", command.canonical_command || command.command));
     card.append(labCreate("p", "", command.purpose || "Local command guidance."));
     if (command.aliases?.length) card.append(labCreate("p", "", `Aliases: ${command.aliases.join(", ")}`));
-    card.append(labCreate("p", "", `Mode: ${command.command_mode || "See vendor prompt"} | Safety: ${command.safety_level || "See local guidance"} | Support: ${(command.simulator_support || "lookup_only").replace(/_/g, " ")}`));
+    card.append(labCreate("p", "", `Mode: ${command.command_mode || "See vendor prompt"} | Safety: ${command.safety_level || "See local guidance"} | Support: ${(command.simulator_support || "output_simulation").replace(/_/g, " ")}`));
     const details = labCreate("p", "", `Verify: ${(command.verification_commands || []).join("; ") || "Review output before continuing"}${command.rollback_commands?.length ? ` | Rollback: ${command.rollback_commands.join("; ")}` : ""}`);
     card.append(details);
     if (PREMIUM_INTERFACE_LESSONS[command.command_id]) {
@@ -4708,7 +4783,7 @@ function renderCommandCoverage() {
   const metrics = labCreate("div", "learn-summary");
   const support = (value) => commands.filter((command) => command.simulator_support === value).length;
   const status = (value) => commands.filter((command) => command.learning_status === value).length;
-  [["Canonical commands", commands.length], ["Aliases", commands.reduce((total, command) => total + (command.aliases || []).length, 0)], ["Learned", states.filter((state) => state === "Passed").length], ["Grouped lessons", status("grouped_lesson")], ["Planned lessons", status("planned_lesson")], ["Fully simulated", support("fully_simulated")], ["Partially simulated", support("partially_simulated")], ["Explanation only", support("explanation_only")], ["Lookup only", support("lookup_only")], ["Needs review", Object.keys(progress.reviewRoutes).length]].forEach(([label, value]) => metrics.append(labCreate("span", "badge", `${label}: ${value}`)));
+  [["Canonical commands", commands.length], ["Aliases", commands.reduce((total, command) => total + (command.aliases || []).length, 0)], ["Learned", states.filter((state) => state === "Passed").length], ["Grouped lessons", status("grouped_lesson")], ["Planned lessons", status("planned_lesson")], ["Full state", support("full_state_simulation")], ["Simplified state", support("simplified_state_simulation")], ["Output simulation", support("output_simulation")], ["Explanation only", support("explanation_only")], ["Needs review", Object.keys(progress.reviewRoutes).length]].forEach(([label, value]) => metrics.append(labCreate("span", "badge", `${label}: ${value}`)));
   panel.append(metrics);
   const auditMetrics = state.curriculum.audit?.coverage_metrics || state.curriculum.health?.coverage_metrics;
   if (auditMetrics) {
@@ -4804,6 +4879,10 @@ function renderPracticeLibrary(parent) {
     select.addEventListener("change", () => { filters[key] = select.value; renderLibrary(); });
     filterPanel.append(select);
   });
+  filterPanel.append(labButton("Clear filters", "secondary", () => {
+    Object.assign(filters, { search: "", vendor: "", operatingSystem: "", platform: "", modelFamily: "", topic: "", difficulty: "", routeType: "", support: "", status: "" });
+    renderLibrary();
+  }));
   parent.append(filterPanel);
   const progress = trackProgress(track);
   const routes = normalizedRoutes.filter((route) => {

@@ -11,10 +11,9 @@
       "vendor": "hp_comware",
       "topic": "device_information",
       "simulation_support": [
-        "lookup_only",
-        "fully_simulated",
+        "output_simulation",
         "explanation_only",
-        "partially_simulated"
+        "simplified_state_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -44,7 +43,7 @@
             "display logbuffer"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_display_device",
@@ -59,7 +58,7 @@
             "display irf"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_display_logbuffer",
@@ -74,50 +73,7 @@
             "display irf"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
-        },
-        {
-          "command_id": "hp_save",
-          "command": "save",
-          "aliases": [
-            "save force"
-          ],
-          "purpose": "Saves the current Comware configuration so it persists after reboot.",
-          "safety_level": "Medium - persists current changes; can preserve mistakes across reboot.",
-          "verification_commands": [
-            "display saved-configuration"
-          ],
-          "rollback_commands": [
-            "undo <command>"
-          ],
-          "simulator_support": "fully_simulated"
-        },
-        {
-          "command_id": "hp_reboot",
-          "command": "reboot",
-          "aliases": [],
-          "purpose": "Restarts the Comware device or member.",
-          "safety_level": "Critical - reboots equipment and interrupts users.",
-          "verification_commands": [
-            "display version"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "explanation_only"
-        },
-        {
-          "command_id": "hp_display_diagnostic_information",
-          "command": "display diagnostic-information",
-          "aliases": [
-            "dis diagnostic-information",
-            "dis diag"
-          ],
-          "purpose": "Collects a broad Comware diagnostic snapshot including system, interface, configuration, and log context.",
-          "safety_level": "Medium - output can be large and the device may prompt to save a diagnostic file; review the prompt before continuing.",
-          "verification_commands": [
-            "display logbuffer"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "explanation_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_display_current_configuration",
@@ -132,7 +88,7 @@
             "display current-configuration interface <interface>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_dir",
@@ -144,7 +100,7 @@
             "display boot-loader"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_display_saved_configuration",
@@ -171,7 +127,7 @@
             "display logbuffer"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_display_memory",
@@ -183,7 +139,7 @@
             "display logbuffer"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_sysname",
@@ -197,21 +153,7 @@
           "rollback_commands": [
             "undo <command>"
           ],
-          "simulator_support": "partially_simulated"
-        },
-        {
-          "command_id": "hp_save_force",
-          "command": "save force",
-          "aliases": [],
-          "purpose": "Saves current Comware configuration without an interactive confirmation.",
-          "safety_level": "High - persists changes across reboot.",
-          "verification_commands": [
-            "display saved-configuration"
-          ],
-          "rollback_commands": [
-            "undo <command>"
-          ],
-          "simulator_support": "explanation_only"
+          "simulator_support": "simplified_state_simulation"
         }
       ]
     }

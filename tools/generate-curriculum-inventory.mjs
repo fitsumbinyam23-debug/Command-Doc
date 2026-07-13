@@ -29,6 +29,7 @@ const profilesByVendor = {
 };
 
 function routeSupportLevel(legacySupport) {
+  if (["full_state_simulation", "simplified_state_simulation", "output_simulation", "explanation_only", "unsupported_for_profile"].includes(legacySupport)) return legacySupport;
   if (legacySupport === "fully_simulated") return "full_state_simulation";
   if (legacySupport === "partially_simulated") return "simplified_state_simulation";
   return "explanation_only";
@@ -37,6 +38,7 @@ function routeSupportLevel(legacySupport) {
 const normalise = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 const titleCase = (value) => String(value || "General").replace(/[-_]/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 const json = (value) => JSON.stringify(value, null, 2) + "\n";
+const groupBy = (items, key) => items.reduce((groups, item) => { const name = key(item); (groups[name] ||= []).push(item); return groups; }, {});
 
 function vendorKey(command, file) {
   const explicit = command.vendor_key || file.vendor_key || "";
@@ -90,9 +92,9 @@ function topicFor(command) {
 function supportFor(command) {
   const safety = String(command.safety_level || "").toLowerCase();
   const syntax = normalise(command.command);
-  if (/^(show interface status|show interfaces status|show vlan brief|show running-config interface|display irf|display irf topology|show interface brief|write memory|copy running-config startup-config|save)$/.test(syntax)) return "fully_simulated";
-  if (/configure terminal|system-view|hostname|sysname|interface |switchport access vlan|port access vlan|shutdown|undo shutdown|no shutdown|vlan /.test(syntax)) return "partially_simulated";
-  if (/safe read-only/.test(safety)) return "lookup_only";
+  if (/^(show interface status|show interfaces status|show vlan brief|show running-config interface|display irf|display irf topology|show interface brief|write memory|copy running-config startup-config|save)$/.test(syntax)) return "full_state_simulation";
+  if (/configure terminal|system-view|hostname|sysname|interface |switchport access vlan|port access vlan|shutdown|undo shutdown|no shutdown|vlan /.test(syntax)) return "simplified_state_simulation";
+  if (/safe read-only/.test(safety)) return "output_simulation";
   return "explanation_only";
 }
 
@@ -177,7 +179,7 @@ for (const item of canonicalByKey.values()) {
   inventory.push({
     command_id: item.id || `${vendor}_${normalise(item.command).replace(/[^a-z0-9]+/g, "_")}`,
     vendor, vendor_label: vendorLabels[vendor] || "Unassigned", operating_system: item.os || (vendor === "cisco_ios" ? "IOS" : vendor === "hp_comware" ? "Comware" : vendor === "aruba_cx" ? "ArubaOS-CX" : vendor === "windows_cmd" ? "Windows CMD" : vendor === "linux" ? "Linux" : "Unknown"),
-    platform: item.platform || vendorLabels[vendor] || "Unassigned", model_family: item.model_family || "Version-sensitive local catalog",
+    operating_system_version: item.operating_system_version || "Unknown", platform: item.platform || vendorLabels[vendor] || "Unassigned", platform_family: item.platform_family || "Any", model_family: item.model_family || "Version-sensitive local catalog", supported_model_profiles: item.supported_model_profiles || [], required_capabilities: item.required_capabilities || [], feature_dependencies: item.feature_dependencies || [], license_dependencies: item.license_dependencies || [], available_modes: item.available_modes || [], required_privilege: item.required_privilege || "",
     canonical_command: item.command, syntax: item.command, aliases: aliasesForCommand, command_mode: safety.changes_configuration ? "configuration or interface context" : "operational / read-only", privilege_level: safety.changes_configuration ? "elevated or configuration context" : "user or privileged operational context",
     category: item.category || "general", topic: topicFor(item), difficulty: safety.changes_configuration ? "intermediate" : "foundation", ...safety,
     purpose: item.meaning || "Local command catalog entry.", when_to_use: item.use_for || [], when_not_to_use: item.do_not_touch ? [item.do_not_touch] : [], prerequisites: [], related_commands: (item.next_commands || []).map((next) => next.command).filter(Boolean), verification_commands: (item.next_commands || []).map((next) => next.command).filter(Boolean).slice(0, 2), rollback_commands: safety.changes_configuration ? [vendor === "hp_comware" ? "undo <command>" : "no <command>"] : [], save_commands: safety.changes_configuration ? [vendor === "hp_comware" ? "save" : vendor === "cisco_ios" || vendor === "aruba_cx" ? "copy running-config startup-config" : "Record and verify results"] : [],
@@ -191,10 +193,10 @@ for (const [commandId, aliasesForCommand] of Object.entries(aliases)) {
   if (record) continue;
   const canonical = aliasesForCommand[0] || commandId.replace(/_/g, " ");
   const vendor = commandId.startsWith("hp_") ? "hp_comware" : commandId.startsWith("aruba_") ? "aruba_cx" : commandId.startsWith("windows_") ? "windows_cmd" : commandId.startsWith("linux_") ? "linux" : "cisco_ios";
-  inventory.push({ command_id: commandId, vendor, vendor_label: vendorLabels[vendor], operating_system: vendorLabels[vendor], platform: vendorLabels[vendor], model_family: "Local CLI alias map", canonical_command: canonical, syntax: canonical, aliases: aliasesForCommand, command_mode: "version-sensitive local CLI", privilege_level: "depends on command", category: "cli", topic: "cli_foundation", difficulty: "foundation", safety_level: "Explanation-only guidance", read_only: false, changes_configuration: false, purpose: "Canonical command inferred from the local alias map.", when_to_use: [], when_not_to_use: [], prerequisites: [], related_commands: [], verification_commands: [], rollback_commands: [], save_commands: [], good_output_example: [], bad_output_example: [], important_output_fields: [], common_errors: [], simulator_support: "lookup_only", source_files: ["src/app-release-21.js alias map"], related_lesson_ids: [], related_route_ids: [], related_scenario_ids: [], learning_status: "planned_lesson" });
+  inventory.push({ command_id: commandId, vendor, vendor_label: vendorLabels[vendor], operating_system: vendorLabels[vendor], platform: vendorLabels[vendor], model_family: "Local CLI alias map", canonical_command: canonical, syntax: canonical, aliases: aliasesForCommand, command_mode: "version-sensitive local CLI", privilege_level: "depends on command", category: "cli", topic: "cli_foundation", difficulty: "foundation", safety_level: "Explanation-only guidance", read_only: false, changes_configuration: false, purpose: "Canonical command inferred from the local alias map.", when_to_use: [], when_not_to_use: [], prerequisites: [], related_commands: [], verification_commands: [], rollback_commands: [], save_commands: [], good_output_example: [], bad_output_example: [], important_output_fields: [], common_errors: [], simulator_support: "output_simulation", source_files: ["src/app-release-21.js alias map"], related_lesson_ids: [], related_route_ids: [], related_scenario_ids: [], learning_status: "planned_lesson" });
 }
 
-const recordsByVendor = Object.groupBy(inventory, (record) => record.vendor);
+const recordsByVendor = groupBy(inventory, (record) => record.vendor);
 const recordById = new Map(inventory.map((record) => [record.command_id, record]));
 
 function templateMatches(candidate, value) {
@@ -276,11 +278,11 @@ const routeInventory = routes.map((route, index) => {
   const verificationIds = verificationForRoute(vendor, requiredIds);
   const records = requiredIds.map((id) => recordById.get(id)).filter(Boolean);
   const isFreePractice = blueprint.policy === "unrestricted";
-  const everyImplemented = records.length > 0 && records.every((record) => record.simulator_support === "fully_simulated") && verificationIds.every((id) => recordById.get(id)?.simulator_support === "fully_simulated");
-  const someSimulation = records.some((record) => ["fully_simulated", "partially_simulated"].includes(record.simulator_support));
+  const everyImplemented = records.length > 0 && records.every((record) => record.simulator_support === "full_state_simulation") && verificationIds.every((id) => recordById.get(id)?.simulator_support === "full_state_simulation");
+  const someSimulation = records.some((record) => ["full_state_simulation", "simplified_state_simulation"].includes(record.simulator_support));
   const supportLevel = !isFreePractice && everyImplemented && route.steps?.length && verificationIds.length
-    ? "fully_simulated"
-    : !isFreePractice && someSimulation && verificationIds.length ? "partially_simulated" : "explanation_only";
+    ? "full_state_simulation"
+    : !isFreePractice && someSimulation && verificationIds.length ? "simplified_state_simulation" : "explanation_only";
   records.forEach((record) => record.related_route_ids.push(route.id));
   return {
     route_id: route.id || `route-${index + 1}`, vendor, vendor_label: vendorLabels[vendor], operating_system: vendorLabels[vendor], platform: route.platform || vendorLabels[vendor], topic: route.topic || route.category || "general", category: route.category || "General", difficulty: route.difficulty || "foundation", route_type: isFreePractice ? "free_practice" : String(route.routeType || "configuration").toLowerCase().replace(/\s+/g, "_"), required_commands_policy: blueprint.policy, support_level: supportLevel, mapping_status: isFreePractice ? "unrestricted" : requiredIds.length ? "fully_mapped" : "unmapped", title: `${vendorLabels[vendor]} — ${route.label || route.id}`, description: route.goal || "Local guided practice route.", prerequisites: [], required_command_ids: requiredIds, accepted_aliases: route.steps?.flatMap((step) => step.alternatives || []) || [], starting_state: route.startingState || `Local ${route.device || "switch"} profile`, hidden_fault: route.hint || "", expected_final_state: route.expectedFinalState || "Verify the local simulated result.", final_state_validation_method: supportLevel === "fully_simulated" ? "shared simulated state and implemented verification command" : supportLevel === "partially_simulated" ? "local CLI output and guided verification" : "explanation and manual evidence review", verification_command_ids: verificationIds, rollback_command_ids: rollbackForRoute(vendor, requiredIds), scoring: { knowledge: 40, practice: 40, verification: 20 }, hints: [route.hint].filter(Boolean), related_lesson_ids: [...new Set(records.map((record) => `${record.vendor}-${record.topic}`))], missing_cli_handler_ids: records.filter((record) => !["fully_simulated", "partially_simulated"].includes(record.simulator_support)).map((record) => record.command_id)
@@ -304,6 +306,13 @@ for (const route of routeInventory) {
     required_capabilities: [],
     version_notes: "Command availability varies by vendor, platform, and software release. The selected profile is a training approximation."
   });
+  route.final_state_validation_method = route.support_level === "full_state_simulation"
+    ? "shared simulated state and implemented verification command"
+    : route.support_level === "simplified_state_simulation"
+      ? "local CLI output and guided verification"
+      : "explanation and manual evidence review";
+  route.missing_cli_handler_ids = (route.required_command_ids || [])
+    .filter((id) => !["full_state_simulation", "simplified_state_simulation"].includes(recordById.get(id)?.simulator_support));
 }
 
 for (const record of inventory) {
@@ -316,7 +325,7 @@ for (const record of inventory) {
 const modules = {};
 for (const vendor of Object.keys(vendorLabels)) {
   const entries = inventory.filter((record) => record.vendor === vendor);
-  const grouped = Object.groupBy(entries, (record) => record.topic);
+  const grouped = groupBy(entries, (record) => record.topic);
   modules[vendor] = Object.entries(grouped).map(([topic, commands], index) => ({
     module_id: `${vendor}-${topic}`, vendor, title: `${index + 1}. ${titleCase(topic)}`, topic, level: index < 2 ? 1 : index < 5 ? 2 : 3,
     lessons: [{ lesson_id: `${vendor}-${topic}`, title: `${vendorLabels[vendor]} — ${titleCase(topic)}`, vendor, topic, simulation_support: [...new Set(commands.map((command) => command.simulator_support))], learning_sequence: ["Understand", "Syntax", "Healthy output", "Problem output", "Interpret evidence", "Guided practice", "Independent practice", "Troubleshooting", "Verification", "Knowledge check", "Complete"], commands: commands.map((command) => ({ command_id: command.command_id, command: command.canonical_command, aliases: command.aliases, purpose: command.purpose, safety_level: command.safety_level, verification_commands: command.verification_commands, rollback_commands: command.rollback_commands, simulator_support: command.simulator_support })) }]
@@ -324,8 +333,8 @@ for (const vendor of Object.keys(vendorLabels)) {
 }
 
 const referencedByRoutes = new Set(routeInventory.flatMap((route) => route.required_command_ids));
-const supportCounts = Object.fromEntries(Object.entries(Object.groupBy(inventory, (record) => record.simulator_support)).map(([key, value]) => [key, value.length]));
-const vendorCounts = Object.fromEntries(Object.entries(Object.groupBy(inventory, (record) => record.vendor)).map(([key, value]) => [key, value.length]));
+const supportCounts = Object.fromEntries(Object.entries(groupBy(inventory, (record) => record.simulator_support)).map(([key, value]) => [key, value.length]));
+const vendorCounts = Object.fromEntries(Object.entries(groupBy(inventory, (record) => record.vendor)).map(([key, value]) => [key, value.length]));
 const crossVendorErrors = routeInventory.flatMap((route) => route.required_command_ids
   .filter((commandId) => recordById.get(commandId)?.vendor !== route.vendor)
   .map((commandId) => ({ route_id: route.route_id, vendor: route.vendor, command_id: commandId, command_vendor: recordById.get(commandId)?.vendor || "missing" })));
@@ -333,23 +342,23 @@ const brokenCommandReferences = routeInventory.flatMap((route) => route.required
   .filter((commandId) => !recordById.has(commandId))
   .map((commandId) => ({ route_id: route.route_id, command_id: commandId })));
 const unresolvedRouteReferences = routeInventory.filter((route) => route.route_type !== "free_practice" && !route.required_command_ids.length).map((route) => ({ route_id: route.route_id, title: route.title }));
-const routesPerVendor = Object.fromEntries(Object.entries(Object.groupBy(routeInventory, (route) => route.vendor)).map(([key, value]) => [key, value.length]));
+const routesPerVendor = Object.fromEntries(Object.entries(groupBy(routeInventory, (route) => route.vendor)).map(([key, value]) => [key, value.length]));
 const routesSuccessfullyMapped = routeInventory.filter((route) => route.mapping_status === "fully_mapped").length;
 const routesPartiallyMapped = routeInventory.filter((route) => route.mapping_status === "partially_mapped").length;
 const routesUnmapped = routeInventory.filter((route) => route.mapping_status === "unmapped").length;
 const coverageMetrics = {
   classification_coverage: 100,
   lesson_coverage: Math.round((inventory.filter((record) => record.related_lesson_ids.length).length / Math.max(1, inventory.length)) * 100),
-  practical_exercise_coverage: Math.round((inventory.filter((record) => ["fully_simulated", "partially_simulated"].includes(record.simulator_support)).length / Math.max(1, inventory.length)) * 100),
+  practical_exercise_coverage: Math.round((inventory.filter((record) => ["full_state_simulation", "simplified_state_simulation"].includes(record.simulator_support)).length / Math.max(1, inventory.length)) * 100),
   route_coverage: Math.round((inventory.filter((record) => record.related_route_ids.length).length / Math.max(1, inventory.length)) * 100),
-  fully_simulated_coverage: Math.round((inventory.filter((record) => record.simulator_support === "fully_simulated").length / Math.max(1, inventory.length)) * 100),
+  fully_simulated_coverage: Math.round((inventory.filter((record) => record.simulator_support === "full_state_simulation").length / Math.max(1, inventory.length)) * 100),
   verification_coverage: Math.round((inventory.filter((record) => !record.changes_configuration || record.verification_commands.length).length / Math.max(1, inventory.length)) * 100),
   troubleshooting_coverage: Math.round((routeInventory.filter((route) => /troubleshoot|diagnostic|fault|recover|wrong/i.test(`${route.category} ${route.title}`)).length / Math.max(1, routeInventory.length)) * 100),
   review_coverage: 0
 };
 coverageMetrics.overall_learning_readiness = Math.round((coverageMetrics.lesson_coverage + coverageMetrics.practical_exercise_coverage + coverageMetrics.route_coverage + coverageMetrics.fully_simulated_coverage + coverageMetrics.verification_coverage + coverageMetrics.troubleshooting_coverage + coverageMetrics.review_coverage) / 7);
 const audit = {
-  generated_at: new Date().toISOString(), source_command_files: commandFiles.map((file) => `data/commands/${file}`), total_raw_command_records: rawRecords.length, total_normalized_canonical_commands: inventory.length, total_aliases: inventory.reduce((sum, record) => sum + record.aliases.length, 0), commands_per_vendor: vendorCounts, commands_per_topic: Object.fromEntries(Object.entries(Object.groupBy(inventory, (record) => record.topic)).map(([key, value]) => [key, value.length])), commands_per_support_level: supportCounts, commands_used_by_cli_engine: inventory.filter((record) => record.simulator_support === "fully_simulated" || record.simulator_support === "partially_simulated").length, commands_used_only_by_lookup: inventory.filter((record) => record.simulator_support === "lookup_only").length, commands_referenced_by_routes: referencedByRoutes.size, commands_without_routes: inventory.filter((record) => !record.related_route_ids.length).map((record) => record.command_id), commands_without_lessons: inventory.filter((record) => !record.related_lesson_ids.length).map((record) => record.command_id), routes_containing_commands_not_found_in_inventory: unresolvedRouteReferences, duplicate_command_ids: [...new Set(duplicateIds)], duplicate_canonical_syntax: [], conflicting_vendor_assignments: [], commands_using_placeholders: inventory.filter((record) => /<[^>]+>/.test(record.syntax)).map((record) => record.command_id), commands_with_missing_verification_steps: inventory.filter((record) => record.changes_configuration && !record.verification_commands.length).map((record) => record.command_id), commands_with_missing_rollback_guidance: inventory.filter((record) => record.changes_configuration && !record.rollback_commands.length).map((record) => record.command_id), broken_command_references: []
+  generated_at: new Date().toISOString(), source_command_files: commandFiles.map((file) => `data/commands/${file}`), total_raw_command_records: rawRecords.length, total_normalized_canonical_commands: inventory.length, total_aliases: inventory.reduce((sum, record) => sum + record.aliases.length, 0), commands_per_vendor: vendorCounts, commands_per_topic: Object.fromEntries(Object.entries(groupBy(inventory, (record) => record.topic)).map(([key, value]) => [key, value.length])), commands_per_support_level: supportCounts, commands_used_by_cli_engine: inventory.filter((record) => record.simulator_support === "full_state_simulation" || record.simulator_support === "simplified_state_simulation").length, commands_used_only_by_lookup: inventory.filter((record) => record.simulator_support === "output_simulation").length, commands_referenced_by_routes: referencedByRoutes.size, commands_without_routes: inventory.filter((record) => !record.related_route_ids.length).map((record) => record.command_id), commands_without_lessons: inventory.filter((record) => !record.related_lesson_ids.length).map((record) => record.command_id), routes_containing_commands_not_found_in_inventory: unresolvedRouteReferences, duplicate_command_ids: [...new Set(duplicateIds)], duplicate_canonical_syntax: [], conflicting_vendor_assignments: [], commands_using_placeholders: inventory.filter((record) => /<[^>]+>/.test(record.syntax)).map((record) => record.command_id), commands_with_missing_verification_steps: inventory.filter((record) => record.changes_configuration && !record.verification_commands.length).map((record) => record.command_id), commands_with_missing_rollback_guidance: inventory.filter((record) => record.changes_configuration && !record.rollback_commands.length).map((record) => record.command_id), broken_command_references: []
 };
 
 Object.assign(audit, {

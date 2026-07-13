@@ -1,0 +1,48 @@
+{
+  "module_id": "hp_comware-diagnostics",
+  "vendor": "hp_comware",
+  "title": "9. Diagnostics",
+  "topic": "diagnostics",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "hp_comware-diagnostics",
+      "title": "HP Comware — Diagnostics",
+      "vendor": "hp_comware",
+      "topic": "diagnostics",
+      "simulation_support": [
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "hp_display_diagnostic_information",
+          "command": "display diagnostic-information",
+          "aliases": [
+            "dis diagnostic-information",
+            "dis diag"
+          ],
+          "purpose": "Collects a broad Comware diagnostic snapshot including system, interface, configuration, and log context.",
+          "safety_level": "Medium - output can be large and the device may prompt to save a diagnostic file; review the prompt before continuing.",
+          "verification_commands": [
+            "display logbuffer"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        }
+      ]
+    }
+  ]
+}

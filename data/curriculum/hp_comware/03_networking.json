@@ -1,7 +1,7 @@
 {
   "module_id": "hp_comware-networking",
   "vendor": "hp_comware",
-  "title": "7. Networking",
+  "title": "10. Networking",
   "topic": "networking",
   "level": 3,
   "lessons": [
@@ -11,7 +11,7 @@
       "vendor": "hp_comware",
       "topic": "networking",
       "simulation_support": [
-        "lookup_only"
+        "output_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -40,7 +40,7 @@
             "display ip interface brief"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         }
       ]
     }

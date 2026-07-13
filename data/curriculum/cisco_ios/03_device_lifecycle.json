@@ -1,15 +1,15 @@
 {
-  "module_id": "cisco_ios-stacking",
+  "module_id": "cisco_ios-device_lifecycle",
   "vendor": "cisco_ios",
-  "title": "13. Stacking",
-  "topic": "stacking",
+  "title": "8. Device Lifecycle",
+  "topic": "device_lifecycle",
   "level": 3,
   "lessons": [
     {
-      "lesson_id": "cisco_ios-stacking",
-      "title": "Cisco IOS — Stacking",
+      "lesson_id": "cisco_ios-device_lifecycle",
+      "title": "Cisco IOS — Device Lifecycle",
       "vendor": "cisco_ios",
-      "topic": "stacking",
+      "topic": "device_lifecycle",
       "simulation_support": [
         "explanation_only"
       ],
@@ -28,13 +28,13 @@
       ],
       "commands": [
         {
-          "command_id": "cisco_switch_priority",
-          "command": "switch <member> priority <priority>",
+          "command_id": "cisco_reload",
+          "command": "reload",
           "aliases": [],
-          "purpose": "Sets Cisco switch-stack member election priority.",
-          "safety_level": "High - affects future stack election behavior.",
+          "purpose": "Restarts the Cisco device.",
+          "safety_level": "Critical - reboots the device and interrupts users.",
           "verification_commands": [
-            "show switch"
+            "show version"
           ],
           "rollback_commands": [],
           "simulator_support": "explanation_only"

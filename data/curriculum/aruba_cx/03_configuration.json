@@ -1,0 +1,63 @@
+{
+  "module_id": "aruba_cx-configuration",
+  "vendor": "aruba_cx",
+  "title": "6. Configuration",
+  "topic": "configuration",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "aruba_cx-configuration",
+      "title": "ArubaOS-CX — Configuration",
+      "vendor": "aruba_cx",
+      "topic": "configuration",
+      "simulation_support": [
+        "full_state_simulation",
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "aruba_write_memory",
+          "command": "write memory",
+          "aliases": [
+            "write mem",
+            "copy running-config startup-config"
+          ],
+          "purpose": "Saves the active ArubaOS-CX running configuration.",
+          "safety_level": "Medium - persists current changes; can preserve a mistake across reboot.",
+          "verification_commands": [
+            "show startup-config"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "full_state_simulation"
+        },
+        {
+          "command_id": "aruba_show_running_config",
+          "command": "show running-config",
+          "aliases": [],
+          "purpose": "Shows the active ArubaOS-CX configuration.",
+          "safety_level": "Low - read-only, but output may contain credentials, addresses, and sensitive configuration.",
+          "verification_commands": [
+            "show version"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        }
+      ]
+    }
+  ]
+}

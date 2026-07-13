@@ -11,9 +11,9 @@
       "vendor": "cisco_ios",
       "topic": "device_information",
       "simulation_support": [
-        "lookup_only",
-        "partially_simulated",
-        "explanation_only"
+        "output_simulation",
+        "explanation_only",
+        "simplified_state_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -43,80 +43,7 @@
             "show startup-config"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
-        },
-        {
-          "command_id": "cisco_configure_terminal",
-          "command": "configure terminal",
-          "aliases": [
-            "conf t",
-            "config terminal"
-          ],
-          "purpose": "Enters global configuration mode on a Cisco IOS device.",
-          "safety_level": "High - enters configuration mode; later commands can affect production.",
-          "verification_commands": [
-            "show running-config"
-          ],
-          "rollback_commands": [
-            "no <command>"
-          ],
-          "simulator_support": "partially_simulated"
-        },
-        {
-          "command_id": "cisco_reload",
-          "command": "reload",
-          "aliases": [],
-          "purpose": "Restarts the Cisco device.",
-          "safety_level": "Critical - reboots the device and interrupts users.",
-          "verification_commands": [
-            "show version"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "explanation_only"
-        },
-        {
-          "command_id": "cisco_show_diagnostic_result",
-          "command": "show diagnostic result",
-          "aliases": [
-            "sh diagnostic result",
-            "sh diag result",
-            "show diag result"
-          ],
-          "purpose": "Shows available Cisco diagnostic test results and their pass, fail, or not-run state.",
-          "safety_level": "Safe read-only command",
-          "verification_commands": [
-            "show logging"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "lookup_only"
-        },
-        {
-          "command_id": "cisco_dir_flash",
-          "command": "dir flash:",
-          "aliases": [
-            "dir flash"
-          ],
-          "purpose": "Lists files and free space in the Cisco flash filesystem.",
-          "safety_level": "Safe read-only command",
-          "verification_commands": [
-            "show file systems"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "lookup_only"
-        },
-        {
-          "command_id": "cisco_show_file_systems",
-          "command": "show file systems",
-          "aliases": [
-            "sh file systems"
-          ],
-          "purpose": "Lists Cisco filesystems, prefixes, sizes, and access capabilities.",
-          "safety_level": "Safe read-only command",
-          "verification_commands": [
-            "dir flash:"
-          ],
-          "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "cisco_show_boot",
@@ -130,7 +57,7 @@
             "dir flash:"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "cisco_show_inventory",
@@ -145,7 +72,7 @@
             "show version"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "cisco_show_logging",
@@ -160,7 +87,7 @@
             "show version"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "cisco_show_running_config",
@@ -202,7 +129,7 @@
             "show logging"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "cisco_hostname",
@@ -216,7 +143,7 @@
           "rollback_commands": [
             "no <command>"
           ],
-          "simulator_support": "partially_simulated"
+          "simulator_support": "simplified_state_simulation"
         }
       ]
     }

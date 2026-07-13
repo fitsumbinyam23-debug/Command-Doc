@@ -2085,6 +2085,16 @@ input {
   gap: 7px;
 }
 
+.route-facts .badge {
+  background: #edf5f4;
+  color: #27414a;
+  border: 1px solid #cbdedb;
+}
+
+.library-filter-panel button {
+  align-self: end;
+}
+
 .practice-route-card button {
   margin-top: auto;
 }

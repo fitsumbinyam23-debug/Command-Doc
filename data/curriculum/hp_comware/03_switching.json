@@ -1,7 +1,7 @@
 {
   "module_id": "hp_comware-switching",
   "vendor": "hp_comware",
-  "title": "8. Switching",
+  "title": "11. Switching",
   "topic": "switching",
   "level": 3,
   "lessons": [
@@ -11,7 +11,7 @@
       "vendor": "hp_comware",
       "topic": "switching",
       "simulation_support": [
-        "lookup_only"
+        "output_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -28,6 +28,21 @@
       ],
       "commands": [
         {
+          "command_id": "hp_display_stp_brief",
+          "command": "display stp brief",
+          "aliases": [
+            "dis stp brief",
+            "dis stp br"
+          ],
+          "purpose": "Summarizes spanning-tree roles and forwarding states for Comware ports.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display logbuffer"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "output_simulation"
+        },
+        {
           "command_id": "hp_display_link_aggregation_verbose",
           "command": "display link-aggregation verbose",
           "aliases": [
@@ -40,7 +55,7 @@
             "display interface brief"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_display_stp",
@@ -52,7 +67,7 @@
             "display logbuffer"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "hp_display_link_aggregation_summary",
@@ -64,7 +79,7 @@
             "display interface <interface>"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         }
       ]
     }

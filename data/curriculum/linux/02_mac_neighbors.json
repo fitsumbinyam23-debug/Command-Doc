@@ -11,7 +11,7 @@
       "vendor": "linux",
       "topic": "mac_neighbors",
       "simulation_support": [
-        "lookup_only"
+        "output_simulation"
       ],
       "learning_sequence": [
         "Understand",
@@ -38,7 +38,7 @@
             "ip addr"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         },
         {
           "command_id": "linux_ip_neigh",
@@ -50,7 +50,7 @@
             "ip route"
           ],
           "rollback_commands": [],
-          "simulator_support": "lookup_only"
+          "simulator_support": "output_simulation"
         }
       ]
     }
