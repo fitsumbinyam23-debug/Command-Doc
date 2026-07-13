@@ -1,0 +1,224 @@
+{
+  "module_id": "cisco_ios-device_information",
+  "vendor": "cisco_ios",
+  "title": "1. Device Information",
+  "topic": "device_information",
+  "level": 1,
+  "lessons": [
+    {
+      "lesson_id": "cisco_ios-device_information",
+      "title": "Cisco IOS — Device Information",
+      "vendor": "cisco_ios",
+      "topic": "device_information",
+      "simulation_support": [
+        "lookup_only",
+        "partially_simulated",
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "cisco_show_version",
+          "command": "show version",
+          "aliases": [
+            "sh version",
+            "sh ver"
+          ],
+          "purpose": "Shows software version, uptime, model, serial details, image, and configuration register.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show running-config",
+            "show startup-config"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_configure_terminal",
+          "command": "configure terminal",
+          "aliases": [
+            "conf t",
+            "config terminal"
+          ],
+          "purpose": "Enters global configuration mode on a Cisco IOS device.",
+          "safety_level": "High - enters configuration mode; later commands can affect production.",
+          "verification_commands": [
+            "show running-config"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "cisco_reload",
+          "command": "reload",
+          "aliases": [],
+          "purpose": "Restarts the Cisco device.",
+          "safety_level": "Critical - reboots the device and interrupts users.",
+          "verification_commands": [
+            "show version"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "cisco_show_diagnostic_result",
+          "command": "show diagnostic result",
+          "aliases": [
+            "sh diagnostic result",
+            "sh diag result",
+            "show diag result"
+          ],
+          "purpose": "Shows available Cisco diagnostic test results and their pass, fail, or not-run state.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show logging"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_dir_flash",
+          "command": "dir flash:",
+          "aliases": [
+            "dir flash"
+          ],
+          "purpose": "Lists files and free space in the Cisco flash filesystem.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show file systems"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_file_systems",
+          "command": "show file systems",
+          "aliases": [
+            "sh file systems"
+          ],
+          "purpose": "Lists Cisco filesystems, prefixes, sizes, and access capabilities.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "dir flash:"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_boot",
+          "command": "show boot",
+          "aliases": [
+            "sh boot"
+          ],
+          "purpose": "Shows Cisco boot variables and the image selected for the next boot.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "dir flash:"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_inventory",
+          "command": "show inventory",
+          "aliases": [
+            "sh inventory",
+            "sh inv"
+          ],
+          "purpose": "Shows installed Cisco chassis, modules, serial numbers, and hardware identifiers.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show version"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_logging",
+          "command": "show logging",
+          "aliases": [
+            "sh logging",
+            "sh log"
+          ],
+          "purpose": "Shows Cisco logging configuration and buffered system messages.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show version"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_running_config",
+          "command": "show running-config",
+          "aliases": [
+            "sh running-config",
+            "sh run"
+          ],
+          "purpose": "Shows the active configuration currently running in memory.",
+          "safety_level": "Low - read-only, but output may contain credentials, addresses, and sensitive configuration.",
+          "verification_commands": [
+            "show startup-config"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "cisco_show_startup_config",
+          "command": "show startup-config",
+          "aliases": [
+            "sh startup-config",
+            "sh start"
+          ],
+          "purpose": "Shows the saved configuration that will be loaded at the next boot.",
+          "safety_level": "Low - read-only, but output may contain credentials, addresses, and sensitive configuration.",
+          "verification_commands": [
+            "show running-config"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "cisco_show_processes_cpu_sorted",
+          "command": "show processes cpu sorted",
+          "aliases": [],
+          "purpose": "Shows CPU use by process, sorted by utilization.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show logging"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_hostname",
+          "command": "hostname <name>",
+          "aliases": [],
+          "purpose": "Sets the Cisco device hostname in global configuration mode.",
+          "safety_level": "Medium - changes device identity in the configuration.",
+          "verification_commands": [
+            "show running-config"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        }
+      ]
+    }
+  ]
+}
