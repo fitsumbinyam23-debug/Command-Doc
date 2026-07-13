@@ -1,0 +1,80 @@
+{
+  "module_id": "cisco_ios-mac_neighbors",
+  "vendor": "cisco_ios",
+  "title": "4. Mac Neighbors",
+  "topic": "mac_neighbors",
+  "level": 2,
+  "lessons": [
+    {
+      "lesson_id": "cisco_ios-mac_neighbors",
+      "title": "Cisco IOS — Mac Neighbors",
+      "vendor": "cisco_ios",
+      "topic": "mac_neighbors",
+      "simulation_support": [
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "cisco_show_cdp_neighbors",
+          "command": "show cdp neighbors",
+          "aliases": [
+            "sh cdp neighbors",
+            "sh cdp neigh"
+          ],
+          "purpose": "Shows Cisco Discovery Protocol neighbors visible from local interfaces.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show lldp neighbors",
+            "show interface status"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_lldp_neighbors",
+          "command": "show lldp neighbors",
+          "aliases": [
+            "sh lldp neighbors",
+            "sh lldp neigh"
+          ],
+          "purpose": "Shows LLDP neighbors visible from local interfaces.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface status",
+            "show cdp neighbors"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "cisco_show_ip_arp",
+          "command": "show ip arp",
+          "aliases": [
+            "sh ip arp"
+          ],
+          "purpose": "Shows IP-to-MAC address mappings learned by ARP.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show mac address-table vlan <vlan>",
+            "show interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
