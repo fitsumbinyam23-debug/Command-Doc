@@ -1,0 +1,75 @@
+{
+  "module_id": "aruba_cx-vlans",
+  "vendor": "aruba_cx",
+  "title": "3. Vlans",
+  "topic": "vlans",
+  "level": 2,
+  "lessons": [
+    {
+      "lesson_id": "aruba_cx-vlans",
+      "title": "ArubaOS-CX — Vlans",
+      "vendor": "aruba_cx",
+      "topic": "vlans",
+      "simulation_support": [
+        "lookup_only",
+        "partially_simulated"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "aruba_show_vlan",
+          "command": "show vlan",
+          "aliases": [],
+          "purpose": "Shows VLAN IDs, names, status, and interface membership.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface brief",
+            "show mac-address-table vlan <vlan>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_vlan_access",
+          "command": "vlan access <vlan>",
+          "aliases": [],
+          "purpose": "Sets the access VLAN for the selected ArubaOS-CX interface.",
+          "safety_level": "High - changes endpoint network placement and can break access.",
+          "verification_commands": [
+            "show vlan"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "aruba_vlan",
+          "command": "vlan <vlan-id>",
+          "aliases": [],
+          "purpose": "Creates or enters an ArubaOS-CX VLAN context.",
+          "safety_level": "Medium - affects switching when assigned.",
+          "verification_commands": [
+            "show vlan"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        }
+      ]
+    }
+  ]
+}
