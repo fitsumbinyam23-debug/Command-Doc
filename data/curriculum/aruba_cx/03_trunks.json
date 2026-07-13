@@ -1,0 +1,59 @@
+{
+  "module_id": "aruba_cx-trunks",
+  "vendor": "aruba_cx",
+  "title": "7. Trunks",
+  "topic": "trunks",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "aruba_cx-trunks",
+      "title": "ArubaOS-CX — Trunks",
+      "vendor": "aruba_cx",
+      "topic": "trunks",
+      "simulation_support": [
+        "partially_simulated"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "aruba_vlan_trunk_allowed",
+          "command": "vlan trunk allowed <vlan-list>",
+          "aliases": [],
+          "purpose": "Defines allowed VLANs for an ArubaOS-CX trunk interface.",
+          "safety_level": "High - can interrupt VLAN services.",
+          "verification_commands": [
+            "show running-config interface <interface>"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "aruba_vlan_trunk_native",
+          "command": "vlan trunk native <vlan-id>",
+          "aliases": [],
+          "purpose": "Sets the native VLAN for an ArubaOS-CX trunk interface.",
+          "safety_level": "High - mismatch can cause VLAN leakage or loss of connectivity.",
+          "verification_commands": [],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        }
+      ]
+    }
+  ]
+}
