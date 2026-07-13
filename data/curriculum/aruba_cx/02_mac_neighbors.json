@@ -1,0 +1,58 @@
+{
+  "module_id": "aruba_cx-mac_neighbors",
+  "vendor": "aruba_cx",
+  "title": "4. Mac Neighbors",
+  "topic": "mac_neighbors",
+  "level": 2,
+  "lessons": [
+    {
+      "lesson_id": "aruba_cx-mac_neighbors",
+      "title": "ArubaOS-CX — Mac Neighbors",
+      "vendor": "aruba_cx",
+      "topic": "mac_neighbors",
+      "simulation_support": [
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "aruba_show_mac_address_table",
+          "command": "show mac-address-table",
+          "aliases": [],
+          "purpose": "Shows MAC addresses learned by the switch.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface <interface>",
+            "show vlan <vlan>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_show_lldp_neighbor_info",
+          "command": "show lldp neighbor-info",
+          "aliases": [],
+          "purpose": "Shows LLDP neighbor details and local-to-remote interface mapping.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
