@@ -1,0 +1,45 @@
+{
+  "module_id": "cisco_ios-cli_foundation",
+  "vendor": "cisco_ios",
+  "title": "7. Cli Foundation",
+  "topic": "cli_foundation",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "cisco_ios-cli_foundation",
+      "title": "Cisco IOS — Cli Foundation",
+      "vendor": "cisco_ios",
+      "topic": "cli_foundation",
+      "simulation_support": [
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "cisco_show_ip_dhcp_binding",
+          "command": "show ip dhcp binding",
+          "aliases": [],
+          "purpose": "Lists DHCP leases maintained by a Cisco IOS DHCP server.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show ip dhcp pool"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
