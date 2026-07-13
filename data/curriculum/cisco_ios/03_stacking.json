@@ -1,0 +1,45 @@
+{
+  "module_id": "cisco_ios-stacking",
+  "vendor": "cisco_ios",
+  "title": "9. Stacking",
+  "topic": "stacking",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "cisco_ios-stacking",
+      "title": "Cisco IOS — Stacking",
+      "vendor": "cisco_ios",
+      "topic": "stacking",
+      "simulation_support": [
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "cisco_switch_priority",
+          "command": "switch <member> priority <priority>",
+          "aliases": [],
+          "purpose": "Sets Cisco switch-stack member election priority.",
+          "safety_level": "High - affects future stack election behavior.",
+          "verification_commands": [
+            "show switch"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        }
+      ]
+    }
+  ]
+}
