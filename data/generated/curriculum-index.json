@@ -3748,7 +3748,7 @@
       "Learning readiness is 38%, not premium-ready. Coverage includes lessons, practice, routes, simulation, verification, troubleshooting, and review."
     ],
     "errors": [],
-    "coverage_percentage": 100,
+    "classification_coverage_percentage": 100,
     "coverage_metrics": {
       "classification_coverage": 100,
       "lesson_coverage": 100,

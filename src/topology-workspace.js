@@ -438,7 +438,7 @@
     panel.setAttribute("aria-label", `${node.name} simulated switch`);
     panel.addEventListener("click", () => { if (topology.tool === "select") selectNode(network, topology, node.id, onChange); });
     const top = create("div", "topology-switch-title topology-drag-handle topology-switch-drag-area");
-    top.append(create("span", "topology-drag-grip", "|| Move"), create("strong", "", node.name), create("span", "", "CD-SW24"));
+    top.append(create("span", "topology-drag-grip", "|| Move"), create("strong", "", node.name), create("span", "", node.modelShort || "CD-SW24"));
     const indicators = create("div", "topology-switch-indicators");
     [["PWR", true], ["SYS", true], ["STACK", false]].forEach(([label, active]) => {
       const indicator = create("span", `topology-indicator ${active ? "is-on" : ""}`);

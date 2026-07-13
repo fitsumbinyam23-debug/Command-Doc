@@ -375,6 +375,9 @@ const state = {
     activeSectionId: "",
     playgroundTaskId: "free-practice",
     visualNetwork: null,
+    switchProfiles: [],
+    activeSwitchProfileId: window.localStorage?.getItem("command-doctor.active-switch-profile") || "cisco-catalyst-3750",
+    switchRuntime: null,
     activeLessonId: "",
     practiceInput: "",
     practicePassed: false,
@@ -587,6 +590,9 @@ async function loadKnowledge() {
     index: generated.index || null,
     health: generated.health || null
   };
+  const profileResult = await Promise.allSettled([loadJson("data/platforms/switch-profiles.json")]);
+  state.lab.switchProfiles = profileResult[0]?.status === "fulfilled" ? profileResult[0].value.profiles || [] : [];
+  initializeSwitchRuntime();
 
   const version = state.sources?.knowledge_base_version || loadedFiles[0]?.version || "local";
   els.kbVersion.textContent = commands.length ? `KB ${version}` : "KB unavailable";
@@ -610,6 +616,46 @@ async function loadJson(path) {
     throw new Error(`Could not load ${path}`);
   }
   return response.json();
+}
+
+function activeSwitchProfile() {
+  return state.lab.switchProfiles.find((profile) => profile.profile_id === state.lab.activeSwitchProfileId) || state.lab.switchProfiles[0] || null;
+}
+
+function initializeSwitchRuntime() {
+  const runtime = window.CommandDoctorSwitchRuntime;
+  const profile = activeSwitchProfile();
+  if (!runtime || !profile || !state.curriculum.inventory.length) return;
+  const saved = (() => {
+    try {
+      const value = window.localStorage.getItem(runtime.STORAGE_KEY);
+      return value ? JSON.parse(value) : null;
+    } catch { return null; }
+  })();
+  const restore = saved?.profile_id === profile.profile_id ? saved : null;
+  state.lab.switchRuntime = {
+    registry: new runtime.CommandRegistry(state.curriculum.inventory, profile),
+    state: new runtime.SharedSwitchState(profile, restore)
+  };
+}
+
+function selectSwitchProfile(profileId) {
+  state.lab.activeSwitchProfileId = profileId;
+  window.localStorage.setItem("command-doctor.active-switch-profile", profileId);
+  initializeSwitchRuntime();
+  const profile = activeSwitchProfile();
+  if (profile) {
+    state.lab.vendorTrack = profile.vendor_label;
+    startLabMission({ device: profile.vendor === "hp_comware" ? "irf" : profile.vendor === "aruba_cx" ? "aruba" : "access", id: "" });
+  }
+}
+
+function activeCommandRegistry() {
+  return state.lab.switchRuntime?.registry || null;
+}
+
+function persistSwitchRuntime() {
+  state.lab.switchRuntime?.state?.persist();
 }
 
 function setBusy(isBusy) {
@@ -2615,6 +2661,14 @@ function renderLab() {
     renderVisualLab();
     return;
   }
+  if (state.lab.screen === "profiles") {
+    renderSwitchProfileSelection();
+    return;
+  }
+  if (state.lab.screen === "workbench") {
+    renderSwitchWorkbench();
+    return;
+  }
   if (state.lab.screen === "stage") {
     renderLabStagePage();
     return;
@@ -2642,6 +2696,7 @@ function renderLabDashboard() {
   els.labRoot.append(intro);
 
   const workspaces = [
+    { title: "Switch Workbench", description: "Choose a simulated profile, work from a shared switch state, inspect ports, preview changes, and verify before saving.", command: "Profile, Inspector, pending changes", action: () => { state.lab.screen = "profiles"; renderLab(); } },
     { title: "Guided CLI", description: "Follow a route with a large continuous switch terminal and concise coaching.", command: "Start with a guided scenario", action: () => { state.lab.screen = "guided-cli"; renderLab(); } },
     { title: "Focused Terminal", description: "Open a near full-screen terminal for uninterrupted manual command practice.", command: "Continuous terminal session", action: () => { state.lab.screen = "cli"; renderLab(); } },
     { title: "Visual Playground", description: "Build a small local topology, connect endpoints, inspect ports, and practise diagnostics.", command: "Drag devices and create cables", action: () => { state.lab.screen = "visual"; renderLab(); } }
@@ -2666,6 +2721,92 @@ function renderGuidedCliLab() {
 
 function renderVisualLab() {
   els.labRoot.append(labButton("Back to Switch Lab", "secondary lab-back-button", () => { state.lab.screen = "dashboard"; renderLab(); }));
+  renderVisualNetworkPlayground();
+}
+
+function renderSwitchProfileSelection() {
+  const selected = activeSwitchProfile();
+  const panel = labCreate("section", "lab-workspace-intro switch-profile-selection");
+  panel.append(labButton("Back to Switch Lab", "secondary lab-back-button", () => { state.lab.screen = "dashboard"; renderLab(); }));
+  panel.append(labCreate("div", "lab-card-kicker", "Simulated training profile"), labCreate("h3", "", "Choose a switch profile"), labCreate("p", "", "Profiles set the vendor prompt, interface format, local command catalog, software version, and capabilities. They are training approximations, not hardware emulators."));
+  const select = document.createElement("select");
+  select.setAttribute("aria-label", "Switch profile");
+  state.lab.switchProfiles.forEach((profile) => { const option = document.createElement("option"); option.value = profile.profile_id; option.textContent = `${profile.vendor_label} | ${profile.model} | ${profile.default_version}`; option.selected = profile.profile_id === selected?.profile_id; select.append(option); });
+  const renderSummary = () => {
+    const profile = state.lab.switchProfiles.find((item) => item.profile_id === select.value) || selected;
+    const registry = window.CommandDoctorSwitchRuntime ? new window.CommandDoctorSwitchRuntime.CommandRegistry(state.curriculum.inventory, profile) : null;
+    const counts = registry?.summary() || {};
+    const facts = labCreate("div", "learn-summary");
+    [["Vendor", profile.vendor_label], ["Model", profile.model], ["OS", profile.operating_system], ["Version", profile.default_version], ["Interfaces", `${profile.access_port_count} + ${profile.uplink_port_count} uplinks`], ["Stack", profile.stack_technology], ["Catalog", counts.canonical || 0], ["Aliases", counts.aliases || 0], ["Full", counts.fully_simulated || 0], ["Simplified", counts.simplified_simulated || 0], ["Output only", counts.output_only || 0], ["Explanation", counts.explanation_only || 0]].forEach(([label, value]) => facts.append(labCreate("span", "badge", `${label}: ${value}`)));
+    return facts;
+  };
+  const summary = renderSummary();
+  select.addEventListener("change", () => {
+    state.lab.activeSwitchProfileId = select.value;
+    renderLab();
+  });
+  panel.append(labCreate("label", "lab-setup-field", "Profile"), select, summary);
+  panel.append(labButton("Open Switch Workbench", "primary", () => { selectSwitchProfile(select.value); state.lab.screen = "workbench"; renderLab(); }));
+  els.labRoot.append(panel);
+}
+
+function workbenchPort(runtimeState, network) {
+  const selected = network.selectedPort;
+  return runtimeState.interface(selected) || runtimeState.interface(Object.keys(runtimeState.running.interfaces)[0]);
+}
+
+function workbenchPreview(profile, port, values) {
+  const name = port.name;
+  if (profile.vendor === "hp_comware") return `system-view\ninterface ${name}\ndescription ${values.description}\nport access vlan ${values.vlan}\nreturn`;
+  if (profile.vendor === "aruba_cx") return `configure terminal\ninterface ${name}\ndescription ${values.description}\nvlan access ${values.vlan}\nend`;
+  return `configure terminal\ninterface ${name}\ndescription ${values.description}\nswitchport access vlan ${values.vlan}\nend`;
+}
+
+function renderSwitchWorkbench() {
+  const profile = activeSwitchProfile();
+  const runtime = state.lab.switchRuntime;
+  if (!profile || !runtime) { state.lab.screen = "profiles"; renderLab(); return; }
+  const network = visualNetwork();
+  const port = workbenchPort(runtime.state, network);
+  const heading = labCreate("section", "lab-workspace-intro switch-workbench-heading");
+  heading.append(labButton("Back to Switch Lab", "secondary lab-back-button", () => { state.lab.screen = "dashboard"; renderLab(); }));
+  heading.append(labCreate("div", "lab-card-kicker", "Shared local switch state"), labCreate("h3", "", "Switch Workbench"), labCreate("p", "", `${profile.vendor_label} ${profile.model} | ${profile.operating_system} ${profile.default_version} | ${profile.simulator_support_summary}`));
+  heading.append(labButton("Change profile", "secondary", () => { state.lab.screen = "profiles"; renderLab(); }));
+  els.labRoot.append(heading);
+
+  const inspector = labCreate("section", "switch-inspector");
+  inspector.append(labCreate("div", "lab-card-kicker", "Switch Inspector"), labCreate("h4", "", port ? `Interface ${port.name}` : "No interface selected"));
+  if (port) {
+    const fields = {};
+    [["Description", "description", port.description], ["Access VLAN", "vlan", String(port.vlan)]].forEach(([label, key, value]) => {
+      const field = labCreate("label", "lab-setup-field"); field.append(labCreate("span", "", label)); const input = document.createElement("input"); input.value = value; input.setAttribute("aria-label", label); fields[key] = input; field.append(input); inspector.append(field);
+    });
+    const preview = labCreate("pre", "lab-output", workbenchPreview(profile, port, { description: fields.description.value, vlan: fields.vlan.value }));
+    const updatePreview = () => { preview.textContent = workbenchPreview(profile, port, { description: fields.description.value, vlan: fields.vlan.value }); };
+    Object.values(fields).forEach((input) => input.addEventListener("input", updatePreview));
+    inspector.append(labCreate("strong", "", "Command Preview"), preview);
+    inspector.append(labButton("Apply pending change", "primary", () => {
+      const before = { description: port.description, vlan: String(port.vlan) };
+      runtime.state.updateInterface(port.name, { description: fields.description.value.trim(), vlan: Number(fields.vlan.value) || fields.vlan.value }, "inspector");
+      const engine = getLabEngine();
+      if (engine) {
+        engine.selectedInterface = port.name; const output = preview.textContent;
+        engine.transcript.push(`${consolePrompt()} ! Inspector applied local change\n${output}`);
+        engine.state.interfaces[port.name] ||= { description: "", vlan: "1", shutdown: false, connected: true, mode: "access" };
+        engine.state.interfaces[port.name].description = fields.description.value.trim();
+        engine.state.interfaces[port.name].vlan = fields.vlan.value;
+      }
+      const visual = visualPort(network, network.selectedPort); if (visual) { visual.description = fields.description.value.trim(); visual.vlan = fields.vlan.value; }
+      runtime.state.record({ command_id: "inspector", entered_text: preview.textContent, success: true, state_before: before, state_after: { description: fields.description.value, vlan: fields.vlan.value }, changed_fields: ["description", "vlan"], safety_result: "pending_verification" });
+      persistSwitchRuntime(); saveVisualNetwork(network); renderLab(); showToast("Local change is pending verification. Running configuration changed; startup configuration did not.");
+    }));
+  }
+  const changes = runtime.state.changes();
+  const pending = labCreate("section", "lab-detail-field");
+  pending.append(labCreate("strong", "", `Pending Changes (${changes.length})`), labCreate("pre", "lab-output", changes.length ? changes.map((change) => `${change.field}: ${change.before ?? "-"} -> ${change.after}`).join("\n") : "No unsaved local configuration changes."));
+  pending.append(labButton("Save verified configuration", "secondary", () => { runtime.state.save("save"); persistSwitchRuntime(); renderLab(); showToast("Startup configuration was updated from the verified local running state."); }), labButton("Roll back pending changes", "secondary", () => { runtime.state.rollback(); persistSwitchRuntime(); renderLab(); showToast("Local running configuration was restored to its baseline."); }));
+  inspector.append(pending);
+  els.labRoot.append(inspector);
   renderVisualNetworkPlayground();
 }
 
@@ -2841,18 +2982,45 @@ function buildTrainingRoutes() {
 
 const PLAYGROUND_TASKS = buildTrainingRoutes();
 
+// Runtime routes come from the generated registry. The legacy builder remains only as
+// generator input until every historic learning objective has been migrated.
+function runtimeTrainingRoutes() {
+  const generated = state.curriculum?.routes || [];
+  if (!generated.length) return PLAYGROUND_TASKS;
+  const inventory = new Map((state.curriculum.inventory || []).map((command) => [command.command_id, command]));
+  return generated.map((route) => ({
+    id: route.route_id,
+    label: route.title,
+    category: route.category || route.topic,
+    vendor: route.vendor_label || route.vendor,
+    device: route.vendor === "hp_comware" ? "irf" : route.vendor === "aruba_cx" ? "aruba" : route.vendor === "windows_cmd" || route.vendor === "linux" ? "access" : "access",
+    purpose: route.description,
+    goal: route.expected_final_state,
+    hint: (route.hints || [])[0] || "Collect evidence before making a change.",
+    supportLevel: route.support_level,
+    routeType: route.route_type,
+    requiredCommandsPolicy: route.required_commands_policy,
+    requiredCommandIds: route.required_command_ids || [],
+    verificationCommandIds: route.verification_command_ids || [],
+    rollbackCommandIds: route.rollback_command_ids || [],
+    steps: (route.required_command_ids || []).map((id) => ({ command: inventory.get(id)?.canonical_command || id, alternatives: inventory.get(id)?.aliases || [] }))
+  }));
+}
+
 function currentTrainingRoute() {
-  return PLAYGROUND_TASKS.find((item) => item.id === state.lab.playgroundTaskId) || PLAYGROUND_TASKS[0];
+  const routes = runtimeTrainingRoutes();
+  return routes.find((item) => item.id === state.lab.playgroundTaskId) || routes[0];
 }
 
 function renderLabPlayground() {
   if (!labPlaygroundUnlocked()) { state.lab.screen = "dashboard"; renderLab(); return; }
   renderLabBreadcrumb([{ label: "Lab Mode", screen: "dashboard" }, { label: "Playground" }]);
-  const task = PLAYGROUND_TASKS.find((item) => item.id === state.lab.playgroundTaskId) || PLAYGROUND_TASKS[0];
+  const routes = runtimeTrainingRoutes();
+  const task = routes.find((item) => item.id === state.lab.playgroundTaskId) || routes[0];
   const header = labCreate("section", "lab-page-header");
   header.append(labCreate("div", "lab-card-kicker", "Simulated switch playground"));
   header.append(labCreate("h3", "", "Practice on a local imaginary switch"));
-  header.append(labCreate("p", "", `Choose from ${PLAYGROUND_TASKS.length} local training routes, type every command yourself, then verify the result. Nothing connects to a network or changes a real device.`));
+  header.append(labCreate("p", "", `Choose from ${routes.length} generated local training routes, type every command yourself, then verify the result. Nothing connects to a network or changes a real device.`));
   els.labRoot.append(header);
 
   const taskBar = labCreate("section", "lab-playground-taskbar");
@@ -2860,10 +3028,10 @@ function renderLabPlayground() {
   selectorField.append(labCreate("span", "", "Scenario"));
   const selector = document.createElement("select");
   selector.setAttribute("aria-label", "Playground scenario");
-  [...new Set(PLAYGROUND_TASKS.map((item) => item.category))].forEach((category) => {
+  [...new Set(routes.map((item) => item.category))].forEach((category) => {
     const group = document.createElement("optgroup");
     group.label = category;
-    PLAYGROUND_TASKS.filter((item) => item.category === category).forEach((item) => {
+    routes.filter((item) => item.category === category).forEach((item) => {
       const option = document.createElement("option");
       option.value = item.id;
       option.textContent = item.label;
@@ -2873,7 +3041,7 @@ function renderLabPlayground() {
   });
   selector.value = task.id;
   selector.addEventListener("change", () => {
-    const next = PLAYGROUND_TASKS.find((item) => item.id === selector.value) || PLAYGROUND_TASKS[0];
+    const next = routes.find((item) => item.id === selector.value) || routes[0];
     state.lab.playgroundTaskId = next.id;
     startLabMission(SIMULATOR_MISSIONS.find((mission) => mission.device === next.device) || { device: next.device });
     renderLab();
@@ -3024,12 +3192,20 @@ function recordVisualCommands(commands, message) {
 
 function renderVisualNetworkPlayground() {
   const network = visualNetwork();
+  window.CommandDoctorTopology?.ensureTopology?.(network);
+  const profile = activeSwitchProfile();
+  const switchNode = network.topology?.nodes?.find((node) => node.id === "switch-1");
+  if (profile && switchNode) {
+    switchNode.vendor = profile.vendor_label;
+    switchNode.model = `${profile.model} simulated training switch`;
+    switchNode.modelShort = profile.model;
+  }
   visualMacRefresh(network);
   const panel = labCreate("section", "visual-playground");
   const heading = labCreate("div", "visual-playground-heading");
   heading.append(labCreate("div", "lab-card-kicker", "Offline simulated training"));
   heading.append(labCreate("h3", "", state.lab.diagnosticsMode ? "Advanced Diagnostics Mode" : "Visual Network Playground"));
-  heading.append(labCreate("p", "", "Build a small topology, configure the local simulated switch through the CLI or visual controls, and test connectivity. It never connects to real equipment."));
+  heading.append(labCreate("p", "", `Build a small topology, configure the local simulated ${profile?.vendor_label || "switch"} profile through the CLI or visual controls, and test connectivity. It never connects to real equipment.`));
   panel.append(heading);
   const topologyHost = labCreate("div", "visual-topology-host");
   const topologyOptions = {
@@ -3478,9 +3654,11 @@ function queueTerminalFocus(input, terminal) {
 
 function appendTerminalHelp(engine, value) {
   const command = value.trim();
-  const suggestions = ["show interfaces status", "show vlan brief", "show running-config", "configure terminal", "display irf", "rollback"]
-    .filter((item) => !command || item.startsWith(command.toLowerCase()));
-  engine.transcript.push(`${consolePrompt()} ${command}?\n${suggestions.length ? suggestions.join("\n") : "No local completion is available."}`);
+  const registry = activeCommandRegistry();
+  const suggestions = registry
+    ? registry.help(command).map((item) => `${item.syntax}  ${item.purpose}`)
+    : ["show interfaces status", "show vlan brief", "show running-config", "configure terminal", "display irf", "rollback"].filter((item) => !command || item.startsWith(command.toLowerCase()));
+  engine.transcript.push(`${consolePrompt()} ${command}?\n${suggestions.length ? suggestions.join("\n") : "No local completion is available for this profile."}`);
   if (engine.transcript.length > 150) engine.transcript.splice(0, engine.transcript.length - 150);
 }
 
@@ -3494,7 +3672,13 @@ function bindTerminalKeyboard(input, engine, terminal) {
     if (event.ctrlKey && event.key.toLowerCase() === "l") { event.preventDefault(); engine.transcript = []; state.lab.console.focusRequested = true; renderLab(); return; }
     if (event.ctrlKey && event.key.toLowerCase() === "c") { event.preventDefault(); input.value = ""; return; }
     if (event.ctrlKey && event.key.toLowerCase() === "z") { event.preventDefault(); input.value = engine.seed.vendor === "HP Comware" ? "return" : "end"; runLabConsoleCommand(input); return; }
-    if (event.key === "Tab") { event.preventDefault(); const value = input.value.trim().toLowerCase(); const match = ["show interfaces status", "show vlan brief", "show running-config", "configure terminal", "display irf", "display irf topology"].find((item) => item.startsWith(value)); if (match) input.value = `${match} `; return; }
+    if (event.key === "Tab") {
+      event.preventDefault();
+      const registry = activeCommandRegistry();
+      const match = registry?.complete(input.value) || ["show interfaces status", "show vlan brief", "show running-config", "configure terminal", "display irf", "display irf topology"].find((item) => item.startsWith(input.value.trim().toLowerCase()));
+      if (match) input.value = `${match} `;
+      return;
+    }
     if (event.key === "?" && !event.ctrlKey && !event.metaKey) { event.preventDefault(); appendTerminalHelp(engine, input.value); state.lab.console.focusRequested = true; renderLab(); return; }
   });
   terminal.addEventListener("scroll", () => { state.lab.console.autoScroll = terminal.scrollHeight - terminal.scrollTop - terminal.clientHeight < 32; });
@@ -3504,7 +3688,7 @@ function renderManualRouteSelector() {
   const route = currentTrainingRoute();
   const panel = labCreate("section", "lab-manual-route-panel");
   panel.append(labCreate("strong", "", "Manual CLI training path"));
-  panel.append(labCreate("span", "", `${PLAYGROUND_TASKS.length} local routes are available. The current route is ${route.label}. Browse or filter routes in the Practice Library, then type every command yourself.`));
+  panel.append(labCreate("span", "", `${runtimeTrainingRoutes().length} generated local routes are available. The current route is ${route.label}. Browse or filter routes in the Practice Library, then type every command yourself.`));
   panel.append(labButton("Open Practice Library", "secondary", () => { state.lab.libraryTab = "practice"; switchView("library"); }), labButton("Start current route", "primary", startFreshTrainingSwitch));
   return panel;
 }
@@ -3786,22 +3970,47 @@ function runLabConsoleCommand(input) {
   }
   const engine = getLabEngine();
   const prompt = consolePrompt();
+  const registry = activeCommandRegistry();
+  const catalogResolution = registry?.resolve(command);
+  if (catalogResolution?.status === "wrong_vendor") {
+    const expected = catalogResolution.command.vendor_label || catalogResolution.command.vendor;
+    const actual = activeSwitchProfile()?.vendor_label || "the active training profile";
+    const output = `${command}\n\nThis is a ${expected} command, but the active profile is ${actual}. Change the switch profile or use the matching ${actual} syntax.`;
+    engine?.transcript.push(`${prompt} ${command}\n${output}`);
+    input.value = "";
+    state.lab.console.focusRequested = true;
+    renderLab();
+    return;
+  }
+  if (catalogResolution?.status === "ambiguous" || catalogResolution?.status === "incomplete") {
+    const matches = catalogResolution.matches || [catalogResolution.command];
+    const output = `Possible commands for this profile:\n${matches.filter(Boolean).map((item) => item.canonical_command).join("\n")}`;
+    engine?.transcript.push(`${prompt} ${command}\n${output}`);
+    input.value = "";
+    state.lab.console.focusRequested = true;
+    renderLab();
+    return;
+  }
   let result = engine ? engine.execute(command) : { output: simulateLabCommand(command), diff: "Simulator engine unavailable." };
   const visualResult = syncVisualCliCommand(command, engine);
   if (visualResult) result = { ...result, ok: visualResult.ok, kind: visualResult.kind || result.kind, output: visualResult.output, diff: "" };
   if (engine && !result.ok && result.kind === "unknown") {
-    const known = findKnownLabCommand(command);
+    const known = catalogResolution?.status === "matched" ? { command: catalogResolution.command.canonical_command, meaning: catalogResolution.command.purpose, support: catalogResolution.command.simulator_support } : findKnownLabCommand(command);
     if (known) {
       result = {
         ...result,
         ok: true,
         kind: "catalog",
-        output: `Recognized offline command: ${known.command}\n${known.meaning}\n\nThis command is available for study in Command Lookup. A device-specific simulated response has not been authored for this practice device yet.`
+        output: `Recognized offline command: ${known.command}\n${known.meaning}\n\nSimulation support: ${String(known.support || "explanation only").replace(/_/g, " ")}. This command is available for study in Command Lookup; a device-specific state handler has not been authored for this practice device yet.`
       };
     }
   }
   if (engine) {
     engine.transcript.push(`${prompt} ${command}\n${result.output}${result.diff ? `\n\nConfiguration diff\n${result.diff}` : ""}`);
+    if (state.lab.switchRuntime?.state) {
+      state.lab.switchRuntime.state.record({ command_id: catalogResolution?.command?.command_id || "unclassified", entered_text: command, success: Boolean(result.ok), state_before: {}, state_after: {}, changed_fields: result.kind === "config" ? ["simulated configuration"] : [], safety_result: result.ok ? "accepted" : "rejected" });
+      persistSwitchRuntime();
+    }
     if (engine.transcript.length > 150) engine.transcript.splice(0, engine.transcript.length - 150);
     const mission = currentLabMission();
     if (labMissionComplete(mission, engine) && !state.lab.progress.simulatorMissions[mission.id]) {
@@ -4200,7 +4409,7 @@ function renderHome() {
   const learned = Object.keys(progress.learnedCommands).length;
   const review = Object.keys(progress.reviewRoutes).length;
   const lastLesson = state.lab.lessons.find((lesson) => lesson.id === progress.lastLessonId || lesson.id === state.lab.progress.lastLessonId);
-  const lastRoute = PLAYGROUND_TASKS.find((route) => route.id === progress.lastLabRouteId);
+  const lastRoute = runtimeTrainingRoutes().find((route) => route.id === progress.lastLabRouteId);
   const hero = labCreate("section", "home-hero");
   hero.append(labCreate("p", "eyebrow", "Offline technician training"));
   hero.append(labCreate("h2", "", "Command Doctor"));
@@ -4551,7 +4760,7 @@ function renderLibraryLaunch(parent, title, copy, label, action) {
 }
 
 function startPracticeRoute(routeId) {
-  const route = PLAYGROUND_TASKS.find((item) => item.id === routeId);
+  const route = runtimeTrainingRoutes().find((item) => item.id === routeId);
   if (!route) return;
   state.lab.playgroundTaskId = route.id;
   state.lab.screen = "guided-cli";
@@ -4563,12 +4772,10 @@ function startPracticeRoute(routeId) {
 function renderPracticeLibrary(parent) {
   const filters = state.lab.libraryFilters;
   const track = activeTrack();
-  const normalizedRoutes = state.curriculum?.routes?.length
-    ? PLAYGROUND_TASKS.map((route) => {
-      const generated = state.curriculum.routes.find((item) => item.route_id === route.id);
-      return generated ? { ...route, ...generated, vendor: generated.vendor_label, operatingSystem: generated.operating_system, modelFamily: generated.platform, routeType: generated.route_type, support: generated.support_level.replace(/_/g, " "), estimatedMinutes: route.estimatedMinutes || 10 } : route;
-    })
-    : PLAYGROUND_TASKS;
+  const normalizedRoutes = runtimeTrainingRoutes().map((route) => {
+    const generated = state.curriculum?.routes?.find((item) => item.route_id === route.id);
+    return generated ? { ...route, ...generated, vendor: generated.vendor_label, operatingSystem: generated.operating_system, modelFamily: generated.platform, routeType: generated.route_type, support: generated.support_level.replace(/_/g, " "), estimatedMinutes: route.estimatedMinutes || 10 } : route;
+  });
   const filterPanel = labCreate("section", "library-filter-panel");
   filterPanel.append(labCreate("strong", "lab-card-kicker", `${normalizedRoutes.length} local practice routes`));
   const search = document.createElement("input");

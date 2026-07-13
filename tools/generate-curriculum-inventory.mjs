@@ -20,6 +20,20 @@ const vendorLabels = {
   windows_cmd: "Windows CMD", linux: "Linux"
 };
 
+const profilesByVendor = {
+  cisco_ios: ["cisco-catalyst-3750", "cisco-catalyst-9300", "cisco-catalyst-9600"],
+  hp_comware: ["hp-5500", "hpe-5130", "hpe-5510"],
+  aruba_cx: ["aruba-cx-6100", "aruba-cx-6200", "aruba-cx-6300"],
+  windows_cmd: [],
+  linux: []
+};
+
+function routeSupportLevel(legacySupport) {
+  if (legacySupport === "fully_simulated") return "full_state_simulation";
+  if (legacySupport === "partially_simulated") return "simplified_state_simulation";
+  return "explanation_only";
+}
+
 const normalise = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 const titleCase = (value) => String(value || "General").replace(/[-_]/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 const json = (value) => JSON.stringify(value, null, 2) + "\n";
@@ -273,6 +287,25 @@ const routeInventory = routes.map((route, index) => {
   };
 });
 
+// Enrich the legacy route source without dropping it: model/version and capability data
+// are deliberately explicit so the workbench can label approximation boundaries.
+for (const route of routeInventory) {
+  const legacySupport = route.support_level;
+  Object.assign(route, {
+    operating_system_version: "Version-sensitive local training profile",
+    platform_family: route.platform,
+    supported_model_profiles: profilesByVendor[route.vendor] || [],
+    support_level: routeSupportLevel(legacySupport),
+    legacy_support_level: legacySupport,
+    optional_command_ids: [],
+    allowed_commands: [...(route.required_command_ids || [])],
+    blocked_commands: [],
+    expected_investigation: route.description || "Collect local evidence before making a change.",
+    required_capabilities: [],
+    version_notes: "Command availability varies by vendor, platform, and software release. The selected profile is a training approximation."
+  });
+}
+
 for (const record of inventory) {
   const matchingRoute = routeInventory.find((route) => route.required_command_ids.includes(record.command_id));
   const lessonId = `${record.vendor}-${record.topic}`;
@@ -345,7 +378,7 @@ const health = {
     ...(coverageMetrics.overall_learning_readiness < 85 ? [`Learning readiness is ${coverageMetrics.overall_learning_readiness}%, not premium-ready. Coverage includes lessons, practice, routes, simulation, verification, troubleshooting, and review.`] : [])
   ],
   errors: audit.broken_command_references,
-  coverage_percentage: coverageMetrics.classification_coverage,
+  classification_coverage_percentage: coverageMetrics.classification_coverage,
   coverage_metrics: coverageMetrics
 };
 
