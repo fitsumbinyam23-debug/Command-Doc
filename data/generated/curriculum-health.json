@@ -1,0 +1,15 @@
+{
+  "status": "Passed",
+  "passed": [
+    "Every normalized command has a vendor classification.",
+    "Every normalized command has a support level.",
+    "Every generated route has a vendor and support level.",
+    "Every alias is linked to a canonical command."
+  ],
+  "warnings": [
+    "2 configuration commands require fuller verification guidance.",
+    "158 commands have no practice route yet."
+  ],
+  "errors": [],
+  "coverage_percentage": 100
+}
