@@ -1,0 +1,72 @@
+{
+  "module_id": "hp_comware-switching",
+  "vendor": "hp_comware",
+  "title": "8. Switching",
+  "topic": "switching",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "hp_comware-switching",
+      "title": "HP Comware — Switching",
+      "vendor": "hp_comware",
+      "topic": "switching",
+      "simulation_support": [
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "hp_display_link_aggregation_verbose",
+          "command": "display link-aggregation verbose",
+          "aliases": [
+            "dis link-aggregation verbose",
+            "dis link agg verbose"
+          ],
+          "purpose": "Shows Comware aggregation groups, selected members, LACP state, and partner information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_display_stp",
+          "command": "display stp",
+          "aliases": [],
+          "purpose": "Shows spanning-tree state and bridge role on a Comware switch.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display logbuffer"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_display_link_aggregation_summary",
+          "command": "display link-aggregation summary",
+          "aliases": [],
+          "purpose": "Summarizes link-aggregation groups and member state.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
