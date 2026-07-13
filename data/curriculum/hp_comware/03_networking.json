@@ -1,0 +1,48 @@
+{
+  "module_id": "hp_comware-networking",
+  "vendor": "hp_comware",
+  "title": "7. Networking",
+  "topic": "networking",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "hp_comware-networking",
+      "title": "HP Comware — Networking",
+      "vendor": "hp_comware",
+      "topic": "networking",
+      "simulation_support": [
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "hp_display_ip_routing_table",
+          "command": "display ip routing-table",
+          "aliases": [
+            "dis ip routing-table",
+            "dis ip route"
+          ],
+          "purpose": "Shows the Comware IPv4 routing table, protocols, preferences, metrics, and next hops.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display ip interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
