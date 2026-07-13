@@ -1,0 +1,59 @@
+{
+  "module_id": "windows_cmd-mac_neighbors",
+  "vendor": "windows_cmd",
+  "title": "1. Mac Neighbors",
+  "topic": "mac_neighbors",
+  "level": 1,
+  "lessons": [
+    {
+      "lesson_id": "windows_cmd-mac_neighbors",
+      "title": "Windows CMD — Mac Neighbors",
+      "vendor": "windows_cmd",
+      "topic": "mac_neighbors",
+      "simulation_support": [
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "windows_ipconfig_all",
+          "command": "ipconfig /all",
+          "aliases": [],
+          "purpose": "Shows Windows network adapter IP address, subnet mask, default gateway, DNS servers, DHCP, and MAC details.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ping <gateway>",
+            "arp -a"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "windows_arp_a",
+          "command": "arp -a",
+          "aliases": [],
+          "purpose": "Shows the local ARP cache mapping IP addresses to MAC addresses.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ping <gateway>",
+            "ipconfig /all"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
