@@ -1,0 +1,764 @@
+{
+  "generated_at": "2026-07-13T07:30:37.156Z",
+  "source_command_files": [
+    "data/commands/cisco_ios.json",
+    "data/commands/hp_comware.json",
+    "data/commands/aruba_cx.json",
+    "data/commands/windows_cmd.json",
+    "data/commands/linux.json",
+    "data/commands/admin_commands.json",
+    "data/commands/platform_commands.json",
+    "data/commands/network_commands_extended.json",
+    "data/commands/vendor_learning_extended.json",
+    "data/commands/switch_configuration_extended.json"
+  ],
+  "total_raw_command_records": 166,
+  "total_normalized_canonical_commands": 163,
+  "total_aliases": 109,
+  "commands_per_vendor": {
+    "cisco_ios": 43,
+    "hp_comware": 42,
+    "aruba_cx": 33,
+    "windows_cmd": 22,
+    "linux": 23
+  },
+  "commands_per_topic": {
+    "device_information": 45,
+    "interfaces": 54,
+    "vlans": 12,
+    "mac_neighbors": 12,
+    "stacking": 8,
+    "networking": 14,
+    "configuration": 4,
+    "cli_foundation": 3,
+    "switching": 5,
+    "trunks": 6
+  },
+  "commands_per_support_level": {
+    "lookup_only": 84,
+    "fully_simulated": 10,
+    "partially_simulated": 39,
+    "explanation_only": 30
+  },
+  "commands_used_by_cli_engine": 49,
+  "commands_used_only_by_lookup": 84,
+  "commands_referenced_by_routes": 5,
+  "commands_without_routes": [
+    "cisco_show_version",
+    "cisco_show_interfaces",
+    "cisco_show_mac_address_table",
+    "cisco_show_cdp_neighbors",
+    "cisco_show_lldp_neighbors",
+    "cisco_show_ip_arp",
+    "cisco_show_spanning_tree",
+    "cisco_show_etherchannel_summary",
+    "cisco_show_running_config_interface",
+    "hp_display_version",
+    "hp_display_interface_brief",
+    "hp_display_interface",
+    "hp_display_vlan",
+    "hp_display_mac_address",
+    "hp_display_lldp_neighbor",
+    "hp_display_device",
+    "hp_display_irf",
+    "hp_display_irf_port",
+    "hp_display_irf_port_configuration",
+    "hp_display_irf_topology",
+    "hp_display_irf_configuration",
+    "hp_display_current_configuration_interface",
+    "hp_display_logbuffer",
+    "aruba_show_version",
+    "aruba_show_interface_brief",
+    "aruba_show_interface",
+    "aruba_show_vlan",
+    "aruba_show_mac_address_table",
+    "aruba_show_lldp_neighbor_info",
+    "aruba_show_running_config_interface",
+    "windows_ipconfig_all",
+    "windows_ping",
+    "windows_tracert",
+    "windows_arp_a",
+    "windows_route_print",
+    "windows_nslookup",
+    "windows_netsh_interface_show_interface",
+    "linux_ip_addr",
+    "linux_ip_route",
+    "linux_ping",
+    "linux_traceroute",
+    "linux_arp_a",
+    "linux_dig",
+    "cisco_configure_terminal",
+    "cisco_interface_config",
+    "cisco_shutdown",
+    "cisco_no_shutdown",
+    "cisco_switchport_access_vlan",
+    "cisco_copy_running_startup",
+    "cisco_reload",
+    "hp_system_view",
+    "hp_interface_config",
+    "hp_shutdown",
+    "hp_undo_shutdown",
+    "hp_port_access_vlan",
+    "hp_save",
+    "hp_reboot",
+    "aruba_interface_config",
+    "aruba_shutdown",
+    "aruba_vlan_access",
+    "aruba_reload",
+    "windows_ipconfig_release",
+    "windows_ipconfig_renew",
+    "windows_netsh_set_static_ip",
+    "windows_netsh_interface_disable",
+    "windows_netsh_interface_enable",
+    "windows_netsh_winsock_reset",
+    "linux_ip_link_down",
+    "linux_ip_link_up",
+    "linux_dhclient_release",
+    "linux_dhclient_renew",
+    "linux_restart_networkmanager",
+    "linux_restart_networking",
+    "cisco_show_diagnostic_result",
+    "cisco_dir_flash",
+    "cisco_show_file_systems",
+    "cisco_show_boot",
+    "cisco_show_inventory",
+    "cisco_show_logging",
+    "hp_display_diagnostic_information",
+    "hp_display_current_configuration",
+    "hp_dir",
+    "aruba_show_system",
+    "aruba_show_flash",
+    "aruba_show_logging",
+    "windows_systeminfo",
+    "windows_netstat_ano",
+    "windows_dir",
+    "windows_dism_scanhealth",
+    "linux_df_h",
+    "linux_lsblk",
+    "linux_dmesg",
+    "linux_journalctl_errors",
+    "cisco_show_ip_interface_brief",
+    "cisco_show_ip_route",
+    "cisco_show_running_config",
+    "cisco_show_startup_config",
+    "hp_display_ip_interface_brief",
+    "hp_display_ip_routing_table",
+    "hp_display_arp",
+    "hp_display_stp_brief",
+    "hp_display_link_aggregation_verbose",
+    "hp_display_saved_configuration",
+    "aruba_show_ip_interface_brief",
+    "aruba_show_ip_route",
+    "aruba_show_spanning_tree",
+    "aruba_show_lacp_interfaces",
+    "aruba_show_running_config",
+    "aruba_show_events_reverse_count",
+    "windows_getmac_verbose",
+    "windows_pathping_host",
+    "windows_netsh_wlan_show_interfaces",
+    "windows_netsh_ipv4_show_interfaces",
+    "linux_ip_link",
+    "linux_ip_neigh",
+    "linux_ss_listening",
+    "linux_ethtool_interface",
+    "linux_systemctl_status_networkmanager",
+    "cisco_show_processes_cpu_sorted",
+    "cisco_show_interfaces_counters_errors",
+    "cisco_show_power_inline",
+    "cisco_show_ip_dhcp_binding",
+    "cisco_show_port_security_interface",
+    "hp_display_cpu_usage",
+    "hp_display_memory",
+    "hp_display_poe_interface",
+    "hp_display_stp",
+    "hp_display_link_aggregation_summary",
+    "aruba_show_system_resource_utilization",
+    "aruba_show_interface_error_statistics",
+    "aruba_show_power_over_ethernet",
+    "windows_netsh_lan_show_interfaces",
+    "linux_journalctl_networkmanager",
+    "linux_resolvectl_status",
+    "cisco_hostname",
+    "cisco_vlan_create",
+    "cisco_vlan_name",
+    "cisco_interface_range",
+    "cisco_switchport_mode_trunk",
+    "cisco_switchport_trunk_allowed",
+    "cisco_voice_vlan",
+    "cisco_stp_root_primary",
+    "cisco_switch_priority",
+    "cisco_svi_ip_address",
+    "hp_sysname",
+    "hp_vlan",
+    "hp_port_link_type_trunk",
+    "hp_port_trunk_permit",
+    "hp_irf_member_priority",
+    "hp_irf_member_renumber",
+    "hp_save_force",
+    "aruba_hostname",
+    "aruba_vlan",
+    "aruba_vlan_trunk_allowed",
+    "aruba_vlan_trunk_native",
+    "aruba_lacp_mode_active",
+    "aruba_lacp_system_priority",
+    "aruba_stp_priority"
+  ],
+  "commands_without_lessons": [],
+  "routes_containing_commands_not_found_in_inventory": [
+    {
+      "route_id": "free-practice",
+      "title": "Cisco IOS — Free Practice"
+    },
+    {
+      "route_id": "access-port",
+      "title": "Cisco IOS — Configure Access Port"
+    },
+    {
+      "route_id": "create-vlan",
+      "title": "Cisco IOS — Create VLAN"
+    },
+    {
+      "route_id": "trunk-port",
+      "title": "Cisco IOS — Configure Trunk Port"
+    },
+    {
+      "route_id": "wrong-vlan",
+      "title": "Cisco IOS — Fix Wrong VLAN"
+    },
+    {
+      "route_id": "recover-port",
+      "title": "Cisco IOS — Recover Shutdown Port"
+    },
+    {
+      "route_id": "route-1-1",
+      "title": "Cisco IOS — Read port status"
+    },
+    {
+      "route_id": "route-1-2",
+      "title": "Cisco IOS — Add a port description"
+    },
+    {
+      "route_id": "route-1-3",
+      "title": "Cisco IOS — Set speed and duplex"
+    },
+    {
+      "route_id": "route-1-4",
+      "title": "Cisco IOS — Disable an unused port"
+    },
+    {
+      "route_id": "route-1-5",
+      "title": "Cisco IOS — Recover a disabled port"
+    },
+    {
+      "route_id": "route-1-6",
+      "title": "Cisco IOS — Compare two port states"
+    },
+    {
+      "route_id": "route-1-7",
+      "title": "Cisco IOS — Check interface counters"
+    },
+    {
+      "route_id": "route-1-8",
+      "title": "Cisco IOS — Clear interface counters"
+    },
+    {
+      "route_id": "route-1-9",
+      "title": "Cisco IOS — Inspect error-disabled state"
+    },
+    {
+      "route_id": "route-1-10",
+      "title": "Cisco IOS — Document an endpoint"
+    },
+    {
+      "route_id": "route-2-1",
+      "title": "Cisco IOS — Create a user VLAN"
+    },
+    {
+      "route_id": "route-2-2",
+      "title": "Cisco IOS — Name a VLAN"
+    },
+    {
+      "route_id": "route-2-3",
+      "title": "Cisco IOS — Assign an access VLAN"
+    },
+    {
+      "route_id": "route-2-4",
+      "title": "Cisco IOS — Move an endpoint VLAN"
+    },
+    {
+      "route_id": "route-2-5",
+      "title": "Cisco IOS — Verify VLAN membership"
+    },
+    {
+      "route_id": "route-2-6",
+      "title": "Cisco IOS — Remove a VLAN assignment"
+    },
+    {
+      "route_id": "route-2-7",
+      "title": "Cisco IOS — Build a guest VLAN"
+    },
+    {
+      "route_id": "route-2-8",
+      "title": "Cisco IOS — Build a voice VLAN"
+    },
+    {
+      "route_id": "route-2-9",
+      "title": "Cisco IOS — Inspect VLAN status"
+    },
+    {
+      "route_id": "route-2-10",
+      "title": "Cisco IOS — Save a VLAN change"
+    },
+    {
+      "route_id": "route-3-1",
+      "title": "Cisco IOS — Identify a trunk"
+    },
+    {
+      "route_id": "route-3-2",
+      "title": "Cisco IOS — Configure a trunk"
+    },
+    {
+      "route_id": "route-3-3",
+      "title": "Cisco IOS — Allow VLANs on a trunk"
+    },
+    {
+      "route_id": "route-3-4",
+      "title": "Cisco IOS — Remove a trunk VLAN"
+    },
+    {
+      "route_id": "route-3-5",
+      "title": "Cisco IOS — Inspect trunk status"
+    },
+    {
+      "route_id": "route-3-6",
+      "title": "Cisco IOS — Find a native VLAN mismatch"
+    },
+    {
+      "route_id": "route-3-7",
+      "title": "Cisco IOS — Validate uplink VLANs"
+    },
+    {
+      "route_id": "route-3-8",
+      "title": "Cisco IOS — Document an uplink"
+    },
+    {
+      "route_id": "route-3-9",
+      "title": "Cisco IOS — Recover a trunk mismatch"
+    },
+    {
+      "route_id": "route-3-10",
+      "title": "Cisco IOS — Save a trunk change"
+    },
+    {
+      "route_id": "route-4-1",
+      "title": "Cisco IOS — Inspect MAC learning"
+    },
+    {
+      "route_id": "route-4-2",
+      "title": "Cisco IOS — Find a MAC on a port"
+    },
+    {
+      "route_id": "route-4-3",
+      "title": "Cisco IOS — Clear a learned MAC"
+    },
+    {
+      "route_id": "route-4-4",
+      "title": "Cisco IOS — Verify MAC movement"
+    },
+    {
+      "route_id": "route-4-5",
+      "title": "Cisco IOS — Read CDP neighbors"
+    },
+    {
+      "route_id": "route-4-6",
+      "title": "Cisco IOS — Read LLDP neighbors"
+    },
+    {
+      "route_id": "route-4-7",
+      "title": "Cisco IOS — Find an unknown endpoint"
+    },
+    {
+      "route_id": "route-4-8",
+      "title": "Cisco IOS — Check a device location"
+    },
+    {
+      "route_id": "route-4-9",
+      "title": "Cisco IOS — Compare MAC tables"
+    },
+    {
+      "route_id": "route-4-10",
+      "title": "Cisco IOS — Verify endpoint traffic"
+    },
+    {
+      "route_id": "route-5-1",
+      "title": "Cisco IOS — Inspect port security"
+    },
+    {
+      "route_id": "route-5-2",
+      "title": "Cisco IOS — Set a secure port"
+    },
+    {
+      "route_id": "route-5-3",
+      "title": "Cisco IOS — Test a violation"
+    },
+    {
+      "route_id": "route-5-4",
+      "title": "Cisco IOS — Recover a violation"
+    },
+    {
+      "route_id": "route-5-5",
+      "title": "Cisco IOS — Check secure MACs"
+    },
+    {
+      "route_id": "route-5-6",
+      "title": "Cisco IOS — Set violation mode"
+    },
+    {
+      "route_id": "route-5-7",
+      "title": "Cisco IOS — Review sticky MACs"
+    },
+    {
+      "route_id": "route-5-8",
+      "title": "Cisco IOS — Clear a security state"
+    },
+    {
+      "route_id": "route-5-9",
+      "title": "Cisco IOS — Document a violation"
+    },
+    {
+      "route_id": "route-5-10",
+      "title": "Cisco IOS — Verify secure port recovery"
+    },
+    {
+      "route_id": "route-6-1",
+      "title": "Cisco IOS — Set hostname"
+    },
+    {
+      "route_id": "route-6-2",
+      "title": "Cisco IOS — Review running configuration"
+    },
+    {
+      "route_id": "route-6-3",
+      "title": "Cisco IOS — Review startup configuration"
+    },
+    {
+      "route_id": "route-6-4",
+      "title": "Cisco IOS — Save configuration"
+    },
+    {
+      "route_id": "route-6-5",
+      "title": "Cisco IOS — Compare saved state"
+    },
+    {
+      "route_id": "route-6-6",
+      "title": "Cisco IOS — Check version"
+    },
+    {
+      "route_id": "route-6-7",
+      "title": "Cisco IOS — Set login banner"
+    },
+    {
+      "route_id": "route-6-8",
+      "title": "Cisco IOS — Set management VLAN"
+    },
+    {
+      "route_id": "route-6-9",
+      "title": "Cisco IOS — Inspect management interface"
+    },
+    {
+      "route_id": "route-6-10",
+      "title": "Cisco IOS — Prepare a change summary"
+    },
+    {
+      "route_id": "route-7-1",
+      "title": "Cisco IOS — Read STP state"
+    },
+    {
+      "route_id": "route-7-2",
+      "title": "Cisco IOS — Inspect root bridge"
+    },
+    {
+      "route_id": "route-7-3",
+      "title": "Cisco IOS — Find a blocked port"
+    },
+    {
+      "route_id": "route-7-4",
+      "title": "Cisco IOS — Review EtherChannel"
+    },
+    {
+      "route_id": "route-7-5",
+      "title": "Cisco IOS — Inspect LACP member"
+    },
+    {
+      "route_id": "route-7-6",
+      "title": "Cisco IOS — Check loop symptoms"
+    },
+    {
+      "route_id": "route-7-7",
+      "title": "Cisco IOS — Verify uplink redundancy"
+    },
+    {
+      "route_id": "route-7-8",
+      "title": "Cisco IOS — Document STP evidence"
+    },
+    {
+      "route_id": "route-7-9",
+      "title": "Cisco IOS — Check broadcast symptoms"
+    },
+    {
+      "route_id": "route-7-10",
+      "title": "Cisco IOS — Verify recovery"
+    },
+    {
+      "route_id": "route-8-1",
+      "title": "HP Comware — Inspect stack members"
+    },
+    {
+      "route_id": "route-8-2",
+      "title": "HP Comware — Review stack priority"
+    },
+    {
+      "route_id": "route-8-3",
+      "title": "HP Comware — Set stack priority"
+    },
+    {
+      "route_id": "route-8-4",
+      "title": "HP Comware — Inspect IRF topology"
+    },
+    {
+      "route_id": "route-8-5",
+      "title": "HP Comware — Inspect IRF port"
+    },
+    {
+      "route_id": "route-8-6",
+      "title": "HP Comware — Review member role"
+    },
+    {
+      "route_id": "route-8-7",
+      "title": "HP Comware — Check stack link health"
+    },
+    {
+      "route_id": "route-8-8",
+      "title": "HP Comware — Document stack evidence"
+    },
+    {
+      "route_id": "route-8-9",
+      "title": "HP Comware — Plan member replacement"
+    },
+    {
+      "route_id": "route-8-10",
+      "title": "HP Comware — Verify stack recovery"
+    },
+    {
+      "route_id": "route-9-1",
+      "title": "Windows CMD — Configure a PC IP"
+    },
+    {
+      "route_id": "route-9-2",
+      "title": "Windows CMD — Check subnet mask"
+    },
+    {
+      "route_id": "route-9-3",
+      "title": "Windows CMD — Check default gateway"
+    },
+    {
+      "route_id": "route-9-4",
+      "title": "Windows CMD — Test same VLAN ping"
+    },
+    {
+      "route_id": "route-9-5",
+      "title": "Windows CMD — Test VLAN mismatch ping"
+    },
+    {
+      "route_id": "route-9-6",
+      "title": "Windows CMD — Fix a duplicate IP"
+    },
+    {
+      "route_id": "route-9-7",
+      "title": "Windows CMD — Inspect ARP"
+    },
+    {
+      "route_id": "route-9-8",
+      "title": "Windows CMD — Check DNS reachability"
+    },
+    {
+      "route_id": "route-9-9",
+      "title": "Windows CMD — Document endpoint state"
+    },
+    {
+      "route_id": "route-9-10",
+      "title": "Windows CMD — Verify endpoint connectivity"
+    },
+    {
+      "route_id": "route-10-1",
+      "title": "Cisco IOS — Read before change"
+    },
+    {
+      "route_id": "route-10-2",
+      "title": "Cisco IOS — Use a rollback plan"
+    },
+    {
+      "route_id": "route-10-3",
+      "title": "Cisco IOS — Build a change checklist"
+    },
+    {
+      "route_id": "route-10-4",
+      "title": "Cisco IOS — Verify before save"
+    },
+    {
+      "route_id": "route-10-5",
+      "title": "Cisco IOS — Write a ticket summary"
+    },
+    {
+      "route_id": "route-10-6",
+      "title": "Cisco IOS — Escalate physical fault"
+    },
+    {
+      "route_id": "route-10-7",
+      "title": "Cisco IOS — Identify dangerous commands"
+    },
+    {
+      "route_id": "route-10-8",
+      "title": "Cisco IOS — Use a maintenance window"
+    },
+    {
+      "route_id": "route-10-9",
+      "title": "Cisco IOS — Capture before/after evidence"
+    },
+    {
+      "route_id": "route-10-10",
+      "title": "Cisco IOS — Close a verified ticket"
+    },
+    {
+      "route_id": "route-11-1",
+      "title": "HP Comware — Display interface brief"
+    },
+    {
+      "route_id": "route-11-2",
+      "title": "HP Comware — Display VLAN"
+    },
+    {
+      "route_id": "route-11-3",
+      "title": "HP Comware — Configure access port"
+    },
+    {
+      "route_id": "route-11-4",
+      "title": "HP Comware — Configure trunk"
+    },
+    {
+      "route_id": "route-11-5",
+      "title": "HP Comware — Inspect MAC address"
+    },
+    {
+      "route_id": "route-11-6",
+      "title": "HP Comware — Read LLDP neighbor"
+    },
+    {
+      "route_id": "route-11-7",
+      "title": "HP Comware — Set system name"
+    },
+    {
+      "route_id": "route-11-8",
+      "title": "HP Comware — Inspect IRF topology"
+    },
+    {
+      "route_id": "route-11-9",
+      "title": "HP Comware — Set IRF priority"
+    },
+    {
+      "route_id": "route-11-10",
+      "title": "HP Comware — Save Comware configuration"
+    },
+    {
+      "route_id": "route-12-1",
+      "title": "Cisco IOS — Show interface status"
+    },
+    {
+      "route_id": "route-12-2",
+      "title": "Cisco IOS — Show VLAN brief"
+    },
+    {
+      "route_id": "route-12-3",
+      "title": "Cisco IOS — Configure access port"
+    },
+    {
+      "route_id": "route-12-4",
+      "title": "Cisco IOS — Configure trunk"
+    },
+    {
+      "route_id": "route-12-5",
+      "title": "Cisco IOS — Show MAC table"
+    },
+    {
+      "route_id": "route-12-6",
+      "title": "Cisco IOS — Show CDP neighbors"
+    },
+    {
+      "route_id": "route-12-7",
+      "title": "Cisco IOS — Show LLDP neighbors"
+    },
+    {
+      "route_id": "route-12-8",
+      "title": "Cisco IOS — Save running configuration"
+    },
+    {
+      "route_id": "route-12-9",
+      "title": "Cisco IOS — Recover shutdown port"
+    },
+    {
+      "route_id": "route-12-10",
+      "title": "Cisco IOS — Verify configuration"
+    }
+  ],
+  "duplicate_command_ids": [
+    "aruba_show_spanning_tree",
+    "windows_netstat_ano"
+  ],
+  "duplicate_canonical_syntax": [],
+  "conflicting_vendor_assignments": [],
+  "commands_using_placeholders": [
+    "cisco_interface_config",
+    "cisco_switchport_access_vlan",
+    "hp_interface_config",
+    "hp_port_access_vlan",
+    "aruba_interface_config",
+    "aruba_vlan_access",
+    "windows_netsh_set_static_ip",
+    "windows_netsh_interface_disable",
+    "windows_netsh_interface_enable",
+    "linux_ip_link_down",
+    "linux_ip_link_up",
+    "linux_dhclient_release",
+    "linux_dhclient_renew",
+    "aruba_show_events_reverse_count",
+    "windows_pathping_host",
+    "linux_ethtool_interface",
+    "cisco_show_port_security_interface",
+    "cisco_hostname",
+    "cisco_vlan_create",
+    "cisco_vlan_name",
+    "cisco_interface_range",
+    "cisco_switchport_trunk_allowed",
+    "cisco_voice_vlan",
+    "cisco_stp_root_primary",
+    "cisco_switch_priority",
+    "cisco_svi_ip_address",
+    "hp_sysname",
+    "hp_vlan",
+    "hp_port_trunk_permit",
+    "hp_irf_member_priority",
+    "hp_irf_member_renumber",
+    "aruba_hostname",
+    "aruba_vlan",
+    "aruba_vlan_trunk_allowed",
+    "aruba_vlan_trunk_native",
+    "aruba_lacp_system_priority",
+    "aruba_stp_priority"
+  ],
+  "commands_with_missing_verification_steps": [
+    "hp_port_trunk_permit",
+    "aruba_vlan_trunk_native"
+  ],
+  "commands_with_missing_rollback_guidance": [],
+  "broken_command_references": []
+}
