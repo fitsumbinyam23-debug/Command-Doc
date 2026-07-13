@@ -1,0 +1,148 @@
+{
+  "module_id": "cisco_ios-vlans",
+  "vendor": "cisco_ios",
+  "title": "2. Vlans",
+  "topic": "vlans",
+  "level": 1,
+  "lessons": [
+    {
+      "lesson_id": "cisco_ios-vlans",
+      "title": "Cisco IOS — Vlans",
+      "vendor": "cisco_ios",
+      "topic": "vlans",
+      "simulation_support": [
+        "fully_simulated",
+        "partially_simulated",
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "cisco_show_interface_status",
+          "command": "show interface status",
+          "aliases": [
+            "sh interface status",
+            "sh interfaces status",
+            "sh int status"
+          ],
+          "purpose": "Shows switch port status, VLAN, duplex, speed, and media type.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface <interface>",
+            "show running-config interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "fully_simulated"
+        },
+        {
+          "command_id": "cisco_show_vlan_brief",
+          "command": "show vlan brief",
+          "aliases": [
+            "sh vlan brief",
+            "sh vlan br"
+          ],
+          "purpose": "Shows VLAN IDs, VLAN names, status, and access ports assigned to each VLAN.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface status",
+            "show mac address-table vlan <vlan>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "fully_simulated"
+        },
+        {
+          "command_id": "cisco_switchport_access_vlan",
+          "command": "switchport access vlan <vlan>",
+          "aliases": [
+            "switchport access vlan <vlan>"
+          ],
+          "purpose": "Assigns the selected access port to a specific VLAN.",
+          "safety_level": "High - changes endpoint network placement and can break access.",
+          "verification_commands": [
+            "show vlan brief"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "cisco_vlan_create",
+          "command": "vlan <vlan-id>",
+          "aliases": [],
+          "purpose": "Creates or enters a VLAN configuration context.",
+          "safety_level": "Medium - can affect switching when assigned to ports.",
+          "verification_commands": [
+            "show vlan brief"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "cisco_vlan_name",
+          "command": "name <vlan-name>",
+          "aliases": [],
+          "purpose": "Assigns a name to the selected Cisco VLAN.",
+          "safety_level": "Low - documentation change within VLAN configuration.",
+          "verification_commands": [],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "cisco_switchport_trunk_allowed",
+          "command": "switchport trunk allowed vlan <vlan-list>",
+          "aliases": [],
+          "purpose": "Restricts which VLANs may traverse a Cisco trunk.",
+          "safety_level": "High - can interrupt VLAN services.",
+          "verification_commands": [
+            "show interfaces trunk"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "cisco_voice_vlan",
+          "command": "switchport voice vlan <vlan-id>",
+          "aliases": [],
+          "purpose": "Assigns a Cisco voice VLAN to an access port for an IP phone.",
+          "safety_level": "Medium - can affect IP phone service.",
+          "verification_commands": [
+            "show interfaces <interface> switchport"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "cisco_stp_root_primary",
+          "command": "spanning-tree vlan <vlan-id> root primary",
+          "aliases": [],
+          "purpose": "Adjusts Cisco STP bridge priority to make the switch preferred root for a VLAN.",
+          "safety_level": "High - changes Layer 2 forwarding topology.",
+          "verification_commands": [
+            "show spanning-tree vlan <vlan-id>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "partially_simulated"
+        }
+      ]
+    }
+  ]
+}
