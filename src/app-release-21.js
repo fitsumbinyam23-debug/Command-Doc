@@ -382,6 +382,7 @@ const state = {
     scenarioScore: 0,
     vendorTrack: "all",
     learnPanel: "overview",
+    activeGeneratedModuleId: "",
     libraryTab: "lookup",
     libraryFilters: { search: "", vendor: "", platform: "", topic: "", difficulty: "", routeType: "", support: "", status: "" },
     vendorProgress: {},
@@ -4281,6 +4282,14 @@ function renderLearn() {
     renderCommandCoverage();
     return;
   }
+  if (state.lab.learnPanel === "modules") {
+    renderGeneratedModules();
+    return;
+  }
+  if (state.lab.learnPanel === "module") {
+    renderGeneratedModule();
+    return;
+  }
   const panel = labCreate("section", "learn-track-panel");
   panel.append(labCreate("div", "lab-card-kicker", "Choose your active learning track"));
   panel.append(labCreate("h3", "", "What do you want to learn?"));
@@ -4302,8 +4311,60 @@ function renderLearn() {
   const trackLessons = lessonsForTrack(track);
   const learned = Object.keys(progress.learnedCommands).length;
   summary.append(labCreate("span", "badge", `Current level: ${learned < 5 ? "Foundation" : learned < 16 ? "Basic configuration" : "Existing advanced content"}`), labCreate("span", "badge", `Current module: ${trackLessons[0]?.section_id || "Command coverage"}`), labCreate("span", "badge", `Progress: ${learned}/${commandsForTrack(track).length} commands`), labCreate("span", "badge", `Needs review: ${Object.keys(progress.reviewRoutes).length}`));
-  summary.append(labButton("Continue Course", "primary", () => { state.lab.screen = "lessons"; switchView("lab"); }), labButton("Browse Modules", "secondary", () => { state.lab.screen = "lessons"; switchView("lab"); }), labButton("Command Coverage", "secondary", () => { state.lab.learnPanel = "coverage"; renderLearn(); }), labButton("Practice Library", "secondary", () => { state.lab.libraryTab = "practice"; switchView("library"); }), labButton("Change Track", "secondary", () => { state.lab.vendorTrack = "all"; renderLearn(); }));
+  summary.append(labButton("Continue Course", "primary", () => { state.lab.learnPanel = "modules"; renderLearn(); }), labButton("Browse Modules", "secondary", () => { state.lab.learnPanel = "modules"; renderLearn(); }), labButton("Command Coverage", "secondary", () => { state.lab.learnPanel = "coverage"; renderLearn(); }), labButton("Practice Library", "secondary", () => { state.lab.libraryTab = "practice"; switchView("library"); }), labButton("Change Track", "secondary", () => { state.lab.vendorTrack = "all"; renderLearn(); }));
   els.learnRoot.append(summary);
+}
+
+function generatedModulesForTrack(track = activeTrack()) {
+  const modules = state.curriculum?.index?.modules || {};
+  const key = vendorTrackKey(track);
+  return key === "all" ? Object.values(modules).flat() : modules[key] || [];
+}
+
+function renderGeneratedModules() {
+  const track = activeTrack();
+  const modules = generatedModulesForTrack(track);
+  const panel = labCreate("section", "learn-track-panel");
+  panel.append(labButton("Back to Learn", "secondary", () => { state.lab.learnPanel = "overview"; renderLearn(); }));
+  panel.append(labCreate("div", "lab-card-kicker", "Progressive vendor curriculum"));
+  panel.append(labCreate("h3", "", `${track === "all" ? "All Tracks" : track} modules`));
+  panel.append(labCreate("p", "", "Open one command group at a time. Every item retains its vendor syntax, safety classification, aliases, verification guidance, and simulation support."));
+  els.learnRoot.append(panel);
+  const grid = labCreate("div", "library-grid");
+  modules.forEach((module) => {
+    const commands = module.lessons?.flatMap((lesson) => lesson.commands || []) || [];
+    const card = labCreate("article", "library-card");
+    card.append(labCreate("div", "lab-card-kicker", module.vendor ? state.curriculum.index?.vendors?.[module.vendor] || module.vendor : "Local curriculum"), labCreate("h3", "", module.title), labCreate("p", "", `${commands.length} commands | Level ${module.level} | ${module.topic.replace(/_/g, " ")}`));
+    card.append(labButton("Open module", "primary", () => { state.lab.activeGeneratedModuleId = module.module_id; state.lab.learnPanel = "module"; renderLearn(); }));
+    grid.append(card);
+  });
+  els.learnRoot.append(grid);
+}
+
+function renderGeneratedModule() {
+  const module = generatedModulesForTrack().find((item) => item.module_id === state.lab.activeGeneratedModuleId) || generatedModulesForTrack()[0];
+  if (!module) { state.lab.learnPanel = "overview"; renderLearn(); return; }
+  const panel = labCreate("section", "learn-track-panel");
+  panel.append(labButton("Back to Modules", "secondary", () => { state.lab.learnPanel = "modules"; renderLearn(); }));
+  panel.append(labCreate("div", "lab-card-kicker", state.curriculum.index?.vendors?.[module.vendor] || module.vendor));
+  panel.append(labCreate("h3", "", module.title));
+  panel.append(labCreate("p", "", "Understand the command, read healthy and faulty output, practise it in the local CLI where supported, then verify before marking it learned."));
+  els.learnRoot.append(panel);
+  const commands = module.lessons?.flatMap((lesson) => lesson.commands || []) || [];
+  const inventory = new Map((state.curriculum?.inventory || []).map((command) => [command.command_id, command]));
+  const grid = labCreate("div", "library-grid");
+  commands.forEach((lessonCommand) => {
+    const command = inventory.get(lessonCommand.command_id) || lessonCommand;
+    const card = labCreate("article", "library-card");
+    card.append(labCreate("h3", "", command.canonical_command || command.command));
+    card.append(labCreate("p", "", command.purpose || "Local command guidance."));
+    if (command.aliases?.length) card.append(labCreate("p", "", `Aliases: ${command.aliases.join(", ")}`));
+    card.append(labCreate("p", "", `Mode: ${command.command_mode || "See vendor prompt"} | Safety: ${command.safety_level || "See local guidance"} | Support: ${(command.simulator_support || "lookup_only").replace(/_/g, " ")}`));
+    const details = labCreate("p", "", `Verify: ${(command.verification_commands || []).join("; ") || "Review output before continuing"}${command.rollback_commands?.length ? ` | Rollback: ${command.rollback_commands.join("; ")}` : ""}`);
+    card.append(details, labButton("Open in Command Lookup", "secondary", () => { els.commandSearch.value = command.canonical_command || command.command; state.lookupSource = "search"; switchView("diagnose"); renderCommandLookup(); }));
+    grid.append(card);
+  });
+  els.learnRoot.append(grid);
 }
 
 function renderCommandCoverage() {
