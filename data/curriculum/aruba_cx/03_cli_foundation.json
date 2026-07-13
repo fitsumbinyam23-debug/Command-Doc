@@ -1,0 +1,60 @@
+{
+  "module_id": "aruba_cx-cli_foundation",
+  "vendor": "aruba_cx",
+  "title": "6. Cli Foundation",
+  "topic": "cli_foundation",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "aruba_cx-cli_foundation",
+      "title": "ArubaOS-CX — Cli Foundation",
+      "vendor": "aruba_cx",
+      "topic": "cli_foundation",
+      "simulation_support": [
+        "lookup_only",
+        "partially_simulated"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "aruba_show_system",
+          "command": "show system",
+          "aliases": [],
+          "purpose": "Shows ArubaOS-CX system identity, platform state, uptime, and management information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show version"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_hostname",
+          "command": "hostname <name>",
+          "aliases": [],
+          "purpose": "Sets the ArubaOS-CX switch hostname.",
+          "safety_level": "Medium - changes device identity.",
+          "verification_commands": [
+            "show running-config"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        }
+      ]
+    }
+  ]
+}
