@@ -1,0 +1,139 @@
+{
+  "module_id": "linux-interfaces",
+  "vendor": "linux",
+  "title": "1. Interfaces",
+  "topic": "interfaces",
+  "level": 1,
+  "lessons": [
+    {
+      "lesson_id": "linux-interfaces",
+      "title": "Linux — Interfaces",
+      "vendor": "linux",
+      "topic": "interfaces",
+      "simulation_support": [
+        "lookup_only",
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "linux_ip_addr",
+          "command": "ip addr",
+          "aliases": [],
+          "purpose": "Shows Linux network interfaces, link state, MAC addresses, and assigned IP addresses.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ip route",
+            "ping <gateway>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_ip_link_down",
+          "command": "sudo ip link set <interface> down",
+          "aliases": [
+            "ip link set <interface> down"
+          ],
+          "purpose": "Administratively brings a Linux network interface down.",
+          "safety_level": "Critical - can disconnect SSH, services, or production traffic.",
+          "verification_commands": [
+            "ip addr"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "linux_ip_link_up",
+          "command": "sudo ip link set <interface> up",
+          "aliases": [
+            "ip link set <interface> up"
+          ],
+          "purpose": "Administratively brings a Linux network interface up.",
+          "safety_level": "High - can change active network path and service reachability.",
+          "verification_commands": [
+            "ip route"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "linux_dhclient_release",
+          "command": "sudo dhclient -r <interface>",
+          "aliases": [
+            "dhclient -r <interface>"
+          ],
+          "purpose": "Releases a DHCP lease on a Linux interface using dhclient.",
+          "safety_level": "Medium - can remove IP connectivity until renewed.",
+          "verification_commands": [
+            "sudo dhclient <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "linux_dhclient_renew",
+          "command": "sudo dhclient <interface>",
+          "aliases": [
+            "dhclient <interface>"
+          ],
+          "purpose": "Requests a DHCP lease on a Linux interface using dhclient.",
+          "safety_level": "Medium - can change endpoint IP settings.",
+          "verification_commands": [
+            "ip addr"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "linux_ip_link",
+          "command": "ip link",
+          "aliases": [],
+          "purpose": "Shows Linux network interfaces, flags, operational state, MTU, and MAC addresses.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ip addr"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_ss_listening",
+          "command": "ss -tulpn",
+          "aliases": [],
+          "purpose": "Lists Linux TCP and UDP listening sockets with addresses, ports, and available process information.",
+          "safety_level": "Safe read-only command; process names may require elevated privileges.",
+          "verification_commands": [
+            "systemctl status <service>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_ethtool_interface",
+          "command": "ethtool <interface>",
+          "aliases": [],
+          "purpose": "Shows Linux Ethernet link settings such as speed, duplex, autonegotiation, and detected link state.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ip link"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
