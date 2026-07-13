@@ -1,0 +1,131 @@
+{
+  "module_id": "hp_comware-stacking",
+  "vendor": "hp_comware",
+  "title": "5. Stacking",
+  "topic": "stacking",
+  "level": 2,
+  "lessons": [
+    {
+      "lesson_id": "hp_comware-stacking",
+      "title": "HP Comware — Stacking",
+      "vendor": "hp_comware",
+      "topic": "stacking",
+      "simulation_support": [
+        "fully_simulated",
+        "lookup_only",
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "hp_display_irf",
+          "command": "display irf",
+          "aliases": [
+            "dis irf"
+          ],
+          "purpose": "Shows IRF member identity, role, priority, bridge MAC, and status.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display irf topology",
+            "display logbuffer"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "fully_simulated"
+        },
+        {
+          "command_id": "hp_display_irf_port",
+          "command": "display irf-port",
+          "aliases": [
+            "dis irf-port"
+          ],
+          "purpose": "Shows operational status of IRF ports and their physical member links.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display irf topology",
+            "display irf-port configuration"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_display_irf_port_configuration",
+          "command": "display irf-port configuration",
+          "aliases": [
+            "dis irf-port configuration"
+          ],
+          "purpose": "Shows configured IRF port bindings and physical ports assigned to IRF links.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display irf-port",
+            "display irf topology"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_display_irf_topology",
+          "command": "display irf topology",
+          "aliases": [
+            "dis irf topology"
+          ],
+          "purpose": "Shows IRF topology and IRF port connection state.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display irf",
+            "display logbuffer"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "fully_simulated"
+        },
+        {
+          "command_id": "hp_display_irf_configuration",
+          "command": "display irf configuration",
+          "aliases": [
+            "dis irf configuration"
+          ],
+          "purpose": "Shows IRF configuration, member priorities, domains, and port bindings.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display irf"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_irf_member_priority",
+          "command": "irf member <member-id> priority <priority>",
+          "aliases": [],
+          "purpose": "Sets HP Comware IRF member election priority.",
+          "safety_level": "High - affects future IRF master elections.",
+          "verification_commands": [
+            "display irf configuration"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "hp_irf_member_renumber",
+          "command": "irf member <member-id> renumber <new-member-id>",
+          "aliases": [],
+          "purpose": "Changes the configured ID of an IRF member.",
+          "safety_level": "Critical - requires reboot and can invalidate member-ID related settings.",
+          "verification_commands": [],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        }
+      ]
+    }
+  ]
+}
