@@ -2,10 +2,9 @@
 
 (() => {
   const normalise = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
-  const clone = (value) => JSON.parse(JSON.stringify(value));
+  const clone = (value) => value === undefined ? undefined : JSON.parse(JSON.stringify(value));
   const STORAGE_KEY = "command-doctor.switch-runtime.v1";
   const RUNTIME_SCHEMA_VERSION = 2;
-  const COMMAND_CATALOG_VERSION = "2026.07-lab.40";
   const SUPPORT_LEVELS = {
     fully_simulated: "full_state_simulation",
     partially_simulated: "simplified_state_simulation",
@@ -16,6 +15,7 @@
     explanation_only: "explanation_only",
     unsupported_for_profile: "unsupported_for_profile"
   };
+  const normaliseSupportLevel = (value) => SUPPORT_LEVELS[normalise(value).replace(/-/g, "_")] || "unsupported_for_profile";
   const groupBy = (items, key) => items.reduce((groups, item) => { const name = key(item); (groups[name] ||= []).push(item); return groups; }, {});
   const cleanSnapshot = (value) => { const next = clone(value); delete next.unsaved_changes; return next; };
   const vendorIds = {
@@ -54,7 +54,13 @@
     next.cables ||= [];
     next.diagnostics ||= [];
     next.logs ||= [];
-    next.unsaved_changes ||= [];
+    next.unsaved_changes = (next.unsaved_changes || []).map((change) => {
+      const field = String(change?.field || "");
+      const first = field.split(".")[0];
+      // Lab 45 stored interface fields without their SharedSwitchState root.
+      const fullPath = field.startsWith("interfaces.") || !next.interfaces[first] ? field : `interfaces.${field}`;
+      return { ...change, field: fullPath };
+    });
     next.session ||= {};
     next.session.selected_interface ||= Object.keys(next.interfaces)[0] || "";
     next.session.terminal_history ||= [];
@@ -160,7 +166,10 @@
 
   class CommandRegistry {
     constructor(commands = [], profile = null) {
-      this.commands = commands.map((command) => ({ ...command, grammar: command.grammar || compileGrammar(command.canonical_command), vendor_id: command.vendor_id || command.vendor, compatible_os_ids: command.compatible_os_ids || [], compatible_os_family_ids: command.compatible_os_family_ids || [], compatible_platform_family_ids: command.compatible_platform_family_ids || (command.platform_family && command.platform_family !== "Any" ? [command.platform_family] : []) }));
+      this.commands = commands.map((command) => {
+        const simulator_support = normaliseSupportLevel(command.simulator_support || command.support_level);
+        return { ...command, simulator_support, support_level: simulator_support, grammar: command.grammar || compileGrammar(command.canonical_command), vendor_id: command.vendor_id || command.vendor, compatible_os_ids: command.compatible_os_ids || [], compatible_os_family_ids: command.compatible_os_family_ids || [], compatible_platform_family_ids: command.compatible_platform_family_ids || (command.platform_family && command.platform_family !== "Any" ? [command.platform_family] : []) };
+      });
       this.profile = normaliseProfile(profile || {});
       this.catalog = this.commands.filter((command) => this.availability(command).available);
     }
@@ -253,8 +262,14 @@
   }
 
   class SharedSwitchState {
-    constructor(profile, saved = null) {
+    constructor(profile, saved = null, catalogMetadata = {}) {
       this.profile = normaliseProfile(profile);
+      this.catalogMetadata = {
+        runtime_schema_version: RUNTIME_SCHEMA_VERSION,
+        command_catalog_version: catalogMetadata.command_catalog_version || "local",
+        profile_catalog_version: catalogMetadata.profile_catalog_version || "local",
+        active_build_version: catalogMetadata.active_build_version || "local"
+      };
       const restored = this.migrateSnapshot(saved);
       this.eventLog = restored?.eventLog || [];
       this.running = normaliseState(restored?.running || this.defaultState(this.profile), this.profile);
@@ -295,12 +310,12 @@
     updateInterface(name, updates, commandId = "inspector") {
       const port = this.interface(name);
       if (!port) return false;
-      Object.entries(updates).forEach(([key, value]) => { this.change(`${name}.${key}`, port[key], value, commandId); port[key] = value; });
+      Object.entries(updates).forEach(([key, value]) => { this.change(`interfaces.${name}.${key}`, port[key], value, commandId); port[key] = value; });
       return true;
     }
     updateHostname(hostname, commandId = "hostname") { this.change("system.hostname", this.running.system.hostname, hostname, commandId); this.running.system.hostname = hostname; }
     getByPath(path, source = this.running) { return String(path || "").split(".").filter(Boolean).reduce((value, key) => value == null ? undefined : value[key], source); }
-    setByPath(path, value, commandId = "inspector") { const keys = String(path || "").split(".").filter(Boolean); if (!keys.length) return false; const before = this.getByPath(path); let target = this.running; keys.slice(0, -1).forEach((key) => { target[key] ||= {}; target = target[key]; }); target[keys.at(-1)] = value; this.change(path, before, value, commandId); return true; }
+    setByPath(path, value, commandId = "inspector", recordChange = true) { const keys = String(path || "").split(".").filter(Boolean); if (!keys.length) return false; const before = this.getByPath(path); let target = this.running; keys.slice(0, -1).forEach((key) => { target[key] ||= {}; target = target[key]; }); target[keys.at(-1)] = value; if (recordChange) this.change(path, before, value, commandId); return true; }
     deleteByPath(path, commandId = "inspector") { const keys = String(path || "").split(".").filter(Boolean); if (!keys.length) return false; const before = this.getByPath(path); let target = this.running; for (const key of keys.slice(0, -1)) { target = target?.[key]; if (target == null) return false; } if (!(keys.at(-1) in target)) return false; delete target[keys.at(-1)]; this.change(path, before, undefined, commandId); return true; }
     save(commandId = "save") {
       const before = clone(this.running);
@@ -321,7 +336,7 @@
       this.persist();
     }
     resetTraining() { const before = clone(this.running); this.running = clone(this.factoryBaseline); this.running.unsaved_changes = []; this.record({ command_id: "reset-training", canonical_command: "reset training switch", entered_text: "reset training switch", success: true, state_before: before, state_after: clone(this.running), safety_result: "reset_training" }); this.persist(); }
-    rollbackChange(index) { const change = this.changes()[index]; if (!change) return false; this.setByPath(change.field, clone(change.before), "rollback-one-change"); this.running.unsaved_changes.splice(index, 1); this.record({ command_id: "rollback-one-change", canonical_command: "rollback one change", entered_text: change.field, success: true, changed_fields: [change.field], safety_result: "rollback_one_change" }); this.persist(); return true; }
+    rollbackChange(index) { const change = this.changes()[index]; if (!change) return false; this.setByPath(change.field, clone(change.before), "rollback-one-change", false); this.running.unsaved_changes.splice(index, 1); this.record({ command_id: "rollback-one-change", canonical_command: "rollback one change", entered_text: change.field, success: true, changed_fields: [change.field], safety_result: "rollback_one_change" }); this.persist(); return true; }
     rollback() { this.rollbackUnsaved(); }
     record(event) {
       const required = { event_id: crypto.randomUUID?.() || `${Date.now()}-${this.eventLog.length}`, timestamp: new Date().toISOString(), command_id: "unclassified", canonical_command: "", entered_text: "", entered_alias: false, parsed_parameters: {}, vendor: this.profile.vendor, profile_id: this.profile.profile_id, operating_system_version: this.profile.default_version, mode_before: "exec", mode_after: "exec", privilege_before: "privileged", privilege_after: "privileged", success: false, failure_type: "", state_before: {}, state_after: {}, changed_fields: [], output_id: "", route_id: "", route_step: null, lesson_id: "", safety_result: "", verification_result: "", save_result: "" };
@@ -332,9 +347,9 @@
     migrateSnapshot(saved) {
       if (!saved || typeof saved !== "object") return null;
       if (saved.profile_id && saved.profile_id !== this.profile.profile_id) return null;
-      return { ...saved, schema_version: RUNTIME_SCHEMA_VERSION, command_catalog_version: saved.command_catalog_version || "legacy" };
+      return { ...saved, schema_version: RUNTIME_SCHEMA_VERSION, ...this.catalogMetadata };
     }
-    snapshot() { return { schema_version: RUNTIME_SCHEMA_VERSION, command_catalog_version: COMMAND_CATALOG_VERSION, profile_id: this.profile.profile_id, running: this.running, startup: this.startup, baseline: this.baseline, factoryBaseline: this.factoryBaseline, eventLog: this.eventLog }; }
+    snapshot() { return { schema_version: RUNTIME_SCHEMA_VERSION, ...this.catalogMetadata, profile_id: this.profile.profile_id, running: this.running, startup: this.startup, baseline: this.baseline, factoryBaseline: this.factoryBaseline, eventLog: this.eventLog }; }
     persist() { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.snapshot())); }
   }
 
@@ -344,6 +359,5 @@
     byVendor(vendor) { return this.profiles.filter((profile) => profile.vendor === vendor); }
   }
 
-  window.CommandDoctorSwitchRuntime = { CommandRegistry, SharedSwitchState, ProfileRegistry, STORAGE_KEY, RUNTIME_SCHEMA_VERSION, COMMAND_CATALOG_VERSION, normalise, clone, normaliseProfile, compileGrammar, parseTokens, validateParameterDetail, compareVersion };
+  window.CommandDoctorSwitchRuntime = { CommandRegistry, SharedSwitchState, ProfileRegistry, STORAGE_KEY, RUNTIME_SCHEMA_VERSION, normaliseSupportLevel, normalise, clone, normaliseProfile, compileGrammar, parseTokens, validateParameterDetail, compareVersion };
 })();
-
