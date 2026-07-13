@@ -1,6 +1,6 @@
 Exit code: 0
 Wall time: 3.7 seconds
-Total output lines: 5119
+Total output lines: 5203
 Output:
 "use strict";
 
@@ -501,7 +501,7 @@ function bindEvents() {
     renderCommandLookup();
   });
   els.cliOutput.addEventListener("input", () => {
-    state.lookupSource = "pa…53545 tokens truncated…];
+    state.lookupSource = "pa…55229 tokens truncated…];
     const card = labCreate("article", "library-card");
     card.append(labCreate("div", "lab-card-kicker", module.vendor ? state.curriculum.index?.vendors?.[module.vendor] || module.vendor : "Local curriculum"), labCreate("h3", "", module.title), labCreate("p", "", `${commands.length} commands | Level ${module.level} | ${module.topic.replace(/_/g, " ")}`));
     card.append(labButton("Open module", "primary", () => { state.lab.activeGeneratedModuleId = module.module_id; state.lab.learnPanel = "module"; renderLearn(); }));
