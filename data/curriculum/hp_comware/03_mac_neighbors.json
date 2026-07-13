@@ -1,0 +1,47 @@
+{
+  "module_id": "hp_comware-mac_neighbors",
+  "vendor": "hp_comware",
+  "title": "6. Mac Neighbors",
+  "topic": "mac_neighbors",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "hp_comware-mac_neighbors",
+      "title": "HP Comware — Mac Neighbors",
+      "vendor": "hp_comware",
+      "topic": "mac_neighbors",
+      "simulation_support": [
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "hp_display_arp",
+          "command": "display arp",
+          "aliases": [
+            "dis arp"
+          ],
+          "purpose": "Shows IPv4-to-MAC address mappings learned by the Comware device.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display mac-address"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
