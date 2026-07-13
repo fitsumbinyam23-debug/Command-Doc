@@ -28,6 +28,14 @@ const LAB_FILES = {
   scenarios: "data/labs/scenarios/scenarios.json"
 };
 
+const GENERATED_CURRICULUM_FILES = {
+  inventory: "data/generated/command-inventory.json",
+  audit: "data/generated/command-inventory-audit.json",
+  routes: "data/generated/route-inventory.json",
+  index: "data/generated/curriculum-index.json",
+  health: "data/generated/curriculum-health.json"
+};
+
 const LAB_PROGRESS_KEY = "commandDoctorLabProgress";
 const VENDOR_PROGRESS_KEY = "commandDoctorVendorProgress";
 const VISUAL_NETWORK_STORAGE_KEY = "command-doctor.visual-network";
@@ -349,6 +357,7 @@ const state = {
   flows: [],
   safety: { commands: [], warning_message: "" },
   sources: null,
+  curriculum: { inventory: [], audit: null, routes: [], index: null, health: null },
   history: [],
   currentReport: null,
   lookupSource: "search",
@@ -562,6 +571,19 @@ async function loadKnowledge() {
   state.lab.progress = loadLabProgress();
   state.lab.vendorProgress = loadVendorProgress();
   migrateLabProgress();
+
+  const generatedResults = await Promise.allSettled(Object.values(GENERATED_CURRICULUM_FILES).map(loadJson));
+  const generated = Object.fromEntries(Object.keys(GENERATED_CURRICULUM_FILES).map((key, index) => [
+    key,
+    generatedResults[index]?.status === "fulfilled" ? generatedResults[index].value : null
+  ]));
+  state.curriculum = {
+    inventory: generated.inventory?.commands || [],
+    audit: generated.audit || null,
+    routes: generated.routes?.routes || [],
+    index: generated.index || null,
+    health: generated.health || null
+  };
 
   const version = state.sources?.knowledge_base_version || loadedFiles[0]?.version || "local";
   els.kbVersion.textContent = commands.length ? `KB ${version}` : "KB unavailable";
@@ -4212,11 +4234,27 @@ function matchingVendor(value, track) {
   return String(value || "").toLowerCase() === String(track).toLowerCase();
 }
 
+function vendorTrackKey(track = activeTrack()) {
+  const map = { "Cisco IOS": "cisco_ios", "HP Comware": "hp_comware", "ArubaOS-CX": "aruba_cx", "Windows CMD": "windows_cmd", Linux: "linux" };
+  return map[track] || track;
+}
+
 function commandsForTrack(track = activeTrack()) {
+  if (state.curriculum?.inventory?.length) {
+    const key = vendorTrackKey(track);
+    return state.curriculum.inventory
+      .filter((command) => key === "all" || command.vendor === key)
+      .map((command) => ({ ...command, id: command.command_id, command: command.canonical_command, vendor_label: command.vendor_label, vendor_key: command.vendor }));
+  }
   return state.commands.filter((command) => matchingVendor(command.vendor_label || command.vendor, track));
 }
 
 function lessonsForTrack(track = activeTrack()) {
+  if (state.curriculum?.index?.modules) {
+    const key = vendorTrackKey(track);
+    const modules = key === "all" ? Object.values(state.curriculum.index.modules).flat() : state.curriculum.index.modules[key] || [];
+    return modules.flatMap((module) => (module.lessons || []).map((lesson) => ({ ...lesson, section_id: module.topic, vendor: lesson.vendor_label || state.curriculum.index.vendors?.[lesson.vendor] || lesson.vendor })));
+  }
   return state.lab.lessons.filter((lesson) => matchingVendor(lesson.vendor, track));
 }
 
@@ -4226,8 +4264,10 @@ function relatedLessonForRoute(route) {
 }
 
 function commandLearningState(command, trackProgressData) {
-  const key = `${command.vendor_label || command.vendor}:${normalizeCommandText(command.command)}`;
+  const key = `${command.vendor_label || command.vendor}:${normalizeCommandText(command.canonical_command || command.command)}`;
   if (trackProgressData.learnedCommands[key]) return "Passed";
+  if (command.learning_status === "grouped_lesson") return "Grouped lesson";
+  if (command.learning_status === "explanation_only") return "Explanation only";
   const lesson = state.lab.lessons.find((item) => matchingVendor(item.vendor, command.vendor_label || command.vendor) && normalizeCommandText(item.command || "") === normalizeCommandText(command.command));
   return lesson ? "In progress" : "Planned lesson";
 }
@@ -4276,13 +4316,15 @@ function renderCommandCoverage() {
   panel.append(labCreate("div", "lab-card-kicker", "Command coverage"));
   panel.append(labCreate("h3", "", `${track === "all" ? "All Tracks" : track} command coverage`));
   const metrics = labCreate("div", "learn-summary");
-  [["Total", commands.length], ["Learned", states.filter((state) => state === "Passed").length], ["In progress", states.filter((state) => state === "In progress").length], ["Not started", states.filter((state) => state === "Planned lesson").length], ["Needs review", Object.keys(progress.reviewRoutes).length], ["Fully simulated", commands.filter((command) => command.safety_level === "Safe read-only command").length], ["Partially simulated", commands.filter((command) => command.safety_level !== "Safe read-only command").length], ["Explanation only", 0]].forEach(([label, value]) => metrics.append(labCreate("span", "badge", `${label}: ${value}`)));
+  const support = (value) => commands.filter((command) => command.simulator_support === value).length;
+  const status = (value) => commands.filter((command) => command.learning_status === value).length;
+  [["Canonical commands", commands.length], ["Aliases", commands.reduce((total, command) => total + (command.aliases || []).length, 0)], ["Learned", states.filter((state) => state === "Passed").length], ["Grouped lessons", status("grouped_lesson")], ["Planned lessons", status("planned_lesson")], ["Fully simulated", support("fully_simulated")], ["Partially simulated", support("partially_simulated")], ["Explanation only", support("explanation_only")], ["Lookup only", support("lookup_only")], ["Needs review", Object.keys(progress.reviewRoutes).length]].forEach(([label, value]) => metrics.append(labCreate("span", "badge", `${label}: ${value}`)));
   panel.append(metrics);
   const list = labCreate("div", "library-grid");
   commands.forEach((command) => {
     const card = labCreate("article", "library-card");
     const status = commandLearningState(command, progress);
-    card.append(labCreate("div", "lab-card-kicker", command.vendor_label || command.vendor || "Local command"), labCreate("h3", "", command.command), labCreate("p", "", `${command.category || "General"} | ${status} | ${command.safety_level || "Explanation only"}`));
+    card.append(labCreate("div", "lab-card-kicker", command.vendor_label || command.vendor || "Local command"), labCreate("h3", "", command.canonical_command || command.command), labCreate("p", "", `${command.topic || command.category || "General"} | ${status} | ${command.simulator_support?.replace(/_/g, " ") || command.safety_level || "Explanation only"}`));
     card.append(labButton("Open in Command Lookup", "secondary", () => { els.commandSearch.value = command.command; state.lookupSource = "search"; switchView("diagnose"); renderCommandLookup(); }));
     list.append(card);
   });
@@ -4330,8 +4372,14 @@ function startPracticeRoute(routeId) {
 function renderPracticeLibrary(parent) {
   const filters = state.lab.libraryFilters;
   const track = activeTrack();
+  const normalizedRoutes = state.curriculum?.routes?.length
+    ? PLAYGROUND_TASKS.map((route) => {
+      const generated = state.curriculum.routes.find((item) => item.route_id === route.id);
+      return generated ? { ...route, ...generated, vendor: generated.vendor_label, operatingSystem: generated.operating_system, modelFamily: generated.platform, routeType: generated.route_type, support: generated.support_level.replace(/_/g, " "), estimatedMinutes: route.estimatedMinutes || 10 } : route;
+    })
+    : PLAYGROUND_TASKS;
   const filterPanel = labCreate("section", "library-filter-panel");
-  filterPanel.append(labCreate("strong", "lab-card-kicker", `${PLAYGROUND_TASKS.length} local practice routes`));
+  filterPanel.append(labCreate("strong", "lab-card-kicker", `${normalizedRoutes.length} local practice routes`));
   const search = document.createElement("input");
   search.placeholder = "Search routes";
   search.value = filters.search;
@@ -4339,12 +4387,14 @@ function renderPracticeLibrary(parent) {
   search.addEventListener("input", () => { filters.search = search.value; renderLibrary(); });
   filterPanel.append(search);
   const definitions = [
-    ["vendor", "Vendor", [...new Set(PLAYGROUND_TASKS.map((route) => route.vendor))]],
-    ["platform", "Platform", [...new Set(PLAYGROUND_TASKS.map((route) => route.platform))]],
-    ["topic", "Topic", [...new Set(PLAYGROUND_TASKS.map((route) => route.topic))]],
-    ["difficulty", "Difficulty", [...new Set(PLAYGROUND_TASKS.map((route) => route.difficulty))]],
-    ["routeType", "Route type", [...new Set(PLAYGROUND_TASKS.map((route) => route.routeType))]],
-    ["support", "Support level", [...new Set(PLAYGROUND_TASKS.map((route) => route.support))]],
+    ["vendor", "Vendor", [...new Set(normalizedRoutes.map((route) => route.vendor))]],
+    ["operatingSystem", "Operating system", [...new Set(normalizedRoutes.map((route) => route.operatingSystem).filter(Boolean))]],
+    ["platform", "Platform", [...new Set(normalizedRoutes.map((route) => route.platform))]],
+    ["modelFamily", "Model family", [...new Set(normalizedRoutes.map((route) => route.modelFamily).filter(Boolean))]],
+    ["topic", "Topic", [...new Set(normalizedRoutes.map((route) => route.topic))]],
+    ["difficulty", "Difficulty", [...new Set(normalizedRoutes.map((route) => route.difficulty))]],
+    ["routeType", "Route type", [...new Set(normalizedRoutes.map((route) => route.routeType))]],
+    ["support", "Support level", [...new Set(normalizedRoutes.map((route) => route.support))]],
     ["status", "Learning status", ["Learned", "Not learned", "Needs review"]]
   ];
   definitions.forEach(([key, label, values]) => {
@@ -4358,10 +4408,10 @@ function renderPracticeLibrary(parent) {
   });
   parent.append(filterPanel);
   const progress = trackProgress(track);
-  const routes = PLAYGROUND_TASKS.filter((route) => {
+  const routes = normalizedRoutes.filter((route) => {
     const searched = !filters.search || `${route.label} ${route.topic} ${route.vendor}`.toLowerCase().includes(filters.search.toLowerCase());
     const activeVendor = track === "all" || route.vendor === track;
-    const fieldsMatch = ["vendor", "platform", "topic", "difficulty", "routeType", "support"].every((key) => !filters[key] || route[key] === filters[key]);
+    const fieldsMatch = ["vendor", "operatingSystem", "platform", "modelFamily", "topic", "difficulty", "routeType", "support"].every((key) => !filters[key] || route[key] === filters[key]);
     const learned = Boolean(progress.practisedRoutes[route.id]);
     const review = Boolean(progress.reviewRoutes[route.id]);
     const statusMatch = !filters.status || (filters.status === "Learned" && learned) || (filters.status === "Not learned" && !learned) || (filters.status === "Needs review" && review);
@@ -4437,6 +4487,20 @@ function renderAdmin() {
   Object.entries(vendorCounts).sort(([a], [b]) => a.localeCompare(b)).forEach(([vendor, count]) => list.append(labCreate("li", "", `${vendor}: ${count}`)));
   catalog.append(list);
   els.adminRoot.append(catalog);
+
+  if (state.curriculum?.audit) {
+    const audit = state.curriculum.audit;
+    const health = state.curriculum.health || {};
+    const inventory = labCreate("section", "admin-panel");
+    inventory.append(labCreate("strong", "lab-card-kicker", "Generated curriculum audit"));
+    inventory.append(labCreate("p", "admin-metric", `${audit.total_normalized_canonical_commands} canonical commands from ${audit.total_raw_command_records} raw records; ${audit.total_aliases} aliases; ${state.curriculum.routes.length} normalized routes.`));
+    inventory.append(labCreate("p", "", `Curriculum health: ${health.status || "Unavailable"}. Classification coverage: ${health.coverage_percentage ?? 0}%.`));
+    const auditList = labCreate("ul", "admin-vendor-list");
+    Object.entries(audit.commands_per_vendor || {}).forEach(([vendor, count]) => auditList.append(labCreate("li", "", `${state.curriculum.index?.vendors?.[vendor] || vendor}: ${count} commands`)));
+    (health.warnings || []).forEach((warning) => auditList.append(labCreate("li", "", `Warning: ${warning}`)));
+    inventory.append(auditList);
+    els.adminRoot.append(inventory);
+  }
 }
 
 function clearInput() {
