@@ -1,0 +1,151 @@
+{
+  "module_id": "aruba_cx-device_information",
+  "vendor": "aruba_cx",
+  "title": "1. Device Information",
+  "topic": "device_information",
+  "level": 1,
+  "lessons": [
+    {
+      "lesson_id": "aruba_cx-device_information",
+      "title": "ArubaOS-CX — Device Information",
+      "vendor": "aruba_cx",
+      "topic": "device_information",
+      "simulation_support": [
+        "lookup_only",
+        "fully_simulated",
+        "explanation_only",
+        "partially_simulated"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "aruba_show_version",
+          "command": "show version",
+          "aliases": [],
+          "purpose": "Shows ArubaOS-CX software version, platform, serial, and uptime information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_write_memory",
+          "command": "write memory",
+          "aliases": [
+            "write mem",
+            "copy running-config startup-config"
+          ],
+          "purpose": "Saves the active ArubaOS-CX running configuration.",
+          "safety_level": "Medium - persists current changes; can preserve a mistake across reboot.",
+          "verification_commands": [
+            "show startup-config"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "fully_simulated"
+        },
+        {
+          "command_id": "aruba_reload",
+          "command": "reload",
+          "aliases": [],
+          "purpose": "Restarts the ArubaOS-CX device.",
+          "safety_level": "Critical - reboots the device and interrupts users.",
+          "verification_commands": [
+            "show version"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "aruba_show_system",
+          "command": "show system",
+          "aliases": [],
+          "purpose": "Shows ArubaOS-CX system identity, platform state, uptime, and management information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show version"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_show_flash",
+          "command": "show flash",
+          "aliases": [],
+          "purpose": "Shows ArubaOS-CX flash storage and software image information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show version"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_show_logging",
+          "command": "show logging",
+          "aliases": [],
+          "purpose": "Shows recent ArubaOS-CX system log messages.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show system"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_show_events_reverse_count",
+          "command": "show events -r -n <count>",
+          "aliases": [],
+          "purpose": "Shows a chosen number of recent ArubaOS-CX events with newest entries first.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show system"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_show_system_resource_utilization",
+          "command": "show system resource-utilization",
+          "aliases": [],
+          "purpose": "Shows CPU, memory, storage, and process resource utilization.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show events -r -n <count>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_hostname",
+          "command": "hostname <name>",
+          "aliases": [],
+          "purpose": "Sets the ArubaOS-CX switch hostname.",
+          "safety_level": "Medium - changes device identity.",
+          "verification_commands": [
+            "show running-config"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        }
+      ]
+    }
+  ]
+}
