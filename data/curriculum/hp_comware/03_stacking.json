@@ -1,0 +1,55 @@
+{
+  "module_id": "hp_comware-stacking",
+  "vendor": "hp_comware",
+  "title": "9. Stacking",
+  "topic": "stacking",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "hp_comware-stacking",
+      "title": "HP Comware — Stacking",
+      "vendor": "hp_comware",
+      "topic": "stacking",
+      "simulation_support": [
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "hp_irf_member_priority",
+          "command": "irf member <member-id> priority <priority>",
+          "aliases": [],
+          "purpose": "Sets HP Comware IRF member election priority.",
+          "safety_level": "High - affects future IRF master elections.",
+          "verification_commands": [
+            "display irf configuration"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "hp_irf_member_renumber",
+          "command": "irf member <member-id> renumber <new-member-id>",
+          "aliases": [],
+          "purpose": "Changes the configured ID of an IRF member.",
+          "safety_level": "Critical - requires reboot and can invalidate member-ID related settings.",
+          "verification_commands": [],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        }
+      ]
+    }
+  ]
+}
