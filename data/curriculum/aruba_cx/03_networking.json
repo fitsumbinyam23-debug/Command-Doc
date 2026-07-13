@@ -1,0 +1,45 @@
+{
+  "module_id": "aruba_cx-networking",
+  "vendor": "aruba_cx",
+  "title": "6. Networking",
+  "topic": "networking",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "aruba_cx-networking",
+      "title": "ArubaOS-CX — Networking",
+      "vendor": "aruba_cx",
+      "topic": "networking",
+      "simulation_support": [
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "aruba_show_ip_route",
+          "command": "show ip route",
+          "aliases": [],
+          "purpose": "Shows ArubaOS-CX IPv4 routes, their source, distance, metric, and next hop.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show ip interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
