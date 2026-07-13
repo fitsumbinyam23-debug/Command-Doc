@@ -1,0 +1,219 @@
+{
+  "module_id": "hp_comware-device_information",
+  "vendor": "hp_comware",
+  "title": "1. Device Information",
+  "topic": "device_information",
+  "level": 1,
+  "lessons": [
+    {
+      "lesson_id": "hp_comware-device_information",
+      "title": "HP Comware — Device Information",
+      "vendor": "hp_comware",
+      "topic": "device_information",
+      "simulation_support": [
+        "lookup_only",
+        "fully_simulated",
+        "explanation_only",
+        "partially_simulated"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "hp_display_version",
+          "command": "display version",
+          "aliases": [
+            "dis version",
+            "dis ver"
+          ],
+          "purpose": "Shows Comware software version, uptime, boot image, and hardware information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display interface brief",
+            "display logbuffer"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_display_device",
+          "command": "display device",
+          "aliases": [
+            "dis device"
+          ],
+          "purpose": "Shows device hardware, slots, members, board status, and operational state.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display logbuffer",
+            "display irf"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_display_logbuffer",
+          "command": "display logbuffer",
+          "aliases": [
+            "dis logbuffer"
+          ],
+          "purpose": "Shows recent system log messages.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display interface brief",
+            "display irf"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_save",
+          "command": "save",
+          "aliases": [
+            "save force"
+          ],
+          "purpose": "Saves the current Comware configuration so it persists after reboot.",
+          "safety_level": "Medium - persists current changes; can preserve mistakes across reboot.",
+          "verification_commands": [
+            "display saved-configuration"
+          ],
+          "rollback_commands": [
+            "undo <command>"
+          ],
+          "simulator_support": "fully_simulated"
+        },
+        {
+          "command_id": "hp_reboot",
+          "command": "reboot",
+          "aliases": [],
+          "purpose": "Restarts the Comware device or member.",
+          "safety_level": "Critical - reboots equipment and interrupts users.",
+          "verification_commands": [
+            "display version"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "hp_display_diagnostic_information",
+          "command": "display diagnostic-information",
+          "aliases": [
+            "dis diagnostic-information",
+            "dis diag"
+          ],
+          "purpose": "Collects a broad Comware diagnostic snapshot including system, interface, configuration, and log context.",
+          "safety_level": "Medium - output can be large and the device may prompt to save a diagnostic file; review the prompt before continuing.",
+          "verification_commands": [
+            "display logbuffer"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "hp_display_current_configuration",
+          "command": "display current-configuration",
+          "aliases": [
+            "dis current-configuration",
+            "dis current"
+          ],
+          "purpose": "Shows the active Comware configuration currently running on the device.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display current-configuration interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_dir",
+          "command": "dir",
+          "aliases": [],
+          "purpose": "Lists files in the current Comware filesystem location.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display boot-loader"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_display_saved_configuration",
+          "command": "display saved-configuration",
+          "aliases": [
+            "dis saved-configuration",
+            "dis saved"
+          ],
+          "purpose": "Shows the Comware configuration file selected for the next startup.",
+          "safety_level": "Low - read-only, but output may contain credentials, addresses, and sensitive configuration.",
+          "verification_commands": [
+            "display current-configuration"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "hp_display_cpu_usage",
+          "command": "display cpu-usage",
+          "aliases": [],
+          "purpose": "Shows processor utilization on a Comware device.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display logbuffer"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_display_memory",
+          "command": "display memory",
+          "aliases": [],
+          "purpose": "Shows memory utilization on supported Comware platforms.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display logbuffer"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_sysname",
+          "command": "sysname <name>",
+          "aliases": [],
+          "purpose": "Sets the HP Comware device name in system view.",
+          "safety_level": "Medium - changes device identity.",
+          "verification_commands": [
+            "display current-configuration"
+          ],
+          "rollback_commands": [
+            "undo <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "hp_save_force",
+          "command": "save force",
+          "aliases": [],
+          "purpose": "Saves current Comware configuration without an interactive confirmation.",
+          "safety_level": "High - persists changes across reboot.",
+          "verification_commands": [
+            "display saved-configuration"
+          ],
+          "rollback_commands": [
+            "undo <command>"
+          ],
+          "simulator_support": "explanation_only"
+        }
+      ]
+    }
+  ]
+}
