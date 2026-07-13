@@ -55,6 +55,11 @@
     next.diagnostics ||= [];
     next.logs ||= [];
     next.unsaved_changes ||= [];
+    next.session ||= {};
+    next.session.selected_interface ||= Object.keys(next.interfaces)[0] || "";
+    next.session.terminal_history ||= [];
+    next.session.command_history ||= [];
+    next.session.verification ||= {};
     delete next.hostname;
     delete next.profile_id;
     delete next.version;
@@ -269,6 +274,20 @@
 
     interface(name) { return this.running.interfaces[name]; }
     changes() { return this.running.unsaved_changes || []; }
+    selectedInterface() { return this.running.session.selected_interface; }
+    selectInterface(name) { if (!this.interface(name)) return false; this.running.session.selected_interface = name; this.persist(); return true; }
+    terminalHistory() { return this.running.session.terminal_history || []; }
+    storeTerminal(history, commands) { this.running.session.terminal_history = clone(history || []); this.running.session.command_history = clone(commands || []); this.persist(); }
+    verification(name) { return this.running.session.verification?.[name] || { verified: false }; }
+    verifyInterfaceDescription(name, command, output) {
+      const port = this.interface(name);
+      const expected = `description ${port?.description || ""}`.trim();
+      const passed = Boolean(port?.description) && normalise(command) === normalise(`show running-config interface ${name}`) && String(output || "").includes(name) && String(output || "").includes(expected);
+      this.running.session.verification[name] = { verified: passed, command, output, timestamp: new Date().toISOString() };
+      this.record({ command_id: "verify-interface-description", canonical_command: command, entered_text: command, success: passed, state_before: {}, state_after: {}, verification_result: passed ? "passed" : "failed" });
+      this.persist();
+      return passed;
+    }
     change(field, before, after, commandId = "inspector") {
       if (before === after) return;
       this.running.unsaved_changes.push({ field, before, after, timestamp: new Date().toISOString(), command_id: commandId });
@@ -292,7 +311,15 @@
       this.record({ command_id: commandId, canonical_command: commandId, entered_text: commandId, success: true, state_before: before, state_after: clone(this.running), save_result: "saved" });
       this.persist();
     }
-    rollbackUnsaved() { const before = clone(this.running); this.running = clone(this.startup); this.running.unsaved_changes = []; this.record({ command_id: "rollback-unsaved", canonical_command: "rollback unsaved", entered_text: "rollback unsaved", success: true, state_before: before, state_after: clone(this.running), safety_result: "rollback_unsaved" }); this.persist(); }
+    rollbackUnsaved() {
+      const before = clone(this.running);
+      const session = clone(this.running.session || {});
+      this.running = clone(this.startup);
+      this.running.session = session;
+      this.running.unsaved_changes = [];
+      this.record({ command_id: "rollback-unsaved", canonical_command: "rollback unsaved", entered_text: "rollback unsaved", success: true, state_before: before, state_after: clone(this.running), safety_result: "rollback_unsaved" });
+      this.persist();
+    }
     resetTraining() { const before = clone(this.running); this.running = clone(this.factoryBaseline); this.running.unsaved_changes = []; this.record({ command_id: "reset-training", canonical_command: "reset training switch", entered_text: "reset training switch", success: true, state_before: before, state_after: clone(this.running), safety_result: "reset_training" }); this.persist(); }
     rollbackChange(index) { const change = this.changes()[index]; if (!change) return false; this.setByPath(change.field, clone(change.before), "rollback-one-change"); this.running.unsaved_changes.splice(index, 1); this.record({ command_id: "rollback-one-change", canonical_command: "rollback one change", entered_text: change.field, success: true, changed_fields: [change.field], safety_result: "rollback_one_change" }); this.persist(); return true; }
     rollback() { this.rollbackUnsaved(); }
