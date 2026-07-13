@@ -1,0 +1,3456 @@
+{
+  "schema_version": 1,
+  "vendors": {
+    "cisco_ios": "Cisco IOS",
+    "hp_comware": "HP Comware",
+    "aruba_cx": "ArubaOS-CX",
+    "windows_cmd": "Windows CMD",
+    "linux": "Linux"
+  },
+  "modules": {
+    "cisco_ios": [
+      {
+        "module_id": "cisco_ios-device_information",
+        "vendor": "cisco_ios",
+        "title": "1. Device Information",
+        "topic": "device_information",
+        "level": 1,
+        "lessons": [
+          {
+            "lesson_id": "cisco_ios-device_information",
+            "title": "Cisco IOS — Device Information",
+            "vendor": "cisco_ios",
+            "topic": "device_information",
+            "simulation_support": [
+              "lookup_only",
+              "partially_simulated",
+              "explanation_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "cisco_show_version",
+                "command": "show version",
+                "aliases": [
+                  "sh version",
+                  "sh ver"
+                ],
+                "purpose": "Shows software version, uptime, model, serial details, image, and configuration register.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show running-config",
+                  "show startup-config"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_configure_terminal",
+                "command": "configure terminal",
+                "aliases": [
+                  "conf t",
+                  "config terminal"
+                ],
+                "purpose": "Enters global configuration mode on a Cisco IOS device.",
+                "safety_level": "High - enters configuration mode; later commands can affect production.",
+                "verification_commands": [
+                  "show running-config"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "cisco_reload",
+                "command": "reload",
+                "aliases": [],
+                "purpose": "Restarts the Cisco device.",
+                "safety_level": "Critical - reboots the device and interrupts users.",
+                "verification_commands": [
+                  "show version"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "cisco_show_diagnostic_result",
+                "command": "show diagnostic result",
+                "aliases": [
+                  "sh diagnostic result",
+                  "sh diag result",
+                  "show diag result"
+                ],
+                "purpose": "Shows available Cisco diagnostic test results and their pass, fail, or not-run state.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show logging"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_dir_flash",
+                "command": "dir flash:",
+                "aliases": [
+                  "dir flash"
+                ],
+                "purpose": "Lists files and free space in the Cisco flash filesystem.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show file systems"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_file_systems",
+                "command": "show file systems",
+                "aliases": [
+                  "sh file systems"
+                ],
+                "purpose": "Lists Cisco filesystems, prefixes, sizes, and access capabilities.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "dir flash:"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_boot",
+                "command": "show boot",
+                "aliases": [
+                  "sh boot"
+                ],
+                "purpose": "Shows Cisco boot variables and the image selected for the next boot.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "dir flash:"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_inventory",
+                "command": "show inventory",
+                "aliases": [
+                  "sh inventory",
+                  "sh inv"
+                ],
+                "purpose": "Shows installed Cisco chassis, modules, serial numbers, and hardware identifiers.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show version"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_logging",
+                "command": "show logging",
+                "aliases": [
+                  "sh logging",
+                  "sh log"
+                ],
+                "purpose": "Shows Cisco logging configuration and buffered system messages.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show version"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_running_config",
+                "command": "show running-config",
+                "aliases": [
+                  "sh running-config",
+                  "sh run"
+                ],
+                "purpose": "Shows the active configuration currently running in memory.",
+                "safety_level": "Low - read-only, but output may contain credentials, addresses, and sensitive configuration.",
+                "verification_commands": [
+                  "show startup-config"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "cisco_show_startup_config",
+                "command": "show startup-config",
+                "aliases": [
+                  "sh startup-config",
+                  "sh start"
+                ],
+                "purpose": "Shows the saved configuration that will be loaded at the next boot.",
+                "safety_level": "Low - read-only, but output may contain credentials, addresses, and sensitive configuration.",
+                "verification_commands": [
+                  "show running-config"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "cisco_show_processes_cpu_sorted",
+                "command": "show processes cpu sorted",
+                "aliases": [],
+                "purpose": "Shows CPU use by process, sorted by utilization.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show logging"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_hostname",
+                "command": "hostname <name>",
+                "aliases": [],
+                "purpose": "Sets the Cisco device hostname in global configuration mode.",
+                "safety_level": "Medium - changes device identity in the configuration.",
+                "verification_commands": [
+                  "show running-config"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "cisco_ios-interfaces",
+        "vendor": "cisco_ios",
+        "title": "2. Interfaces",
+        "topic": "interfaces",
+        "level": 1,
+        "lessons": [
+          {
+            "lesson_id": "cisco_ios-interfaces",
+            "title": "Cisco IOS — Interfaces",
+            "vendor": "cisco_ios",
+            "topic": "interfaces",
+            "simulation_support": [
+              "fully_simulated",
+              "lookup_only",
+              "partially_simulated",
+              "explanation_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "cisco_show_interface_status",
+                "command": "show interface status",
+                "aliases": [
+                  "sh interface status",
+                  "sh interfaces status",
+                  "sh int status"
+                ],
+                "purpose": "Shows switch port status, VLAN, duplex, speed, and media type.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface <interface>",
+                  "show running-config interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "fully_simulated"
+              },
+              {
+                "command_id": "cisco_show_interfaces",
+                "command": "show interfaces",
+                "aliases": [
+                  "sh interfaces",
+                  "sh interface",
+                  "sh int"
+                ],
+                "purpose": "Shows detailed interface state, counters, errors, speed, duplex, and traffic.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface status",
+                  "show running-config interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_mac_address_table",
+                "command": "show mac address-table",
+                "aliases": [
+                  "sh mac address-table",
+                  "sh mac add",
+                  "sh mac-address-table"
+                ],
+                "purpose": "Shows MAC addresses learned by the switch and the interfaces where they were learned.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface <interface>",
+                  "show vlan brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_spanning_tree",
+                "command": "show spanning-tree",
+                "aliases": [
+                  "sh spanning-tree",
+                  "sh span"
+                ],
+                "purpose": "Shows spanning-tree state, root bridge information, and port roles.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface status",
+                  "show cdp neighbors"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_etherchannel_summary",
+                "command": "show etherchannel summary",
+                "aliases": [
+                  "sh etherchannel summary",
+                  "sh ether sum"
+                ],
+                "purpose": "Shows port-channel groups, protocol, and member-port bundle state.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface <interface>",
+                  "show running-config interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_running_config_interface",
+                "command": "show running-config interface",
+                "aliases": [
+                  "sh running-config interface",
+                  "sh run interface",
+                  "sh run int"
+                ],
+                "purpose": "Shows the active configuration applied to a specific interface.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface status",
+                  "show interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "fully_simulated"
+              },
+              {
+                "command_id": "cisco_interface_config",
+                "command": "interface <interface>",
+                "aliases": [
+                  "int <interface>"
+                ],
+                "purpose": "Enters configuration mode for a specific Cisco interface.",
+                "safety_level": "High - selects a production interface for possible changes.",
+                "verification_commands": [
+                  "show running-config interface <interface>"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "cisco_shutdown",
+                "command": "shutdown",
+                "aliases": [],
+                "purpose": "Administratively disables the selected interface.",
+                "safety_level": "Critical - can disconnect users, APs, cameras, uplinks, or services.",
+                "verification_commands": [
+                  "show interface status"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "cisco_no_shutdown",
+                "command": "no shutdown",
+                "aliases": [
+                  "no shut"
+                ],
+                "purpose": "Administratively enables the selected interface.",
+                "safety_level": "High - can restore traffic or introduce an unexpected device to the network.",
+                "verification_commands": [
+                  "show interface <interface>"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "cisco_show_ip_interface_brief",
+                "command": "show ip interface brief",
+                "aliases": [
+                  "sh ip interface brief",
+                  "sh ip int brief",
+                  "sh ip int br"
+                ],
+                "purpose": "Summarizes interface IP addresses and their physical and protocol states.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interfaces"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "cisco_show_interfaces_counters_errors",
+                "command": "show interfaces counters errors",
+                "aliases": [],
+                "purpose": "Summarizes interface error counters on supported Catalyst platforms.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interfaces <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_power_inline",
+                "command": "show power inline",
+                "aliases": [],
+                "purpose": "Shows Power over Ethernet status, power draw, and allocation on supported switches.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interfaces <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_port_security_interface",
+                "command": "show port-security interface <interface>",
+                "aliases": [],
+                "purpose": "Shows port-security state, learned secure MACs, and violation information.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show logging"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "cisco_interface_range",
+                "command": "interface range <interfaces>",
+                "aliases": [],
+                "purpose": "Selects multiple Cisco interfaces for a shared configuration.",
+                "safety_level": "High - applies later commands to multiple interfaces.",
+                "verification_commands": [
+                  "show running-config interface <interface>"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "cisco_svi_ip_address",
+                "command": "ip address <ip-address> <mask>",
+                "aliases": [],
+                "purpose": "Assigns an IPv4 address to a selected Layer 3 or SVI interface.",
+                "safety_level": "High - can disconnect management or create an IP conflict.",
+                "verification_commands": [
+                  "show ip interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "cisco_ios-vlans",
+        "vendor": "cisco_ios",
+        "title": "3. Vlans",
+        "topic": "vlans",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "cisco_ios-vlans",
+            "title": "Cisco IOS — Vlans",
+            "vendor": "cisco_ios",
+            "topic": "vlans",
+            "simulation_support": [
+              "fully_simulated",
+              "partially_simulated",
+              "explanation_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "cisco_show_vlan_brief",
+                "command": "show vlan brief",
+                "aliases": [
+                  "sh vlan brief",
+                  "sh vlan br"
+                ],
+                "purpose": "Shows VLAN IDs, VLAN names, status, and access ports assigned to each VLAN.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface status",
+                  "show mac address-table vlan <vlan>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "fully_simulated"
+              },
+              {
+                "command_id": "cisco_switchport_access_vlan",
+                "command": "switchport access vlan <vlan>",
+                "aliases": [
+                  "switchport access vlan <vlan>"
+                ],
+                "purpose": "Assigns the selected access port to a specific VLAN.",
+                "safety_level": "High - changes endpoint network placement and can break access.",
+                "verification_commands": [
+                  "show vlan brief"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "cisco_vlan_create",
+                "command": "vlan <vlan-id>",
+                "aliases": [],
+                "purpose": "Creates or enters a VLAN configuration context.",
+                "safety_level": "Medium - can affect switching when assigned to ports.",
+                "verification_commands": [
+                  "show vlan brief"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "cisco_vlan_name",
+                "command": "name <vlan-name>",
+                "aliases": [],
+                "purpose": "Assigns a name to the selected Cisco VLAN.",
+                "safety_level": "Low - documentation change within VLAN configuration.",
+                "verification_commands": [],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "cisco_voice_vlan",
+                "command": "switchport voice vlan <vlan-id>",
+                "aliases": [],
+                "purpose": "Assigns a Cisco voice VLAN to an access port for an IP phone.",
+                "safety_level": "Medium - can affect IP phone service.",
+                "verification_commands": [
+                  "show interfaces <interface> switchport"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "cisco_stp_root_primary",
+                "command": "spanning-tree vlan <vlan-id> root primary",
+                "aliases": [],
+                "purpose": "Adjusts Cisco STP bridge priority to make the switch preferred root for a VLAN.",
+                "safety_level": "High - changes Layer 2 forwarding topology.",
+                "verification_commands": [
+                  "show spanning-tree vlan <vlan-id>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "partially_simulated"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "cisco_ios-mac_neighbors",
+        "vendor": "cisco_ios",
+        "title": "4. Mac Neighbors",
+        "topic": "mac_neighbors",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "cisco_ios-mac_neighbors",
+            "title": "Cisco IOS — Mac Neighbors",
+            "vendor": "cisco_ios",
+            "topic": "mac_neighbors",
+            "simulation_support": [
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "cisco_show_cdp_neighbors",
+                "command": "show cdp neighbors",
+                "aliases": [
+                  "sh cdp neighbors",
+                  "sh cdp neigh"
+                ],
+                "purpose": "Shows Cisco Discovery Protocol neighbors visible from local interfaces.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show lldp neighbors",
+                  "show interface status"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_lldp_neighbors",
+                "command": "show lldp neighbors",
+                "aliases": [
+                  "sh lldp neighbors",
+                  "sh lldp neigh"
+                ],
+                "purpose": "Shows LLDP neighbors visible from local interfaces.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface status",
+                  "show cdp neighbors"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "cisco_show_ip_arp",
+                "command": "show ip arp",
+                "aliases": [
+                  "sh ip arp"
+                ],
+                "purpose": "Shows IP-to-MAC address mappings learned by ARP.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show mac address-table vlan <vlan>",
+                  "show interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "cisco_ios-configuration",
+        "vendor": "cisco_ios",
+        "title": "5. Configuration",
+        "topic": "configuration",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "cisco_ios-configuration",
+            "title": "Cisco IOS — Configuration",
+            "vendor": "cisco_ios",
+            "topic": "configuration",
+            "simulation_support": [
+              "fully_simulated"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "cisco_copy_running_startup",
+                "command": "copy running-config startup-config",
+                "aliases": [
+                  "copy run start",
+                  "write memory",
+                  "wr mem"
+                ],
+                "purpose": "Saves the active running configuration to startup configuration.",
+                "safety_level": "Medium - persists current changes; can preserve a mistake across reboot.",
+                "verification_commands": [
+                  "show startup-config"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "fully_simulated"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "cisco_ios-networking",
+        "vendor": "cisco_ios",
+        "title": "6. Networking",
+        "topic": "networking",
+        "level": 3,
+        "lessons": [
+          {
+            "lesson_id": "cisco_ios-networking",
+            "title": "Cisco IOS — Networking",
+            "vendor": "cisco_ios",
+            "topic": "networking",
+            "simulation_support": [
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "cisco_show_ip_route",
+                "command": "show ip route",
+                "aliases": [
+                  "sh ip route"
+                ],
+                "purpose": "Shows the IPv4 routing table and how each destination was learned.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show ip interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "cisco_ios-cli_foundation",
+        "vendor": "cisco_ios",
+        "title": "7. Cli Foundation",
+        "topic": "cli_foundation",
+        "level": 3,
+        "lessons": [
+          {
+            "lesson_id": "cisco_ios-cli_foundation",
+            "title": "Cisco IOS — Cli Foundation",
+            "vendor": "cisco_ios",
+            "topic": "cli_foundation",
+            "simulation_support": [
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "cisco_show_ip_dhcp_binding",
+                "command": "show ip dhcp binding",
+                "aliases": [],
+                "purpose": "Lists DHCP leases maintained by a Cisco IOS DHCP server.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show ip dhcp pool"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "cisco_ios-trunks",
+        "vendor": "cisco_ios",
+        "title": "8. Trunks",
+        "topic": "trunks",
+        "level": 3,
+        "lessons": [
+          {
+            "lesson_id": "cisco_ios-trunks",
+            "title": "Cisco IOS — Trunks",
+            "vendor": "cisco_ios",
+            "topic": "trunks",
+            "simulation_support": [
+              "explanation_only",
+              "partially_simulated"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "cisco_switchport_mode_trunk",
+                "command": "switchport mode trunk",
+                "aliases": [],
+                "purpose": "Configures a Layer 2 interface to operate as a trunk.",
+                "safety_level": "High - can alter VLAN reachability.",
+                "verification_commands": [
+                  "show interfaces trunk"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "cisco_switchport_trunk_allowed",
+                "command": "switchport trunk allowed vlan <vlan-list>",
+                "aliases": [],
+                "purpose": "Restricts which VLANs may traverse a Cisco trunk.",
+                "safety_level": "High - can interrupt VLAN services.",
+                "verification_commands": [
+                  "show interfaces trunk"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "cisco_ios-stacking",
+        "vendor": "cisco_ios",
+        "title": "9. Stacking",
+        "topic": "stacking",
+        "level": 3,
+        "lessons": [
+          {
+            "lesson_id": "cisco_ios-stacking",
+            "title": "Cisco IOS — Stacking",
+            "vendor": "cisco_ios",
+            "topic": "stacking",
+            "simulation_support": [
+              "explanation_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "cisco_switch_priority",
+                "command": "switch <member> priority <priority>",
+                "aliases": [],
+                "purpose": "Sets Cisco switch-stack member election priority.",
+                "safety_level": "High - affects future stack election behavior.",
+                "verification_commands": [
+                  "show switch"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "hp_comware": [
+      {
+        "module_id": "hp_comware-device_information",
+        "vendor": "hp_comware",
+        "title": "1. Device Information",
+        "topic": "device_information",
+        "level": 1,
+        "lessons": [
+          {
+            "lesson_id": "hp_comware-device_information",
+            "title": "HP Comware — Device Information",
+            "vendor": "hp_comware",
+            "topic": "device_information",
+            "simulation_support": [
+              "lookup_only",
+              "fully_simulated",
+              "explanation_only",
+              "partially_simulated"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "hp_display_version",
+                "command": "display version",
+                "aliases": [
+                  "dis version",
+                  "dis ver"
+                ],
+                "purpose": "Shows Comware software version, uptime, boot image, and hardware information.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display interface brief",
+                  "display logbuffer"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_display_device",
+                "command": "display device",
+                "aliases": [
+                  "dis device"
+                ],
+                "purpose": "Shows device hardware, slots, members, board status, and operational state.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display logbuffer",
+                  "display irf"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_display_logbuffer",
+                "command": "display logbuffer",
+                "aliases": [
+                  "dis logbuffer"
+                ],
+                "purpose": "Shows recent system log messages.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display interface brief",
+                  "display irf"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_save",
+                "command": "save",
+                "aliases": [
+                  "save force"
+                ],
+                "purpose": "Saves the current Comware configuration so it persists after reboot.",
+                "safety_level": "Medium - persists current changes; can preserve mistakes across reboot.",
+                "verification_commands": [
+                  "display saved-configuration"
+                ],
+                "rollback_commands": [
+                  "undo <command>"
+                ],
+                "simulator_support": "fully_simulated"
+              },
+              {
+                "command_id": "hp_reboot",
+                "command": "reboot",
+                "aliases": [],
+                "purpose": "Restarts the Comware device or member.",
+                "safety_level": "Critical - reboots equipment and interrupts users.",
+                "verification_commands": [
+                  "display version"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "hp_display_diagnostic_information",
+                "command": "display diagnostic-information",
+                "aliases": [
+                  "dis diagnostic-information",
+                  "dis diag"
+                ],
+                "purpose": "Collects a broad Comware diagnostic snapshot including system, interface, configuration, and log context.",
+                "safety_level": "Medium - output can be large and the device may prompt to save a diagnostic file; review the prompt before continuing.",
+                "verification_commands": [
+                  "display logbuffer"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "hp_display_current_configuration",
+                "command": "display current-configuration",
+                "aliases": [
+                  "dis current-configuration",
+                  "dis current"
+                ],
+                "purpose": "Shows the active Comware configuration currently running on the device.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display current-configuration interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_dir",
+                "command": "dir",
+                "aliases": [],
+                "purpose": "Lists files in the current Comware filesystem location.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display boot-loader"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_display_saved_configuration",
+                "command": "display saved-configuration",
+                "aliases": [
+                  "dis saved-configuration",
+                  "dis saved"
+                ],
+                "purpose": "Shows the Comware configuration file selected for the next startup.",
+                "safety_level": "Low - read-only, but output may contain credentials, addresses, and sensitive configuration.",
+                "verification_commands": [
+                  "display current-configuration"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "hp_display_cpu_usage",
+                "command": "display cpu-usage",
+                "aliases": [],
+                "purpose": "Shows processor utilization on a Comware device.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display logbuffer"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_display_memory",
+                "command": "display memory",
+                "aliases": [],
+                "purpose": "Shows memory utilization on supported Comware platforms.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display logbuffer"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_sysname",
+                "command": "sysname <name>",
+                "aliases": [],
+                "purpose": "Sets the HP Comware device name in system view.",
+                "safety_level": "Medium - changes device identity.",
+                "verification_commands": [
+                  "display current-configuration"
+                ],
+                "rollback_commands": [
+                  "undo <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "hp_save_force",
+                "command": "save force",
+                "aliases": [],
+                "purpose": "Saves current Comware configuration without an interactive confirmation.",
+                "safety_level": "High - persists changes across reboot.",
+                "verification_commands": [
+                  "display saved-configuration"
+                ],
+                "rollback_commands": [
+                  "undo <command>"
+                ],
+                "simulator_support": "explanation_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "hp_comware-interfaces",
+        "vendor": "hp_comware",
+        "title": "2. Interfaces",
+        "topic": "interfaces",
+        "level": 1,
+        "lessons": [
+          {
+            "lesson_id": "hp_comware-interfaces",
+            "title": "HP Comware — Interfaces",
+            "vendor": "hp_comware",
+            "topic": "interfaces",
+            "simulation_support": [
+              "partially_simulated",
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "hp_display_interface_brief",
+                "command": "display interface brief",
+                "aliases": [
+                  "dis interface brief",
+                  "dis int brief"
+                ],
+                "purpose": "Shows interface physical state, protocol state, and brief status information.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display interface <interface>",
+                  "display current-configuration interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "hp_display_interface",
+                "command": "display interface",
+                "aliases": [
+                  "dis interface",
+                  "dis int"
+                ],
+                "purpose": "Shows detailed interface state, counters, errors, speed, duplex, and media information.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display interface brief",
+                  "display current-configuration interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_display_current_configuration_interface",
+                "command": "display current-configuration interface",
+                "aliases": [
+                  "dis current-configuration interface",
+                  "dis current int"
+                ],
+                "purpose": "Shows current configuration applied to a specific interface.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display interface <interface>",
+                  "display interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_interface_config",
+                "command": "interface <interface>",
+                "aliases": [
+                  "int <interface>",
+                  "interface <interface>"
+                ],
+                "purpose": "Enters Comware interface view for a selected interface.",
+                "safety_level": "High - selects a production interface for possible changes.",
+                "verification_commands": [
+                  "display current-configuration interface <interface>"
+                ],
+                "rollback_commands": [
+                  "undo <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "hp_shutdown",
+                "command": "shutdown",
+                "aliases": [],
+                "purpose": "Administratively disables the selected Comware interface.",
+                "safety_level": "Critical - can disconnect users, APs, cameras, uplinks, or stack links.",
+                "verification_commands": [
+                  "display interface brief"
+                ],
+                "rollback_commands": [
+                  "undo <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "hp_undo_shutdown",
+                "command": "undo shutdown",
+                "aliases": [
+                  "undo shut"
+                ],
+                "purpose": "Administratively enables the selected Comware interface.",
+                "safety_level": "High - can restore traffic or introduce an unexpected device to the network.",
+                "verification_commands": [
+                  "display interface <interface>"
+                ],
+                "rollback_commands": [
+                  "undo <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "hp_display_ip_interface_brief",
+                "command": "display ip interface brief",
+                "aliases": [
+                  "dis ip interface brief",
+                  "dis ip int brief",
+                  "dis ip int br"
+                ],
+                "purpose": "Summarizes Comware interface IPv4 addresses and physical and protocol states.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "hp_display_stp_brief",
+                "command": "display stp brief",
+                "aliases": [
+                  "dis stp brief",
+                  "dis stp br"
+                ],
+                "purpose": "Summarizes spanning-tree roles and forwarding states for Comware ports.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display logbuffer"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_display_poe_interface",
+                "command": "display poe interface",
+                "aliases": [],
+                "purpose": "Shows Power over Ethernet status for Comware interfaces.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "hp_comware-vlans",
+        "vendor": "hp_comware",
+        "title": "3. Vlans",
+        "topic": "vlans",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "hp_comware-vlans",
+            "title": "HP Comware — Vlans",
+            "vendor": "hp_comware",
+            "topic": "vlans",
+            "simulation_support": [
+              "lookup_only",
+              "partially_simulated"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "hp_display_vlan",
+                "command": "display vlan",
+                "aliases": [
+                  "dis vlan"
+                ],
+                "purpose": "Shows VLAN information, status, and member interfaces.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display interface brief",
+                  "display mac-address vlan <vlan>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_port_access_vlan",
+                "command": "port access vlan <vlan>",
+                "aliases": [
+                  "port access vlan <vlan>"
+                ],
+                "purpose": "Assigns the selected Comware access port to a VLAN.",
+                "safety_level": "High - changes endpoint network placement and can break access.",
+                "verification_commands": [
+                  "display vlan <vlan>"
+                ],
+                "rollback_commands": [
+                  "undo <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "hp_vlan",
+                "command": "vlan <vlan-id>",
+                "aliases": [],
+                "purpose": "Creates or enters an HP Comware VLAN view.",
+                "safety_level": "Medium - can affect switching once assigned.",
+                "verification_commands": [
+                  "display vlan <vlan-id>"
+                ],
+                "rollback_commands": [
+                  "undo <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "hp_comware-mac_neighbors",
+        "vendor": "hp_comware",
+        "title": "4. Mac Neighbors",
+        "topic": "mac_neighbors",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "hp_comware-mac_neighbors",
+            "title": "HP Comware — Mac Neighbors",
+            "vendor": "hp_comware",
+            "topic": "mac_neighbors",
+            "simulation_support": [
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "hp_display_mac_address",
+                "command": "display mac-address",
+                "aliases": [
+                  "dis mac-address",
+                  "dis mac"
+                ],
+                "purpose": "Shows MAC addresses learned by the switch.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display interface <interface>",
+                  "display vlan <vlan>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_display_lldp_neighbor",
+                "command": "display lldp neighbor-information",
+                "aliases": [
+                  "dis lldp neighbor-information",
+                  "dis lldp neighbor"
+                ],
+                "purpose": "Shows LLDP neighbor information and local-to-remote interface mapping.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_display_arp",
+                "command": "display arp",
+                "aliases": [
+                  "dis arp"
+                ],
+                "purpose": "Shows IPv4-to-MAC address mappings learned by the Comware device.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display mac-address"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "hp_comware-stacking",
+        "vendor": "hp_comware",
+        "title": "5. Stacking",
+        "topic": "stacking",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "hp_comware-stacking",
+            "title": "HP Comware — Stacking",
+            "vendor": "hp_comware",
+            "topic": "stacking",
+            "simulation_support": [
+              "fully_simulated",
+              "lookup_only",
+              "explanation_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "hp_display_irf",
+                "command": "display irf",
+                "aliases": [
+                  "dis irf"
+                ],
+                "purpose": "Shows IRF member identity, role, priority, bridge MAC, and status.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display irf topology",
+                  "display logbuffer"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "fully_simulated"
+              },
+              {
+                "command_id": "hp_display_irf_port",
+                "command": "display irf-port",
+                "aliases": [
+                  "dis irf-port"
+                ],
+                "purpose": "Shows operational status of IRF ports and their physical member links.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display irf topology",
+                  "display irf-port configuration"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_display_irf_port_configuration",
+                "command": "display irf-port configuration",
+                "aliases": [
+                  "dis irf-port configuration"
+                ],
+                "purpose": "Shows configured IRF port bindings and physical ports assigned to IRF links.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display irf-port",
+                  "display irf topology"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_display_irf_topology",
+                "command": "display irf topology",
+                "aliases": [
+                  "dis irf topology"
+                ],
+                "purpose": "Shows IRF topology and IRF port connection state.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display irf",
+                  "display logbuffer"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "fully_simulated"
+              },
+              {
+                "command_id": "hp_display_irf_configuration",
+                "command": "display irf configuration",
+                "aliases": [
+                  "dis irf configuration"
+                ],
+                "purpose": "Shows IRF configuration, member priorities, domains, and port bindings.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display irf"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_irf_member_priority",
+                "command": "irf member <member-id> priority <priority>",
+                "aliases": [],
+                "purpose": "Sets HP Comware IRF member election priority.",
+                "safety_level": "High - affects future IRF master elections.",
+                "verification_commands": [
+                  "display irf configuration"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "hp_irf_member_renumber",
+                "command": "irf member <member-id> renumber <new-member-id>",
+                "aliases": [],
+                "purpose": "Changes the configured ID of an IRF member.",
+                "safety_level": "Critical - requires reboot and can invalidate member-ID related settings.",
+                "verification_commands": [],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "hp_comware-configuration",
+        "vendor": "hp_comware",
+        "title": "6. Configuration",
+        "topic": "configuration",
+        "level": 3,
+        "lessons": [
+          {
+            "lesson_id": "hp_comware-configuration",
+            "title": "HP Comware — Configuration",
+            "vendor": "hp_comware",
+            "topic": "configuration",
+            "simulation_support": [
+              "partially_simulated"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "hp_system_view",
+                "command": "system-view",
+                "aliases": [
+                  "sys",
+                  "system-view"
+                ],
+                "purpose": "Enters Comware system configuration view.",
+                "safety_level": "High - enters configuration mode; later commands can affect production.",
+                "verification_commands": [
+                  "display current-configuration"
+                ],
+                "rollback_commands": [
+                  "undo <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "hp_comware-networking",
+        "vendor": "hp_comware",
+        "title": "7. Networking",
+        "topic": "networking",
+        "level": 3,
+        "lessons": [
+          {
+            "lesson_id": "hp_comware-networking",
+            "title": "HP Comware — Networking",
+            "vendor": "hp_comware",
+            "topic": "networking",
+            "simulation_support": [
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "hp_display_ip_routing_table",
+                "command": "display ip routing-table",
+                "aliases": [
+                  "dis ip routing-table",
+                  "dis ip route"
+                ],
+                "purpose": "Shows the Comware IPv4 routing table, protocols, preferences, metrics, and next hops.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display ip interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "hp_comware-switching",
+        "vendor": "hp_comware",
+        "title": "8. Switching",
+        "topic": "switching",
+        "level": 3,
+        "lessons": [
+          {
+            "lesson_id": "hp_comware-switching",
+            "title": "HP Comware — Switching",
+            "vendor": "hp_comware",
+            "topic": "switching",
+            "simulation_support": [
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "hp_display_link_aggregation_verbose",
+                "command": "display link-aggregation verbose",
+                "aliases": [
+                  "dis link-aggregation verbose",
+                  "dis link agg verbose"
+                ],
+                "purpose": "Shows Comware aggregation groups, selected members, LACP state, and partner information.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_display_stp",
+                "command": "display stp",
+                "aliases": [],
+                "purpose": "Shows spanning-tree state and bridge role on a Comware switch.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display logbuffer"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "hp_display_link_aggregation_summary",
+                "command": "display link-aggregation summary",
+                "aliases": [],
+                "purpose": "Summarizes link-aggregation groups and member state.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "display interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "hp_comware-trunks",
+        "vendor": "hp_comware",
+        "title": "9. Trunks",
+        "topic": "trunks",
+        "level": 3,
+        "lessons": [
+          {
+            "lesson_id": "hp_comware-trunks",
+            "title": "HP Comware — Trunks",
+            "vendor": "hp_comware",
+            "topic": "trunks",
+            "simulation_support": [
+              "explanation_only",
+              "partially_simulated"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "hp_port_link_type_trunk",
+                "command": "port link-type trunk",
+                "aliases": [],
+                "purpose": "Sets a Comware Layer 2 port to trunk mode.",
+                "safety_level": "High - can change VLAN forwarding.",
+                "verification_commands": [
+                  "display current-configuration interface <interface>"
+                ],
+                "rollback_commands": [
+                  "undo <command>"
+                ],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "hp_port_trunk_permit",
+                "command": "port trunk permit vlan <vlan-list>",
+                "aliases": [],
+                "purpose": "Allows selected VLANs on a Comware trunk port.",
+                "safety_level": "High - can interrupt VLAN services.",
+                "verification_commands": [],
+                "rollback_commands": [
+                  "undo <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "aruba_cx": [
+      {
+        "module_id": "aruba_cx-device_information",
+        "vendor": "aruba_cx",
+        "title": "1. Device Information",
+        "topic": "device_information",
+        "level": 1,
+        "lessons": [
+          {
+            "lesson_id": "aruba_cx-device_information",
+            "title": "ArubaOS-CX — Device Information",
+            "vendor": "aruba_cx",
+            "topic": "device_information",
+            "simulation_support": [
+              "lookup_only",
+              "fully_simulated",
+              "explanation_only",
+              "partially_simulated"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "aruba_show_version",
+                "command": "show version",
+                "aliases": [],
+                "purpose": "Shows ArubaOS-CX software version, platform, serial, and uptime information.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "aruba_write_memory",
+                "command": "write memory",
+                "aliases": [
+                  "write mem",
+                  "copy running-config startup-config"
+                ],
+                "purpose": "Saves the active ArubaOS-CX running configuration.",
+                "safety_level": "Medium - persists current changes; can preserve a mistake across reboot.",
+                "verification_commands": [
+                  "show startup-config"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "fully_simulated"
+              },
+              {
+                "command_id": "aruba_reload",
+                "command": "reload",
+                "aliases": [],
+                "purpose": "Restarts the ArubaOS-CX device.",
+                "safety_level": "Critical - reboots the device and interrupts users.",
+                "verification_commands": [
+                  "show version"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "aruba_show_system",
+                "command": "show system",
+                "aliases": [],
+                "purpose": "Shows ArubaOS-CX system identity, platform state, uptime, and management information.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show version"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "aruba_show_flash",
+                "command": "show flash",
+                "aliases": [],
+                "purpose": "Shows ArubaOS-CX flash storage and software image information.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show version"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "aruba_show_logging",
+                "command": "show logging",
+                "aliases": [],
+                "purpose": "Shows recent ArubaOS-CX system log messages.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show system"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "aruba_show_events_reverse_count",
+                "command": "show events -r -n <count>",
+                "aliases": [],
+                "purpose": "Shows a chosen number of recent ArubaOS-CX events with newest entries first.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show system"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "aruba_show_system_resource_utilization",
+                "command": "show system resource-utilization",
+                "aliases": [],
+                "purpose": "Shows CPU, memory, storage, and process resource utilization.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show events -r -n <count>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "aruba_hostname",
+                "command": "hostname <name>",
+                "aliases": [],
+                "purpose": "Sets the ArubaOS-CX switch hostname.",
+                "safety_level": "Medium - changes device identity.",
+                "verification_commands": [
+                  "show running-config"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "aruba_cx-interfaces",
+        "vendor": "aruba_cx",
+        "title": "2. Interfaces",
+        "topic": "interfaces",
+        "level": 1,
+        "lessons": [
+          {
+            "lesson_id": "aruba_cx-interfaces",
+            "title": "ArubaOS-CX — Interfaces",
+            "vendor": "aruba_cx",
+            "topic": "interfaces",
+            "simulation_support": [
+              "fully_simulated",
+              "lookup_only",
+              "partially_simulated",
+              "explanation_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "aruba_show_interface_brief",
+                "command": "show interface brief",
+                "aliases": [],
+                "purpose": "Shows interface status, speed, duplex, and brief operational information.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface <interface>",
+                  "show running-config interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "fully_simulated"
+              },
+              {
+                "command_id": "aruba_show_interface",
+                "command": "show interface",
+                "aliases": [],
+                "purpose": "Shows detailed interface state, counters, errors, speed, duplex, and media data.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface brief",
+                  "show running-config interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "aruba_show_running_config_interface",
+                "command": "show running-config interface",
+                "aliases": [],
+                "purpose": "Shows running configuration applied to a specific interface.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface <interface>",
+                  "show interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "fully_simulated"
+              },
+              {
+                "command_id": "aruba_interface_config",
+                "command": "interface <interface>",
+                "aliases": [
+                  "int <interface>"
+                ],
+                "purpose": "Enters ArubaOS-CX configuration mode for a specific interface.",
+                "safety_level": "High - selects a production interface for possible changes.",
+                "verification_commands": [
+                  "show running-config interface <interface>"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "aruba_shutdown",
+                "command": "shutdown",
+                "aliases": [],
+                "purpose": "Administratively disables the selected ArubaOS-CX interface.",
+                "safety_level": "Critical - can disconnect users, APs, cameras, uplinks, or services.",
+                "verification_commands": [
+                  "show interface brief"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "aruba_no_shutdown",
+                "command": "no shutdown",
+                "aliases": [
+                  "no shut"
+                ],
+                "purpose": "Administratively enables the selected ArubaOS-CX interface.",
+                "safety_level": "High - can restore traffic or introduce an unexpected device to the network.",
+                "verification_commands": [
+                  "show interface <interface>"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "aruba_show_ip_interface_brief",
+                "command": "show ip interface brief",
+                "aliases": [],
+                "purpose": "Summarizes ArubaOS-CX Layer 3 interfaces, IP addresses, and administrative and link states.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "aruba_show_spanning_tree",
+                "command": "show spanning-tree",
+                "aliases": [],
+                "purpose": "Shows ArubaOS-CX spanning-tree instances, root information, port roles, and states.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show events -r -n <count>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "aruba_show_lacp_interfaces",
+                "command": "show lacp interfaces",
+                "aliases": [],
+                "purpose": "Shows ArubaOS-CX LACP interface state, aggregation membership, and partner information.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "aruba_show_interface_error_statistics",
+                "command": "show interface error-statistics",
+                "aliases": [],
+                "purpose": "Shows non-traffic interface error counters on ArubaOS-CX.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "aruba_show_power_over_ethernet",
+                "command": "show power-over-ethernet",
+                "aliases": [],
+                "purpose": "Shows PoE status and budget on ArubaOS-CX switches that support PoE.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "aruba_lacp_mode_active",
+                "command": "lacp mode active",
+                "aliases": [],
+                "purpose": "Enables active LACP negotiation on an ArubaOS-CX member interface.",
+                "safety_level": "High - can affect aggregate link forwarding.",
+                "verification_commands": [
+                  "show lacp interfaces"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "aruba_cx-vlans",
+        "vendor": "aruba_cx",
+        "title": "3. Vlans",
+        "topic": "vlans",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "aruba_cx-vlans",
+            "title": "ArubaOS-CX — Vlans",
+            "vendor": "aruba_cx",
+            "topic": "vlans",
+            "simulation_support": [
+              "lookup_only",
+              "partially_simulated"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "aruba_show_vlan",
+                "command": "show vlan",
+                "aliases": [],
+                "purpose": "Shows VLAN IDs, names, status, and interface membership.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface brief",
+                  "show mac-address-table vlan <vlan>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "aruba_vlan_access",
+                "command": "vlan access <vlan>",
+                "aliases": [],
+                "purpose": "Sets the access VLAN for the selected ArubaOS-CX interface.",
+                "safety_level": "High - changes endpoint network placement and can break access.",
+                "verification_commands": [
+                  "show vlan"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "aruba_vlan",
+                "command": "vlan <vlan-id>",
+                "aliases": [],
+                "purpose": "Creates or enters an ArubaOS-CX VLAN context.",
+                "safety_level": "Medium - affects switching when assigned.",
+                "verification_commands": [
+                  "show vlan"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "aruba_cx-mac_neighbors",
+        "vendor": "aruba_cx",
+        "title": "4. Mac Neighbors",
+        "topic": "mac_neighbors",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "aruba_cx-mac_neighbors",
+            "title": "ArubaOS-CX — Mac Neighbors",
+            "vendor": "aruba_cx",
+            "topic": "mac_neighbors",
+            "simulation_support": [
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "aruba_show_mac_address_table",
+                "command": "show mac-address-table",
+                "aliases": [],
+                "purpose": "Shows MAC addresses learned by the switch.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface <interface>",
+                  "show vlan <vlan>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "aruba_show_lldp_neighbor_info",
+                "command": "show lldp neighbor-info",
+                "aliases": [],
+                "purpose": "Shows LLDP neighbor details and local-to-remote interface mapping.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "aruba_cx-configuration",
+        "vendor": "aruba_cx",
+        "title": "5. Configuration",
+        "topic": "configuration",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "aruba_cx-configuration",
+            "title": "ArubaOS-CX — Configuration",
+            "vendor": "aruba_cx",
+            "topic": "configuration",
+            "simulation_support": [
+              "partially_simulated",
+              "explanation_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "aruba_configure_terminal",
+                "command": "configure terminal",
+                "aliases": [
+                  "conf t",
+                  "config terminal"
+                ],
+                "purpose": "Enters global configuration mode on ArubaOS-CX.",
+                "safety_level": "High - enters configuration mode; later commands can affect production.",
+                "verification_commands": [
+                  "show running-config"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "aruba_show_running_config",
+                "command": "show running-config",
+                "aliases": [],
+                "purpose": "Shows the active ArubaOS-CX configuration.",
+                "safety_level": "Low - read-only, but output may contain credentials, addresses, and sensitive configuration.",
+                "verification_commands": [
+                  "show version"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "aruba_cx-networking",
+        "vendor": "aruba_cx",
+        "title": "6. Networking",
+        "topic": "networking",
+        "level": 3,
+        "lessons": [
+          {
+            "lesson_id": "aruba_cx-networking",
+            "title": "ArubaOS-CX — Networking",
+            "vendor": "aruba_cx",
+            "topic": "networking",
+            "simulation_support": [
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "aruba_show_ip_route",
+                "command": "show ip route",
+                "aliases": [],
+                "purpose": "Shows ArubaOS-CX IPv4 routes, their source, distance, metric, and next hop.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "show ip interface brief"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "aruba_cx-trunks",
+        "vendor": "aruba_cx",
+        "title": "7. Trunks",
+        "topic": "trunks",
+        "level": 3,
+        "lessons": [
+          {
+            "lesson_id": "aruba_cx-trunks",
+            "title": "ArubaOS-CX — Trunks",
+            "vendor": "aruba_cx",
+            "topic": "trunks",
+            "simulation_support": [
+              "partially_simulated"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "aruba_vlan_trunk_allowed",
+                "command": "vlan trunk allowed <vlan-list>",
+                "aliases": [],
+                "purpose": "Defines allowed VLANs for an ArubaOS-CX trunk interface.",
+                "safety_level": "High - can interrupt VLAN services.",
+                "verification_commands": [
+                  "show running-config interface <interface>"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "aruba_vlan_trunk_native",
+                "command": "vlan trunk native <vlan-id>",
+                "aliases": [],
+                "purpose": "Sets the native VLAN for an ArubaOS-CX trunk interface.",
+                "safety_level": "High - mismatch can cause VLAN leakage or loss of connectivity.",
+                "verification_commands": [],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "aruba_cx-switching",
+        "vendor": "aruba_cx",
+        "title": "8. Switching",
+        "topic": "switching",
+        "level": 3,
+        "lessons": [
+          {
+            "lesson_id": "aruba_cx-switching",
+            "title": "ArubaOS-CX — Switching",
+            "vendor": "aruba_cx",
+            "topic": "switching",
+            "simulation_support": [
+              "explanation_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "aruba_lacp_system_priority",
+                "command": "lacp system-priority <priority>",
+                "aliases": [],
+                "purpose": "Sets ArubaOS-CX system priority used by LACP selection.",
+                "safety_level": "High - can affect LAG negotiation.",
+                "verification_commands": [],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "aruba_stp_priority",
+                "command": "spanning-tree priority <priority>",
+                "aliases": [],
+                "purpose": "Sets the ArubaOS-CX bridge priority for spanning-tree election.",
+                "safety_level": "High - can change Layer 2 forwarding topology.",
+                "verification_commands": [
+                  "show spanning-tree"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "windows_cmd": [
+      {
+        "module_id": "windows_cmd-mac_neighbors",
+        "vendor": "windows_cmd",
+        "title": "1. Mac Neighbors",
+        "topic": "mac_neighbors",
+        "level": 1,
+        "lessons": [
+          {
+            "lesson_id": "windows_cmd-mac_neighbors",
+            "title": "Windows CMD — Mac Neighbors",
+            "vendor": "windows_cmd",
+            "topic": "mac_neighbors",
+            "simulation_support": [
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "windows_ipconfig_all",
+                "command": "ipconfig /all",
+                "aliases": [],
+                "purpose": "Shows Windows network adapter IP address, subnet mask, default gateway, DNS servers, DHCP, and MAC details.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ping <gateway>",
+                  "arp -a"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "windows_arp_a",
+                "command": "arp -a",
+                "aliases": [],
+                "purpose": "Shows the local ARP cache mapping IP addresses to MAC addresses.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ping <gateway>",
+                  "ipconfig /all"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "windows_cmd-networking",
+        "vendor": "windows_cmd",
+        "title": "2. Networking",
+        "topic": "networking",
+        "level": 1,
+        "lessons": [
+          {
+            "lesson_id": "windows_cmd-networking",
+            "title": "Windows CMD — Networking",
+            "vendor": "windows_cmd",
+            "topic": "networking",
+            "simulation_support": [
+              "lookup_only",
+              "explanation_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "windows_ping",
+                "command": "ping",
+                "aliases": [],
+                "purpose": "Tests basic reachability to an IP address or hostname using ICMP echo.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ipconfig /all",
+                  "tracert <ip>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "windows_tracert",
+                "command": "tracert",
+                "aliases": [],
+                "purpose": "Shows hop-by-hop path toward a target using TTL-limited probes.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ping <gateway>",
+                  "route print"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "windows_nslookup",
+                "command": "nslookup",
+                "aliases": [],
+                "purpose": "Queries DNS for hostname resolution and shows the DNS server used.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ipconfig /all",
+                  "ping <ip>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "windows_ipconfig_release",
+                "command": "ipconfig /release",
+                "aliases": [],
+                "purpose": "Releases the DHCP lease from Windows network adapters.",
+                "safety_level": "Medium - can disconnect the endpoint until DHCP renews.",
+                "verification_commands": [
+                  "ipconfig /renew"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "windows_ipconfig_renew",
+                "command": "ipconfig /renew",
+                "aliases": [],
+                "purpose": "Requests a new DHCP lease for Windows network adapters.",
+                "safety_level": "Medium - can briefly interrupt endpoint connectivity.",
+                "verification_commands": [
+                  "ipconfig /all"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "windows_pathping_host",
+                "command": "pathping <host>",
+                "aliases": [],
+                "purpose": "Traces a Windows network path and measures packet loss at each hop over time.",
+                "safety_level": "Safe diagnostic command; sends network probes and can take several minutes.",
+                "verification_commands": [
+                  "tracert <host>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "windows_cmd-interfaces",
+        "vendor": "windows_cmd",
+        "title": "3. Interfaces",
+        "topic": "interfaces",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "windows_cmd-interfaces",
+            "title": "Windows CMD — Interfaces",
+            "vendor": "windows_cmd",
+            "topic": "interfaces",
+            "simulation_support": [
+              "lookup_only",
+              "partially_simulated"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "windows_route_print",
+                "command": "route print",
+                "aliases": [],
+                "purpose": "Shows the Windows routing table and interface route metrics.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ipconfig /all",
+                  "ping <gateway>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "windows_netsh_interface_show_interface",
+                "command": "netsh interface show interface",
+                "aliases": [],
+                "purpose": "Shows Windows network interface administrative and connection state.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ipconfig /all",
+                  "ping <gateway>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "windows_netsh_set_static_ip",
+                "command": "netsh interface ipv4 set address name=<name> static <ip> <mask> <gateway>",
+                "aliases": [
+                  "netsh interface ipv4 set address"
+                ],
+                "purpose": "Configures a static IPv4 address on a Windows interface.",
+                "safety_level": "High - changes endpoint addressing and can break remote access.",
+                "verification_commands": [
+                  "ipconfig /all"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "windows_netsh_interface_disable",
+                "command": "netsh interface set interface <name> admin=disabled",
+                "aliases": [
+                  "netsh interface set interface <name> disabled"
+                ],
+                "purpose": "Disables a Windows network interface.",
+                "safety_level": "Critical - can disconnect the endpoint or remote session.",
+                "verification_commands": [
+                  "netsh interface show interface"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "windows_netsh_interface_enable",
+                "command": "netsh interface set interface <name> admin=enabled",
+                "aliases": [
+                  "netsh interface set interface <name> enabled"
+                ],
+                "purpose": "Enables a Windows network interface.",
+                "safety_level": "High - can change active network path and endpoint reachability.",
+                "verification_commands": [
+                  "ipconfig /all"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "windows_netstat_ano",
+                "command": "netstat -ano",
+                "aliases": [],
+                "purpose": "Lists Windows TCP and UDP endpoints, connection states, listening ports, and owning process IDs.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "tasklist"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "windows_getmac_verbose",
+                "command": "getmac /v",
+                "aliases": [],
+                "purpose": "Lists Windows network adapters, connection names, MAC addresses, and transport names.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ipconfig /all"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "windows_netsh_wlan_show_interfaces",
+                "command": "netsh wlan show interfaces",
+                "aliases": [],
+                "purpose": "Shows the current Windows Wi-Fi adapter, connection, SSID, radio, channel, rates, and signal level.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ipconfig /all"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "windows_netsh_ipv4_show_interfaces",
+                "command": "netsh interface ipv4 show interfaces",
+                "aliases": [],
+                "purpose": "Shows Windows IPv4 interfaces, indexes, metrics, MTU values, and connection states.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "route print"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "partially_simulated"
+              },
+              {
+                "command_id": "windows_netsh_lan_show_interfaces",
+                "command": "netsh lan show interfaces",
+                "aliases": [],
+                "purpose": "Shows wired LAN interface state and 802.1X-related information where available.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ipconfig /all"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "windows_cmd-device_information",
+        "vendor": "windows_cmd",
+        "title": "4. Device Information",
+        "topic": "device_information",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "windows_cmd-device_information",
+            "title": "Windows CMD — Device Information",
+            "vendor": "windows_cmd",
+            "topic": "device_information",
+            "simulation_support": [
+              "explanation_only",
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "windows_netsh_winsock_reset",
+                "command": "netsh winsock reset",
+                "aliases": [],
+                "purpose": "Resets the Windows Winsock catalog.",
+                "safety_level": "High - changes local network stack and usually requires reboot.",
+                "verification_commands": [
+                  "ipconfig /all"
+                ],
+                "rollback_commands": [
+                  "no <command>"
+                ],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "windows_systeminfo",
+                "command": "systeminfo",
+                "aliases": [],
+                "purpose": "Shows Windows operating system, hardware, boot time, memory, domain, and hotfix summary information.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ipconfig /all"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "windows_dir",
+                "command": "dir",
+                "aliases": [],
+                "purpose": "Lists Windows files and directories in the current path.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "systeminfo"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "windows_dism_scanhealth",
+                "command": "dism /online /cleanup-image /scanhealth",
+                "aliases": [],
+                "purpose": "Scans the online Windows component store for corruption without repairing it.",
+                "safety_level": "Low - read-only health scan; can take time and use system resources.",
+                "verification_commands": [
+                  "sfc /verifyonly"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "linux": [
+      {
+        "module_id": "linux-interfaces",
+        "vendor": "linux",
+        "title": "1. Interfaces",
+        "topic": "interfaces",
+        "level": 1,
+        "lessons": [
+          {
+            "lesson_id": "linux-interfaces",
+            "title": "Linux — Interfaces",
+            "vendor": "linux",
+            "topic": "interfaces",
+            "simulation_support": [
+              "lookup_only",
+              "explanation_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "linux_ip_addr",
+                "command": "ip addr",
+                "aliases": [],
+                "purpose": "Shows Linux network interfaces, link state, MAC addresses, and assigned IP addresses.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ip route",
+                  "ping <gateway>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_ip_link_down",
+                "command": "sudo ip link set <interface> down",
+                "aliases": [
+                  "ip link set <interface> down"
+                ],
+                "purpose": "Administratively brings a Linux network interface down.",
+                "safety_level": "Critical - can disconnect SSH, services, or production traffic.",
+                "verification_commands": [
+                  "ip addr"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "linux_ip_link_up",
+                "command": "sudo ip link set <interface> up",
+                "aliases": [
+                  "ip link set <interface> up"
+                ],
+                "purpose": "Administratively brings a Linux network interface up.",
+                "safety_level": "High - can change active network path and service reachability.",
+                "verification_commands": [
+                  "ip route"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "linux_dhclient_release",
+                "command": "sudo dhclient -r <interface>",
+                "aliases": [
+                  "dhclient -r <interface>"
+                ],
+                "purpose": "Releases a DHCP lease on a Linux interface using dhclient.",
+                "safety_level": "Medium - can remove IP connectivity until renewed.",
+                "verification_commands": [
+                  "sudo dhclient <interface>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "linux_dhclient_renew",
+                "command": "sudo dhclient <interface>",
+                "aliases": [
+                  "dhclient <interface>"
+                ],
+                "purpose": "Requests a DHCP lease on a Linux interface using dhclient.",
+                "safety_level": "Medium - can change endpoint IP settings.",
+                "verification_commands": [
+                  "ip addr"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "linux_ip_link",
+                "command": "ip link",
+                "aliases": [],
+                "purpose": "Shows Linux network interfaces, flags, operational state, MTU, and MAC addresses.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ip addr"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_ss_listening",
+                "command": "ss -tulpn",
+                "aliases": [],
+                "purpose": "Lists Linux TCP and UDP listening sockets with addresses, ports, and available process information.",
+                "safety_level": "Safe read-only command; process names may require elevated privileges.",
+                "verification_commands": [
+                  "systemctl status <service>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_ethtool_interface",
+                "command": "ethtool <interface>",
+                "aliases": [],
+                "purpose": "Shows Linux Ethernet link settings such as speed, duplex, autonegotiation, and detected link state.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ip link"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "linux-networking",
+        "vendor": "linux",
+        "title": "2. Networking",
+        "topic": "networking",
+        "level": 1,
+        "lessons": [
+          {
+            "lesson_id": "linux-networking",
+            "title": "Linux — Networking",
+            "vendor": "linux",
+            "topic": "networking",
+            "simulation_support": [
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "linux_ip_route",
+                "command": "ip route",
+                "aliases": [],
+                "purpose": "Shows the Linux routing table, including default gateway and connected routes.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ip addr",
+                  "ping <gateway>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_ping",
+                "command": "ping",
+                "aliases": [],
+                "purpose": "Tests reachability to an IP address or hostname using ICMP echo.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ip addr",
+                  "ip route"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_traceroute",
+                "command": "traceroute",
+                "aliases": [],
+                "purpose": "Shows hop-by-hop path toward a target.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ip route",
+                  "ping <gateway>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_dig",
+                "command": "dig",
+                "aliases": [],
+                "purpose": "Queries DNS records and displays resolver response details.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ip route",
+                  "ping <ip>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_resolvectl_status",
+                "command": "resolvectl status",
+                "aliases": [],
+                "purpose": "Shows DNS resolver state, servers, and per-link DNS configuration on systemd-resolved systems.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "dig <name>"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "linux-mac_neighbors",
+        "vendor": "linux",
+        "title": "3. Mac Neighbors",
+        "topic": "mac_neighbors",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "linux-mac_neighbors",
+            "title": "Linux — Mac Neighbors",
+            "vendor": "linux",
+            "topic": "mac_neighbors",
+            "simulation_support": [
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "linux_arp_a",
+                "command": "arp -a",
+                "aliases": [],
+                "purpose": "Shows local ARP neighbor mappings.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ping <gateway>",
+                  "ip addr"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_ip_neigh",
+                "command": "ip neigh",
+                "aliases": [],
+                "purpose": "Shows the Linux IPv4 and IPv6 neighbor cache, including MAC addresses and reachability states.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ip route"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "linux-cli_foundation",
+        "vendor": "linux",
+        "title": "4. Cli Foundation",
+        "topic": "cli_foundation",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "linux-cli_foundation",
+            "title": "Linux — Cli Foundation",
+            "vendor": "linux",
+            "topic": "cli_foundation",
+            "simulation_support": [
+              "explanation_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "linux_restart_networkmanager",
+                "command": "sudo systemctl restart NetworkManager",
+                "aliases": [
+                  "systemctl restart NetworkManager"
+                ],
+                "purpose": "Restarts the Linux NetworkManager service.",
+                "safety_level": "High - can briefly or permanently interrupt Linux network connectivity.",
+                "verification_commands": [
+                  "systemctl status NetworkManager"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              },
+              {
+                "command_id": "linux_restart_networking",
+                "command": "sudo systemctl restart networking",
+                "aliases": [
+                  "systemctl restart networking"
+                ],
+                "purpose": "Restarts the traditional Linux networking service on distributions that use it.",
+                "safety_level": "High - can interrupt Linux network connectivity.",
+                "verification_commands": [
+                  "ip route"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "explanation_only"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "module_id": "linux-device_information",
+        "vendor": "linux",
+        "title": "5. Device Information",
+        "topic": "device_information",
+        "level": 2,
+        "lessons": [
+          {
+            "lesson_id": "linux-device_information",
+            "title": "Linux — Device Information",
+            "vendor": "linux",
+            "topic": "device_information",
+            "simulation_support": [
+              "lookup_only"
+            ],
+            "learning_sequence": [
+              "Understand",
+              "Syntax",
+              "Healthy output",
+              "Problem output",
+              "Interpret evidence",
+              "Guided practice",
+              "Independent practice",
+              "Troubleshooting",
+              "Verification",
+              "Knowledge check",
+              "Complete"
+            ],
+            "commands": [
+              {
+                "command_id": "linux_df_h",
+                "command": "df -h",
+                "aliases": [],
+                "purpose": "Shows Linux mounted filesystem usage in human-readable units.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "lsblk"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_lsblk",
+                "command": "lsblk",
+                "aliases": [],
+                "purpose": "Lists Linux block devices, partitions, sizes, types, and mount points.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "df -h"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_dmesg",
+                "command": "dmesg",
+                "aliases": [],
+                "purpose": "Shows Linux kernel messages, including hardware, driver, storage, and network events.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "journalctl -p err"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_journalctl_errors",
+                "command": "journalctl -p err",
+                "aliases": [],
+                "purpose": "Shows Linux systemd journal entries at error priority and above.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "dmesg"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_systemctl_status_networkmanager",
+                "command": "systemctl status NetworkManager",
+                "aliases": [],
+                "purpose": "Shows whether the Linux NetworkManager service is loaded, active, failed, and its recent log messages.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "journalctl -p err"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              },
+              {
+                "command_id": "linux_journalctl_networkmanager",
+                "command": "journalctl -u NetworkManager",
+                "aliases": [],
+                "purpose": "Shows logs for the NetworkManager service on systems using it.",
+                "safety_level": "Safe read-only command",
+                "verification_commands": [
+                  "ip addr"
+                ],
+                "rollback_commands": [],
+                "simulator_support": "lookup_only"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "health": {
+    "status": "Passed",
+    "passed": [
+      "Every normalized command has a vendor classification.",
+      "Every normalized command has a support level.",
+      "Every generated route has a vendor and support level.",
+      "Every alias is linked to a canonical command."
+    ],
+    "warnings": [
+      "2 configuration commands require fuller verification guidance.",
+      "158 commands have no practice route yet."
+    ],
+    "errors": [],
+    "coverage_percentage": 100
+  }
+}
