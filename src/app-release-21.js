@@ -29,6 +29,7 @@ const LAB_FILES = {
 };
 
 const LAB_PROGRESS_KEY = "commandDoctorLabProgress";
+const VENDOR_PROGRESS_KEY = "commandDoctorVendorProgress";
 const VISUAL_NETWORK_STORAGE_KEY = "command-doctor.visual-network";
 const VISUAL_NETWORK_SCHEMA_VERSION = 3;
 
@@ -371,6 +372,10 @@ const state = {
     quizSelection: null,
     scenarioScore: 0,
     vendorTrack: "all",
+    learnPanel: "overview",
+    libraryTab: "lookup",
+    libraryFilters: { search: "", vendor: "", platform: "", topic: "", difficulty: "", routeType: "", support: "", status: "" },
+    vendorProgress: {},
     console: {
       device: "access",
       missionId: "access-vlan",
@@ -555,6 +560,7 @@ async function loadKnowledge() {
   state.lab.foundationFinalQuiz = labData.curriculum?.foundation_final || [];
   state.lab.scenarios = labData.scenarios?.scenarios || [];
   state.lab.progress = loadLabProgress();
+  state.lab.vendorProgress = loadVendorProgress();
   migrateLabProgress();
 
   const version = state.sources?.knowledge_base_version || loadedFiles[0]?.version || "local";
@@ -2463,6 +2469,40 @@ function saveLabProgress() {
   localStorage.setItem(LAB_PROGRESS_KEY, JSON.stringify(state.lab.progress));
 }
 
+function emptyVendorProgress() {
+  return { completedLessons: {}, learnedCommands: {}, practisedRoutes: {}, reviewRoutes: {}, lastLessonId: "", lastLabRouteId: "" };
+}
+
+function loadVendorProgress() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(VENDOR_PROGRESS_KEY) || "{}");
+    return stored && typeof stored === "object" ? stored : {};
+  } catch {
+    return {};
+  }
+}
+
+function activeTrack() {
+  return state.lab.vendorTrack || "all";
+}
+
+function trackProgress(track = activeTrack()) {
+  const key = track || "all";
+  state.lab.vendorProgress ||= {};
+  state.lab.vendorProgress[key] ||= emptyVendorProgress();
+  return state.lab.vendorProgress[key];
+}
+
+function saveVendorProgress() {
+  localStorage.setItem(VENDOR_PROGRESS_KEY, JSON.stringify(state.lab.vendorProgress || {}));
+}
+
+function recordTrackActivity(track, patch) {
+  const progress = trackProgress(track);
+  Object.assign(progress, patch);
+  saveVendorProgress();
+}
+
 function labFoundationLessons() {
   return state.lab.lessons.filter((lesson) => !isConfigurationLesson(lesson));
 }
@@ -2688,6 +2728,41 @@ function renderLabSectionPage() {
   els.labRoot.append(list);
 }
 
+function routeMetadata(route, index) {
+  const vendor = route.category === "HP Comware" || route.category === "Stacking" ? "HP Comware"
+    : route.category === "Endpoint Network" ? "Windows CMD"
+      : "Cisco IOS";
+  const support = route.steps?.length || ["Free Practice", "Access Ports", "VLANs", "Trunks", "Troubleshooting"].includes(route.category)
+    ? "Fully simulated"
+    : ["Layer 2 Health", "Stacking", "Port Security"].includes(route.category)
+      ? "Explanation only"
+      : "Partially simulated";
+  const routeType = route.category === "Troubleshooting" ? "Troubleshooting"
+    : route.category === "Free Practice" ? "Free practice"
+      : route.category === "Safety and Tickets" ? "Workflow"
+        : "Configuration";
+  const requiredCommands = route.steps?.map((step) => step.command) || (vendor === "HP Comware"
+    ? ["display interface brief", "display vlan"]
+    : route.category === "VLANs" ? ["show vlan brief", "configure terminal"]
+      : route.category === "Trunks" ? ["show interfaces trunk", "configure terminal"]
+        : ["show interface status"]);
+  return {
+    ...route,
+    id: route.id || `route-${index + 1}`,
+    vendor,
+    platform: vendor,
+    topic: route.category,
+    difficulty: index < 30 ? "Foundation" : index < 85 ? "Intermediate" : "Advanced existing content",
+    routeType,
+    support,
+    requiredCommands,
+    startingState: `Local ${route.device || "access"} switch profile`,
+    expectedFinalState: "Local simulated state checked and verified",
+    verificationCommands: vendor === "HP Comware" ? ["display interface brief"] : ["show interface status"],
+    estimatedMinutes: route.steps?.length ? Math.max(8, Math.ceil(route.steps.length * 1.5)) : 8 + (index % 4) * 2
+  };
+}
+
 function buildTrainingRoutes() {
   const core = [
     { id: "free-practice", category: "Free Practice", label: "Free Practice", device: "access", goal: "Explore a fresh local switch without automatic answers.", hint: "Start with show interface status or show vlan brief.", steps: [] },
@@ -2736,7 +2811,7 @@ function buildTrainingRoutes() {
     goal: `${label}. Work through the local simulation manually and verify the final state.`,
     hint: "The coach suggests safe verification steps; it does not run commands for you.",
     steps: []
-  }))));
+  })))).map(routeMetadata);
 }
 
 const PLAYGROUND_TASKS = buildTrainingRoutes();
@@ -3404,23 +3479,8 @@ function renderManualRouteSelector() {
   const route = currentTrainingRoute();
   const panel = labCreate("section", "lab-manual-route-panel");
   panel.append(labCreate("strong", "", "Manual CLI training path"));
-  panel.append(labCreate("span", "", `${PLAYGROUND_TASKS.length} routes are available. Choose a route, press Start selected route, then type every command yourself in Step 1.`));
-  const select = document.createElement("select");
-  select.setAttribute("aria-label", "Manual CLI training path");
-  [...new Set(PLAYGROUND_TASKS.map((item) => item.category))].forEach((category) => {
-    const group = document.createElement("optgroup");
-    group.label = category;
-    PLAYGROUND_TASKS.filter((item) => item.category === category).forEach((item) => {
-      const option = document.createElement("option");
-      option.value = item.id;
-      option.textContent = item.label;
-      group.append(option);
-    });
-    select.append(group);
-  });
-  select.value = route.id;
-  select.addEventListener("change", () => { state.lab.playgroundTaskId = select.value; renderLab(); });
-  panel.append(select, labButton("Start selected route", "primary", startFreshTrainingSwitch));
+  panel.append(labCreate("span", "", `${PLAYGROUND_TASKS.length} local routes are available. The current route is ${route.label}. Browse or filter routes in the Practice Library, then type every command yourself.`));
+  panel.append(labButton("Open Practice Library", "secondary", () => { state.lab.libraryTab = "practice"; switchView("library"); }), labButton("Start current route", "primary", startFreshTrainingSwitch));
   return panel;
 }
 
@@ -3434,6 +3494,10 @@ function startFreshTrainingSwitch() {
   state.lab.console.focusRequested = true;
   state.lab.visualNetwork = createVisualNetwork();
   state.lab.visualNetwork.hostname = "TRAINING-SWITCH";
+  recordTrackActivity(route.vendor || activeTrack(), { lastLabRouteId: route.id });
+  const track = trackProgress(route.vendor || activeTrack());
+  track.practisedRoutes[route.id] = true;
+  saveVendorProgress();
   window.CommandDoctorTopology?.ensureTopology?.(state.lab.visualNetwork);
   saveVisualNetwork(state.lab.visualNetwork);
   renderLab();
@@ -4020,6 +4084,14 @@ function finishLabLesson(lesson, correct, explanation) {
   state.lab.quizSelection = correct ? 0 : -1;
   if (correct) state.lab.progress.completedLessons[lesson.id] = true;
   if (correct && isConfigurationLesson(lesson)) state.lab.progress.configurationCompleted = true;
+  if (correct) {
+    const progress = trackProgress(lesson.vendor || activeTrack());
+    const commandKey = `${lesson.vendor || activeTrack()}:${normalizeCommandText(lesson.command || lesson.id)}`;
+    progress.completedLessons[lesson.id] = true;
+    progress.learnedCommands[commandKey] = true;
+    progress.lastLessonId = lesson.id;
+    saveVendorProgress();
+  }
   saveLabProgress();
   showToast(correct ? `Lesson complete. ${explanation}` : `Not quite. ${explanation}`);
   renderLab();
@@ -4098,22 +4170,25 @@ function renderLabScenario() {
 function renderHome() {
   if (!els.homeRoot || !state.lab.progress) return;
   els.homeRoot.replaceChildren();
-  const completed = Object.keys(state.lab.progress.completedLessons || {}).length;
+  const track = activeTrack();
+  const progress = trackProgress(track);
+  const learned = Object.keys(progress.learnedCommands).length;
+  const review = Object.keys(progress.reviewRoutes).length;
+  const lastLesson = state.lab.lessons.find((lesson) => lesson.id === progress.lastLessonId || lesson.id === state.lab.progress.lastLessonId);
+  const lastRoute = PLAYGROUND_TASKS.find((route) => route.id === progress.lastLabRouteId);
   const hero = labCreate("section", "home-hero");
   hero.append(labCreate("p", "eyebrow", "Offline technician training"));
   hero.append(labCreate("h2", "", "Command Doctor"));
-  hero.append(labCreate("p", "", "Diagnose pasted command output, learn vendor command workflows, and practise safely on a local simulated switch. Nothing here reaches a real device."));
+  hero.append(labCreate("p", "", "Choose one clear task: diagnose output, learn commands, or practise on an imaginary switch. Nothing here reaches a real device."));
   const status = labCreate("div", "home-status-strip");
-  status.append(labCreate("span", "badge badge-green", "Works offline"));
-  status.append(labCreate("span", "badge", `${state.commands.length} local commands`));
-  status.append(labCreate("span", "badge", `${completed} lessons completed`));
+  status.append(labCreate("span", "badge badge-green", "Works offline"), labCreate("span", "badge", `Track: ${track === "all" ? "All Tracks" : track}`), labCreate("span", "badge", `Course progress: ${learned} commands learned`), labCreate("span", "badge", `Needs review: ${review}`));
   hero.append(status);
   els.homeRoot.append(hero);
 
   const choices = [
-    ["Diagnose", "Paste command output to identify the command, see evidence, understand the result, and build a ticket-ready summary.", "Open Diagnose", () => switchView("diagnose")],
-    ["Learn", "Select a vendor track and work through structured command lessons before practising in the local simulator.", "Open Learn", () => switchView("learn")],
-    ["Switch Lab", "Use guided CLI practice, a focused terminal, or the visual local topology playground.", "Open Switch Lab", () => switchView("lab", { resetLab: true })]
+    ["Diagnose Output", "Paste command output to identify the command, see evidence, understand the result, and build a ticket-ready summary.", "Open Diagnose", () => switchView("diagnose")],
+    ["Learn Commands", "Choose a vendor track, continue the course, inspect command coverage, and learn supported syntax safely.", "Open Learn", () => switchView("learn")],
+    ["Practise on a Switch", "Use Guided CLI, Focused Terminal, or Visual Playground on a local simulated switch.", "Open Switch Lab", () => switchView("lab", { resetLab: true })]
   ];
   const grid = labCreate("div", "home-action-grid");
   choices.forEach(([title, description, label, action]) => {
@@ -4125,34 +4200,93 @@ function renderHome() {
     grid.append(card);
   });
   els.homeRoot.append(grid);
+  const details = labCreate("section", "home-status-strip");
+  details.append(labCreate("span", "badge", `Last lesson: ${lastLesson?.title || "Not started"}`), labCreate("span", "badge", `Last lab used: ${lastRoute?.label || "Not started"}`));
+  els.homeRoot.append(details);
+}
+
+const LEARNING_TRACKS = ["Cisco IOS", "HP Comware", "ArubaOS-CX", "Windows CMD", "Linux", "all"];
+
+function matchingVendor(value, track) {
+  if (track === "all") return true;
+  return String(value || "").toLowerCase() === String(track).toLowerCase();
+}
+
+function commandsForTrack(track = activeTrack()) {
+  return state.commands.filter((command) => matchingVendor(command.vendor_label || command.vendor, track));
+}
+
+function lessonsForTrack(track = activeTrack()) {
+  return state.lab.lessons.filter((lesson) => matchingVendor(lesson.vendor, track));
+}
+
+function relatedLessonForRoute(route) {
+  const tokens = `${route.label} ${route.topic}`.toLowerCase().split(/\s+/).filter((token) => token.length > 4);
+  return state.lab.lessons.find((lesson) => matchingVendor(lesson.vendor, route.vendor) && tokens.some((token) => lesson.title.toLowerCase().includes(token))) || null;
+}
+
+function commandLearningState(command, trackProgressData) {
+  const key = `${command.vendor_label || command.vendor}:${normalizeCommandText(command.command)}`;
+  if (trackProgressData.learnedCommands[key]) return "Passed";
+  const lesson = state.lab.lessons.find((item) => matchingVendor(item.vendor, command.vendor_label || command.vendor) && normalizeCommandText(item.command || "") === normalizeCommandText(command.command));
+  return lesson ? "In progress" : "Planned lesson";
 }
 
 function renderLearn() {
   if (!els.learnRoot || !state.lab.progress) return;
   els.learnRoot.replaceChildren();
+  const track = activeTrack();
+  const progress = trackProgress(track);
+  if (state.lab.learnPanel === "coverage") {
+    renderCommandCoverage();
+    return;
+  }
   const panel = labCreate("section", "learn-track-panel");
   panel.append(labCreate("div", "lab-card-kicker", "Choose your active learning track"));
   panel.append(labCreate("h3", "", "What do you want to learn?"));
-  panel.append(labCreate("p", "", "Your selection filters the course entry point. Existing lessons remain stored locally and your progress is preserved on this browser."));
+  panel.append(labCreate("p", "", "Your selection filters the course, Practice Library, and command coverage. Progress is stored independently for each vendor on this browser."));
   els.learnRoot.append(panel);
-  const tracks = [
-    ["Cisco IOS", "Cisco IOS"], ["HP Comware", "HP Comware"], ["ArubaOS-CX", "ArubaOS-CX"], ["Windows CMD", "Windows CMD"], ["Linux", "Linux"], ["all", "All Tracks"]
-  ];
   const grid = labCreate("div", "learn-track-grid");
-  tracks.forEach(([id, label]) => {
-    const count = id === "all" ? state.lab.lessons.length : state.lab.lessons.filter((lesson) => lesson.vendor === id).length;
-    const card = labCreate("article", `learn-track-card ${state.lab.vendorTrack === id ? "is-active" : ""}`);
-    card.append(labCreate("div", "lab-card-kicker", state.lab.vendorTrack === id ? "Active track" : "Learning track"));
+  LEARNING_TRACKS.forEach((id) => {
+    const label = id === "all" ? "All Tracks" : id;
+    const count = lessonsForTrack(id).length;
+    const card = labCreate("article", `learn-track-card ${track === id ? "is-active" : ""}`);
+    card.append(labCreate("div", "lab-card-kicker", track === id ? "Active track" : "Learning track"));
     card.append(labCreate("h3", "", label));
-    card.append(labCreate("p", "", count ? `${count} available local lesson${count === 1 ? "" : "s"} in the current curriculum.` : "No local lessons are classified in this track yet. Its commands remain available in the Library."));
-    card.append(labButton(state.lab.vendorTrack === id ? "Current Track" : `Choose ${label}`, state.lab.vendorTrack === id ? "secondary" : "primary", () => { state.lab.vendorTrack = id; renderLearn(); }));
+    card.append(labCreate("p", "", count ? `${count} available local lesson${count === 1 ? "" : "s"}; ${commandsForTrack(id).length} local commands.` : `${commandsForTrack(id).length} local commands are available for coverage and explanation.`));
+    card.append(labButton(track === id ? "Current Track" : `Choose ${label}`, track === id ? "secondary" : "primary", () => { state.lab.vendorTrack = id; trackProgress(id); saveVendorProgress(); renderLearn(); renderHome(); }));
     grid.append(card);
   });
   els.learnRoot.append(grid);
   const summary = labCreate("section", "learn-summary");
-  summary.append(labButton("Continue Course", "primary", () => { state.lab.screen = "lessons"; switchView("lab"); }));
-  summary.append(labButton("Open Practice Library", "secondary", () => switchView("library")));
+  const trackLessons = lessonsForTrack(track);
+  const learned = Object.keys(progress.learnedCommands).length;
+  summary.append(labCreate("span", "badge", `Current level: ${learned < 5 ? "Foundation" : learned < 16 ? "Basic configuration" : "Existing advanced content"}`), labCreate("span", "badge", `Current module: ${trackLessons[0]?.section_id || "Command coverage"}`), labCreate("span", "badge", `Progress: ${learned}/${commandsForTrack(track).length} commands`), labCreate("span", "badge", `Needs review: ${Object.keys(progress.reviewRoutes).length}`));
+  summary.append(labButton("Continue Course", "primary", () => { state.lab.screen = "lessons"; switchView("lab"); }), labButton("Browse Modules", "secondary", () => { state.lab.screen = "lessons"; switchView("lab"); }), labButton("Command Coverage", "secondary", () => { state.lab.learnPanel = "coverage"; renderLearn(); }), labButton("Practice Library", "secondary", () => { state.lab.libraryTab = "practice"; switchView("library"); }), labButton("Change Track", "secondary", () => { state.lab.vendorTrack = "all"; renderLearn(); }));
   els.learnRoot.append(summary);
+}
+
+function renderCommandCoverage() {
+  const track = activeTrack();
+  const progress = trackProgress(track);
+  const commands = commandsForTrack(track);
+  const states = commands.map((command) => commandLearningState(command, progress));
+  const panel = labCreate("section", "learn-track-panel");
+  panel.append(labButton("Back to Learn", "secondary", () => { state.lab.learnPanel = "overview"; renderLearn(); }));
+  panel.append(labCreate("div", "lab-card-kicker", "Command coverage"));
+  panel.append(labCreate("h3", "", `${track === "all" ? "All Tracks" : track} command coverage`));
+  const metrics = labCreate("div", "learn-summary");
+  [["Total", commands.length], ["Learned", states.filter((state) => state === "Passed").length], ["In progress", states.filter((state) => state === "In progress").length], ["Not started", states.filter((state) => state === "Planned lesson").length], ["Needs review", Object.keys(progress.reviewRoutes).length], ["Fully simulated", commands.filter((command) => command.safety_level === "Safe read-only command").length], ["Partially simulated", commands.filter((command) => command.safety_level !== "Safe read-only command").length], ["Explanation only", 0]].forEach(([label, value]) => metrics.append(labCreate("span", "badge", `${label}: ${value}`)));
+  panel.append(metrics);
+  const list = labCreate("div", "library-grid");
+  commands.forEach((command) => {
+    const card = labCreate("article", "library-card");
+    const status = commandLearningState(command, progress);
+    card.append(labCreate("div", "lab-card-kicker", command.vendor_label || command.vendor || "Local command"), labCreate("h3", "", command.command), labCreate("p", "", `${command.category || "General"} | ${status} | ${command.safety_level || "Explanation only"}`));
+    card.append(labButton("Open in Command Lookup", "secondary", () => { els.commandSearch.value = command.command; state.lookupSource = "search"; switchView("diagnose"); renderCommandLookup(); }));
+    list.append(card);
+  });
+  els.learnRoot.append(panel, list);
 }
 
 function renderLibrary() {
@@ -4160,23 +4294,93 @@ function renderLibrary() {
   els.libraryRoot.replaceChildren();
   const intro = labCreate("section", "library-intro");
   intro.append(labCreate("div", "lab-card-kicker", "Reference and review"));
-  intro.append(labCreate("h3", "", "Use the local library when you need a command, a saved diagnosis, or course administration."));
+  intro.append(labCreate("h3", "", "Find commands, repeat practice routes, review saved reports, or open instructor controls."));
   els.libraryRoot.append(intro);
-  const entries = [
-    ["Command Lookup", "Search the local knowledge base or paste an exact command and output for explanation and diagnosis.", "Open Command Lookup", () => switchView("diagnose")],
-    ["Knowledge Base", "Browse the offline command catalog that powers lookup and explanations.", "Open Knowledge Base", () => switchView("knowledge")],
-    ["Saved Reports", "Review diagnoses saved only in this browser.", "Open History", () => switchView("history")],
-    ["Instructor Mode", "Unlock local review content or reset local learning progress. This is intentionally outside the student navigation.", "Open Instructor Mode", () => switchView("admin")]
+  const tabs = [
+    ["lookup", "Command Lookup"], ["practice", "Practice Library"], ["knowledge", "Knowledge Base"], ["reports", "Saved Reports"], ["instructor", "Instructor Mode"]
   ];
-  const grid = labCreate("div", "library-grid");
-  entries.forEach(([title, description, label, action]) => {
-    const card = labCreate("article", "library-card");
-    card.append(labCreate("h3", "", title));
-    card.append(labCreate("p", "", description));
-    card.append(labButton(label, "secondary", action));
+  const bar = labCreate("div", "library-tabs");
+  tabs.forEach(([id, label]) => bar.append(labButton(label, `secondary ${state.lab.libraryTab === id ? "is-active" : ""}`, () => { state.lab.libraryTab = id; renderLibrary(); })));
+  els.libraryRoot.append(bar);
+  const body = labCreate("section", "library-tab-body");
+  if (state.lab.libraryTab === "practice") renderPracticeLibrary(body);
+  else if (state.lab.libraryTab === "knowledge") renderLibraryLaunch(body, "Knowledge Base", "Browse the offline command catalog used by Command Lookup.", "Open Knowledge Base", () => switchView("knowledge"));
+  else if (state.lab.libraryTab === "reports") renderLibraryLaunch(body, "Saved Reports", `${state.history.length} report${state.history.length === 1 ? "" : "s"} are stored only in this browser.`, "Open Saved Reports", () => switchView("history"));
+  else if (state.lab.libraryTab === "instructor") renderLibraryLaunch(body, "Instructor Mode", "Local course controls are kept here, away from normal student navigation.", "Open Instructor Mode", () => switchView("admin"));
+  else renderLibraryLaunch(body, "Command Lookup", "Search the local knowledge base or paste exact command output for an explanation and diagnosis.", "Open Command Lookup", () => switchView("diagnose"));
+  els.libraryRoot.append(body);
+}
+
+function renderLibraryLaunch(parent, title, copy, label, action) {
+  const card = labCreate("article", "library-card");
+  card.append(labCreate("h3", "", title), labCreate("p", "", copy), labButton(label, "primary", action));
+  parent.append(card);
+}
+
+function startPracticeRoute(routeId) {
+  const route = PLAYGROUND_TASKS.find((item) => item.id === routeId);
+  if (!route) return;
+  state.lab.playgroundTaskId = route.id;
+  state.lab.screen = "guided-cli";
+  recordTrackActivity(route.vendor, { lastLabRouteId: route.id });
+  switchView("lab");
+  startFreshTrainingSwitch();
+}
+
+function renderPracticeLibrary(parent) {
+  const filters = state.lab.libraryFilters;
+  const track = activeTrack();
+  const filterPanel = labCreate("section", "library-filter-panel");
+  filterPanel.append(labCreate("strong", "lab-card-kicker", `${PLAYGROUND_TASKS.length} local practice routes`));
+  const search = document.createElement("input");
+  search.placeholder = "Search routes";
+  search.value = filters.search;
+  search.setAttribute("aria-label", "Search practice routes");
+  search.addEventListener("input", () => { filters.search = search.value; renderLibrary(); });
+  filterPanel.append(search);
+  const definitions = [
+    ["vendor", "Vendor", [...new Set(PLAYGROUND_TASKS.map((route) => route.vendor))]],
+    ["platform", "Platform", [...new Set(PLAYGROUND_TASKS.map((route) => route.platform))]],
+    ["topic", "Topic", [...new Set(PLAYGROUND_TASKS.map((route) => route.topic))]],
+    ["difficulty", "Difficulty", [...new Set(PLAYGROUND_TASKS.map((route) => route.difficulty))]],
+    ["routeType", "Route type", [...new Set(PLAYGROUND_TASKS.map((route) => route.routeType))]],
+    ["support", "Support level", [...new Set(PLAYGROUND_TASKS.map((route) => route.support))]],
+    ["status", "Learning status", ["Learned", "Not learned", "Needs review"]]
+  ];
+  definitions.forEach(([key, label, values]) => {
+    const select = document.createElement("select");
+    select.setAttribute("aria-label", label);
+    select.append(new Option(`All ${label.toLowerCase()}`, ""));
+    values.forEach((value) => select.append(new Option(value, value)));
+    select.value = filters[key];
+    select.addEventListener("change", () => { filters[key] = select.value; renderLibrary(); });
+    filterPanel.append(select);
+  });
+  parent.append(filterPanel);
+  const progress = trackProgress(track);
+  const routes = PLAYGROUND_TASKS.filter((route) => {
+    const searched = !filters.search || `${route.label} ${route.topic} ${route.vendor}`.toLowerCase().includes(filters.search.toLowerCase());
+    const activeVendor = track === "all" || route.vendor === track;
+    const fieldsMatch = ["vendor", "platform", "topic", "difficulty", "routeType", "support"].every((key) => !filters[key] || route[key] === filters[key]);
+    const learned = Boolean(progress.practisedRoutes[route.id]);
+    const review = Boolean(progress.reviewRoutes[route.id]);
+    const statusMatch = !filters.status || (filters.status === "Learned" && learned) || (filters.status === "Not learned" && !learned) || (filters.status === "Needs review" && review);
+    return searched && activeVendor && fieldsMatch && statusMatch;
+  });
+  const count = labCreate("p", "", `${routes.length} route${routes.length === 1 ? "" : "s"} match the current filters.`);
+  parent.append(count);
+  const grid = labCreate("div", "practice-route-grid");
+  routes.forEach((route) => {
+    const lesson = relatedLessonForRoute(route);
+    const card = labCreate("article", "practice-route-card");
+    card.dataset.routeId = route.id;
+    card.append(labCreate("div", "lab-card-kicker", `${route.vendor} | ${route.platform}`), labCreate("h3", "", route.label), labCreate("p", "", `${route.topic} | ${route.difficulty}`));
+    const facts = labCreate("div", "route-facts");
+    [route.routeType, route.support, `${route.estimatedMinutes} min`, `Lesson: ${lesson?.title || "Planned command group"}`].forEach((fact) => facts.append(labCreate("span", "badge", fact)));
+    card.append(facts, labButton("Start route", "primary", () => startPracticeRoute(route.id)));
     grid.append(card);
   });
-  els.libraryRoot.append(grid);
+  parent.append(grid);
 }
 
 function switchView(viewName, options = {}) {
