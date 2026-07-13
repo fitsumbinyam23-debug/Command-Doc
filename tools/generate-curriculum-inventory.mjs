@@ -28,6 +28,14 @@ const profilesByVendor = {
   linux: []
 };
 
+const compatibilityByVendor = {
+  cisco_ios: { operating_system_id: "cisco_ios", operating_system_family_id: "cisco_ios" },
+  hp_comware: { operating_system_id: "hp_comware", operating_system_family_id: "hp_comware" },
+  aruba_cx: { operating_system_id: "arubaos_cx", operating_system_family_id: "arubaos_cx" },
+  windows_cmd: { operating_system_id: "windows_cmd", operating_system_family_id: "windows" },
+  linux: { operating_system_id: "linux", operating_system_family_id: "linux" }
+};
+
 function routeSupportLevel(legacySupport) {
   if (["full_state_simulation", "simplified_state_simulation", "output_simulation", "explanation_only", "unsupported_for_profile"].includes(legacySupport)) return legacySupport;
   if (legacySupport === "fully_simulated") return "full_state_simulation";
@@ -176,10 +184,11 @@ for (const item of canonicalByKey.values()) {
   const vendor = vendorKey(item, item);
   const safety = safetyFields(item);
   const aliasesForCommand = aliases[item.id] || [];
+  const compatibility = compatibilityByVendor[vendor] || { operating_system_id: "unknown", operating_system_family_id: "unknown" };
   inventory.push({
     command_id: item.id || `${vendor}_${normalise(item.command).replace(/[^a-z0-9]+/g, "_")}`,
-    vendor, vendor_label: vendorLabels[vendor] || "Unassigned", operating_system: item.os || (vendor === "cisco_ios" ? "IOS" : vendor === "hp_comware" ? "Comware" : vendor === "aruba_cx" ? "ArubaOS-CX" : vendor === "windows_cmd" ? "Windows CMD" : vendor === "linux" ? "Linux" : "Unknown"),
-    operating_system_version: item.operating_system_version || "Unknown", platform: item.platform || vendorLabels[vendor] || "Unassigned", platform_family: item.platform_family || "Any", model_family: item.model_family || "Version-sensitive local catalog", supported_model_profiles: item.supported_model_profiles || [], required_capabilities: item.required_capabilities || [], feature_dependencies: item.feature_dependencies || [], license_dependencies: item.license_dependencies || [], available_modes: item.available_modes || [], required_privilege: item.required_privilege || "",
+    vendor, vendor_id: vendor, vendor_label: vendorLabels[vendor] || "Unassigned", operating_system: item.os || (vendor === "cisco_ios" ? "IOS" : vendor === "hp_comware" ? "Comware" : vendor === "aruba_cx" ? "ArubaOS-CX" : vendor === "windows_cmd" ? "Windows CMD" : vendor === "linux" ? "Linux" : "Unknown"), operating_system_id: item.operating_system_id || compatibility.operating_system_id, operating_system_family_id: item.operating_system_family_id || compatibility.operating_system_family_id,
+    operating_system_version: item.operating_system_version || "Unknown", compatible_os_ids: item.compatible_os_ids || [], compatible_os_family_ids: item.compatible_os_family_ids || [compatibility.operating_system_family_id], minimum_version: item.minimum_version || "", maximum_version: item.maximum_version || "", excluded_versions: item.excluded_versions || [], platform: item.platform || vendorLabels[vendor] || "Unassigned", platform_family: item.platform_family || "Any", platform_family_id: item.platform_family_id || item.platform_family || "", compatible_platform_family_ids: item.compatible_platform_family_ids || (item.platform_family && item.platform_family !== "Any" ? [item.platform_family] : []), model_family: item.model_family || "Version-sensitive local catalog", supported_model_profiles: item.supported_model_profiles || [], required_capabilities: item.required_capabilities || [], feature_dependencies: item.feature_dependencies || [], license_dependencies: item.license_dependencies || [], available_modes: item.available_modes || [], required_privilege: item.required_privilege || "",
     canonical_command: item.command, syntax: item.command, aliases: aliasesForCommand, command_mode: safety.changes_configuration ? "configuration or interface context" : "operational / read-only", privilege_level: safety.changes_configuration ? "elevated or configuration context" : "user or privileged operational context",
     category: item.category || "general", topic: topicFor(item), difficulty: safety.changes_configuration ? "intermediate" : "foundation", ...safety,
     purpose: item.meaning || "Local command catalog entry.", when_to_use: item.use_for || [], when_not_to_use: item.do_not_touch ? [item.do_not_touch] : [], prerequisites: [], related_commands: (item.next_commands || []).map((next) => next.command).filter(Boolean), verification_commands: (item.next_commands || []).map((next) => next.command).filter(Boolean).slice(0, 2), rollback_commands: safety.changes_configuration ? [vendor === "hp_comware" ? "undo <command>" : "no <command>"] : [], save_commands: safety.changes_configuration ? [vendor === "hp_comware" ? "save" : vendor === "cisco_ios" || vendor === "aruba_cx" ? "copy running-config startup-config" : "Record and verify results"] : [],
