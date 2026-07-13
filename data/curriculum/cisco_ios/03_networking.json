@@ -1,0 +1,47 @@
+{
+  "module_id": "cisco_ios-networking",
+  "vendor": "cisco_ios",
+  "title": "6. Networking",
+  "topic": "networking",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "cisco_ios-networking",
+      "title": "Cisco IOS — Networking",
+      "vendor": "cisco_ios",
+      "topic": "networking",
+      "simulation_support": [
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "cisco_show_ip_route",
+          "command": "show ip route",
+          "aliases": [
+            "sh ip route"
+          ],
+          "purpose": "Shows the IPv4 routing table and how each destination was learned.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show ip interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
