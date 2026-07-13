@@ -1,0 +1,62 @@
+{
+  "module_id": "cisco_ios-trunks",
+  "vendor": "cisco_ios",
+  "title": "8. Trunks",
+  "topic": "trunks",
+  "level": 3,
+  "lessons": [
+    {
+      "lesson_id": "cisco_ios-trunks",
+      "title": "Cisco IOS — Trunks",
+      "vendor": "cisco_ios",
+      "topic": "trunks",
+      "simulation_support": [
+        "explanation_only",
+        "partially_simulated"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "cisco_switchport_mode_trunk",
+          "command": "switchport mode trunk",
+          "aliases": [],
+          "purpose": "Configures a Layer 2 interface to operate as a trunk.",
+          "safety_level": "High - can alter VLAN reachability.",
+          "verification_commands": [
+            "show interfaces trunk"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "explanation_only"
+        },
+        {
+          "command_id": "cisco_switchport_trunk_allowed",
+          "command": "switchport trunk allowed vlan <vlan-list>",
+          "aliases": [],
+          "purpose": "Restricts which VLANs may traverse a Cisco trunk.",
+          "safety_level": "High - can interrupt VLAN services.",
+          "verification_commands": [
+            "show interfaces trunk"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        }
+      ]
+    }
+  ]
+}
