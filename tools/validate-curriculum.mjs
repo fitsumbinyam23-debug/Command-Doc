@@ -37,7 +37,20 @@ for (const route of routes) {
   if (!route.route_id || routeIds.has(route.route_id)) errors.push(`Duplicate or missing route ID: ${route.route_id || "(missing)"}`);
   routeIds.add(route.route_id);
   if (!route.vendor || !route.support_level) errors.push(`Route missing vendor/support: ${route.route_id}`);
-  for (const commandId of route.required_command_ids || []) if (!commandIds.has(commandId)) errors.push(`Broken route command reference: ${route.route_id} -> ${commandId}`);
+  const required = route.required_command_ids || [];
+  if (route.route_type !== "free_practice" && !required.length) errors.push(`Route has no required commands: ${route.route_id}`);
+  if (route.route_type === "free_practice" && route.required_commands_policy !== "unrestricted") errors.push(`Free practice route lacks unrestricted policy: ${route.route_id}`);
+  for (const commandId of required) {
+    const command = commands.find((item) => item.command_id === commandId);
+    if (!commandIds.has(commandId)) errors.push(`Broken route command reference: ${route.route_id} -> ${commandId}`);
+    else if (command.vendor !== route.vendor) errors.push(`Cross-vendor route command reference: ${route.route_id} (${route.vendor}) -> ${commandId} (${command.vendor})`);
+  }
+  for (const lessonId of route.related_lesson_ids || []) if (!String(lessonId).startsWith(`${route.vendor}-`)) errors.push(`Cross-vendor lesson reference: ${route.route_id} -> ${lessonId}`);
+  if (route.support_level === "fully_simulated") {
+    for (const commandId of [...required, ...(route.verification_command_ids || [])]) {
+      if (commands.find((item) => item.command_id === commandId)?.simulator_support !== "fully_simulated") errors.push(`Fully simulated route has non-full command: ${route.route_id} -> ${commandId}`);
+    }
+  }
 }
 
 for (const [vendor, modules] of Object.entries(indexFile.modules || {})) {
