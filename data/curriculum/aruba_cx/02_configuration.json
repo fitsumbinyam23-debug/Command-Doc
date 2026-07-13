@@ -1,0 +1,63 @@
+{
+  "module_id": "aruba_cx-configuration",
+  "vendor": "aruba_cx",
+  "title": "5. Configuration",
+  "topic": "configuration",
+  "level": 2,
+  "lessons": [
+    {
+      "lesson_id": "aruba_cx-configuration",
+      "title": "ArubaOS-CX — Configuration",
+      "vendor": "aruba_cx",
+      "topic": "configuration",
+      "simulation_support": [
+        "partially_simulated",
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "aruba_configure_terminal",
+          "command": "configure terminal",
+          "aliases": [
+            "conf t",
+            "config terminal"
+          ],
+          "purpose": "Enters global configuration mode on ArubaOS-CX.",
+          "safety_level": "High - enters configuration mode; later commands can affect production.",
+          "verification_commands": [
+            "show running-config"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "aruba_show_running_config",
+          "command": "show running-config",
+          "aliases": [],
+          "purpose": "Shows the active ArubaOS-CX configuration.",
+          "safety_level": "Low - read-only, but output may contain credentials, addresses, and sensitive configuration.",
+          "verification_commands": [
+            "show version"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        }
+      ]
+    }
+  ]
+}
