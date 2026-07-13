@@ -1,0 +1,172 @@
+{
+  "module_id": "hp_comware-interfaces",
+  "vendor": "hp_comware",
+  "title": "2. Interfaces",
+  "topic": "interfaces",
+  "level": 1,
+  "lessons": [
+    {
+      "lesson_id": "hp_comware-interfaces",
+      "title": "HP Comware — Interfaces",
+      "vendor": "hp_comware",
+      "topic": "interfaces",
+      "simulation_support": [
+        "partially_simulated",
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "hp_display_interface_brief",
+          "command": "display interface brief",
+          "aliases": [
+            "dis interface brief",
+            "dis int brief"
+          ],
+          "purpose": "Shows interface physical state, protocol state, and brief status information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display interface <interface>",
+            "display current-configuration interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "hp_display_interface",
+          "command": "display interface",
+          "aliases": [
+            "dis interface",
+            "dis int"
+          ],
+          "purpose": "Shows detailed interface state, counters, errors, speed, duplex, and media information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display interface brief",
+            "display current-configuration interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_display_current_configuration_interface",
+          "command": "display current-configuration interface",
+          "aliases": [
+            "dis current-configuration interface",
+            "dis current int"
+          ],
+          "purpose": "Shows current configuration applied to a specific interface.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display interface <interface>",
+            "display interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_interface_config",
+          "command": "interface <interface>",
+          "aliases": [
+            "int <interface>",
+            "interface <interface>"
+          ],
+          "purpose": "Enters Comware interface view for a selected interface.",
+          "safety_level": "High - selects a production interface for possible changes.",
+          "verification_commands": [
+            "display current-configuration interface <interface>"
+          ],
+          "rollback_commands": [
+            "undo <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "hp_shutdown",
+          "command": "shutdown",
+          "aliases": [],
+          "purpose": "Administratively disables the selected Comware interface.",
+          "safety_level": "Critical - can disconnect users, APs, cameras, uplinks, or stack links.",
+          "verification_commands": [
+            "display interface brief"
+          ],
+          "rollback_commands": [
+            "undo <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "hp_undo_shutdown",
+          "command": "undo shutdown",
+          "aliases": [
+            "undo shut"
+          ],
+          "purpose": "Administratively enables the selected Comware interface.",
+          "safety_level": "High - can restore traffic or introduce an unexpected device to the network.",
+          "verification_commands": [
+            "display interface <interface>"
+          ],
+          "rollback_commands": [
+            "undo <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "hp_display_ip_interface_brief",
+          "command": "display ip interface brief",
+          "aliases": [
+            "dis ip interface brief",
+            "dis ip int brief",
+            "dis ip int br"
+          ],
+          "purpose": "Summarizes Comware interface IPv4 addresses and physical and protocol states.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "hp_display_stp_brief",
+          "command": "display stp brief",
+          "aliases": [
+            "dis stp brief",
+            "dis stp br"
+          ],
+          "purpose": "Summarizes spanning-tree roles and forwarding states for Comware ports.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display logbuffer"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_display_poe_interface",
+          "command": "display poe interface",
+          "aliases": [],
+          "purpose": "Shows Power over Ethernet status for Comware interfaces.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
