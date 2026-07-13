@@ -1,0 +1,193 @@
+{
+  "module_id": "aruba_cx-interfaces",
+  "vendor": "aruba_cx",
+  "title": "2. Interfaces",
+  "topic": "interfaces",
+  "level": 1,
+  "lessons": [
+    {
+      "lesson_id": "aruba_cx-interfaces",
+      "title": "ArubaOS-CX — Interfaces",
+      "vendor": "aruba_cx",
+      "topic": "interfaces",
+      "simulation_support": [
+        "fully_simulated",
+        "lookup_only",
+        "partially_simulated",
+        "explanation_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "aruba_show_interface_brief",
+          "command": "show interface brief",
+          "aliases": [],
+          "purpose": "Shows interface status, speed, duplex, and brief operational information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface <interface>",
+            "show running-config interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "fully_simulated"
+        },
+        {
+          "command_id": "aruba_show_interface",
+          "command": "show interface",
+          "aliases": [],
+          "purpose": "Shows detailed interface state, counters, errors, speed, duplex, and media data.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface brief",
+            "show running-config interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_show_running_config_interface",
+          "command": "show running-config interface",
+          "aliases": [],
+          "purpose": "Shows running configuration applied to a specific interface.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface <interface>",
+            "show interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "fully_simulated"
+        },
+        {
+          "command_id": "aruba_interface_config",
+          "command": "interface <interface>",
+          "aliases": [
+            "int <interface>"
+          ],
+          "purpose": "Enters ArubaOS-CX configuration mode for a specific interface.",
+          "safety_level": "High - selects a production interface for possible changes.",
+          "verification_commands": [
+            "show running-config interface <interface>"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "aruba_shutdown",
+          "command": "shutdown",
+          "aliases": [],
+          "purpose": "Administratively disables the selected ArubaOS-CX interface.",
+          "safety_level": "Critical - can disconnect users, APs, cameras, uplinks, or services.",
+          "verification_commands": [
+            "show interface brief"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "aruba_no_shutdown",
+          "command": "no shutdown",
+          "aliases": [
+            "no shut"
+          ],
+          "purpose": "Administratively enables the selected ArubaOS-CX interface.",
+          "safety_level": "High - can restore traffic or introduce an unexpected device to the network.",
+          "verification_commands": [
+            "show interface <interface>"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "aruba_show_ip_interface_brief",
+          "command": "show ip interface brief",
+          "aliases": [],
+          "purpose": "Summarizes ArubaOS-CX Layer 3 interfaces, IP addresses, and administrative and link states.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "aruba_show_spanning_tree",
+          "command": "show spanning-tree",
+          "aliases": [],
+          "purpose": "Shows ArubaOS-CX spanning-tree instances, root information, port roles, and states.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show events -r -n <count>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_show_lacp_interfaces",
+          "command": "show lacp interfaces",
+          "aliases": [],
+          "purpose": "Shows ArubaOS-CX LACP interface state, aggregation membership, and partner information.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface brief"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_show_interface_error_statistics",
+          "command": "show interface error-statistics",
+          "aliases": [],
+          "purpose": "Shows non-traffic interface error counters on ArubaOS-CX.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "aruba_show_power_over_ethernet",
+          "command": "show power-over-ethernet",
+          "aliases": [],
+          "purpose": "Shows PoE status and budget on ArubaOS-CX switches that support PoE.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "show interface <interface>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "aruba_lacp_mode_active",
+          "command": "lacp mode active",
+          "aliases": [],
+          "purpose": "Enables active LACP negotiation on an ArubaOS-CX member interface.",
+          "safety_level": "High - can affect aggregate link forwarding.",
+          "verification_commands": [
+            "show lacp interfaces"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "explanation_only"
+        }
+      ]
+    }
+  ]
+}
