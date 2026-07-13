@@ -1,0 +1,58 @@
+{
+  "module_id": "linux-mac_neighbors",
+  "vendor": "linux",
+  "title": "3. Mac Neighbors",
+  "topic": "mac_neighbors",
+  "level": 2,
+  "lessons": [
+    {
+      "lesson_id": "linux-mac_neighbors",
+      "title": "Linux — Mac Neighbors",
+      "vendor": "linux",
+      "topic": "mac_neighbors",
+      "simulation_support": [
+        "lookup_only"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "linux_arp_a",
+          "command": "arp -a",
+          "aliases": [],
+          "purpose": "Shows local ARP neighbor mappings.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ping <gateway>",
+            "ip addr"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "linux_ip_neigh",
+          "command": "ip neigh",
+          "aliases": [],
+          "purpose": "Shows the Linux IPv4 and IPv6 neighbor cache, including MAC addresses and reachability states.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "ip route"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        }
+      ]
+    }
+  ]
+}
