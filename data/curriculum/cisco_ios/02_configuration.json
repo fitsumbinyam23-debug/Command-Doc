@@ -1,0 +1,51 @@
+{
+  "module_id": "cisco_ios-configuration",
+  "vendor": "cisco_ios",
+  "title": "5. Configuration",
+  "topic": "configuration",
+  "level": 2,
+  "lessons": [
+    {
+      "lesson_id": "cisco_ios-configuration",
+      "title": "Cisco IOS — Configuration",
+      "vendor": "cisco_ios",
+      "topic": "configuration",
+      "simulation_support": [
+        "fully_simulated"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "cisco_copy_running_startup",
+          "command": "copy running-config startup-config",
+          "aliases": [
+            "copy run start",
+            "write memory",
+            "wr mem"
+          ],
+          "purpose": "Saves the active running configuration to startup configuration.",
+          "safety_level": "Medium - persists current changes; can preserve a mistake across reboot.",
+          "verification_commands": [
+            "show startup-config"
+          ],
+          "rollback_commands": [
+            "no <command>"
+          ],
+          "simulator_support": "fully_simulated"
+        }
+      ]
+    }
+  ]
+}
