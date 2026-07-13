@@ -1,0 +1,79 @@
+{
+  "module_id": "hp_comware-vlans",
+  "vendor": "hp_comware",
+  "title": "3. Vlans",
+  "topic": "vlans",
+  "level": 2,
+  "lessons": [
+    {
+      "lesson_id": "hp_comware-vlans",
+      "title": "HP Comware — Vlans",
+      "vendor": "hp_comware",
+      "topic": "vlans",
+      "simulation_support": [
+        "lookup_only",
+        "partially_simulated"
+      ],
+      "learning_sequence": [
+        "Understand",
+        "Syntax",
+        "Healthy output",
+        "Problem output",
+        "Interpret evidence",
+        "Guided practice",
+        "Independent practice",
+        "Troubleshooting",
+        "Verification",
+        "Knowledge check",
+        "Complete"
+      ],
+      "commands": [
+        {
+          "command_id": "hp_display_vlan",
+          "command": "display vlan",
+          "aliases": [
+            "dis vlan"
+          ],
+          "purpose": "Shows VLAN information, status, and member interfaces.",
+          "safety_level": "Safe read-only command",
+          "verification_commands": [
+            "display interface brief",
+            "display mac-address vlan <vlan>"
+          ],
+          "rollback_commands": [],
+          "simulator_support": "lookup_only"
+        },
+        {
+          "command_id": "hp_port_access_vlan",
+          "command": "port access vlan <vlan>",
+          "aliases": [
+            "port access vlan <vlan>"
+          ],
+          "purpose": "Assigns the selected Comware access port to a VLAN.",
+          "safety_level": "High - changes endpoint network placement and can break access.",
+          "verification_commands": [
+            "display vlan <vlan>"
+          ],
+          "rollback_commands": [
+            "undo <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        },
+        {
+          "command_id": "hp_vlan",
+          "command": "vlan <vlan-id>",
+          "aliases": [],
+          "purpose": "Creates or enters an HP Comware VLAN view.",
+          "safety_level": "Medium - can affect switching once assigned.",
+          "verification_commands": [
+            "display vlan <vlan-id>"
+          ],
+          "rollback_commands": [
+            "undo <command>"
+          ],
+          "simulator_support": "partially_simulated"
+        }
+      ]
+    }
+  ]
+}
