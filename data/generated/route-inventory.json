@@ -14,7 +14,7 @@
       "required_commands_policy": "unrestricted",
       "support_level": "explanation_only",
       "mapping_status": "unrestricted",
-      "title": "Cisco IOS â€” Free Practice",
+      "title": "Cisco IOS — Free Practice",
       "description": "Explore a fresh local switch without automatic answers.",
       "prerequisites": [],
       "required_command_ids": [],
@@ -49,7 +49,7 @@
       "required_commands_policy": "guided",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Full Switch Configuration - Start to Finish",
+      "title": "Cisco IOS — Full Switch Configuration - Start to Finish",
       "description": "Configure a fresh simulated Cisco switch manually: name it, create a VLAN, configure two access ports, verify, and save.",
       "prerequisites": [],
       "required_command_ids": [
@@ -110,7 +110,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Configure Access Port",
+      "title": "Cisco IOS — Configure Access Port",
       "description": "Set a simulated access port description, access VLAN, and verify it.",
       "prerequisites": [],
       "required_command_ids": [
@@ -153,7 +153,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Create VLAN",
+      "title": "Cisco IOS — Create VLAN",
       "description": "Create a local simulated VLAN, give it a name, verify it, then save.",
       "prerequisites": [],
       "required_command_ids": [
@@ -196,7 +196,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Configure Trunk Port",
+      "title": "Cisco IOS — Configure Trunk Port",
       "description": "Configure a simulated trunk and verify its allowed VLANs.",
       "prerequisites": [],
       "required_command_ids": [
@@ -239,7 +239,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Fix Wrong VLAN",
+      "title": "Cisco IOS — Fix Wrong VLAN",
       "description": "Inspect a simulated port, correct its VLAN, then confirm the result.",
       "prerequisites": [],
       "required_command_ids": [
@@ -282,7 +282,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Recover Shutdown Port",
+      "title": "Cisco IOS — Recover Shutdown Port",
       "description": "Identify an administratively disabled simulated port and recover it safely.",
       "prerequisites": [],
       "required_command_ids": [
@@ -324,7 +324,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Read port status",
+      "title": "Cisco IOS — Read port status",
       "description": "Read port status. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -366,7 +366,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Add a port description",
+      "title": "Cisco IOS — Add a port description",
       "description": "Add a port description. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -408,7 +408,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Set speed and duplex",
+      "title": "Cisco IOS — Set speed and duplex",
       "description": "Set speed and duplex. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -450,7 +450,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Disable an unused port",
+      "title": "Cisco IOS — Disable an unused port",
       "description": "Disable an unused port. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -492,7 +492,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Recover a disabled port",
+      "title": "Cisco IOS — Recover a disabled port",
       "description": "Recover a disabled port. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -534,7 +534,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Compare two port states",
+      "title": "Cisco IOS — Compare two port states",
       "description": "Compare two port states. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -545,7 +545,4503 @@
       "starting_state": "Local access switch profile",
       "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
       "expected_final_state": "Local simulated state checked and verified",
-      "final_state…41482 tokens truncated…   ],
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-1-7",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Interface Basics",
+      "category": "Interface Basics",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Check interface counters",
+      "description": "Check interface counters. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status",
+        "cisco_interface_config"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-1-8",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Interface Basics",
+      "category": "Interface Basics",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Clear interface counters",
+      "description": "Clear interface counters. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status",
+        "cisco_interface_config"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-1-9",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Interface Basics",
+      "category": "Interface Basics",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Inspect error-disabled state",
+      "description": "Inspect error-disabled state. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status",
+        "cisco_interface_config"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-1-10",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Interface Basics",
+      "category": "Interface Basics",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Document an endpoint",
+      "description": "Document an endpoint. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status",
+        "cisco_interface_config"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-2-1",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "VLANs",
+      "category": "VLANs",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Create a user VLAN",
+      "description": "Create a user VLAN. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-2-2",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "VLANs",
+      "category": "VLANs",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Name a VLAN",
+      "description": "Name a VLAN. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-2-3",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "VLANs",
+      "category": "VLANs",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Assign an access VLAN",
+      "description": "Assign an access VLAN. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-2-4",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "VLANs",
+      "category": "VLANs",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Move an endpoint VLAN",
+      "description": "Move an endpoint VLAN. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-2-5",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "VLANs",
+      "category": "VLANs",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Verify VLAN membership",
+      "description": "Verify VLAN membership. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_switch_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-stacking"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_switch_priority"
+      ]
+    },
+    {
+      "route_id": "route-2-6",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "VLANs",
+      "category": "VLANs",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Remove a VLAN assignment",
+      "description": "Remove a VLAN assignment. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-2-7",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "VLANs",
+      "category": "VLANs",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Build a guest VLAN",
+      "description": "Build a guest VLAN. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-2-8",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "VLANs",
+      "category": "VLANs",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Build a voice VLAN",
+      "description": "Build a voice VLAN. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-2-9",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "VLANs",
+      "category": "VLANs",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Inspect VLAN status",
+      "description": "Inspect VLAN status. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-2-10",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "VLANs",
+      "category": "VLANs",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Save a VLAN change",
+      "description": "Save a VLAN change. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-3-1",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Trunks",
+      "category": "Trunks",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Identify a trunk",
+      "description": "Identify a trunk. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status",
+        "cisco_configure_terminal",
+        "cisco_interface_config",
+        "cisco_switchport_mode_trunk",
+        "cisco_switchport_trunk_allowed"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces",
+        "cisco_ios-cli_foundation",
+        "cisco_ios-trunks"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_switchport_mode_trunk"
+      ]
+    },
+    {
+      "route_id": "route-3-2",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Trunks",
+      "category": "Trunks",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Configure a trunk",
+      "description": "Configure a trunk. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status",
+        "cisco_configure_terminal",
+        "cisco_interface_config",
+        "cisco_switchport_mode_trunk",
+        "cisco_switchport_trunk_allowed"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces",
+        "cisco_ios-cli_foundation",
+        "cisco_ios-trunks"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_switchport_mode_trunk"
+      ]
+    },
+    {
+      "route_id": "route-3-3",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Trunks",
+      "category": "Trunks",
+      "difficulty": "Foundation",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Allow VLANs on a trunk",
+      "description": "Allow VLANs on a trunk. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-3-4",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Trunks",
+      "category": "Trunks",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Remove a trunk VLAN",
+      "description": "Remove a trunk VLAN. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-3-5",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Trunks",
+      "category": "Trunks",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Inspect trunk status",
+      "description": "Inspect trunk status. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status",
+        "cisco_configure_terminal",
+        "cisco_interface_config",
+        "cisco_switchport_mode_trunk",
+        "cisco_switchport_trunk_allowed"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces",
+        "cisco_ios-cli_foundation",
+        "cisco_ios-trunks"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_switchport_mode_trunk"
+      ]
+    },
+    {
+      "route_id": "route-3-6",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Trunks",
+      "category": "Trunks",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Find a native VLAN mismatch",
+      "description": "Find a native VLAN mismatch. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-3-7",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Trunks",
+      "category": "Trunks",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Validate uplink VLANs",
+      "description": "Validate uplink VLANs. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-3-8",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Trunks",
+      "category": "Trunks",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Document an uplink",
+      "description": "Document an uplink. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status",
+        "cisco_configure_terminal",
+        "cisco_interface_config",
+        "cisco_switchport_mode_trunk",
+        "cisco_switchport_trunk_allowed"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces",
+        "cisco_ios-cli_foundation",
+        "cisco_ios-trunks"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_switchport_mode_trunk"
+      ]
+    },
+    {
+      "route_id": "route-3-9",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Trunks",
+      "category": "Trunks",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Recover a trunk mismatch",
+      "description": "Recover a trunk mismatch. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status",
+        "cisco_configure_terminal",
+        "cisco_interface_config",
+        "cisco_switchport_mode_trunk",
+        "cisco_switchport_trunk_allowed"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces",
+        "cisco_ios-cli_foundation",
+        "cisco_ios-trunks"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_switchport_mode_trunk"
+      ]
+    },
+    {
+      "route_id": "route-3-10",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Trunks",
+      "category": "Trunks",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Save a trunk change",
+      "description": "Save a trunk change. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status",
+        "cisco_configure_terminal",
+        "cisco_interface_config",
+        "cisco_switchport_mode_trunk",
+        "cisco_switchport_trunk_allowed"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces",
+        "cisco_ios-cli_foundation",
+        "cisco_ios-trunks"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_switchport_mode_trunk"
+      ]
+    },
+    {
+      "route_id": "route-4-1",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "MAC and Neighbor",
+      "category": "MAC and Neighbor",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Inspect MAC learning",
+      "description": "Inspect MAC learning. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ]
+    },
+    {
+      "route_id": "route-4-2",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "MAC and Neighbor",
+      "category": "MAC and Neighbor",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Find a MAC on a port",
+      "description": "Find a MAC on a port. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ]
+    },
+    {
+      "route_id": "route-4-3",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "MAC and Neighbor",
+      "category": "MAC and Neighbor",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Clear a learned MAC",
+      "description": "Clear a learned MAC. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ]
+    },
+    {
+      "route_id": "route-4-4",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "MAC and Neighbor",
+      "category": "MAC and Neighbor",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Verify MAC movement",
+      "description": "Verify MAC movement. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ]
+    },
+    {
+      "route_id": "route-4-5",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "MAC and Neighbor",
+      "category": "MAC and Neighbor",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Read CDP neighbors",
+      "description": "Read CDP neighbors. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ]
+    },
+    {
+      "route_id": "route-4-6",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "MAC and Neighbor",
+      "category": "MAC and Neighbor",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Read LLDP neighbors",
+      "description": "Read LLDP neighbors. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ]
+    },
+    {
+      "route_id": "route-4-7",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "MAC and Neighbor",
+      "category": "MAC and Neighbor",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Find an unknown endpoint",
+      "description": "Find an unknown endpoint. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ]
+    },
+    {
+      "route_id": "route-4-8",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "MAC and Neighbor",
+      "category": "MAC and Neighbor",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Check a device location",
+      "description": "Check a device location. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ]
+    },
+    {
+      "route_id": "route-4-9",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "MAC and Neighbor",
+      "category": "MAC and Neighbor",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Compare MAC tables",
+      "description": "Compare MAC tables. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ]
+    },
+    {
+      "route_id": "route-4-10",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "MAC and Neighbor",
+      "category": "MAC and Neighbor",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Verify endpoint traffic",
+      "description": "Verify endpoint traffic. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_cdp_neighbors",
+        "cisco_show_lldp_neighbors"
+      ]
+    },
+    {
+      "route_id": "route-5-1",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Port Security",
+      "category": "Port Security",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Inspect port security",
+      "description": "Inspect port security. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_port_security_interface"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-5-2",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Port Security",
+      "category": "Port Security",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Set a secure port",
+      "description": "Set a secure port. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_port_security_interface"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-5-3",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Port Security",
+      "category": "Port Security",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Test a violation",
+      "description": "Test a violation. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_port_security_interface"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-5-4",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Port Security",
+      "category": "Port Security",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Recover a violation",
+      "description": "Recover a violation. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_port_security_interface"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-5-5",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Port Security",
+      "category": "Port Security",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Check secure MACs",
+      "description": "Check secure MACs. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_port_security_interface"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-5-6",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Port Security",
+      "category": "Port Security",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Set violation mode",
+      "description": "Set violation mode. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_port_security_interface"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-5-7",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Port Security",
+      "category": "Port Security",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Review sticky MACs",
+      "description": "Review sticky MACs. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_port_security_interface"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-5-8",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Port Security",
+      "category": "Port Security",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Clear a security state",
+      "description": "Clear a security state. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_port_security_interface"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-5-9",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Port Security",
+      "category": "Port Security",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Document a violation",
+      "description": "Document a violation. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_port_security_interface"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-5-10",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Port Security",
+      "category": "Port Security",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Verify secure port recovery",
+      "description": "Verify secure port recovery. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_port_security_interface"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-6-1",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Switch Management",
+      "category": "Switch Management",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Set hostname",
+      "description": "Set hostname. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-6-2",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Switch Management",
+      "category": "Switch Management",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Review running configuration",
+      "description": "Review running configuration. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-6-3",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Switch Management",
+      "category": "Switch Management",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Review startup configuration",
+      "description": "Review startup configuration. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-6-4",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Switch Management",
+      "category": "Switch Management",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Save configuration",
+      "description": "Save configuration. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-6-5",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Switch Management",
+      "category": "Switch Management",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Compare saved state",
+      "description": "Compare saved state. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-6-6",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Switch Management",
+      "category": "Switch Management",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Check version",
+      "description": "Check version. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-6-7",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Switch Management",
+      "category": "Switch Management",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Set login banner",
+      "description": "Set login banner. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-6-8",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Switch Management",
+      "category": "Switch Management",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Set management VLAN",
+      "description": "Set management VLAN. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_vlan_brief",
+        "cisco_vlan_create",
+        "cisco_switchport_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-vlans"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-6-9",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Switch Management",
+      "category": "Switch Management",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Inspect management interface",
+      "description": "Inspect management interface. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status",
+        "cisco_interface_config"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-6-10",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Switch Management",
+      "category": "Switch Management",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Prepare a change summary",
+      "description": "Prepare a change summary. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-7-1",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Layer 2 Health",
+      "category": "Layer 2 Health",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Read STP state",
+      "description": "Read STP state. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_spanning_tree"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-switching"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_spanning_tree"
+      ]
+    },
+    {
+      "route_id": "route-7-2",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Layer 2 Health",
+      "category": "Layer 2 Health",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Inspect root bridge",
+      "description": "Inspect root bridge. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_spanning_tree"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-switching"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_spanning_tree"
+      ]
+    },
+    {
+      "route_id": "route-7-3",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Layer 2 Health",
+      "category": "Layer 2 Health",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Find a blocked port",
+      "description": "Find a blocked port. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_spanning_tree"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-switching"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_spanning_tree"
+      ]
+    },
+    {
+      "route_id": "route-7-4",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Layer 2 Health",
+      "category": "Layer 2 Health",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Review EtherChannel",
+      "description": "Review EtherChannel. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_etherchannel_summary"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-switching"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_etherchannel_summary"
+      ]
+    },
+    {
+      "route_id": "route-7-5",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Layer 2 Health",
+      "category": "Layer 2 Health",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Inspect LACP member",
+      "description": "Inspect LACP member. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_switch_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-stacking"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_switch_priority"
+      ]
+    },
+    {
+      "route_id": "route-7-6",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Layer 2 Health",
+      "category": "Layer 2 Health",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Check loop symptoms",
+      "description": "Check loop symptoms. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-7-7",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Layer 2 Health",
+      "category": "Layer 2 Health",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Verify uplink redundancy",
+      "description": "Verify uplink redundancy. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status",
+        "cisco_configure_terminal",
+        "cisco_interface_config",
+        "cisco_switchport_mode_trunk",
+        "cisco_switchport_trunk_allowed"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces",
+        "cisco_ios-cli_foundation",
+        "cisco_ios-trunks"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_switchport_mode_trunk"
+      ]
+    },
+    {
+      "route_id": "route-7-8",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Layer 2 Health",
+      "category": "Layer 2 Health",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Document STP evidence",
+      "description": "Document STP evidence. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_spanning_tree"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-switching"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_spanning_tree"
+      ]
+    },
+    {
+      "route_id": "route-7-9",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Layer 2 Health",
+      "category": "Layer 2 Health",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Check broadcast symptoms",
+      "description": "Check broadcast symptoms. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_spanning_tree"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-switching"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_spanning_tree"
+      ]
+    },
+    {
+      "route_id": "route-7-10",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Layer 2 Health",
+      "category": "Layer 2 Health",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Verify recovery",
+      "description": "Verify recovery. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local trunk switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-8-1",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "Stacking",
+      "category": "Stacking",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Inspect stack members",
+      "description": "Inspect stack members. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_irf_topology",
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-stacking"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ]
+    },
+    {
+      "route_id": "route-8-2",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "Stacking",
+      "category": "Stacking",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Review stack priority",
+      "description": "Review stack priority. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_irf_topology",
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-stacking"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ]
+    },
+    {
+      "route_id": "route-8-3",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "Stacking",
+      "category": "Stacking",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Set stack priority",
+      "description": "Set stack priority. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_irf_topology",
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-stacking"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ]
+    },
+    {
+      "route_id": "route-8-4",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "Stacking",
+      "category": "Stacking",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Inspect IRF topology",
+      "description": "Inspect IRF topology. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_irf_topology",
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-stacking"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ]
+    },
+    {
+      "route_id": "route-8-5",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "Stacking",
+      "category": "Stacking",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Inspect IRF port",
+      "description": "Inspect IRF port. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_irf_topology",
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-stacking"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ]
+    },
+    {
+      "route_id": "route-8-6",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "Stacking",
+      "category": "Stacking",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Review member role",
+      "description": "Review member role. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_irf_topology",
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-stacking"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ]
+    },
+    {
+      "route_id": "route-8-7",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "Stacking",
+      "category": "Stacking",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Check stack link health",
+      "description": "Check stack link health. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_irf_topology",
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-stacking"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ]
+    },
+    {
+      "route_id": "route-8-8",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "Stacking",
+      "category": "Stacking",
+      "difficulty": "Intermediate",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Document stack evidence",
+      "description": "Document stack evidence. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_irf_topology",
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-stacking"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ]
+    },
+    {
+      "route_id": "route-8-9",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "Stacking",
+      "category": "Stacking",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Plan member replacement",
+      "description": "Plan member replacement. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_irf_topology",
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-stacking"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ]
+    },
+    {
+      "route_id": "route-8-10",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "Stacking",
+      "category": "Stacking",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Verify stack recovery",
+      "description": "Verify stack recovery. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_irf_topology",
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-stacking"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ]
+    },
+    {
+      "route_id": "route-9-1",
+      "vendor": "windows_cmd",
+      "vendor_label": "Windows CMD",
+      "operating_system": "Windows CMD",
+      "platform": "Windows CMD",
+      "topic": "Endpoint Network",
+      "category": "Endpoint Network",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Windows CMD — Configure a PC IP",
+      "description": "Configure a PC IP. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "windows_ping",
+        "windows_tracert",
+        "windows_nslookup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "windows_cmd-networking"
+      ],
+      "missing_cli_handler_ids": [
+        "windows_ping",
+        "windows_tracert",
+        "windows_nslookup"
+      ]
+    },
+    {
+      "route_id": "route-9-2",
+      "vendor": "windows_cmd",
+      "vendor_label": "Windows CMD",
+      "operating_system": "Windows CMD",
+      "platform": "Windows CMD",
+      "topic": "Endpoint Network",
+      "category": "Endpoint Network",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Windows CMD — Check subnet mask",
+      "description": "Check subnet mask. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "windows_ping",
+        "windows_tracert",
+        "windows_nslookup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "windows_cmd-networking"
+      ],
+      "missing_cli_handler_ids": [
+        "windows_ping",
+        "windows_tracert",
+        "windows_nslookup"
+      ]
+    },
+    {
+      "route_id": "route-9-3",
+      "vendor": "windows_cmd",
+      "vendor_label": "Windows CMD",
+      "operating_system": "Windows CMD",
+      "platform": "Windows CMD",
+      "topic": "Endpoint Network",
+      "category": "Endpoint Network",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Windows CMD — Check default gateway",
+      "description": "Check default gateway. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "windows_ping",
+        "windows_tracert",
+        "windows_nslookup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "windows_cmd-networking"
+      ],
+      "missing_cli_handler_ids": [
+        "windows_ping",
+        "windows_tracert",
+        "windows_nslookup"
+      ]
+    },
+    {
+      "route_id": "route-9-4",
+      "vendor": "windows_cmd",
+      "vendor_label": "Windows CMD",
+      "operating_system": "Windows CMD",
+      "platform": "Windows CMD",
+      "topic": "Endpoint Network",
+      "category": "Endpoint Network",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Windows CMD — Test same VLAN ping",
+      "description": "Test same VLAN ping. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "windows_cmd-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "windows_ipconfig_all"
+      ]
+    },
+    {
+      "route_id": "route-9-5",
+      "vendor": "windows_cmd",
+      "vendor_label": "Windows CMD",
+      "operating_system": "Windows CMD",
+      "platform": "Windows CMD",
+      "topic": "Endpoint Network",
+      "category": "Endpoint Network",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Windows CMD — Test VLAN mismatch ping",
+      "description": "Test VLAN mismatch ping. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "windows_cmd-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "windows_ipconfig_all"
+      ]
+    },
+    {
+      "route_id": "route-9-6",
+      "vendor": "windows_cmd",
+      "vendor_label": "Windows CMD",
+      "operating_system": "Windows CMD",
+      "platform": "Windows CMD",
+      "topic": "Endpoint Network",
+      "category": "Endpoint Network",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Windows CMD — Fix a duplicate IP",
+      "description": "Fix a duplicate IP. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "windows_ping",
+        "windows_tracert",
+        "windows_nslookup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "windows_cmd-networking"
+      ],
+      "missing_cli_handler_ids": [
+        "windows_ping",
+        "windows_tracert",
+        "windows_nslookup"
+      ]
+    },
+    {
+      "route_id": "route-9-7",
+      "vendor": "windows_cmd",
+      "vendor_label": "Windows CMD",
+      "operating_system": "Windows CMD",
+      "platform": "Windows CMD",
+      "topic": "Endpoint Network",
+      "category": "Endpoint Network",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Windows CMD — Inspect ARP",
+      "description": "Inspect ARP. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "windows_arp_a"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "windows_cmd-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "windows_arp_a"
+      ]
+    },
+    {
+      "route_id": "route-9-8",
+      "vendor": "windows_cmd",
+      "vendor_label": "Windows CMD",
+      "operating_system": "Windows CMD",
+      "platform": "Windows CMD",
+      "topic": "Endpoint Network",
+      "category": "Endpoint Network",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Windows CMD — Check DNS reachability",
+      "description": "Check DNS reachability. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "windows_ping",
+        "windows_tracert",
+        "windows_nslookup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "windows_cmd-networking"
+      ],
+      "missing_cli_handler_ids": [
+        "windows_ping",
+        "windows_tracert",
+        "windows_nslookup"
+      ]
+    },
+    {
+      "route_id": "route-9-9",
+      "vendor": "windows_cmd",
+      "vendor_label": "Windows CMD",
+      "operating_system": "Windows CMD",
+      "platform": "Windows CMD",
+      "topic": "Endpoint Network",
+      "category": "Endpoint Network",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Windows CMD — Document endpoint state",
+      "description": "Document endpoint state. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "windows_cmd-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "windows_ipconfig_all"
+      ]
+    },
+    {
+      "route_id": "route-9-10",
+      "vendor": "windows_cmd",
+      "vendor_label": "Windows CMD",
+      "operating_system": "Windows CMD",
+      "platform": "Windows CMD",
+      "topic": "Endpoint Network",
+      "category": "Endpoint Network",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "Windows CMD — Verify endpoint connectivity",
+      "description": "Verify endpoint connectivity. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "windows_cmd-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "windows_ipconfig_all"
+      ]
+    },
+    {
+      "route_id": "route-10-1",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Safety and Tickets",
+      "category": "Safety and Tickets",
+      "difficulty": "Advanced existing content",
+      "route_type": "workflow",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Read before change",
+      "description": "Read before change. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-10-2",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Safety and Tickets",
+      "category": "Safety and Tickets",
+      "difficulty": "Advanced existing content",
+      "route_type": "workflow",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Use a rollback plan",
+      "description": "Use a rollback plan. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-10-3",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Safety and Tickets",
+      "category": "Safety and Tickets",
+      "difficulty": "Advanced existing content",
+      "route_type": "workflow",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Build a change checklist",
+      "description": "Build a change checklist. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-10-4",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Safety and Tickets",
+      "category": "Safety and Tickets",
+      "difficulty": "Advanced existing content",
+      "route_type": "workflow",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Verify before save",
+      "description": "Verify before save. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-10-5",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Safety and Tickets",
+      "category": "Safety and Tickets",
+      "difficulty": "Advanced existing content",
+      "route_type": "workflow",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Write a ticket summary",
+      "description": "Write a ticket summary. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-10-6",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Safety and Tickets",
+      "category": "Safety and Tickets",
+      "difficulty": "Advanced existing content",
+      "route_type": "workflow",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Escalate physical fault",
+      "description": "Escalate physical fault. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-10-7",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Safety and Tickets",
+      "category": "Safety and Tickets",
+      "difficulty": "Advanced existing content",
+      "route_type": "workflow",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Identify dangerous commands",
+      "description": "Identify dangerous commands. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-10-8",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Safety and Tickets",
+      "category": "Safety and Tickets",
+      "difficulty": "Advanced existing content",
+      "route_type": "workflow",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Use a maintenance window",
+      "description": "Use a maintenance window. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-10-9",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Safety and Tickets",
+      "category": "Safety and Tickets",
+      "difficulty": "Advanced existing content",
+      "route_type": "workflow",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Capture before/after evidence",
+      "description": "Capture before/after evidence. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-10-10",
+      "vendor": "cisco_ios",
+      "vendor_label": "Cisco IOS",
+      "operating_system": "Cisco IOS",
+      "platform": "Cisco IOS",
+      "topic": "Safety and Tickets",
+      "category": "Safety and Tickets",
+      "difficulty": "Advanced existing content",
+      "route_type": "workflow",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "Cisco IOS — Close a verified ticket",
+      "description": "Close a verified ticket. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "cisco_show_running_config",
+        "cisco_copy_running_startup"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local access switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-configuration"
+      ],
+      "missing_cli_handler_ids": [
+        "cisco_show_running_config"
+      ]
+    },
+    {
+      "route_id": "route-11-1",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "HP Comware",
+      "category": "HP Comware",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Display interface brief",
+      "description": "Display interface brief. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_interface_brief",
+        "hp_interface_config"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-11-2",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "HP Comware",
+      "category": "HP Comware",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Display VLAN",
+      "description": "Display VLAN. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_vlan",
+        "hp_vlan",
+        "hp_port_access_vlan"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-vlans"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_vlan"
+      ]
+    },
+    {
+      "route_id": "route-11-3",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "HP Comware",
+      "category": "HP Comware",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Configure access port",
+      "description": "Configure access port. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_interface_brief",
+        "hp_interface_config"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-11-4",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "HP Comware",
+      "category": "HP Comware",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Configure trunk",
+      "description": "Configure trunk. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_interface_brief",
+        "hp_system_view",
+        "hp_interface_config",
+        "hp_port_link_type_trunk",
+        "hp_port_trunk_permit"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-interfaces",
+        "hp_comware-cli_foundation",
+        "hp_comware-trunks"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_port_link_type_trunk"
+      ]
+    },
+    {
+      "route_id": "route-11-5",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "HP Comware",
+      "category": "HP Comware",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Inspect MAC address",
+      "description": "Inspect MAC address. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_mac_address"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_mac_address"
+      ]
+    },
+    {
+      "route_id": "route-11-6",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "HP Comware",
+      "category": "HP Comware",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "explanation_only",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Read LLDP neighbor",
+      "description": "Read LLDP neighbor. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_lldp_neighbor"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "explanation and manual evidence review",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-mac_neighbors"
+      ],
+      "missing_cli_handler_ids": [
+        "hp_display_lldp_neighbor"
+      ]
+    },
+    {
+      "route_id": "route-11-7",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "HP Comware",
+      "category": "HP Comware",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Set system name",
+      "description": "Set system name. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "rollback_command_ids": [],
+      "scoring": {
+        "knowledge": 40,
+        "practice": 40,
+        "verification": 20
+      },
+      "hints": [
+        "The coach suggests safe verification steps; it does not run commands for you."
+      ],
+      "related_lesson_ids": [
+        "hp_comware-interfaces"
+      ],
+      "missing_cli_handler_ids": []
+    },
+    {
+      "route_id": "route-11-8",
+      "vendor": "hp_comware",
+      "vendor_label": "HP Comware",
+      "operating_system": "HP Comware",
+      "platform": "HP Comware",
+      "topic": "HP Comware",
+      "category": "HP Comware",
+      "difficulty": "Advanced existing content",
+      "route_type": "configuration",
+      "required_commands_policy": "derived_from_route_objective",
+      "support_level": "partially_simulated",
+      "mapping_status": "fully_mapped",
+      "title": "HP Comware — Inspect IRF topology",
+      "description": "Inspect IRF topology. Work through the local simulation manually and verify the final state.",
+      "prerequisites": [],
+      "required_command_ids": [
+        "hp_display_irf_topology",
+        "hp_display_irf_port",
+        "hp_irf_member_priority"
+      ],
+      "accepted_aliases": [],
+      "starting_state": "Local irf switch profile",
+      "hidden_fault": "The coach suggests safe verification steps; it does not run commands for you.",
+      "expected_final_state": "Local simulated state checked and verified",
+      "final_state_validation_method": "local CLI output and guided verification",
+      "verification_command_ids": [
+        "hp_display_interface_brief"
+      ],
       "rollback_command_ids": [],
       "scoring": {
         "knowledge": 40,
@@ -576,7 +5072,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "HP Comware â€” Set IRF priority",
+      "title": "HP Comware — Set IRF priority",
       "description": "Set IRF priority. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -622,7 +5118,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "HP Comware â€” Save Comware configuration",
+      "title": "HP Comware — Save Comware configuration",
       "description": "Save Comware configuration. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -647,7 +5143,8 @@
         "The coach suggests safe verification steps; it does not run commands for you."
       ],
       "related_lesson_ids": [
-        "hp_comware-device_information"
+        "hp_comware-device_information",
+        "hp_comware-configuration"
       ],
       "missing_cli_handler_ids": [
         "hp_display_current_configuration"
@@ -666,7 +5163,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Show interface status",
+      "title": "Cisco IOS — Show interface status",
       "description": "Show interface status. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -708,7 +5205,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Show VLAN brief",
+      "title": "Cisco IOS — Show VLAN brief",
       "description": "Show VLAN brief. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -751,7 +5248,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Configure access port",
+      "title": "Cisco IOS — Configure access port",
       "description": "Configure access port. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -793,7 +5290,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Configure trunk",
+      "title": "Cisco IOS — Configure trunk",
       "description": "Configure trunk. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -842,7 +5339,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "explanation_only",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Show MAC table",
+      "title": "Cisco IOS — Show MAC table",
       "description": "Show MAC table. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -885,7 +5382,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "explanation_only",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Show CDP neighbors",
+      "title": "Cisco IOS — Show CDP neighbors",
       "description": "Show CDP neighbors. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -930,7 +5427,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "explanation_only",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Show LLDP neighbors",
+      "title": "Cisco IOS — Show LLDP neighbors",
       "description": "Show LLDP neighbors. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -975,7 +5472,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Save running configuration",
+      "title": "Cisco IOS — Save running configuration",
       "description": "Save running configuration. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -1020,7 +5517,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Recover shutdown port",
+      "title": "Cisco IOS — Recover shutdown port",
       "description": "Recover shutdown port. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [
@@ -1062,7 +5559,7 @@
       "required_commands_policy": "derived_from_route_objective",
       "support_level": "partially_simulated",
       "mapping_status": "fully_mapped",
-      "title": "Cisco IOS â€” Verify configuration",
+      "title": "Cisco IOS — Verify configuration",
       "description": "Verify configuration. Work through the local simulation manually and verify the final state.",
       "prerequisites": [],
       "required_command_ids": [

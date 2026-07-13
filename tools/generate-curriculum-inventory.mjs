@@ -47,6 +47,13 @@ function topicFor(command) {
   // Keep mode navigation and lifecycle operations in deterministic learning modules.
   if (/^(configure terminal|system-view|quit|return|enable|disable)$/.test(syntax)) return "cli_foundation";
   if (/^(reload|reboot)$/.test(syntax)) return "device_lifecycle";
+  if (/^(?:show|display) (?:version|system|device|inventory|boot|memory|cpu)/.test(syntax)) return "device_information";
+  if (/^(?:show|display) diagnostic/.test(syntax)) return "diagnostics";
+  if (/^(?:dir|display) (?:flash|file)|^show file systems/.test(syntax)) return "file_system";
+  if (/^(?:copy running-config|write memory|save)/.test(syntax)) return "configuration";
+  if (/^(?:show|display) (?:spanning-tree|stp)|\bstp\b/.test(syntax)) return "switching";
+  if (/etherchannel|lacp|link-aggregation|\blag\b/.test(syntax)) return "switching";
+  if (/^(?:show|display) ip route|^route print$/.test(syntax)) return "networking";
   if (/interface|port/.test(category)) return "interfaces";
   if (/vlan/.test(category)) return "vlans";
   if (/trunk/.test(category)) return "trunks";
@@ -262,7 +269,7 @@ const routeInventory = routes.map((route, index) => {
     : !isFreePractice && someSimulation && verificationIds.length ? "partially_simulated" : "explanation_only";
   records.forEach((record) => record.related_route_ids.push(route.id));
   return {
-    route_id: route.id || `route-${index + 1}`, vendor, vendor_label: vendorLabels[vendor], operating_system: vendorLabels[vendor], platform: route.platform || vendorLabels[vendor], topic: route.topic || route.category || "general", category: route.category || "General", difficulty: route.difficulty || "foundation", route_type: isFreePractice ? "free_practice" : String(route.routeType || "configuration").toLowerCase().replace(/\s+/g, "_"), required_commands_policy: blueprint.policy, support_level: supportLevel, mapping_status: isFreePractice ? "unrestricted" : requiredIds.length ? "fully_mapped" : "unmapped", title: `${vendorLabels[vendor]} â€” ${route.label || route.id}`, description: route.goal || "Local guided practice route.", prerequisites: [], required_command_ids: requiredIds, accepted_aliases: route.steps?.flatMap((step) => step.alternatives || []) || [], starting_state: route.startingState || `Local ${route.device || "switch"} profile`, hidden_fault: route.hint || "", expected_final_state: route.expectedFinalState || "Verify the local simulated result.", final_state_validation_method: supportLevel === "fully_simulated" ? "shared simulated state and implemented verification command" : supportLevel === "partially_simulated" ? "local CLI output and guided verification" : "explanation and manual evidence review", verification_command_ids: verificationIds, rollback_command_ids: rollbackForRoute(vendor, requiredIds), scoring: { knowledge: 40, practice: 40, verification: 20 }, hints: [route.hint].filter(Boolean), related_lesson_ids: [...new Set(records.map((record) => `${record.vendor}-${record.topic}`))], missing_cli_handler_ids: records.filter((record) => !["fully_simulated", "partially_simulated"].includes(record.simulator_support)).map((record) => record.command_id)
+    route_id: route.id || `route-${index + 1}`, vendor, vendor_label: vendorLabels[vendor], operating_system: vendorLabels[vendor], platform: route.platform || vendorLabels[vendor], topic: route.topic || route.category || "general", category: route.category || "General", difficulty: route.difficulty || "foundation", route_type: isFreePractice ? "free_practice" : String(route.routeType || "configuration").toLowerCase().replace(/\s+/g, "_"), required_commands_policy: blueprint.policy, support_level: supportLevel, mapping_status: isFreePractice ? "unrestricted" : requiredIds.length ? "fully_mapped" : "unmapped", title: `${vendorLabels[vendor]} — ${route.label || route.id}`, description: route.goal || "Local guided practice route.", prerequisites: [], required_command_ids: requiredIds, accepted_aliases: route.steps?.flatMap((step) => step.alternatives || []) || [], starting_state: route.startingState || `Local ${route.device || "switch"} profile`, hidden_fault: route.hint || "", expected_final_state: route.expectedFinalState || "Verify the local simulated result.", final_state_validation_method: supportLevel === "fully_simulated" ? "shared simulated state and implemented verification command" : supportLevel === "partially_simulated" ? "local CLI output and guided verification" : "explanation and manual evidence review", verification_command_ids: verificationIds, rollback_command_ids: rollbackForRoute(vendor, requiredIds), scoring: { knowledge: 40, practice: 40, verification: 20 }, hints: [route.hint].filter(Boolean), related_lesson_ids: [...new Set(records.map((record) => `${record.vendor}-${record.topic}`))], missing_cli_handler_ids: records.filter((record) => !["fully_simulated", "partially_simulated"].includes(record.simulator_support)).map((record) => record.command_id)
   };
 });
 
@@ -279,7 +286,7 @@ for (const vendor of Object.keys(vendorLabels)) {
   const grouped = Object.groupBy(entries, (record) => record.topic);
   modules[vendor] = Object.entries(grouped).map(([topic, commands], index) => ({
     module_id: `${vendor}-${topic}`, vendor, title: `${index + 1}. ${titleCase(topic)}`, topic, level: index < 2 ? 1 : index < 5 ? 2 : 3,
-    lessons: [{ lesson_id: `${vendor}-${topic}`, title: `${vendorLabels[vendor]} â€” ${titleCase(topic)}`, vendor, topic, simulation_support: [...new Set(commands.map((command) => command.simulator_support))], learning_sequence: ["Understand", "Syntax", "Healthy output", "Problem output", "Interpret evidence", "Guided practice", "Independent practice", "Troubleshooting", "Verification", "Knowledge check", "Complete"], commands: commands.map((command) => ({ command_id: command.command_id, command: command.canonical_command, aliases: command.aliases, purpose: command.purpose, safety_level: command.safety_level, verification_commands: command.verification_commands, rollback_commands: command.rollback_commands, simulator_support: command.simulator_support })) }]
+    lessons: [{ lesson_id: `${vendor}-${topic}`, title: `${vendorLabels[vendor]} — ${titleCase(topic)}`, vendor, topic, simulation_support: [...new Set(commands.map((command) => command.simulator_support))], learning_sequence: ["Understand", "Syntax", "Healthy output", "Problem output", "Interpret evidence", "Guided practice", "Independent practice", "Troubleshooting", "Verification", "Knowledge check", "Complete"], commands: commands.map((command) => ({ command_id: command.command_id, command: command.canonical_command, aliases: command.aliases, purpose: command.purpose, safety_level: command.safety_level, verification_commands: command.verification_commands, rollback_commands: command.rollback_commands, simulator_support: command.simulator_support })) }]
   }));
 }
 
@@ -297,6 +304,17 @@ const routesPerVendor = Object.fromEntries(Object.entries(Object.groupBy(routeIn
 const routesSuccessfullyMapped = routeInventory.filter((route) => route.mapping_status === "fully_mapped").length;
 const routesPartiallyMapped = routeInventory.filter((route) => route.mapping_status === "partially_mapped").length;
 const routesUnmapped = routeInventory.filter((route) => route.mapping_status === "unmapped").length;
+const coverageMetrics = {
+  classification_coverage: 100,
+  lesson_coverage: Math.round((inventory.filter((record) => record.related_lesson_ids.length).length / Math.max(1, inventory.length)) * 100),
+  practical_exercise_coverage: Math.round((inventory.filter((record) => ["fully_simulated", "partially_simulated"].includes(record.simulator_support)).length / Math.max(1, inventory.length)) * 100),
+  route_coverage: Math.round((inventory.filter((record) => record.related_route_ids.length).length / Math.max(1, inventory.length)) * 100),
+  fully_simulated_coverage: Math.round((inventory.filter((record) => record.simulator_support === "fully_simulated").length / Math.max(1, inventory.length)) * 100),
+  verification_coverage: Math.round((inventory.filter((record) => !record.changes_configuration || record.verification_commands.length).length / Math.max(1, inventory.length)) * 100),
+  troubleshooting_coverage: Math.round((routeInventory.filter((route) => /troubleshoot|diagnostic|fault|recover|wrong/i.test(`${route.category} ${route.title}`)).length / Math.max(1, routeInventory.length)) * 100),
+  review_coverage: 0
+};
+coverageMetrics.overall_learning_readiness = Math.round((coverageMetrics.lesson_coverage + coverageMetrics.practical_exercise_coverage + coverageMetrics.route_coverage + coverageMetrics.fully_simulated_coverage + coverageMetrics.verification_coverage + coverageMetrics.troubleshooting_coverage + coverageMetrics.review_coverage) / 7);
 const audit = {
   generated_at: new Date().toISOString(), source_command_files: commandFiles.map((file) => `data/commands/${file}`), total_raw_command_records: rawRecords.length, total_normalized_canonical_commands: inventory.length, total_aliases: inventory.reduce((sum, record) => sum + record.aliases.length, 0), commands_per_vendor: vendorCounts, commands_per_topic: Object.fromEntries(Object.entries(Object.groupBy(inventory, (record) => record.topic)).map(([key, value]) => [key, value.length])), commands_per_support_level: supportCounts, commands_used_by_cli_engine: inventory.filter((record) => record.simulator_support === "fully_simulated" || record.simulator_support === "partially_simulated").length, commands_used_only_by_lookup: inventory.filter((record) => record.simulator_support === "lookup_only").length, commands_referenced_by_routes: referencedByRoutes.size, commands_without_routes: inventory.filter((record) => !record.related_route_ids.length).map((record) => record.command_id), commands_without_lessons: inventory.filter((record) => !record.related_lesson_ids.length).map((record) => record.command_id), routes_containing_commands_not_found_in_inventory: unresolvedRouteReferences, duplicate_command_ids: [...new Set(duplicateIds)], duplicate_canonical_syntax: [], conflicting_vendor_assignments: [], commands_using_placeholders: inventory.filter((record) => /<[^>]+>/.test(record.syntax)).map((record) => record.command_id), commands_with_missing_verification_steps: inventory.filter((record) => record.changes_configuration && !record.verification_commands.length).map((record) => record.command_id), commands_with_missing_rollback_guidance: inventory.filter((record) => record.changes_configuration && !record.rollback_commands.length).map((record) => record.command_id), broken_command_references: []
 };
@@ -310,6 +328,7 @@ Object.assign(audit, {
   empty_required_command_routes: unresolvedRouteReferences,
   routes_without_lessons: routeInventory.filter((route) => !route.related_lesson_ids.length).map((route) => route.route_id),
   routes_with_missing_cli_handlers: routeInventory.filter((route) => route.missing_cli_handler_ids.length).map((route) => route.route_id),
+  coverage_metrics: coverageMetrics,
   broken_command_references: brokenCommandReferences
 });
 
@@ -318,14 +337,16 @@ if (crossVendorErrors.length || brokenCommandReferences.length || unresolvedRout
 }
 
 const health = {
-  status: audit.commands_without_lessons.length || audit.broken_command_references.length ? "Warnings" : "Passed",
+  status: audit.broken_command_references.length || audit.routes_with_cross_vendor_conflicts.length ? "Errors" : coverageMetrics.overall_learning_readiness >= 85 ? "Passed" : "Warnings",
   passed: ["Every normalized command has a vendor classification.", "Every normalized command has a support level.", "Every generated route has a vendor and support level.", "Every alias is linked to a canonical command."],
   warnings: [
     ...(audit.commands_with_missing_verification_steps.length ? [`${audit.commands_with_missing_verification_steps.length} configuration commands require fuller verification guidance.`] : []),
-    ...(audit.commands_without_routes.length ? [`${audit.commands_without_routes.length} commands have no practice route yet.`] : [])
+    ...(audit.commands_without_routes.length ? [`${audit.commands_without_routes.length} commands have no practice route yet.`] : []),
+    ...(coverageMetrics.overall_learning_readiness < 85 ? [`Learning readiness is ${coverageMetrics.overall_learning_readiness}%, not premium-ready. Coverage includes lessons, practice, routes, simulation, verification, troubleshooting, and review.`] : [])
   ],
   errors: audit.broken_command_references,
-  coverage_percentage: Math.round((inventory.filter((record) => record.learning_status !== "unclassified").length / Math.max(1, inventory.length)) * 100)
+  coverage_percentage: coverageMetrics.classification_coverage,
+  coverage_metrics: coverageMetrics
 };
 
 await fs.mkdir(generatedDirectory, { recursive: true });

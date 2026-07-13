@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-13T08:54:25.108Z",
+  "generated_at": "2026-07-13T09:29:05.284Z",
   "source_command_files": [
     "data/commands/cisco_ios.json",
     "data/commands/hp_comware.json",
@@ -23,16 +23,18 @@
     "linux": 23
   },
   "commands_per_topic": {
-    "device_information": 41,
-    "interfaces": 54,
+    "device_information": 34,
+    "interfaces": 47,
     "vlans": 12,
     "mac_neighbors": 12,
+    "switching": 11,
     "stacking": 8,
-    "networking": 14,
+    "networking": 15,
     "cli_foundation": 6,
-    "configuration": 2,
+    "configuration": 5,
     "device_lifecycle": 3,
-    "switching": 5,
+    "diagnostics": 2,
+    "file_system": 2,
     "trunks": 6
   },
   "commands_per_support_level": {
@@ -307,5 +309,16 @@
     "route-12-6",
     "route-12-7",
     "route-12-8"
-  ]
+  ],
+  "coverage_metrics": {
+    "classification_coverage": 100,
+    "lesson_coverage": 100,
+    "practical_exercise_coverage": 30,
+    "route_coverage": 25,
+    "fully_simulated_coverage": 6,
+    "verification_coverage": 99,
+    "troubleshooting_coverage": 9,
+    "review_coverage": 0,
+    "overall_learning_readiness": 38
+  }
 }

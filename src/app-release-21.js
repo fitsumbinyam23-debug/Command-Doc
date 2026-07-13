@@ -383,6 +383,8 @@ const state = {
     vendorTrack: "all",
     learnPanel: "overview",
     activeGeneratedModuleId: "",
+    activePremiumCommandId: "",
+    premiumLesson: { mode: "guided", prediction: "", evidence: "", entered: "", hintLevel: 0, confidence: "", verified: false },
     libraryTab: "lookup",
     libraryFilters: { search: "", vendor: "", platform: "", topic: "", difficulty: "", routeType: "", support: "", status: "" },
     vendorProgress: {},
@@ -2493,7 +2495,7 @@ function saveLabProgress() {
 }
 
 function emptyVendorProgress() {
-  return { completedLessons: {}, learnedCommands: {}, practisedRoutes: {}, reviewRoutes: {}, lastLessonId: "", lastLabRouteId: "" };
+  return { completedLessons: {}, learnedCommands: {}, practisedRoutes: {}, reviewRoutes: {}, mastery: {}, reviewRecords: {}, lastLessonId: "", lastLabRouteId: "" };
 }
 
 function loadVendorProgress() {
@@ -4266,11 +4268,121 @@ function relatedLessonForRoute(route) {
 
 function commandLearningState(command, trackProgressData) {
   const key = `${command.vendor_label || command.vendor}:${normalizeCommandText(command.canonical_command || command.command)}`;
-  if (trackProgressData.learnedCommands[key]) return "Passed";
+  const mastery = trackProgressData.mastery?.[command.command_id];
+  const review = trackProgressData.reviewRecords?.[command.command_id];
+  if (review && new Date(review.next_review_date).getTime() <= Date.now()) return "Needs review";
+  if (trackProgressData.learnedCommands[key]) return "Mastered";
+  if (mastery?.verification >= 100) return "Verified";
+  if (mastery?.practical_execution >= 100) return "Practised";
+  if (mastery?.concept > 0 || mastery?.syntax > 0) return "Understood";
   if (command.learning_status === "grouped_lesson") return "Grouped lesson";
   if (command.learning_status === "explanation_only") return "Explanation only";
   const lesson = state.lab.lessons.find((item) => matchingVendor(item.vendor, command.vendor_label || command.vendor) && normalizeCommandText(item.command || "") === normalizeCommandText(command.command));
-  return lesson ? "In progress" : "Planned lesson";
+  return lesson ? "Introduced" : "Not started";
+}
+
+const PREMIUM_INTERFACE_LESSONS = {
+  cisco_show_interface_status: { vendor: "Cisco IOS", output: "Port      Name       Status       Vlan\nGi1/0/24  Lobby-AP   connected    30\nGi1/0/25  Camera     notconnect   40", signal: "notconnect", next: "show interfaces Gi1/0/25", purpose: "Scan port state, VLAN, and link health before changing a switch port.", evidence: ["Gi1/0/25 is not connected and needs a detailed check.", "Gi1/0/24 is the failed endpoint.", "VLAN 30 has been deleted."], correctEvidence: 0 },
+  hp_display_interface_brief: { vendor: "HP Comware", output: "Interface                 Link Protocol Description\nGigabitEthernet1/0/24    UP   UP       Lobby-AP\nGigabitEthernet1/0/25    DOWN DOWN     Camera", signal: "DOWN", next: "display interface GigabitEthernet1/0/25", purpose: "Read Comware physical and protocol state before entering system view.", evidence: ["GigabitEthernet1/0/25 is down and needs a detailed check.", "GigabitEthernet1/0/24 has a protocol fault.", "The camera is confirmed to be on VLAN 1."], correctEvidence: 0 },
+  aruba_show_interface_brief: { vendor: "ArubaOS-CX", output: "Interface  Status  Speed  Duplex\n1/1/24     up      1G     full\n1/1/25     down    auto   auto", signal: "down", next: "show interface 1/1/25", purpose: "Review an ArubaOS-CX interface summary and isolate the port that needs evidence.", evidence: ["Interface 1/1/25 is down and needs a detailed check.", "Interface 1/1/24 has lost duplex.", "The output proves the endpoint VLAN is wrong."], correctEvidence: 0 }
+};
+
+function resetPremiumLesson(commandId) {
+  state.lab.activePremiumCommandId = commandId;
+  state.lab.premiumLesson = { mode: "guided", prediction: "", evidence: "", entered: "", hintLevel: 0, confidence: "", verified: false };
+}
+
+function premiumMastery(command, progress) {
+  const key = command.command_id;
+  progress.mastery ||= {};
+  progress.mastery[key] ||= { concept: 0, syntax: 0, output_interpretation: 0, command_selection: 0, practical_execution: 0, troubleshooting: 0, verification: 0, safety: 0, ticket_documentation: 0, attempts: 0, hints_used: 0 };
+  return progress.mastery[key];
+}
+
+function renderPremiumLesson() {
+  const command = (state.curriculum.inventory || []).find((item) => item.command_id === state.lab.activePremiumCommandId);
+  const profile = PREMIUM_INTERFACE_LESSONS[state.lab.activePremiumCommandId];
+  if (!command || !profile) { state.lab.learnPanel = "module"; renderLearn(); return; }
+  const lesson = state.lab.premiumLesson;
+  const progress = trackProgress(command.vendor);
+  const mastery = premiumMastery(command, progress);
+  const panel = labCreate("section", "learn-track-panel premium-lesson");
+  panel.append(labButton("Back to Module", "secondary", () => { state.lab.learnPanel = "module"; renderLearn(); }));
+  panel.append(labCreate("div", "lab-card-kicker", `${profile.vendor} premium practice`));
+  panel.append(labCreate("h3", "", command.canonical_command));
+  panel.append(labCreate("p", "", profile.purpose));
+  const mode = document.createElement("select");
+  mode.setAttribute("aria-label", "Learning support mode");
+  [["guided", "Guided"], ["assisted", "Assisted"], ["independent", "Independent"]].forEach(([value, label]) => { const option = document.createElement("option"); option.value = value; option.textContent = label; option.selected = lesson.mode === value; mode.append(option); });
+  mode.addEventListener("change", () => { lesson.mode = mode.value; renderLearn(); });
+  panel.append(labCreate("p", "", "Support mode"), mode);
+  if (lesson.mode === "guided") panel.append(labCreate("p", "", `Worked workflow: read the summary, identify ${profile.signal}, inspect that interface, then verify the physical cause before changing configuration.`));
+  if (lesson.mode === "assisted") panel.append(labCreate("p", "", "Choose the evidence and command yourself. Hints remain available, but no worked solution is shown."));
+  if (lesson.mode === "independent") panel.append(labCreate("p", "", "Ticket: an expected endpoint is offline. Collect evidence and submit a safe next command without coaching."));
+  if (lesson.mode !== "independent") {
+    const syntax = labCreate("section", "lab-detail-field");
+    syntax.append(labCreate("strong", "", "Syntax and purpose"), labCreate("code", "lab-command", command.canonical_command), labCreate("p", "", `Aliases: ${(command.aliases || []).join(", ") || "None"}. Safe read-only command.`));
+    panel.append(syntax);
+  }
+  const attempted = Boolean(lesson.prediction || lesson.entered.trim());
+  if (lesson.mode === "guided" || (lesson.mode === "assisted" && attempted) || (lesson.mode === "independent" && attempted)) {
+    const output = labCreate("section", "lab-detail-field");
+    output.append(labCreate("strong", "", "Evidence sample"), labCreate("pre", "lab-output", profile.output));
+    panel.append(output);
+  }
+  const prediction = labCreate("section", "lab-detail-field");
+  prediction.append(labCreate("strong", "", "Prediction"), labCreate("p", "", "Before checking the answer, which state needs follow-up?"));
+  ["connected or UP", profile.signal, "the expected VLAN name"].forEach((choice) => prediction.append(labButton(choice, `secondary ${lesson.prediction === choice ? "is-selected" : ""}`, () => { lesson.prediction = choice; mastery.output_interpretation = choice === profile.signal ? 100 : 35; mastery.attempts += 1; saveVendorProgress(); renderLearn(); })));
+  panel.append(prediction);
+  if (lesson.mode !== "independent") {
+    const hints = labCreate("section", "lab-detail-field");
+    hints.append(labCreate("strong", "", "Progressive hints"));
+    const hintText = ["Start with the port whose expected endpoint is not healthy.", "Use the vendor's detailed interface command family.", `Try: ${profile.next}`, `Complete answer: ${profile.next}`];
+    const maximumHint = lesson.mode === "guided" ? 3 : 1;
+    for (let index = 0; index <= Math.min(lesson.hintLevel, maximumHint); index += 1) hints.append(labCreate("p", "", `Hint ${index + 1}: ${hintText[index]}`));
+    if (lesson.hintLevel < maximumHint) hints.append(labButton("Show next hint", "secondary", () => { lesson.hintLevel += 1; mastery.hints_used += 1; saveVendorProgress(); renderLearn(); }));
+    panel.append(hints);
+  }
+  const practice = labCreate("section", "lab-practice-panel");
+  practice.append(labCreate("strong", "", "Simulated command practice"));
+  const input = document.createElement("input"); input.className = "lab-terminal-input"; input.value = lesson.entered; input.placeholder = "Type the command"; input.setAttribute("aria-label", "Premium lesson command input");
+  input.addEventListener("input", () => { lesson.entered = input.value; });
+  input.addEventListener("keydown", (event) => { if (event.key === "Enter") { event.preventDefault(); lesson.entered = input.value; const accepted = [command.canonical_command, ...(command.aliases || [])].map(normalizeCommandText); const correct = accepted.includes(normalizeCommandText(lesson.entered)); mastery.syntax = correct ? 100 : 30; mastery.practical_execution = correct ? 100 : 0; mastery.command_selection = correct ? 100 : 35; mastery.attempts += 1; saveVendorProgress(); renderLearn(); } });
+  practice.append(input, labButton("Check command", "secondary", () => { const accepted = [command.canonical_command, ...(command.aliases || [])].map(normalizeCommandText); const correct = accepted.includes(normalizeCommandText(lesson.entered)); mastery.syntax = correct ? 100 : 30; mastery.practical_execution = correct ? 100 : 0; mastery.command_selection = correct ? 100 : 35; mastery.attempts += 1; saveVendorProgress(); renderLearn(); }));
+  if (mastery.practical_execution) practice.append(labCreate("p", "lab-success", lesson.mode === "independent" ? "Command accepted. Continue the investigation using the evidence you collected." : `Accepted. Next safe command: ${profile.next}`));
+  panel.append(practice);
+  const verification = labCreate("section", "lab-detail-field");
+  verification.append(labCreate("strong", "", "Evidence interpretation"), labCreate("p", "", "Which statement is supported by the output?"));
+  profile.evidence.forEach((choice, index) => verification.append(labButton(choice, `secondary ${lesson.evidence === choice ? "is-selected" : ""}`, () => {
+    lesson.evidence = choice;
+    const correct = index === profile.correctEvidence;
+    mastery.concept = correct ? 100 : 35;
+    mastery.troubleshooting = correct ? 100 : 30;
+    mastery.safety = correct ? 100 : 35;
+    mastery.attempts += 1;
+    saveVendorProgress();
+    renderLearn();
+  })));
+  if (lesson.evidence === profile.evidence[profile.correctEvidence]) {
+    const verificationLabel = lesson.mode === "independent" ? "Submit final investigation" : `Verify with: ${profile.next}`;
+    verification.append(labButton(verificationLabel, "secondary", () => { lesson.verified = true; mastery.verification = 100; mastery.ticket_documentation = 100; saveVendorProgress(); renderLearn(); }));
+  }
+  panel.append(verification);
+  const confidence = document.createElement("select"); confidence.setAttribute("aria-label", "Lesson confidence"); ["", "Low", "Medium", "High"].forEach((value) => { const option = document.createElement("option"); option.value = value; option.textContent = value || "Rate confidence"; option.selected = lesson.confidence === value; confidence.append(option); }); confidence.addEventListener("change", () => { lesson.confidence = confidence.value; saveVendorProgress(); renderLearn(); });
+  panel.append(labCreate("p", "", "Confidence"), confidence);
+  const dimensions = Object.entries(mastery).filter(([key]) => !["attempts", "hints_used"].includes(key));
+  panel.append(labCreate("p", "", `Mastery: ${dimensions.map(([key, value]) => `${key.replace(/_/g, " ")} ${value}%`).join(" | ")}`));
+  if (lesson.verified && lesson.evidence === profile.evidence[profile.correctEvidence] && mastery.practical_execution && lesson.prediction === profile.signal && lesson.confidence) {
+    progress.learnedCommands[`${command.vendor_label}:${normalizeCommandText(command.canonical_command)}`] = true;
+    progress.reviewRecords ||= {};
+    const existingReview = progress.reviewRecords[command.command_id];
+    const reviewIntervals = [3, 7, 14, 30];
+    const intervalDays = existingReview ? reviewIntervals.find((days) => days > existingReview.interval_days) || 30 : 3;
+    progress.reviewRecords[command.command_id] = { command_id: command.command_id, vendor: command.vendor, next_review_date: new Date(Date.now() + intervalDays * 86400000).toISOString(), interval_days: intervalDays, ease: lesson.hintLevel ? 2 : 3, attempt_history: mastery.attempts, last_result: "passed", question_type: "evidence interpretation" };
+    progress.reviewRoutes[command.command_id] = true; saveVendorProgress();
+    panel.append(labCreate("p", "lab-lesson-complete", "Premium lesson complete. Your evidence, practice, verification, confidence, and mastery dimensions were saved locally."));
+  }
+  els.learnRoot.append(panel);
 }
 
 function renderLearn() {
@@ -4288,6 +4400,10 @@ function renderLearn() {
   }
   if (state.lab.learnPanel === "module") {
     renderGeneratedModule();
+    return;
+  }
+  if (state.lab.learnPanel === "premium") {
+    renderPremiumLesson();
     return;
   }
   const panel = labCreate("section", "learn-track-panel");
@@ -4361,7 +4477,11 @@ function renderGeneratedModule() {
     if (command.aliases?.length) card.append(labCreate("p", "", `Aliases: ${command.aliases.join(", ")}`));
     card.append(labCreate("p", "", `Mode: ${command.command_mode || "See vendor prompt"} | Safety: ${command.safety_level || "See local guidance"} | Support: ${(command.simulator_support || "lookup_only").replace(/_/g, " ")}`));
     const details = labCreate("p", "", `Verify: ${(command.verification_commands || []).join("; ") || "Review output before continuing"}${command.rollback_commands?.length ? ` | Rollback: ${command.rollback_commands.join("; ")}` : ""}`);
-    card.append(details, labButton("Open in Command Lookup", "secondary", () => { els.commandSearch.value = command.canonical_command || command.command; state.lookupSource = "search"; switchView("diagnose"); renderCommandLookup(); }));
+    card.append(details);
+    if (PREMIUM_INTERFACE_LESSONS[command.command_id]) {
+      card.append(labButton("Start premium lesson", "primary", () => { resetPremiumLesson(command.command_id); state.lab.learnPanel = "premium"; renderLearn(); }));
+    }
+    card.append(labButton("Open in Command Lookup", "secondary", () => { els.commandSearch.value = command.canonical_command || command.command; state.lookupSource = "search"; switchView("diagnose"); renderCommandLookup(); }));
     grid.append(card);
   });
   els.learnRoot.append(grid);
@@ -4381,6 +4501,16 @@ function renderCommandCoverage() {
   const status = (value) => commands.filter((command) => command.learning_status === value).length;
   [["Canonical commands", commands.length], ["Aliases", commands.reduce((total, command) => total + (command.aliases || []).length, 0)], ["Learned", states.filter((state) => state === "Passed").length], ["Grouped lessons", status("grouped_lesson")], ["Planned lessons", status("planned_lesson")], ["Fully simulated", support("fully_simulated")], ["Partially simulated", support("partially_simulated")], ["Explanation only", support("explanation_only")], ["Lookup only", support("lookup_only")], ["Needs review", Object.keys(progress.reviewRoutes).length]].forEach(([label, value]) => metrics.append(labCreate("span", "badge", `${label}: ${value}`)));
   panel.append(metrics);
+  const auditMetrics = state.curriculum.audit?.coverage_metrics || state.curriculum.health?.coverage_metrics;
+  if (auditMetrics) {
+    const readiness = labCreate("section", "lab-detail-field");
+    readiness.append(labCreate("strong", "", `Learning readiness: ${auditMetrics.overall_learning_readiness}%`));
+    readiness.append(labCreate("p", "", "This is an honest readiness calculation. It measures lesson assignment, practical exercise availability, route coverage, simulation depth, verification, troubleshooting, and review rather than treating classification alone as completion."));
+    const readinessMetrics = labCreate("div", "learn-summary");
+    [["Lessons", auditMetrics.lesson_coverage], ["Practical", auditMetrics.practical_exercise_coverage], ["Routes", auditMetrics.route_coverage], ["Fully simulated", auditMetrics.fully_simulated_coverage], ["Verification", auditMetrics.verification_coverage], ["Troubleshooting", auditMetrics.troubleshooting_coverage], ["Review", auditMetrics.review_coverage]].forEach(([label, value]) => readinessMetrics.append(labCreate("span", "badge", `${label}: ${value}%`)));
+    readiness.append(readinessMetrics);
+    panel.append(readiness);
+  }
   const list = labCreate("div", "library-grid");
   commands.forEach((command) => {
     const card = labCreate("article", "library-card");

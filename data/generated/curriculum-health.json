@@ -1,5 +1,5 @@
 {
-  "status": "Passed",
+  "status": "Warnings",
   "passed": [
     "Every normalized command has a vendor classification.",
     "Every normalized command has a support level.",
@@ -8,8 +8,20 @@
   ],
   "warnings": [
     "2 configuration commands require fuller verification guidance.",
-    "122 commands have no practice route yet."
+    "122 commands have no practice route yet.",
+    "Learning readiness is 38%, not premium-ready. Coverage includes lessons, practice, routes, simulation, verification, troubleshooting, and review."
   ],
   "errors": [],
-  "coverage_percentage": 100
+  "coverage_percentage": 100,
+  "coverage_metrics": {
+    "classification_coverage": 100,
+    "lesson_coverage": 100,
+    "practical_exercise_coverage": 30,
+    "route_coverage": 25,
+    "fully_simulated_coverage": 6,
+    "verification_coverage": 99,
+    "troubleshooting_coverage": 9,
+    "review_coverage": 0,
+    "overall_learning_readiness": 38
+  }
 }
