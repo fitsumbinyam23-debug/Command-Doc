@@ -43,6 +43,10 @@ function vendorKey(command, file) {
 
 function topicFor(command) {
   const category = String(command.category || "").toLowerCase();
+  const syntax = normalise(command.command);
+  // Keep mode navigation and lifecycle operations in deterministic learning modules.
+  if (/^(configure terminal|system-view|quit|return|enable|disable)$/.test(syntax)) return "cli_foundation";
+  if (/^(reload|reboot)$/.test(syntax)) return "device_lifecycle";
   if (/interface|port/.test(category)) return "interfaces";
   if (/vlan/.test(category)) return "vlans";
   if (/trunk/.test(category)) return "trunks";
@@ -169,14 +173,96 @@ for (const [commandId, aliasesForCommand] of Object.entries(aliases)) {
   inventory.push({ command_id: commandId, vendor, vendor_label: vendorLabels[vendor], operating_system: vendorLabels[vendor], platform: vendorLabels[vendor], model_family: "Local CLI alias map", canonical_command: canonical, syntax: canonical, aliases: aliasesForCommand, command_mode: "version-sensitive local CLI", privilege_level: "depends on command", category: "cli", topic: "cli_foundation", difficulty: "foundation", safety_level: "Explanation-only guidance", read_only: false, changes_configuration: false, purpose: "Canonical command inferred from the local alias map.", when_to_use: [], when_not_to_use: [], prerequisites: [], related_commands: [], verification_commands: [], rollback_commands: [], save_commands: [], good_output_example: [], bad_output_example: [], important_output_fields: [], common_errors: [], simulator_support: "lookup_only", source_files: ["src/app-release-21.js alias map"], related_lesson_ids: [], related_route_ids: [], related_scenario_ids: [], learning_status: "planned_lesson" });
 }
 
-const canonicalIndex = new Map(inventory.map((record) => [normalise(record.canonical_command), record]));
+const recordsByVendor = Object.groupBy(inventory, (record) => record.vendor);
+const recordById = new Map(inventory.map((record) => [record.command_id, record]));
+
+function templateMatches(candidate, value) {
+  const normalizedCandidate = normalise(candidate);
+  const normalizedValue = normalise(value);
+  if (normalizedCandidate === normalizedValue) return true;
+  if (normalizedCandidate.includes("<")) {
+    const expression = `^${normalizedCandidate.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/<[^>]+>/g, "[^ ]+")}$`;
+    return new RegExp(expression).test(normalizedValue);
+  }
+  return /\b(?:interface|vlan|priority|address|description)$/.test(normalizedCandidate) && normalizedValue.startsWith(`${normalizedCandidate} `);
+}
+
+function resolveVendorCommand(vendor, rawText) {
+  const candidates = recordsByVendor[vendor] || [];
+  const normalized = normalise(rawText);
+  return candidates.find((record) => normalise(record.canonical_command) === normalized)
+    || candidates.find((record) => (record.aliases || []).some((alias) => normalise(alias) === normalized))
+    || candidates.find((record) => templateMatches(record.canonical_command, rawText))
+    || candidates.find((record) => (record.aliases || []).some((alias) => templateMatches(alias, rawText)))
+    || null;
+}
+
+function existingVendorIds(vendor, ids) {
+  return [...new Set(ids.filter((id) => recordById.get(id)?.vendor === vendor))];
+}
+
+function routeBlueprint(route, vendor) {
+  const label = `${route.category || ""} ${route.label || ""} ${route.goal || ""}`.toLowerCase();
+  const explicit = [
+    ...(route.requiredCommands || []),
+    ...(route.steps || []).flatMap((step) => [step.command, ...(step.alternatives || [])]).filter(Boolean)
+  ].map((command) => resolveVendorCommand(vendor, command)).filter(Boolean).map((record) => record.command_id);
+  if (route.id === "free-practice") return { ids: [], policy: "unrestricted", explicitCount: 0 };
+  if (explicit.length) return { ids: existingVendorIds(vendor, explicit), policy: "guided", explicitCount: explicit.length };
+
+  const cisco = {
+    inspect: ["cisco_show_interface_status"], interface: ["cisco_show_interface_status", "cisco_interface_config"], vlan: ["cisco_show_vlan_brief", "cisco_vlan_create", "cisco_switchport_access_vlan"], trunk: ["cisco_show_interface_status", "cisco_configure_terminal", "cisco_interface_config", "cisco_switchport_mode_trunk", "cisco_switchport_trunk_allowed"], save: ["cisco_show_running_config", "cisco_copy_running_startup"], mac: ["cisco_show_mac_address_table"], discovery: ["cisco_show_cdp_neighbors", "cisco_show_lldp_neighbors"], stp: ["cisco_show_spanning_tree"], aggregation: ["cisco_show_etherchannel_summary"], security: ["cisco_show_port_security_interface"], stack: ["cisco_switch_priority"], network: ["cisco_show_ip_arp", "cisco_show_ip_route"]
+  };
+  const hp = {
+    inspect: ["hp_display_interface_brief"], interface: ["hp_display_interface_brief", "hp_interface_config"], vlan: ["hp_display_vlan", "hp_vlan", "hp_port_access_vlan"], trunk: ["hp_display_interface_brief", "hp_system_view", "hp_interface_config", "hp_port_link_type_trunk", "hp_port_trunk_permit"], save: ["hp_display_current_configuration", "hp_save"], mac: ["hp_display_mac_address"], discovery: ["hp_display_lldp_neighbor"], stack: ["hp_display_irf_topology", "hp_display_irf_port", "hp_irf_member_priority"], aggregation: ["hp_display_link_aggregation_summary"], stp: ["hp_display_stp"], network: ["hp_display_arp", "hp_display_ip_routing_table"]
+  };
+  const aruba = {
+    inspect: ["aruba_show_interface_brief"], interface: ["aruba_show_interface_brief", "aruba_interface_config"], vlan: ["aruba_show_vlan", "aruba_vlan", "aruba_vlan_access"], trunk: ["aruba_show_interface_brief", "aruba_configure_terminal", "aruba_interface_config", "aruba_vlan_trunk_allowed"], save: ["aruba_show_running_config", "aruba_write_memory"], mac: ["aruba_show_mac_address_table"], discovery: ["aruba_show_lldp_neighbor_info"], aggregation: ["aruba_show_lacp_interfaces"], stp: ["aruba_show_spanning_tree"], network: ["aruba_show_ip_route"]
+  };
+  const windows = { inspect: ["windows_ipconfig_all"], interface: ["windows_netsh_interface_show_interface"], network: ["windows_ping", "windows_tracert", "windows_nslookup"], mac: ["windows_arp_a"], save: ["windows_ipconfig_all"] };
+  const linux = { inspect: ["linux_ip_addr"], interface: ["linux_ip_link"], network: ["linux_ping", "linux_ip_route", "linux_dig"], mac: ["linux_ip_neigh"], save: ["linux_ip_addr"] };
+  const blueprints = { cisco_ios: cisco, hp_comware: hp, aruba_cx: aruba, windows_cmd: windows, linux }[vendor] || {};
+  let group = "inspect";
+  if (/irf|stack|member|priority/.test(label)) group = "stack";
+  else if (/port security|violation|sticky|secure/.test(label)) group = "security";
+  else if (/etherchannel|lacp|aggregation/.test(label)) group = "aggregation";
+  else if (/spanning|stp|root bridge|blocked port|broadcast/.test(label)) group = "stp";
+  else if (/cdp|lldp|neighbor/.test(label)) group = "discovery";
+  else if (/mac|arp|endpoint location/.test(label)) group = "mac";
+  else if (/vlan|voice/.test(label)) group = "vlan";
+  else if (/trunk|uplink|native vlan/.test(label)) group = "trunk";
+  else if (/save|running configuration|startup configuration|ticket|change checklist|rollback/.test(label)) group = "save";
+  else if (/ping|dns|gateway|ip |subnet|route/.test(label)) group = "network";
+  else if (/interface|port|speed|duplex|shutdown|error-disabled|counters|physical/.test(label)) group = "interface";
+  return { ids: existingVendorIds(vendor, blueprints[group] || blueprints.inspect || []), policy: "derived_from_route_objective", explicitCount: 0 };
+}
+
+function verificationForRoute(vendor, requiredIds) {
+  const checks = { cisco_ios: "cisco_show_interface_status", hp_comware: "hp_display_interface_brief", aruba_cx: "aruba_show_interface_brief", windows_cmd: "windows_ipconfig_all", linux: "linux_ip_addr" };
+  const check = checks[vendor];
+  return requiredIds.length && recordById.has(check) ? [check] : [];
+}
+
+function rollbackForRoute(vendor, requiredIds) {
+  const rollback = { cisco_ios: "cisco_no_shutdown", hp_comware: "hp_undo_shutdown", aruba_cx: "aruba_no_shutdown", windows_cmd: "windows_netsh_interface_enable", linux: "linux_ip_link_up" }[vendor];
+  return requiredIds.some((id) => /shutdown|disable|link_down/.test(id)) && recordById.has(rollback) ? [rollback] : [];
+}
+
 const routeInventory = routes.map((route, index) => {
   const vendor = routeVendor(route);
-  const requiredCommands = route.requiredCommands || route.steps?.map((step) => step.command) || [];
-  const matched = requiredCommands.map((command) => canonicalIndex.get(normalise(command))).filter(Boolean);
-  matched.forEach((record) => record.related_route_ids.push(route.id));
+  const blueprint = routeBlueprint(route, vendor);
+  const requiredIds = blueprint.ids;
+  const verificationIds = verificationForRoute(vendor, requiredIds);
+  const records = requiredIds.map((id) => recordById.get(id)).filter(Boolean);
+  const isFreePractice = blueprint.policy === "unrestricted";
+  const everyImplemented = records.length > 0 && records.every((record) => record.simulator_support === "fully_simulated") && verificationIds.every((id) => recordById.get(id)?.simulator_support === "fully_simulated");
+  const someSimulation = records.some((record) => ["fully_simulated", "partially_simulated"].includes(record.simulator_support));
+  const supportLevel = !isFreePractice && everyImplemented && route.steps?.length && verificationIds.length
+    ? "fully_simulated"
+    : !isFreePractice && someSimulation && verificationIds.length ? "partially_simulated" : "explanation_only";
+  records.forEach((record) => record.related_route_ids.push(route.id));
   return {
-    route_id: route.id || `route-${index + 1}`, vendor, vendor_label: vendorLabels[vendor], operating_system: vendorLabels[vendor], platform: route.platform || vendorLabels[vendor], topic: route.topic || route.category || "general", category: route.category || "General", difficulty: route.difficulty || "foundation", route_type: route.routeType || "configuration", support_level: String(route.support || "Partially simulated").toLowerCase().replace(/\s+/g, "_"), title: `${vendorLabels[vendor]} — ${route.label || route.id}`, description: route.goal || "Local guided practice route.", prerequisites: [], required_command_ids: matched.map((record) => record.command_id), accepted_aliases: [], starting_state: route.startingState || `Local ${route.device || "switch"} profile`, hidden_fault: route.hint || "", expected_final_state: route.expectedFinalState || "Verify the local simulated result.", verification_command_ids: (route.verificationCommands || []).map((command) => canonicalIndex.get(normalise(command))?.command_id).filter(Boolean), rollback_command_ids: [], scoring: { knowledge: 40, practice: 40, verification: 20 }, hints: [route.hint].filter(Boolean), related_lesson_ids: []
+    route_id: route.id || `route-${index + 1}`, vendor, vendor_label: vendorLabels[vendor], operating_system: vendorLabels[vendor], platform: route.platform || vendorLabels[vendor], topic: route.topic || route.category || "general", category: route.category || "General", difficulty: route.difficulty || "foundation", route_type: isFreePractice ? "free_practice" : String(route.routeType || "configuration").toLowerCase().replace(/\s+/g, "_"), required_commands_policy: blueprint.policy, support_level: supportLevel, mapping_status: isFreePractice ? "unrestricted" : requiredIds.length ? "fully_mapped" : "unmapped", title: `${vendorLabels[vendor]} â€” ${route.label || route.id}`, description: route.goal || "Local guided practice route.", prerequisites: [], required_command_ids: requiredIds, accepted_aliases: route.steps?.flatMap((step) => step.alternatives || []) || [], starting_state: route.startingState || `Local ${route.device || "switch"} profile`, hidden_fault: route.hint || "", expected_final_state: route.expectedFinalState || "Verify the local simulated result.", final_state_validation_method: supportLevel === "fully_simulated" ? "shared simulated state and implemented verification command" : supportLevel === "partially_simulated" ? "local CLI output and guided verification" : "explanation and manual evidence review", verification_command_ids: verificationIds, rollback_command_ids: rollbackForRoute(vendor, requiredIds), scoring: { knowledge: 40, practice: 40, verification: 20 }, hints: [route.hint].filter(Boolean), related_lesson_ids: [...new Set(records.map((record) => `${record.vendor}-${record.topic}`))], missing_cli_handler_ids: records.filter((record) => !["fully_simulated", "partially_simulated"].includes(record.simulator_support)).map((record) => record.command_id)
   };
 });
 
@@ -193,17 +279,43 @@ for (const vendor of Object.keys(vendorLabels)) {
   const grouped = Object.groupBy(entries, (record) => record.topic);
   modules[vendor] = Object.entries(grouped).map(([topic, commands], index) => ({
     module_id: `${vendor}-${topic}`, vendor, title: `${index + 1}. ${titleCase(topic)}`, topic, level: index < 2 ? 1 : index < 5 ? 2 : 3,
-    lessons: [{ lesson_id: `${vendor}-${topic}`, title: `${vendorLabels[vendor]} — ${titleCase(topic)}`, vendor, topic, simulation_support: [...new Set(commands.map((command) => command.simulator_support))], learning_sequence: ["Understand", "Syntax", "Healthy output", "Problem output", "Interpret evidence", "Guided practice", "Independent practice", "Troubleshooting", "Verification", "Knowledge check", "Complete"], commands: commands.map((command) => ({ command_id: command.command_id, command: command.canonical_command, aliases: command.aliases, purpose: command.purpose, safety_level: command.safety_level, verification_commands: command.verification_commands, rollback_commands: command.rollback_commands, simulator_support: command.simulator_support })) }]
+    lessons: [{ lesson_id: `${vendor}-${topic}`, title: `${vendorLabels[vendor]} â€” ${titleCase(topic)}`, vendor, topic, simulation_support: [...new Set(commands.map((command) => command.simulator_support))], learning_sequence: ["Understand", "Syntax", "Healthy output", "Problem output", "Interpret evidence", "Guided practice", "Independent practice", "Troubleshooting", "Verification", "Knowledge check", "Complete"], commands: commands.map((command) => ({ command_id: command.command_id, command: command.canonical_command, aliases: command.aliases, purpose: command.purpose, safety_level: command.safety_level, verification_commands: command.verification_commands, rollback_commands: command.rollback_commands, simulator_support: command.simulator_support })) }]
   }));
 }
 
 const referencedByRoutes = new Set(routeInventory.flatMap((route) => route.required_command_ids));
 const supportCounts = Object.fromEntries(Object.entries(Object.groupBy(inventory, (record) => record.simulator_support)).map(([key, value]) => [key, value.length]));
 const vendorCounts = Object.fromEntries(Object.entries(Object.groupBy(inventory, (record) => record.vendor)).map(([key, value]) => [key, value.length]));
-const unresolvedRouteReferences = routeInventory.flatMap((route) => route.required_command_ids.length ? [] : [{ route_id: route.route_id, title: route.title }]);
+const crossVendorErrors = routeInventory.flatMap((route) => route.required_command_ids
+  .filter((commandId) => recordById.get(commandId)?.vendor !== route.vendor)
+  .map((commandId) => ({ route_id: route.route_id, vendor: route.vendor, command_id: commandId, command_vendor: recordById.get(commandId)?.vendor || "missing" })));
+const brokenCommandReferences = routeInventory.flatMap((route) => route.required_command_ids
+  .filter((commandId) => !recordById.has(commandId))
+  .map((commandId) => ({ route_id: route.route_id, command_id: commandId })));
+const unresolvedRouteReferences = routeInventory.filter((route) => route.route_type !== "free_practice" && !route.required_command_ids.length).map((route) => ({ route_id: route.route_id, title: route.title }));
+const routesPerVendor = Object.fromEntries(Object.entries(Object.groupBy(routeInventory, (route) => route.vendor)).map(([key, value]) => [key, value.length]));
+const routesSuccessfullyMapped = routeInventory.filter((route) => route.mapping_status === "fully_mapped").length;
+const routesPartiallyMapped = routeInventory.filter((route) => route.mapping_status === "partially_mapped").length;
+const routesUnmapped = routeInventory.filter((route) => route.mapping_status === "unmapped").length;
 const audit = {
   generated_at: new Date().toISOString(), source_command_files: commandFiles.map((file) => `data/commands/${file}`), total_raw_command_records: rawRecords.length, total_normalized_canonical_commands: inventory.length, total_aliases: inventory.reduce((sum, record) => sum + record.aliases.length, 0), commands_per_vendor: vendorCounts, commands_per_topic: Object.fromEntries(Object.entries(Object.groupBy(inventory, (record) => record.topic)).map(([key, value]) => [key, value.length])), commands_per_support_level: supportCounts, commands_used_by_cli_engine: inventory.filter((record) => record.simulator_support === "fully_simulated" || record.simulator_support === "partially_simulated").length, commands_used_only_by_lookup: inventory.filter((record) => record.simulator_support === "lookup_only").length, commands_referenced_by_routes: referencedByRoutes.size, commands_without_routes: inventory.filter((record) => !record.related_route_ids.length).map((record) => record.command_id), commands_without_lessons: inventory.filter((record) => !record.related_lesson_ids.length).map((record) => record.command_id), routes_containing_commands_not_found_in_inventory: unresolvedRouteReferences, duplicate_command_ids: [...new Set(duplicateIds)], duplicate_canonical_syntax: [], conflicting_vendor_assignments: [], commands_using_placeholders: inventory.filter((record) => /<[^>]+>/.test(record.syntax)).map((record) => record.command_id), commands_with_missing_verification_steps: inventory.filter((record) => record.changes_configuration && !record.verification_commands.length).map((record) => record.command_id), commands_with_missing_rollback_guidance: inventory.filter((record) => record.changes_configuration && !record.rollback_commands.length).map((record) => record.command_id), broken_command_references: []
 };
+
+Object.assign(audit, {
+  routes_per_vendor: routesPerVendor,
+  routes_successfully_mapped: routesSuccessfullyMapped,
+  routes_partially_mapped: routesPartiallyMapped,
+  routes_unmapped: routesUnmapped,
+  routes_with_cross_vendor_conflicts: crossVendorErrors,
+  empty_required_command_routes: unresolvedRouteReferences,
+  routes_without_lessons: routeInventory.filter((route) => !route.related_lesson_ids.length).map((route) => route.route_id),
+  routes_with_missing_cli_handlers: routeInventory.filter((route) => route.missing_cli_handler_ids.length).map((route) => route.route_id),
+  broken_command_references: brokenCommandReferences
+});
+
+if (crossVendorErrors.length || brokenCommandReferences.length || unresolvedRouteReferences.length) {
+  throw new Error(`Curriculum generation failed: ${crossVendorErrors.length} cross-vendor, ${brokenCommandReferences.length} broken, ${unresolvedRouteReferences.length} empty required-command mappings.`);
+}
 
 const health = {
   status: audit.commands_without_lessons.length || audit.broken_command_references.length ? "Warnings" : "Passed",
