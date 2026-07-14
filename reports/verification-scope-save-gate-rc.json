@@ -1,0 +1,35 @@
+{
+  "report_type": "verification_scope_authoritative_save_gate_rc",
+  "base_commit": "620e8c4c83d817835cefe1bd7a21f63166f6af4d",
+  "previous_source_candidate_commit": "d952da745bc9080970bd64f7973945e654a7b79d",
+  "repair_candidate_commit": "73ec0a36ea5cee292e5145de83eb800655ec5b9c",
+  "branch": "repair/runtime-integrity-and-verification",
+  "build_version": "2026.07-runtime-rc",
+  "runtime_schema_version": 5,
+  "route_count": 127,
+  "profile_count": 9,
+  "tests": {
+    "core_smoke": "passed",
+    "current_application_smoke": "passed",
+    "profile_save_alias_matrix": "passed",
+    "field_scope_matrix": "passed",
+    "interface_isolation_matrix": "passed",
+    "same_field_reverification_matrix": "passed",
+    "rollback_matrix": "passed",
+    "legacy_migration_matrix": "passed",
+    "terminal_save_gate_static_integration": "passed",
+    "graphical_and_route_save_gate_static_integration": "passed",
+    "build": "passed",
+    "startup": "passed",
+    "diff_check": "passed",
+    "chrome": "blocked",
+    "edge": "blocked",
+    "responsive": "blocked",
+    "service_worker_offline_update": "blocked"
+  },
+  "release_decision": "do_not_merge_or_deploy",
+  "known_limitations": [
+    "Interactive browser and Edge evidence was unavailable in this session.",
+    "Only interface description currently has full field-scoped save-authorization evidence; other pending fields remain safely blocked."
+  ]
+}
