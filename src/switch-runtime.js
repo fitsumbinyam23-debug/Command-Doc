@@ -4,7 +4,7 @@
   const normalise = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
   const clone = (value) => value === undefined ? undefined : JSON.parse(JSON.stringify(value));
   const STORAGE_KEY = "command-doctor.switch-runtime.v1";
-  const RUNTIME_SCHEMA_VERSION = 4;
+  const RUNTIME_SCHEMA_VERSION = 5;
   const SUPPORT_LEVELS = {
     fully_simulated: "full_state_simulation",
     partially_simulated: "simplified_state_simulation",
@@ -59,7 +59,15 @@
       const first = field.split(".")[0];
       // Lab 45 stored interface fields without their SharedSwitchState root.
       const fullPath = field.startsWith("interfaces.") || !next.interfaces[first] ? field : `interfaces.${field}`;
-      return { ...change, field: fullPath };
+      return {
+        ...change,
+        field: fullPath,
+        transaction_id: change.transaction_id || change.command_id || "migrated-change",
+        revision_created: Number.isInteger(change.revision_created) ? change.revision_created : Number(next.session?.revision || 0),
+        verification_required: change.verification_required !== false,
+        verification_status: change.verification_status || "required",
+        verification_record_id: change.verification_record_id || ""
+      };
     });
     next.session ||= {};
     next.session.selected_interface ||= Object.keys(next.interfaces)[0] || "";
@@ -317,46 +325,126 @@
       this.running.session.command_history = compact(commands, 120, 320);
       this.persist();
     }
-    verification(name) { return this.running.session.verification?.[name] || { verified: false, covered_change_ids: [] }; }
+    verificationPolicies() {
+      return [{
+        policy_id: "interface-description-running-config",
+        vendor_ids: ["cisco_ios", "hp_comware", "aruba_cx"],
+        command_patterns: ["show running-config interface <interface>", "display current-configuration interface <interface>"],
+        object_type: "interface",
+        field_pattern: "interfaces.<interface>.description",
+        required_evidence: "interface name and exact description line",
+        invalidating_fields: ["interfaces.<interface>.description"],
+        support_level: "full_state_simulation",
+        authorizes_save: true
+      }];
+    }
+    verificationPolicyForChange(change) {
+      const field = String(change?.field || "");
+      const description = field.match(/^interfaces\.([^\.]+)\.description$/);
+      if (description) return { ...this.verificationPolicies()[0], object_id: description[1], verified_field_path: field };
+      return { policy_id: "unverified-pending-change", object_type: field.startsWith("interfaces.") ? "interface" : "system", object_id: field.split(".")[1] || "system", verified_field_path: field, required_evidence: "No current verification policy proves this field.", invalidating_fields: [field], support_level: "unsupported_for_profile", authorizes_save: false };
+    }
+    verificationRecords() { return Object.values(this.running.session.verification_records || {}); }
+    verification(name) {
+      const records = this.verificationRecords().filter((record) => record.object_id === name);
+      return records.at(-1) || this.running.session.verification?.[name] || { verified: false, covered_change_ids: [] };
+    }
     revision() { return Number(this.running.session.revision || 0); }
     bumpRevision() { this.running.session.revision = this.revision() + 1; return this.running.session.revision; }
+    invalidateVerificationForFields(fields = []) {
+      const changed = new Set(fields.map(String));
+      this.verificationRecords().forEach((record) => {
+        if ((record.verified_field_paths || []).some((field) => changed.has(field))) {
+          record.result = "stale";
+          record.failure_reason = "A field proved by this verification changed.";
+          record.covered_change_ids = [];
+        }
+      });
+      this.changes().forEach((change) => {
+        if (changed.has(change.field)) {
+          change.verification_status = "required";
+          change.verification_record_id = "";
+        }
+      });
+    }
     invalidateVerification(name = "") {
-      if (name) delete this.running.session.verification?.[name];
-      else this.running.session.verification = {};
+      if (!name) {
+        this.running.session.verification = {};
+        this.running.session.verification_records = {};
+        return;
+      }
+      this.invalidateVerificationForFields(Object.keys(this.interface(name) || {}).map((field) => `interfaces.${name}.${field}`));
+    }
+    isVerificationRecordCurrent(record) {
+      if (!record || record.result !== "passed" || !record.policy_id || !record.output_evidence) return false;
+      if (record.profile_id !== this.profile.profile_id || record.vendor !== this.profile.vendor) return false;
+      const policy = this.verificationPolicies().find((item) => item.policy_id === record.policy_id);
+      if (!policy?.authorizes_save) return false;
+      return (record.covered_change_ids || []).every((changeId) => {
+        const change = this.changes().find((item) => item.change_id === changeId);
+        return Boolean(change && record.verified_field_paths?.includes(change.field) && record.values_proved?.[change.field] === change.after);
+      });
     }
     isVerificationCurrent(name) {
       const verification = this.verification(name);
       const pending = this.changes().filter((change) => String(change.field || "").startsWith(`interfaces.${name}.`));
-      return Boolean(verification.verified && verification.revision === this.revision() && pending.length && pending.every((change) => verification.covered_change_ids?.includes(change.change_id)));
+      return Boolean(pending.length && pending.every((change) => this.verificationRecords().some((record) => this.isVerificationRecordCurrent(record) && record.covered_change_ids?.includes(change.change_id))));
     }
     verifyInterfaceDescription(name, command, output) {
       const port = this.interface(name);
       const expected = `description ${port?.description || ""}`.trim();
       const expectedCommands = [`show running-config interface ${name}`, `display current-configuration interface ${name}`].map(normalise);
       const passed = Boolean(port?.description) && expectedCommands.includes(normalise(command)) && String(output || "").includes(name) && String(output || "").includes(expected);
-      const covered = this.changes().filter((change) => String(change.field || "").startsWith(`interfaces.${name}.`)).map((change) => change.change_id);
-      this.running.session.verification[name] = { verified: passed, command, output: String(output || "").slice(-2400), timestamp: new Date().toISOString(), revision: this.revision(), expected_description: port?.description || "", covered_change_ids: passed ? covered : [] };
+      const policy = this.verificationPolicies()[0];
+      const field = `interfaces.${name}.description`;
+      const covered = this.changes().filter((change) => change.field === field).map((change) => change.change_id);
+      const verificationId = `verification-${crypto.randomUUID?.() || Date.now()}-${this.verificationRecords().length}`;
+      const verification = { verification_id: verificationId, policy_id: policy.policy_id, vendor: this.profile.vendor, profile_id: this.profile.profile_id, object_type: policy.object_type, object_id: name, command_id: "verify-interface-description", entered_command: command, output_evidence: String(output || "").slice(-2400), state_revision: this.revision(), verified_field_paths: passed ? [field] : [], covered_change_ids: passed ? covered : [], values_proved: passed ? { [field]: port?.description || "" } : {}, timestamp: new Date().toISOString(), result: passed ? "passed" : "failed", failure_reason: passed ? "" : "The required interface description evidence was not present.", support_level: policy.support_level, verified: passed, command, output: String(output || "").slice(-2400), expected_description: port?.description || "" };
+      this.running.session.verification_records ||= {};
+      this.running.session.verification_records[verification.verification_id] = verification;
+      if (passed) this.changes().filter((change) => covered.includes(change.change_id)).forEach((change) => {
+        change.verification_status = "verified";
+        change.verification_record_id = verification.verification_id;
+      });
+      this.running.session.verification ||= {};
+      this.running.session.verification[name] = verification;
       this.record({ command_id: "verify-interface-description", canonical_command: command, entered_text: command, success: passed, verification_result: passed ? "passed" : "failed" });
       this.persist();
       return passed;
     }
     change(field, before, after, commandId = "inspector") {
       if (before === after) return;
-      this.running.unsaved_changes.push({ change_id: crypto.randomUUID?.() || `${Date.now()}-${this.running.unsaved_changes.length}`, field, before, after, timestamp: new Date().toISOString(), command_id: commandId, verified: false });
+      const existing = [...this.running.unsaved_changes].reverse().find((change) => change.field === field);
+      if (existing) {
+        if (existing.before === after) {
+          this.running.unsaved_changes.splice(this.running.unsaved_changes.indexOf(existing), 1);
+          return;
+        }
+        existing.after = after;
+        existing.command_id = commandId;
+        existing.transaction_id = commandId;
+        existing.timestamp = new Date().toISOString();
+        existing.verification_status = "required";
+        existing.verification_record_id = "";
+        return;
+      }
+      this.running.unsaved_changes.push({ change_id: `change-${crypto.randomUUID?.() || Date.now()}-${this.eventLog.length}-${this.running.unsaved_changes.length}`, transaction_id: commandId, field, before, after, revision_created: this.revision() + 1, verification_required: true, verification_status: "required", verification_record_id: "", timestamp: new Date().toISOString(), command_id: commandId, verified: false });
     }
     updateInterface(name, updates, commandId = "inspector", options = {}) {
       const port = this.interface(name);
       if (!port) return false;
       let changed = false;
+      const changedFields = [];
       Object.entries(updates).forEach(([key, value]) => {
         if (port[key] === value) return;
         if (options.recordChange !== false) this.change(`interfaces.${name}.${key}`, port[key], value, commandId);
         port[key] = value;
         changed = true;
+        changedFields.push(`interfaces.${name}.${key}`);
       });
       if (changed && options.bumpRevision !== false) {
         this.bumpRevision();
-        this.invalidateVerification(name);
+        this.invalidateVerificationForFields(changedFields);
       }
       return true;
     }
@@ -364,7 +452,7 @@
       if (this.running.system.hostname === hostname) return false;
       if (options.recordChange !== false) this.change("system.hostname", this.running.system.hostname, hostname, commandId);
       this.running.system.hostname = hostname;
-      if (options.bumpRevision !== false) { this.bumpRevision(); this.invalidateVerification(); }
+      if (options.bumpRevision !== false) { this.bumpRevision(); this.invalidateVerificationForFields(["system.hostname"]); }
       return true;
     }
     getByPath(path, source = this.running) { return String(path || "").split(".").filter(Boolean).reduce((value, key) => value == null ? undefined : value[key], source); }
@@ -378,26 +466,32 @@
       if (options.recordChange !== false) this.change(path, before, value, commandId);
       if (before !== value && options.bumpRevision !== false) {
         this.bumpRevision();
-        if (keys[0] === "interfaces") this.invalidateVerification(keys[1]);
-        else this.invalidateVerification();
+        this.invalidateVerificationForFields([path]);
       }
       return true;
     }
     deleteByPath(path, commandId = "inspector") { const keys = String(path || "").split(".").filter(Boolean); if (!keys.length) return false; const before = this.getByPath(path); let target = this.running; for (const key of keys.slice(0, -1)) { target = target?.[key]; if (target == null) return false; } if (!(keys.at(-1) in target)) return false; delete target[keys.at(-1)]; this.change(path, before, undefined, commandId); return true; }
     canSave() {
       const changes = this.changes();
-      if (!changes.length) return { ok: true, uncovered: [] };
-      const covered = new Set(Object.values(this.running.session.verification || {}).flatMap((verification) => verification?.verified && verification.revision === this.revision() ? verification.covered_change_ids || [] : []));
-      const uncovered = changes.filter((change) => !covered.has(change.change_id));
-      return { ok: !uncovered.length, uncovered };
+      if (!changes.length) return { ok: true, uncovered: [], uncovered_change_ids: [], uncovered_fields: [], required_policy_ids: [] };
+      const uncovered = changes.filter((change) => !this.verificationRecords().some((record) => this.isVerificationRecordCurrent(record) && record.covered_change_ids?.includes(change.change_id)));
+      return { ok: !uncovered.length, uncovered, uncovered_change_ids: uncovered.map((change) => change.change_id), uncovered_fields: uncovered.map((change) => change.field), required_policy_ids: [...new Set(uncovered.map((change) => this.verificationPolicyForChange(change).policy_id))] };
     }
     save(commandId = "save") {
+      const eligibility = this.canSave();
+      if (!eligibility.ok) {
+        const message = `Save blocked: verify ${eligibility.uncovered_fields.join(", ")} before saving.`;
+        this.record({ command_id: commandId, canonical_command: commandId, entered_text: commandId, success: false, failure_type: "verification_required", changed_fields: [], safety_result: "save_rejected", save_result: "rejected" });
+        this.persist();
+        return { ok: false, saved: false, ...eligibility, message };
+      }
       const cleanRunning = cleanSnapshot(this.running);
       this.startup = clone(cleanRunning);
       this.baseline = clone(cleanRunning);
       this.running.unsaved_changes = [];
       this.record({ command_id: commandId, canonical_command: commandId, entered_text: commandId, success: true, save_result: "saved" });
       this.persist();
+      return { ok: true, saved: true, uncovered_change_ids: [], uncovered_fields: [], required_policy_ids: [], message: "Local startup configuration updated from verified running state." };
     }
     rollbackUnsaved() {
       const session = clone(this.running.session || {});
@@ -416,9 +510,9 @@
       this.setByPath(change.field, clone(change.before), "rollback-one-change", { recordChange: false, bumpRevision: false });
       this.running.unsaved_changes.splice(index, 1);
       this.bumpRevision();
-      const segments = String(change.field || "").split(".");
-      if (segments[0] === "interfaces") this.invalidateVerification(segments[1]);
-      else this.invalidateVerification();
+      this.verificationRecords().forEach((verification) => {
+        verification.covered_change_ids = (verification.covered_change_ids || []).filter((changeId) => changeId !== change.change_id);
+      });
       this.record({ command_id: "rollback-one-change", canonical_command: "rollback one change", entered_text: change.field, success: true, changed_fields: [change.field], safety_result: "rollback_one_change" });
       this.persist();
       return true;
@@ -443,11 +537,27 @@
       migrated.running.unsaved_changes = (migrated.running.unsaved_changes || []).map((change, index) => {
         const field = String(change.field || "");
         const selected = migrated.running.session?.selected_interface || Object.keys(migrated.running.interfaces || {})[0] || "GigabitEthernet1/0/1";
-        return { ...change, change_id: change.change_id || `migrated-${index}-${field}`, field: field.startsWith("interfaces.") || field.startsWith("system.") ? field : `interfaces.${selected}.${field}`, verified: false };
+        const fullPath = field.startsWith("interfaces.") || field.startsWith("system.") ? field : `interfaces.${selected}.${field}`;
+        return {
+          ...change,
+          change_id: change.change_id || `migrated-${index}-${fullPath}`,
+          transaction_id: change.transaction_id || change.command_id || "migrated-change",
+          field: fullPath,
+          revision_created: Number.isInteger(change.revision_created) ? change.revision_created : Number(migrated.running.session?.revision || 0),
+          verification_required: change.verification_required !== false,
+          verification_status: change.verification_status || "required",
+          verification_record_id: change.verification_record_id || "",
+          verified: false
+        };
       });
       migrated.running.session ||= {};
       migrated.running.session.verification ||= {};
-      Object.values(migrated.running.session.verification).forEach((verification) => { verification.covered_change_ids ||= []; });
+      migrated.running.session.verification_records ||= {};
+      Object.values(migrated.running.session.verification).forEach((verification, index) => {
+        verification.covered_change_ids ||= [];
+        const verificationId = verification.verification_id || `migrated-verification-${index}`;
+        migrated.running.session.verification_records[verificationId] ||= { ...verification, verification_id: verificationId, policy_id: "legacy-unscoped", vendor: this.profile.vendor, profile_id: this.profile.profile_id, object_type: "interface", object_id: Object.keys(migrated.running.interfaces || {})[0] || "", verified_field_paths: [], values_proved: {}, result: "stale", failure_reason: "Legacy unscoped verification requires a new field-scoped verification.", support_level: "unsupported_for_profile", output_evidence: verification.output || "" };
+      });
       migrated.eventLog = Array.isArray(migrated.eventLog) ? migrated.eventLog.slice(-200).map((event) => {
         const compact = { ...event };
         delete compact.state_before; delete compact.state_after;

@@ -3016,8 +3016,8 @@ function renderSwitchWorkbench() {
   pending.append(labCreate("strong", "", `Pending Changes (${changes.length})`), labCreate("pre", "lab-output", changes.length ? changes.map((change) => `${change.field}: ${change.before ?? "-"} -> ${change.after}`).join("\n") : "No unsaved local configuration changes."));
   pending.append(
     labButton("Save verified configuration", "secondary", () => {
-      if (!runtime.state.canSave().ok) { showToast("Verify every pending change from its current running configuration before saving."); return; }
-      runtime.state.save("save");
+      const saved = runtime.state.save("save");
+      if (!saved.ok) { showToast(saved.message); return; }
       hydrateEngineFromRuntime(getLabEngine());
       syncVisualFromRuntime();
       persistSwitchRuntime();
@@ -4300,23 +4300,25 @@ function runLabConsoleCommand(input) {
   }
   if (engine) {
     const isModeNavigation = /^(configure terminal|conf t|system-view|end|return|exit|interface\s+\S+|vlan\s+\S+)$/i.test(command);
-    engine.transcript.push(`${prompt} ${command}\n${result.output}${result.kind === "config" && result.diff && !isModeNavigation ? `\n\nConfiguration diff\n${result.diff}` : ""}`);
+    const isSaveRequest = /^(write memory|wr mem|write mem|copy running-config startup-config|save|save force)$/i.test(command);
     if (state.lab.switchRuntime?.state) {
       const shared = state.lab.switchRuntime.state;
       const commandId = catalogResolution?.command?.command_id || "unclassified";
-      if (result.ok && result.kind === "save") {
-        shared.save(commandId);
+      if (isSaveRequest) {
+        const saved = shared.save(commandId);
+        result = { ...result, ok: saved.ok, kind: saved.ok ? "save" : "warning", output: saved.ok ? result.output : saved.message, save_gate: saved };
       } else if (result.ok && result.kind === "rollback") {
         shared.rollbackUnsaved();
         hydrateEngineFromRuntime(engine);
       } else if (result.ok) {
         syncRuntimeFromEngine(engine, commandId);
       }
-      if (result.kind !== "save" && result.kind !== "rollback") {
+      if (result.kind !== "save" && result.kind !== "rollback" && !result.save_gate) {
         shared.record({ command_id: commandId, canonical_command: catalogResolution?.command?.canonical_command || command, entered_text: command, entered_alias: Boolean(catalogResolution?.entered_alias), parsed_parameters: catalogResolution?.parsed_parameters || {}, mode_before: prompt.includes("config-if") ? "interface" : prompt.includes("config") ? "config" : "exec", mode_after: engine.mode || "exec", success: Boolean(result.ok), failure_type: result.ok ? "" : (catalogResolution?.status || result.kind || "command_rejected"), state_before: runtimeBefore, state_after: result.ok ? JSON.parse(JSON.stringify(shared.running)) : runtimeBefore, changed_fields: result.ok && result.kind === "config" ? ["simulated configuration"] : [], safety_result: result.ok ? "accepted" : "rejected", verification_result: result.verified ? "passed" : "not_run", save_result: "" });
       }
       persistSwitchRuntime();
     }
+    engine.transcript.push(`${prompt} ${command}\n${result.output}${result.kind === "config" && result.diff && !isModeNavigation ? `\n\nConfiguration diff\n${result.diff}` : ""}`);
     if (engine.transcript.length > 150) engine.transcript.splice(0, engine.transcript.length - 150);
     const mission = currentLabMission();
     if (labMissionComplete(mission, engine) && !state.lab.progress.simulatorMissions[mission.id]) {
@@ -5092,7 +5094,10 @@ function startPracticeRoute(routeId, action = "") {
     showToast(`${route.label} is using the current simulated switch and topology.`);
     return;
   }
-  if (action === "save-and-replace") state.lab.switchRuntime?.state?.save("route-start-save");
+  if (action === "save-and-replace") {
+    const saved = state.lab.switchRuntime?.state?.save("route-start-save");
+    if (saved && !saved.ok) { showToast(saved.message); return; }
+  }
   const routeProfile = state.lab.switchProfiles.find((profile) => profile.vendor === route.vendor);
   if (routeProfile && activeSwitchProfile()?.vendor !== route.vendor) activateSwitchProfile(routeProfile.profile_id);
   startFreshTrainingSwitch(route);

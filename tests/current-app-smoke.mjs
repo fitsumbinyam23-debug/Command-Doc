@@ -111,37 +111,60 @@ for (const candidateProfile of profiles) {
   assert(rollback.every((command) => engine.execute(command).ok) && !engine.state.interfaces[interfaceName].description, `displayed rollback syntax executes for ${candidateProfile.profile_id}`);
 }
 
+for (const candidateProfile of profiles) {
+  const candidateState = new Runtime.SharedSwitchState(candidateProfile, null, { command_catalog_version: "test", profile_catalog_version: "test", active_build_version: "test" });
+  const candidatePort = Object.keys(candidateState.running.interfaces)[0];
+  const candidateRegistry = new Runtime.CommandRegistry(inventoryFile.commands, candidateProfile);
+  const saveAliases = [...new Set(candidateRegistry.catalog.flatMap((command) => [command.canonical_command, ...(command.aliases || [])]).filter((syntax) => /^(write memory|wr mem|write mem|copy running-config startup-config|save|save force)$/i.test(syntax)))];
+  assert(saveAliases.length > 0, `active save aliases exist for ${candidateProfile.profile_id}`);
+  candidateState.updateInterface(candidatePort, { description: "Save gate test" }, "save-gate-test");
+  const startupBeforeSave = candidateState.startup.interfaces[candidatePort].description;
+  for (const alias of saveAliases) {
+    const rejected = candidateState.save(alias);
+    assert(!rejected.ok && candidateState.startup.interfaces[candidatePort].description === startupBeforeSave && candidateState.changes().length === 1, `save alias ${alias} uses the authoritative rejection gate for ${candidateProfile.profile_id}`);
+  }
+  const verificationCommand = candidateProfile.vendor === "hp_comware" ? `display current-configuration interface ${candidatePort}` : `show running-config interface ${candidatePort}`;
+  assert(candidateState.verifyInterfaceDescription(candidatePort, verificationCommand, `interface ${candidatePort}\n description Save gate test`), `field-scoped verification works for ${candidateProfile.profile_id}`);
+  assert(candidateState.save(saveAliases[0]).ok && candidateState.startup.interfaces[candidatePort].description === "Save gate test", `verified save alias succeeds for ${candidateProfile.profile_id}`);
+}
+const activeAppSource = await read("src/app-release-21.js");
+assert(activeAppSource.includes("const isSaveRequest") && activeAppSource.includes("const saved = shared.save(commandId)"), "terminal save aliases invoke the shared authoritative save gate");
+
 const state = new Runtime.SharedSwitchState(profile, null, { command_catalog_version: "test", profile_catalog_version: "test", active_build_version: "test" });
 const port = Object.keys(state.running.interfaces)[0];
+const secondPort = Object.keys(state.running.interfaces).find((name) => name !== port);
 const beforeStartup = state.startup.interfaces[port].description;
 assert(state.updateInterface(port, { description: "Current app smoke" }, "test-change"), "supported state change applies");
 assert(state.changes().length === 1 && state.startup.interfaces[port].description === beforeStartup, "running and startup remain separate with pending change");
-state.save("test-save");
-assert(state.changes().length === 0 && state.startup.interfaces[port].description === "Current app smoke", "save copies clean running state to startup");
+const rejectedSave = state.save("test-save-rejected");
+assert(!rejectedSave.ok && state.changes().length === 1 && state.startup.interfaces[port].description === beforeStartup, "authoritative save gate rejects an unverified pending change without mutating startup");
+assert(state.eventLog.at(-1).save_result === "rejected" && state.eventLog.at(-1).failure_type === "verification_required", "rejected save records one compact authoritative event");
+assert(state.verifyInterfaceDescription(port, `show running-config interface ${port}`, `interface ${port}\n description Current app smoke`), "field-scoped description verification succeeds");
+assert(state.save("test-save").ok && state.changes().length === 0 && state.startup.interfaces[port].description === "Current app smoke", "fully verified save copies clean running state to startup");
 state.updateInterface(port, { description: "Unsaved" }, "test-unsaved");
 state.rollbackUnsaved();
 assert(state.running.interfaces[port].description === "Current app smoke" && state.changes().length === 0, "unsaved rollback restores startup");
-state.updateInterface(port, { description: "First change" }, "test-first-change");
-state.updateInterface(port, { vlan: 20 }, "test-second-change");
-const changeCount = state.changes().length;
-assert(state.rollbackChange(changeCount - 1), "one-change rollback succeeds");
-assert(state.running.interfaces[port].vlan === 1, "one-change rollback restores the exact path");
-assert(state.changes().length === changeCount - 1 && !state.changes().some((change) => !change.field.startsWith("interfaces.")), "rollback does not create a rootless or extra pending change");
-const eventsBeforeRollback = state.eventLog.length;
-state.updateInterface(port, { vlan: 20 }, "test-one-change-rollback");
-assert(state.rollbackChange(state.changes().length - 1), "second one-change rollback succeeds");
-assert(state.eventLog.length === eventsBeforeRollback + 1 && state.changes().every((change) => change.field.startsWith("interfaces.")), "one-change rollback records exactly one event without a replacement pending change");
-const verificationOutput = `interface ${port}\n description First change`;
-assert(state.verifyInterfaceDescription(port, `show running-config interface ${port}`, verificationOutput), "verification records current running state");
-assert(state.isVerificationCurrent(port), "fresh verification is current");
-const secondPort = Object.keys(state.running.interfaces).find((name) => name !== port);
-state.updateInterface(secondPort, { description: "Separate pending change" }, "test-separate-interface");
-assert(!state.canSave().ok, "verification of one interface cannot authorize a pending change on another interface");
-state.verifyInterfaceDescription(secondPort, `show running-config interface ${secondPort}`, `interface ${secondPort}\n description Separate pending change`);
-state.verifyInterfaceDescription(port, `show running-config interface ${port}`, verificationOutput);
-assert(state.canSave().ok, "all pending changes require and accept their own current verification");
-state.updateInterface(port, { description: "Verification changed" }, "test-stale-verification");
-assert(!state.isVerificationCurrent(port), "a later configuration change invalidates verification");
+state.updateInterface(port, { description: "First change", vlan: 20 }, "test-same-interface-fields");
+assert(state.verifyInterfaceDescription(port, `show running-config interface ${port}`, `interface ${port}\n description First change`), "description policy verifies its exact field");
+const descriptionChange = state.changes().find((change) => change.field === `interfaces.${port}.description`);
+const vlanChange = state.changes().find((change) => change.field === `interfaces.${port}.vlan`);
+const descriptionRecord = state.verification(port);
+assert(descriptionRecord.covered_change_ids.length === 1 && descriptionRecord.covered_change_ids.includes(descriptionChange.change_id) && !descriptionRecord.covered_change_ids.includes(vlanChange.change_id), "description evidence never covers an unrelated field on the same interface");
+assert(!state.save("test-same-interface-reject").ok && state.canSave().uncovered_fields.includes(vlanChange.field), "same-interface unverified VLAN blocks save");
+assert(state.rollbackChange(state.changes().findIndex((change) => change.change_id === vlanChange.change_id)), "one-change rollback succeeds");
+assert(state.canSave().ok, "rolling back the unrelated field preserves valid description coverage");
+assert(state.save("test-description-save").ok, "remaining verified description saves successfully");
+state.updateInterface(port, { description: "Port A" }, "test-port-a");
+state.updateInterface(secondPort, { description: "Port B" }, "test-port-b");
+assert(state.verifyInterfaceDescription(secondPort, `show running-config interface ${secondPort}`, `interface ${secondPort}\n description Port B`), "second-interface description verification succeeds");
+assert(!state.canSave().ok, "verification of interface B cannot authorize interface A");
+assert(state.verifyInterfaceDescription(port, `show running-config interface ${port}`, `interface ${port}\n description Port A`), "first-interface description verification succeeds");
+assert(state.canSave().ok && state.save("test-multi-interface-save").ok, "every required pending change must be verified before save");
+state.updateInterface(port, { description: "Stale evidence" }, "test-stale-evidence");
+assert(state.verifyInterfaceDescription(port, `show running-config interface ${port}`, `interface ${port}\n description Stale evidence`), "fresh evidence records exact current value");
+state.updateInterface(port, { description: "Changed again" }, "test-stale-evidence-change");
+assert(!state.canSave().ok, "changing the proved field invalidates only its prior verification");
+assert(state.verifyInterfaceDescription(port, `show running-config interface ${port}`, `interface ${port}\n description Changed again`) && state.save("test-reverified-save").ok, "reverification enables save after a same-field change");
 for (let index = 0; index < 150; index += 1) {
   state.record({ command_id: "read-only-test", canonical_command: "show version", entered_text: "show version", success: true, state_before: { giant: "x".repeat(10000) }, state_after: { giant: "x".repeat(10000) } });
 }
@@ -149,7 +172,11 @@ assert(!state.eventLog.some((event) => "state_before" in event || "state_after" 
 state.storeTerminal(Array.from({ length: 150 }, (_, index) => `line ${index} ${"x".repeat(1000)}`), Array.from({ length: 150 }, (_, index) => `show version ${index}`));
 assert(state.terminalHistory().length === 120 && JSON.stringify(state.snapshot()).length < 800000, "terminal persistence remains within a compact local-storage budget");
 const restored = new Runtime.SharedSwitchState(profile, JSON.parse(store.get(Runtime.STORAGE_KEY)), { command_catalog_version: "test", profile_catalog_version: "test", active_build_version: "test" });
-assert(restored.running.interfaces[port].description === "Verification changed", "runtime snapshot persists and restores");
+assert(restored.running.interfaces[port].description === "Changed again" && restored.verificationRecords().length > 0, "runtime snapshot persists field-scoped verification records");
+const legacySnapshot = JSON.parse(JSON.stringify(state.snapshot()));
+legacySnapshot.running.unsaved_changes = [{ field: `${port}.description`, before: "Changed again", after: "Migrated", command_id: "legacy-change" }];
+const migrated = new Runtime.SharedSwitchState(profile, legacySnapshot, { command_catalog_version: "test", profile_catalog_version: "test", active_build_version: "test" });
+assert(migrated.changes()[0].field === `interfaces.${port}.description` && migrated.changes()[0].verification_required && migrated.changes()[0].verification_status === "required", "legacy pending changes migrate to complete root-scoped verification metadata");
 
 console.log(JSON.stringify({
   suite: "current application",
@@ -157,5 +184,5 @@ console.log(JSON.stringify({
   active_styles: activeStyles.length,
   canonical_commands: inventoryFile.commands.length,
   routes: routeFile.routes.length,
-  passed: 33
+  passed: 38
 }));
