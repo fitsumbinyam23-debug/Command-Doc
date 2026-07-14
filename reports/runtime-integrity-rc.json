@@ -1,0 +1,25 @@
+{
+  "report_version": "1.0",
+  "branch": "repair/runtime-integrity-and-verification",
+  "source_commit": "620e8c4c83d817835cefe1bd7a21f63166f6af4d",
+  "base_main_commit": "620e8c4c83d817835cefe1bd7a21f63166f6af4d",
+  "ahead": 0,
+  "behind": 0,
+  "working_tree_clean": false,
+  "tests": [
+    {"id":"RC-CORE-01","area":"Core diagnosis","status":"Passed"},
+    {"id":"RC-RUNTIME-01","area":"Current runtime","status":"Passed"},
+    {"id":"RC-BUILD-01","area":"Build","status":"Passed"},
+    {"id":"RC-STARTUP-01","area":"Startup","status":"Passed"},
+    {"id":"RC-PROFILE-01","area":"Profile registry","status":"Passed"},
+    {"id":"RC-WORKBENCH-01","area":"HP Workbench","status":"Passed"},
+    {"id":"RC-VERIFY-01","area":"Verification revisions","status":"Passed"},
+    {"id":"RC-HELP-01","area":"Help rendering","status":"Passed"},
+    {"id":"RC-NAV-01","area":"Workspace navigation","status":"Passed"},
+    {"id":"RC-BROWSER-02","area":"Edge browser","status":"Blocked"},
+    {"id":"RC-MOBILE-01","area":"Mobile browser","status":"Not implemented"},
+    {"id":"RC-ATOMIC-ALL","area":"Full action matrix","status":"Partially working"},
+    {"id":"RC-ROLLBACK-ALL","area":"All rollback paths","status":"Partially working"}
+  ],
+  "release_decision": "not_ready_for_merge_or_deploy"
+}

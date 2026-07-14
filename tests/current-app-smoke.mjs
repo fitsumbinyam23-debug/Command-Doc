@@ -88,8 +88,25 @@ assert(state.changes().length === 0 && state.startup.interfaces[port].descriptio
 state.updateInterface(port, { description: "Unsaved" }, "test-unsaved");
 state.rollbackUnsaved();
 assert(state.running.interfaces[port].description === "Current app smoke" && state.changes().length === 0, "unsaved rollback restores startup");
+state.updateInterface(port, { description: "First change" }, "test-first-change");
+state.updateInterface(port, { vlan: 20 }, "test-second-change");
+const changeCount = state.changes().length;
+assert(state.rollbackChange(changeCount - 1), "one-change rollback succeeds");
+assert(state.running.interfaces[port].vlan === 1, "one-change rollback restores the exact path");
+assert(state.changes().length === changeCount - 1 && !state.changes().some((change) => !change.field.startsWith("interfaces.")), "rollback does not create a rootless or extra pending change");
+const verificationOutput = `interface ${port}\n description First change`;
+assert(state.verifyInterfaceDescription(port, `show running-config interface ${port}`, verificationOutput), "verification records current running state");
+assert(state.isVerificationCurrent(port), "fresh verification is current");
+state.updateInterface(port, { description: "Verification changed" }, "test-stale-verification");
+assert(!state.isVerificationCurrent(port), "a later configuration change invalidates verification");
+for (let index = 0; index < 150; index += 1) {
+  state.record({ command_id: "read-only-test", canonical_command: "show version", entered_text: "show version", success: true, state_before: { giant: "x".repeat(10000) }, state_after: { giant: "x".repeat(10000) } });
+}
+assert(!state.eventLog.some((event) => "state_before" in event || "state_after" in event), "event log stores compact records rather than full state snapshots");
+state.storeTerminal(Array.from({ length: 150 }, (_, index) => `line ${index} ${"x".repeat(1000)}`), Array.from({ length: 150 }, (_, index) => `show version ${index}`));
+assert(state.terminalHistory().length === 120 && JSON.stringify(state.snapshot()).length < 800000, "terminal persistence remains within a compact local-storage budget");
 const restored = new Runtime.SharedSwitchState(profile, JSON.parse(store.get(Runtime.STORAGE_KEY)), { command_catalog_version: "test", profile_catalog_version: "test", active_build_version: "test" });
-assert(restored.running.interfaces[port].description === "Current app smoke", "runtime snapshot persists and restores");
+assert(restored.running.interfaces[port].description === "Verification changed", "runtime snapshot persists and restores");
 
 console.log(JSON.stringify({
   suite: "current application",
@@ -97,5 +114,5 @@ console.log(JSON.stringify({
   active_styles: activeStyles.length,
   canonical_commands: inventoryFile.commands.length,
   routes: routeFile.routes.length,
-  passed: 24
+  passed: 33
 }));

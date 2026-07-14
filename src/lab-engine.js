@@ -49,10 +49,15 @@
     }
 
     prompt() {
+      if (this.seed.vendor === "HP Comware") {
+        if (this.mode === "interface") return `[${this.state.hostname}-GigabitEthernet1/0/1]`;
+        if (this.mode === "config" || this.mode === "vlan") return `[${this.state.hostname}]`;
+        return `<${this.state.hostname}>`;
+      }
       if (this.mode === "config") return `${this.state.hostname}(config)#`;
       if (this.mode === "interface") return `${this.state.hostname}(config-if)#`;
       if (this.mode === "vlan") return `${this.state.hostname}(config-vlan)#`;
-      return this.seed.vendor === "HP Comware" ? `<${this.state.hostname}>` : `${this.state.hostname}#`;
+      return `${this.state.hostname}#`;
     }
 
     setTrainingProfile(profile = {}) {

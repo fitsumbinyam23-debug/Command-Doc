@@ -4,7 +4,7 @@
   const normalise = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
   const clone = (value) => value === undefined ? undefined : JSON.parse(JSON.stringify(value));
   const STORAGE_KEY = "command-doctor.switch-runtime.v1";
-  const RUNTIME_SCHEMA_VERSION = 2;
+  const RUNTIME_SCHEMA_VERSION = 3;
   const SUPPORT_LEVELS = {
     fully_simulated: "full_state_simulation",
     partially_simulated: "simplified_state_simulation",
@@ -66,6 +66,7 @@
     next.session.terminal_history ||= [];
     next.session.command_history ||= [];
     next.session.verification ||= {};
+    next.session.revision = Number.isInteger(next.session.revision) ? next.session.revision : 0;
     delete next.hostname;
     delete next.profile_id;
     delete next.version;
@@ -168,7 +169,12 @@
     constructor(commands = [], profile = null) {
       this.commands = commands.map((command) => {
         const simulator_support = normaliseSupportLevel(command.simulator_support || command.support_level);
-        return { ...command, simulator_support, support_level: simulator_support, grammar: command.grammar || compileGrammar(command.canonical_command), vendor_id: command.vendor_id || command.vendor, compatible_os_ids: command.compatible_os_ids || [], compatible_os_family_ids: command.compatible_os_family_ids || [], compatible_platform_family_ids: command.compatible_platform_family_ids || (command.platform_family && command.platform_family !== "Any" ? [command.platform_family] : []) };
+        const derivedModes = Array.isArray(command.available_modes) && command.available_modes.length
+          ? command.available_modes
+          : (/^(description|switchport|port access|port link-type|vlan access|shutdown|no shutdown|undo shutdown)\b/i.test(command.canonical_command || "") ? ["interface"]
+            : (/^(hostname|sysname|interface|vlan|switch \S+ priority|irf member)\b/i.test(command.canonical_command || "") ? ["config"] : []));
+        const requiredPrivilege = command.required_privilege || (derivedModes.length || /^(show|display|copy|write|save|rollback|end|return)\b/i.test(command.canonical_command || "") ? "enable" : "user");
+        return { ...command, simulator_support, support_level: simulator_support, grammar: command.grammar || compileGrammar(command.canonical_command), vendor_id: command.vendor_id || command.vendor, compatible_os_ids: command.compatible_os_ids || [], compatible_os_family_ids: command.compatible_os_family_ids || [], compatible_platform_family_ids: command.compatible_platform_family_ids || (command.platform_family && command.platform_family !== "Any" ? [command.platform_family] : []), available_modes: derivedModes, required_privilege: requiredPrivilege, metadata_source: command.metadata_source || (command.available_modes?.length ? "catalog" : "derived") };
       });
       this.profile = normaliseProfile(profile || {});
       this.catalog = this.commands.filter((command) => this.availability(command).available);
@@ -225,7 +231,8 @@
       const nodes = grammar.nodes || [];
       const literals = nodes.filter((node) => node.type === "literal").length;
       const parameters = nodes.filter((node) => !["literal", "choice"].includes(node.type)).length;
-      return (canonical === entered ? 100000 : 0) + (alias === entered ? 50000 : 0) + (item.availability.available ? 10000 : 0) + ((item.command.available_modes || []).includes(context.mode) ? 1000 : 0) + ((item.command.supported_model_profiles || []).includes(this.profile?.profile_id) ? 500 : 0) + (literals * 20) - parameters;
+      const available = item.availability?.available !== false;
+      return (canonical === entered ? 100000 : 0) + (alias === entered ? 50000 : 0) + (available ? 10000 : 0) + ((item.command.available_modes || []).includes(context.mode) ? 1000 : 0) + ((item.command.supported_model_profiles || []).includes(this.profile?.profile_id) ? 500 : 0) + (literals * 20) - parameters;
     }
 
     help(text = "", context = {}) {
@@ -292,14 +299,30 @@
     selectedInterface() { return this.running.session.selected_interface; }
     selectInterface(name) { if (!this.interface(name)) return false; this.running.session.selected_interface = name; this.persist(); return true; }
     terminalHistory() { return this.running.session.terminal_history || []; }
-    storeTerminal(history, commands) { this.running.session.terminal_history = clone(history || []); this.running.session.command_history = clone(commands || []); this.persist(); }
+    storeTerminal(history, commands) {
+      const compact = (items, limit, maxLength) => (items || []).slice(-limit).map((item) => String(item || "").slice(-maxLength));
+      this.running.session.terminal_history = compact(history, 120, 2400);
+      this.running.session.command_history = compact(commands, 120, 320);
+      this.persist();
+    }
     verification(name) { return this.running.session.verification?.[name] || { verified: false }; }
+    revision() { return Number(this.running.session.revision || 0); }
+    bumpRevision() { this.running.session.revision = this.revision() + 1; return this.running.session.revision; }
+    invalidateVerification(name = "") {
+      if (name) delete this.running.session.verification?.[name];
+      else this.running.session.verification = {};
+    }
+    isVerificationCurrent(name) {
+      const verification = this.verification(name);
+      return Boolean(verification.verified && verification.revision === this.revision());
+    }
     verifyInterfaceDescription(name, command, output) {
       const port = this.interface(name);
       const expected = `description ${port?.description || ""}`.trim();
-      const passed = Boolean(port?.description) && normalise(command) === normalise(`show running-config interface ${name}`) && String(output || "").includes(name) && String(output || "").includes(expected);
-      this.running.session.verification[name] = { verified: passed, command, output, timestamp: new Date().toISOString() };
-      this.record({ command_id: "verify-interface-description", canonical_command: command, entered_text: command, success: passed, state_before: {}, state_after: {}, verification_result: passed ? "passed" : "failed" });
+      const expectedCommands = [`show running-config interface ${name}`, `display current-configuration interface ${name}`].map(normalise);
+      const passed = Boolean(port?.description) && expectedCommands.includes(normalise(command)) && String(output || "").includes(name) && String(output || "").includes(expected);
+      this.running.session.verification[name] = { verified: passed, command, output: String(output || "").slice(-2400), timestamp: new Date().toISOString(), revision: this.revision(), expected_description: port?.description || "" };
+      this.record({ command_id: "verify-interface-description", canonical_command: command, entered_text: command, success: passed, verification_result: passed ? "passed" : "failed" });
       this.persist();
       return passed;
     }
@@ -307,47 +330,101 @@
       if (before === after) return;
       this.running.unsaved_changes.push({ field, before, after, timestamp: new Date().toISOString(), command_id: commandId });
     }
-    updateInterface(name, updates, commandId = "inspector") {
+    updateInterface(name, updates, commandId = "inspector", options = {}) {
       const port = this.interface(name);
       if (!port) return false;
-      Object.entries(updates).forEach(([key, value]) => { this.change(`interfaces.${name}.${key}`, port[key], value, commandId); port[key] = value; });
+      let changed = false;
+      Object.entries(updates).forEach(([key, value]) => {
+        if (port[key] === value) return;
+        if (options.recordChange !== false) this.change(`interfaces.${name}.${key}`, port[key], value, commandId);
+        port[key] = value;
+        changed = true;
+      });
+      if (changed && options.bumpRevision !== false) {
+        this.bumpRevision();
+        this.invalidateVerification(name);
+      }
       return true;
     }
-    updateHostname(hostname, commandId = "hostname") { this.change("system.hostname", this.running.system.hostname, hostname, commandId); this.running.system.hostname = hostname; }
+    updateHostname(hostname, commandId = "hostname", options = {}) {
+      if (this.running.system.hostname === hostname) return false;
+      if (options.recordChange !== false) this.change("system.hostname", this.running.system.hostname, hostname, commandId);
+      this.running.system.hostname = hostname;
+      if (options.bumpRevision !== false) { this.bumpRevision(); this.invalidateVerification(); }
+      return true;
+    }
     getByPath(path, source = this.running) { return String(path || "").split(".").filter(Boolean).reduce((value, key) => value == null ? undefined : value[key], source); }
-    setByPath(path, value, commandId = "inspector", recordChange = true) { const keys = String(path || "").split(".").filter(Boolean); if (!keys.length) return false; const before = this.getByPath(path); let target = this.running; keys.slice(0, -1).forEach((key) => { target[key] ||= {}; target = target[key]; }); target[keys.at(-1)] = value; if (recordChange) this.change(path, before, value, commandId); return true; }
+    setByPath(path, value, commandId = "inspector", options = {}) {
+      const keys = String(path || "").split(".").filter(Boolean);
+      if (!keys.length) return false;
+      const before = this.getByPath(path);
+      let target = this.running;
+      keys.slice(0, -1).forEach((key) => { target[key] ||= {}; target = target[key]; });
+      target[keys.at(-1)] = value;
+      if (options.recordChange !== false) this.change(path, before, value, commandId);
+      if (before !== value && options.bumpRevision !== false) {
+        this.bumpRevision();
+        if (keys[0] === "interfaces") this.invalidateVerification(keys[1]);
+        else this.invalidateVerification();
+      }
+      return true;
+    }
     deleteByPath(path, commandId = "inspector") { const keys = String(path || "").split(".").filter(Boolean); if (!keys.length) return false; const before = this.getByPath(path); let target = this.running; for (const key of keys.slice(0, -1)) { target = target?.[key]; if (target == null) return false; } if (!(keys.at(-1) in target)) return false; delete target[keys.at(-1)]; this.change(path, before, undefined, commandId); return true; }
     save(commandId = "save") {
-      const before = clone(this.running);
       const cleanRunning = cleanSnapshot(this.running);
       this.startup = clone(cleanRunning);
       this.baseline = clone(cleanRunning);
       this.running.unsaved_changes = [];
-      this.record({ command_id: commandId, canonical_command: commandId, entered_text: commandId, success: true, state_before: before, state_after: clone(this.running), save_result: "saved" });
+      this.record({ command_id: commandId, canonical_command: commandId, entered_text: commandId, success: true, save_result: "saved" });
       this.persist();
     }
     rollbackUnsaved() {
-      const before = clone(this.running);
       const session = clone(this.running.session || {});
       this.running = clone(this.startup);
       this.running.session = session;
       this.running.unsaved_changes = [];
-      this.record({ command_id: "rollback-unsaved", canonical_command: "rollback unsaved", entered_text: "rollback unsaved", success: true, state_before: before, state_after: clone(this.running), safety_result: "rollback_unsaved" });
+      this.bumpRevision();
+      this.invalidateVerification();
+      this.record({ command_id: "rollback-unsaved", canonical_command: "rollback unsaved", entered_text: "rollback unsaved", success: true, safety_result: "rollback_unsaved" });
       this.persist();
     }
-    resetTraining() { const before = clone(this.running); this.running = clone(this.factoryBaseline); this.running.unsaved_changes = []; this.record({ command_id: "reset-training", canonical_command: "reset training switch", entered_text: "reset training switch", success: true, state_before: before, state_after: clone(this.running), safety_result: "reset_training" }); this.persist(); }
-    rollbackChange(index) { const change = this.changes()[index]; if (!change) return false; this.setByPath(change.field, clone(change.before), "rollback-one-change", false); this.running.unsaved_changes.splice(index, 1); this.record({ command_id: "rollback-one-change", canonical_command: "rollback one change", entered_text: change.field, success: true, changed_fields: [change.field], safety_result: "rollback_one_change" }); this.persist(); return true; }
+    resetTraining() { this.running = clone(this.factoryBaseline); this.running.unsaved_changes = []; this.bumpRevision(); this.invalidateVerification(); this.record({ command_id: "reset-training", canonical_command: "reset training switch", entered_text: "reset training switch", success: true, safety_result: "reset_training" }); this.persist(); }
+    rollbackChange(index) {
+      const change = this.changes()[index];
+      if (!change) return false;
+      this.setByPath(change.field, clone(change.before), "rollback-one-change", { recordChange: false, bumpRevision: false });
+      this.running.unsaved_changes.splice(index, 1);
+      this.bumpRevision();
+      const segments = String(change.field || "").split(".");
+      if (segments[0] === "interfaces") this.invalidateVerification(segments[1]);
+      else this.invalidateVerification();
+      this.record({ command_id: "rollback-one-change", canonical_command: "rollback one change", entered_text: change.field, success: true, changed_fields: [change.field], safety_result: "rollback_one_change" });
+      this.persist();
+      return true;
+    }
     rollback() { this.rollbackUnsaved(); }
     record(event) {
-      const required = { event_id: crypto.randomUUID?.() || `${Date.now()}-${this.eventLog.length}`, timestamp: new Date().toISOString(), command_id: "unclassified", canonical_command: "", entered_text: "", entered_alias: false, parsed_parameters: {}, vendor: this.profile.vendor, profile_id: this.profile.profile_id, operating_system_version: this.profile.default_version, mode_before: "exec", mode_after: "exec", privilege_before: "privileged", privilege_after: "privileged", success: false, failure_type: "", state_before: {}, state_after: {}, changed_fields: [], output_id: "", route_id: "", route_step: null, lesson_id: "", safety_result: "", verification_result: "", save_result: "" };
+      const required = { event_id: crypto.randomUUID?.() || `${Date.now()}-${this.eventLog.length}`, timestamp: new Date().toISOString(), command_id: "unclassified", canonical_command: "", entered_text: "", entered_alias: false, parsed_parameters: {}, vendor: this.profile.vendor, profile_id: this.profile.profile_id, operating_system_version: this.profile.default_version, mode_before: "exec", mode_after: "exec", privilege_before: "privileged", privilege_after: "privileged", success: false, failure_type: "", changed_fields: [], output_id: "", route_id: "", route_step: null, lesson_id: "", safety_result: "", verification_result: "", save_result: "" };
       const next = { ...required, ...event };
-      if (!next.command_id || !next.profile_id || typeof next.success !== "boolean" || !next.vendor || !next.event_id || !next.timestamp || !Array.isArray(next.changed_fields) || typeof next.parsed_parameters !== "object" || typeof next.state_before !== "object" || typeof next.state_after !== "object") throw new Error("Invalid local command event.");
-      this.eventLog.push(next); if (this.eventLog.length > 300) this.eventLog.splice(0, this.eventLog.length - 300);
+      delete next.state_before;
+      delete next.state_after;
+      if (!next.command_id || !next.profile_id || typeof next.success !== "boolean" || !next.vendor || !next.event_id || !next.timestamp || !Array.isArray(next.changed_fields) || typeof next.parsed_parameters !== "object") throw new Error("Invalid local command event.");
+      this.eventLog.push(next); if (this.eventLog.length > 200) this.eventLog.splice(0, this.eventLog.length - 200);
     }
     migrateSnapshot(saved) {
       if (!saved || typeof saved !== "object") return null;
       if (saved.profile_id && saved.profile_id !== this.profile.profile_id) return null;
-      return { ...saved, schema_version: RUNTIME_SCHEMA_VERSION, ...this.catalogMetadata };
+      const migrated = { ...saved, schema_version: RUNTIME_SCHEMA_VERSION, ...this.catalogMetadata };
+      migrated.running = normaliseState(migrated.running || {}, this.profile);
+      migrated.startup = normaliseState(migrated.startup || {}, this.profile);
+      migrated.baseline = normaliseState(migrated.baseline || {}, this.profile);
+      migrated.factoryBaseline = normaliseState(migrated.factoryBaseline || {}, this.profile);
+      migrated.eventLog = Array.isArray(migrated.eventLog) ? migrated.eventLog.slice(-200).map((event) => {
+        const compact = { ...event };
+        delete compact.state_before; delete compact.state_after;
+        return compact;
+      }) : [];
+      return migrated;
     }
     snapshot() { return { schema_version: RUNTIME_SCHEMA_VERSION, ...this.catalogMetadata, profile_id: this.profile.profile_id, running: this.running, startup: this.startup, baseline: this.baseline, factoryBaseline: this.factoryBaseline, eventLog: this.eventLog }; }
     persist() { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.snapshot())); }
