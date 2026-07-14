@@ -1,25 +1,33 @@
 {
-  "report_version": "1.0",
+  "report_type": "runtime_integrity_rc",
+  "base_commit": "620e8c4c83d817835cefe1bd7a21f63166f6af4d",
+  "source_candidate_commit": "d952da745bc9080970bd64f7973945e654a7b79d",
   "branch": "repair/runtime-integrity-and-verification",
-  "source_commit": "620e8c4c83d817835cefe1bd7a21f63166f6af4d",
-  "base_main_commit": "620e8c4c83d817835cefe1bd7a21f63166f6af4d",
-  "ahead": 0,
-  "behind": 0,
-  "working_tree_clean": false,
-  "tests": [
-    {"id":"RC-CORE-01","area":"Core diagnosis","status":"Passed"},
-    {"id":"RC-RUNTIME-01","area":"Current runtime","status":"Passed"},
-    {"id":"RC-BUILD-01","area":"Build","status":"Passed"},
-    {"id":"RC-STARTUP-01","area":"Startup","status":"Passed"},
-    {"id":"RC-PROFILE-01","area":"Profile registry","status":"Passed"},
-    {"id":"RC-WORKBENCH-01","area":"HP Workbench","status":"Passed"},
-    {"id":"RC-VERIFY-01","area":"Verification revisions","status":"Passed"},
-    {"id":"RC-HELP-01","area":"Help rendering","status":"Passed"},
-    {"id":"RC-NAV-01","area":"Workspace navigation","status":"Passed"},
-    {"id":"RC-BROWSER-02","area":"Edge browser","status":"Blocked"},
-    {"id":"RC-MOBILE-01","area":"Mobile browser","status":"Not implemented"},
-    {"id":"RC-ATOMIC-ALL","area":"Full action matrix","status":"Partially working"},
-    {"id":"RC-ROLLBACK-ALL","area":"All rollback paths","status":"Partially working"}
-  ],
-  "release_decision": "not_ready_for_merge_or_deploy"
+  "build_version": "2026.07-runtime-rc",
+  "runtime_schema_version": 4,
+  "command_catalog": "command-inventory@schema:generated",
+  "profile_catalog": "switch-profiles@schema:1",
+  "route_count": 127,
+  "profile_count": 9,
+  "tests": {
+    "core": "passed",
+    "current_app": "passed",
+    "build": "passed",
+    "startup": "passed",
+    "profile_matrix": "passed",
+    "route_matrix": "passed",
+    "vendor_workbench_matrix": "passed",
+    "verification_coverage_matrix": "passed",
+    "mode_completion_matrix": "passed",
+    "service_worker_static_graph": "passed",
+    "browser": "blocked",
+    "edge": "blocked",
+    "responsive": "blocked",
+    "service_worker_offline_update": "blocked"
+  },
+  "release_decision": "do_not_merge_or_deploy",
+  "known_limitations": [
+    "Interactive browser, responsive, Edge, and service-worker offline-update evidence was unavailable in this session.",
+    "The current Workbench exposes only the interface-description mutation; the test matrix covers exposed actions without inventing unsupported ones."
+  ]
 }
