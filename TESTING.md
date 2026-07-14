@@ -1,13 +1,13 @@
 # Command Doctor Independent Testing
 
-## Public build
+## Review candidate
 
-- Application: https://fitsumbinyam23-debug.github.io/Command-Doc/
-- Application build: `2026.07-lab.49`
-- Application commit: https://github.com/fitsumbinyam23-debug/Command-Doc/commit/6712a9111fe5014130c59dc95490c84c7fe26fcd
+- Candidate branch: `repair/runtime-integrity-and-verification`
+- Application build: `2026.07-runtime-rc.2`
+- Application commit: https://github.com/fitsumbinyam23-debug/Command-Doc/commit/7becdc28471fe64df8dc773d563de94081a8fd65
 - Build record: `BUILD-MANIFEST.json`
 
-Use the public URL in a private/incognito window. It does not require a login, VPN, local server, or real network device.
+This candidate is not merged or deployed. Use the independent review ZIP or the draft branch; do not treat the GitHub Pages URL as candidate evidence.
 
 ## First-time reset
 

@@ -1,0 +1,24 @@
+{
+  "report_type": "independent_rc_review_remediation",
+  "base_commit": "620e8c4c83d817835cefe1bd7a21f63166f6af4d",
+  "previous_rejected_candidate": "73ec0a36ea5cee292e5145de83eb800655ec5b9c",
+  "replacement_source_candidate": "7becdc28471fe64df8dc773d563de94081a8fd65",
+  "branch": "repair/runtime-integrity-and-verification",
+  "build_version": "2026.07-runtime-rc.2",
+  "runtime_schema_version": 5,
+  "tests": {
+    "core_smoke": "passed",
+    "current_application_smoke": "passed",
+    "aruba_registry_matrix": "passed",
+    "vendor_verification_matrix": "passed",
+    "save_gate_matrix": "passed",
+    "prefix_help_matrix": "passed",
+    "verification_retention": "passed",
+    "build": "passed",
+    "startup": "passed",
+    "chrome": "blocked",
+    "edge": "blocked",
+    "service_worker_update": "blocked"
+  },
+  "release_decision": "do_not_merge_or_deploy"
+}

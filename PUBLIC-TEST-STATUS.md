@@ -1,16 +1,15 @@
 # Public Test Status
 
-Build: `2026.07-lab.49`  
-Application commit: `6712a9111fe5014130c59dc95490c84c7fe26fcd`
+Candidate build: `2026.07-runtime-rc.2`
+Candidate source commit: `7becdc28471fe64df8dc773d563de94081a8fd65`
 
-## Verified in the public browser
+## Candidate status
 
 | Check | Status | Evidence |
 | --- | --- | --- |
-| Root public URL | Working | Root redirects to `lab.html`; current Home renders. |
-| Current app assets | Working | Current Lab 49 app, runtime, and page assets load after cache refresh. |
-| Command and curriculum JSON availability | Working | Required command, flow, lab, generated-curriculum, and profile JSON endpoints returned HTTP 200. |
-| Public console | Working | No browser errors or warnings observed during public entry smoke test. |
+| Candidate source tests | Working | Core smoke, current application, build, and startup checks pass locally. |
+| Candidate deployment | Not performed | Draft PR #3 remains unmerged and no public deployment is claimed. |
+| Interactive browser evidence | Pending independent review | This session cannot generate Chrome or Edge interaction artifacts. |
 
 ## Not yet published
 

@@ -1,14 +1,14 @@
 {
   "product": "Command Doctor",
-  "build_version": "2026.07-runtime-rc",
-  "build_date": "2026-07-14T00:00:00Z",
-  "runtime_schema_version": 4,
+  "build_version": "2026.07-runtime-rc.2",
+  "build_date": "2026-07-15T00:00:00Z",
+  "runtime_schema_version": 5,
   "command_catalog_version": "command-inventory@schema:generated",
   "profile_catalog_version": "switch-profiles@schema:local",
   "route_catalog_version": "route-inventory@schema:generated",
   "curriculum_version": "curriculum-index@schema:generated",
-  "application_commit_sha": "d952da745bc9080970bd64f7973945e654a7b79d",
-  "application_commit_url": "https://github.com/fitsumbinyam23-debug/Command-Doc/commit/d952da745bc9080970bd64f7973945e654a7b79d",
+  "application_commit_sha": "7becdc28471fe64df8dc773d563de94081a8fd65",
+  "application_commit_url": "https://github.com/fitsumbinyam23-debug/Command-Doc/commit/7becdc28471fe64df8dc773d563de94081a8fd65",
   "public_url": "https://fitsumbinyam23-debug.github.io/Command-Doc/",
   "scope": "Offline, browser-local training simulator. No real-device connections are implemented."
 }
