@@ -1,8 +1,8 @@
 {
   "product": "Command Doctor",
-  "build_version": "2026.07-lab.49",
+  "build_version": "2026.07-runtime-rc",
   "build_date": "2026-07-13T20:27:26Z",
-  "runtime_schema_version": 2,
+  "runtime_schema_version": 4,
   "command_catalog_version": "command-inventory@schema:generated",
   "profile_catalog_version": "switch-profiles@schema:local",
   "route_catalog_version": "route-inventory@schema:generated",

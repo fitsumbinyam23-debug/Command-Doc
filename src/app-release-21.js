@@ -40,7 +40,7 @@ const LAB_PROGRESS_KEY = "commandDoctorLabProgress";
 const VENDOR_PROGRESS_KEY = "commandDoctorVendorProgress";
 const VISUAL_NETWORK_STORAGE_KEY = "command-doctor.visual-network";
 const VISUAL_NETWORK_SCHEMA_VERSION = 3;
-const ACTIVE_BUILD_VERSION = "2026.07-lab.49";
+const ACTIVE_BUILD_VERSION = "2026.07-runtime-rc";
 
 const SIMULATOR_MISSIONS = [
   { id: "first-check", device: "access", phase: "Foundation", title: "Read an Access Port", description: "Use a safe read-only command to understand the simulated endpoint state.", command: "show interface status" },
@@ -645,7 +645,10 @@ function initializeSwitchRuntime() {
   // These commands already exist in the local CLI engine. They are registered here so
   // every Workbench action takes the same parser-and-runtime path as typed CLI input.
   const engineCommands = [
-    { command_id: "runtime_end", canonical_command: "end", aliases: ["return"], vendor: "cisco_ios", vendor_id: "cisco_ios", compatible_os_family_ids: ["cisco_ios"], available_modes: [], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "CLI navigation" },
+    { command_id: "runtime_end", canonical_command: "end", aliases: [], vendor: "cisco_ios", vendor_id: "cisco_ios", compatible_os_family_ids: ["cisco_ios"], available_modes: [], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "CLI navigation" },
+    { command_id: "runtime_enter_config_aruba", canonical_command: "configure terminal", aliases: ["conf t"], vendor: "aruba_cx", vendor_id: "aruba_cx", compatible_os_family_ids: ["arubaos_cx"], available_modes: [], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "CLI navigation" },
+    { command_id: "runtime_end_aruba", canonical_command: "end", aliases: [], vendor: "aruba_cx", vendor_id: "aruba_cx", compatible_os_family_ids: ["arubaos_cx"], available_modes: [], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "CLI navigation" },
+    { command_id: "runtime_interface_aruba", canonical_command: "interface <interface>", aliases: [], vendor: "aruba_cx", vendor_id: "aruba_cx", compatible_os_family_ids: ["arubaos_cx"], available_modes: ["config"], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "Interface configuration" },
     { command_id: "runtime_enter_config_comware", canonical_command: "system-view", aliases: [], vendor: "hp_comware", vendor_id: "hp_comware", compatible_os_family_ids: ["hp_comware"], available_modes: [], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "CLI navigation" },
     { command_id: "runtime_return_comware", canonical_command: "return", aliases: [], vendor: "hp_comware", vendor_id: "hp_comware", compatible_os_family_ids: ["hp_comware"], available_modes: [], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "CLI navigation" },
     { command_id: "runtime_interface_comware", canonical_command: "interface <interface>", aliases: [], vendor: "hp_comware", vendor_id: "hp_comware", compatible_os_family_ids: ["hp_comware"], available_modes: ["config"], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "Interface configuration" },
@@ -2921,7 +2924,7 @@ function executeWorkbenchSequence(commands, source = "workbench") {
     commands: [...engine.commands]
   };
   const runtimeBefore = JSON.parse(JSON.stringify(runtime.state.running));
-  const changesBefore = JSON.parse(JSON.stringify(runtime.state.running.unsaved_changes || []));
+  const eventLogBefore = JSON.parse(JSON.stringify(runtime.state.eventLog));
   const outcomes = [];
   for (const command of commands) {
     const outcome = executeWorkbenchCommand(command, source);
@@ -2934,7 +2937,7 @@ function executeWorkbenchSequence(commands, source = "workbench") {
       engine.transcript = engineBefore.transcript;
       engine.commands = engineBefore.commands;
       runtime.state.running = runtimeBefore;
-      runtime.state.running.unsaved_changes = changesBefore;
+      runtime.state.eventLog = eventLogBefore;
       persistSwitchRuntime();
       return { ok: false, output: `No simulated changes were applied. ${outcome.output}`, outcomes };
     }
@@ -3013,7 +3016,7 @@ function renderSwitchWorkbench() {
   pending.append(labCreate("strong", "", `Pending Changes (${changes.length})`), labCreate("pre", "lab-output", changes.length ? changes.map((change) => `${change.field}: ${change.before ?? "-"} -> ${change.after}`).join("\n") : "No unsaved local configuration changes."));
   pending.append(
     labButton("Save verified configuration", "secondary", () => {
-      if (!runtime.state.isVerificationCurrent(port?.name)) { showToast("Run and pass verification again after the latest running-configuration change."); return; }
+      if (!runtime.state.canSave().ok) { showToast("Verify every pending change from its current running configuration before saving."); return; }
       runtime.state.save("save");
       hydrateEngineFromRuntime(getLabEngine());
       syncVisualFromRuntime();
@@ -3913,7 +3916,7 @@ function appendTerminalHelp(engine, value) {
   const command = value.trim();
   const registry = activeCommandRegistry();
   const suggestions = registry
-    ? registry.help(command)
+    ? registry.help(command, { mode: engine?.mode || "exec", privilege: "privileged" })
     : ["show interfaces status", "show vlan brief", "show running-config", "configure terminal", "display irf", "rollback"].filter((item) => !command || item.startsWith(command.toLowerCase()));
   const lines = suggestions.map((suggestion) => typeof suggestion === "string" ? suggestion : `${suggestion.token}${suggestion.description ? `  ${suggestion.description}` : ""}`);
   engine.transcript.push(`${consolePrompt()} ${command}?\n${lines.length ? lines.join("\n") : "No local completion is available for this profile."}`);
@@ -3933,8 +3936,10 @@ function bindTerminalKeyboard(input, engine, terminal) {
     if (event.key === "Tab") {
       event.preventDefault();
       const registry = activeCommandRegistry();
-      const match = registry?.complete(input.value) || ["show interfaces status", "show vlan brief", "show running-config", "configure terminal", "display irf", "display irf topology"].find((item) => item.startsWith(input.value.trim().toLowerCase()));
+      const completion = registry?.complete(input.value, { mode: engine?.mode || "exec", privilege: "privileged" });
+      const match = typeof completion === "string" ? completion : ["show interfaces status", "show vlan brief", "show running-config", "configure terminal", "display irf", "display irf topology"].find((item) => item.startsWith(input.value.trim().toLowerCase()));
       if (match) input.value = `${match} `;
+      else if (completion?.status === "ambiguous") showToast(`Possible completions: ${completion.candidates.slice(0, 4).join(", ")}`);
       return;
     }
     if (event.key === "?" && !event.ctrlKey && !event.metaKey) { event.preventDefault(); appendTerminalHelp(engine, input.value); state.lab.console.focusRequested = true; renderLab(); return; }
@@ -3953,7 +3958,9 @@ function renderManualRouteSelector() {
 
 function startFreshTrainingSwitch(route = currentTrainingRoute()) {
   const engine = createLabEngine(route.device);
-  if (engine?.setTrainingProfile) engine.setTrainingProfile({ hostname: "TRAINING-SWITCH", interface: "GigabitEthernet1/0/1", endpoint: "PC-1", currentVlan: "1", targetVlan: "20" });
+  const profile = activeSwitchProfile();
+  const interfaceName = profile?.interface_naming?.replace("{port}", "1") || "GigabitEthernet1/0/1";
+  if (engine?.setTrainingProfile) engine.setTrainingProfile({ hostname: "TRAINING-SWITCH", interface: interfaceName, endpoint: "PC-1", currentVlan: "1", targetVlan: "20" });
   state.lab.console.engine = engine;
   state.lab.console.device = route.device;
   state.lab.console.routeStarted = route.id;
@@ -4074,10 +4081,10 @@ function renderLabMissionPath() {
 
 function startLabMission(mission) {
   const device = mission.device || "access";
-  const profile = profileForSimulatorDevice(device);
-  if (profile && profile.profile_id !== state.lab.activeSwitchProfileId) {
-    activateSwitchProfile(profile.profile_id);
-  }
+  const candidate = profileForSimulatorDevice(device);
+  // Keep a selected model when it already belongs to the requested vendor. A
+  // Cisco 9300 must not be silently replaced by the first Cisco profile.
+  if (candidate && (!activeSwitchProfile() || activeSwitchProfile().vendor !== candidate.vendor)) activateSwitchProfile(candidate.profile_id);
   state.lab.console = {
     device,
     missionId: mission.id || (SIMULATOR_MISSIONS.find((item) => item.device === device)?.id || ""),
@@ -4292,7 +4299,8 @@ function runLabConsoleCommand(input) {
     }
   }
   if (engine) {
-    engine.transcript.push(`${prompt} ${command}\n${result.output}${result.kind === "config" && result.diff ? `\n\nConfiguration diff\n${result.diff}` : ""}`);
+    const isModeNavigation = /^(configure terminal|conf t|system-view|end|return|exit|interface\s+\S+|vlan\s+\S+)$/i.test(command);
+    engine.transcript.push(`${prompt} ${command}\n${result.output}${result.kind === "config" && result.diff && !isModeNavigation ? `\n\nConfiguration diff\n${result.diff}` : ""}`);
     if (state.lab.switchRuntime?.state) {
       const shared = state.lab.switchRuntime.state;
       const commandId = catalogResolution?.command?.command_id || "unclassified";
@@ -5085,6 +5093,8 @@ function startPracticeRoute(routeId, action = "") {
     return;
   }
   if (action === "save-and-replace") state.lab.switchRuntime?.state?.save("route-start-save");
+  const routeProfile = state.lab.switchProfiles.find((profile) => profile.vendor === route.vendor);
+  if (routeProfile && activeSwitchProfile()?.vendor !== route.vendor) activateSwitchProfile(routeProfile.profile_id);
   startFreshTrainingSwitch(route);
 }
 

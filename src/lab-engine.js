@@ -50,7 +50,7 @@
 
     prompt() {
       if (this.seed.vendor === "HP Comware") {
-        if (this.mode === "interface") return `[${this.state.hostname}-GigabitEthernet1/0/1]`;
+        if (this.mode === "interface") return `[${this.state.hostname}-${this.selectedInterface}]`;
         if (this.mode === "config" || this.mode === "vlan") return `[${this.state.hostname}]`;
         return `<${this.state.hostname}>`;
       }
@@ -171,6 +171,7 @@
       if (/^port link-type access$/.test(command)) { current.mode = "access"; return this.result(true, "Simulated Comware port link type set to access.", "config"); }
       if (/^port access vlan \S+$/.test(command)) { current.vlan = raw.trim().split(/\s+/).at(-1); return this.result(true, `Simulated Comware access VLAN set to ${current.vlan}.`, "config"); }
       if (/^vlan access \S+$/.test(command)) { current.vlan = raw.trim().split(/\s+/).at(-1); return this.result(true, `Simulated Aruba access VLAN set to ${current.vlan}.`, "config"); }
+      if (/^(no description|undo description)$/.test(command)) { current.description = ""; return this.result(true, "Simulated interface description cleared. Verify before saving.", "config"); }
       if (/^description\s+/.test(command)) { current.description = raw.trim().slice("description".length).trim(); return this.result(true, `Simulated description set to ${current.description}.`, "config"); }
       if (/^(no shutdown|undo shutdown)$/.test(command)) { current.shutdown = false; current.connected = true; return this.result(true, "Simulated interface enabled. Verify the link and VLAN.", "config"); }
       if (/^shutdown$/.test(command)) { current.shutdown = true; return this.result(true, "Simulated interface administratively down. This is reversible with no shutdown.", "config"); }

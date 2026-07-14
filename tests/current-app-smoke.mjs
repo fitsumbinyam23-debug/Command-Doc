@@ -21,12 +21,17 @@ const substitute = (syntax, profile) => syntax.replace(/<([^>]+)>/g, (_, name) =
 
 const labHtml = await read("lab.html");
 const indexHtml = await read("index.html");
+const serviceWorker = await read("sw.js");
 assert(indexHtml.includes('location.replace("lab.html")'), "root redirects to lab.html");
 const activeScripts = references(labHtml, /<script[^>]+\bsrc=["']([^"']+)["']/gi);
 const activeStyles = references(labHtml, /<link[^>]+\bhref=["']([^"']+)["']/gi);
 assert(activeScripts.length > 0, "lab.html has active scripts");
 for (const asset of [...activeScripts, ...activeStyles]) {
   await fs.access(path.join(root, asset));
+}
+assert(!serviceWorker.includes("lab-29") && serviceWorker.includes("command-doctor-2026-07-runtime-rc"), "service worker uses the current RC cache identity");
+for (const asset of ["src/lab-engine.js", "src/diagnostics-engine.js", "src/topology-workspace.js", "src/curriculum-services.js", "src/switch-runtime.js", "src/app-release-21.js", "data/platforms/switch-profiles.json", "data/generated/command-inventory.json", "data/generated/route-inventory.json"]) {
+  assert(serviceWorker.includes(asset), `service worker includes current offline asset ${asset}`);
 }
 
 const store = new Map();
@@ -65,6 +70,7 @@ const profile = profileRegistry.get(profiles[0].profile_id);
 assert(profile && profileRegistry.byVendor(profile.vendor).length > 0, "profile registry selects active profile");
 const registry = new Runtime.CommandRegistry(inventoryFile.commands, profile);
 assert(registry.catalog.length > 0 && registry.catalog.length < inventoryFile.commands.length, "profile command filtering works");
+assert(registry.catalog.some((command) => command.available_modes?.includes("config") || command.available_modes?.includes("interface")), "profile registry retains commands outside EXEC mode for help and completion");
 const canonical = registry.catalog.find((command) => !command.canonical_command.includes("<"));
 assert(canonical, "a canonical command is available");
 assert(registry.resolve(canonical.canonical_command, { mode: "exec", privilege: "privileged" }).status === "matched", "canonical command resolves");
@@ -77,6 +83,33 @@ if (parameterized) assert(!Runtime.validateParameterDetail("vlan", "5000", profi
 const otherVendor = inventoryFile.commands.find((command) => command.vendor !== profile.vendor && !command.canonical_command.includes("<"));
 if (otherVendor) assert(registry.resolve(otherVendor.canonical_command, { mode: "exec", privilege: "privileged" }).status === "wrong_vendor", "wrong-vendor commands are distinguished");
 assert(new Set(inventoryFile.commands.map((command) => command.simulator_support)).size >= 4, "all current support levels remain represented");
+const normalizedSupportLevels = new Set(["full_state_simulation", "simplified_state_simulation", "output_simulation", "explanation_only", "unsupported_for_profile"]);
+for (const candidateProfile of profiles) {
+  const candidateRegistry = new Runtime.CommandRegistry(inventoryFile.commands, candidateProfile);
+  assert(candidateRegistry.catalog.every((command) => normalizedSupportLevels.has(command.simulator_support)), `support levels normalize for ${candidateProfile.profile_id}`);
+  const modeBoundCommand = candidateRegistry.catalog.find((command) => command.available_modes?.length);
+  if (modeBoundCommand) assert(candidateRegistry.resolve(substitute(modeBoundCommand.canonical_command, candidateProfile), { mode: "exec", privilege: "privileged" }).status === "wrong_mode", `wrong mode remains explicit for ${candidateProfile.profile_id}`);
+}
+assert((await read("src/app-release-21.js")).includes('const ACTIVE_BUILD_VERSION = "2026.07-runtime-rc"'), "runtime reports the current RC build identity");
+for (const route of routeFile.routes) {
+  if (!["cisco_ios", "hp_comware", "aruba_cx"].includes(route.vendor)) continue;
+  const compatible = profiles.filter((candidateProfile) => candidateProfile.vendor === route.vendor && (!route.supported_model_profiles?.length || route.supported_model_profiles.includes(candidateProfile.profile_id)));
+  assert(compatible.length > 0, `switch route ${route.route_id} has a compatible profile`);
+}
+for (const candidateProfile of profiles) {
+  const engineDevice = candidateProfile.vendor === "hp_comware" ? "irf" : candidateProfile.vendor === "aruba_cx" ? "aruba" : "access";
+  const engine = new sandbox.CommandDoctorLabEngine.SimulatedDeviceEngine(engineDevice);
+  const interfaceName = candidateProfile.interface_naming.replace("{port}", "1");
+  engine.setTrainingProfile({ hostname: "RC-TEST", interface: interfaceName, endpoint: "PC-1", currentVlan: "1", targetVlan: "20" });
+  const workflow = candidateProfile.vendor === "hp_comware"
+    ? ["system-view", `interface ${interfaceName}`, "description RC test", "return"]
+    : ["configure terminal", `interface ${interfaceName}`, "description RC test", "end"];
+  assert(workflow.every((command) => engine.execute(command).ok), `active vendor Workbench description sequence completes for ${candidateProfile.profile_id}`);
+  const rollback = candidateProfile.vendor === "hp_comware"
+    ? ["system-view", `interface ${interfaceName}`, "undo description", "return"]
+    : ["configure terminal", `interface ${interfaceName}`, "no description", "end"];
+  assert(rollback.every((command) => engine.execute(command).ok) && !engine.state.interfaces[interfaceName].description, `displayed rollback syntax executes for ${candidateProfile.profile_id}`);
+}
 
 const state = new Runtime.SharedSwitchState(profile, null, { command_catalog_version: "test", profile_catalog_version: "test", active_build_version: "test" });
 const port = Object.keys(state.running.interfaces)[0];
@@ -94,9 +127,19 @@ const changeCount = state.changes().length;
 assert(state.rollbackChange(changeCount - 1), "one-change rollback succeeds");
 assert(state.running.interfaces[port].vlan === 1, "one-change rollback restores the exact path");
 assert(state.changes().length === changeCount - 1 && !state.changes().some((change) => !change.field.startsWith("interfaces.")), "rollback does not create a rootless or extra pending change");
+const eventsBeforeRollback = state.eventLog.length;
+state.updateInterface(port, { vlan: 20 }, "test-one-change-rollback");
+assert(state.rollbackChange(state.changes().length - 1), "second one-change rollback succeeds");
+assert(state.eventLog.length === eventsBeforeRollback + 1 && state.changes().every((change) => change.field.startsWith("interfaces.")), "one-change rollback records exactly one event without a replacement pending change");
 const verificationOutput = `interface ${port}\n description First change`;
 assert(state.verifyInterfaceDescription(port, `show running-config interface ${port}`, verificationOutput), "verification records current running state");
 assert(state.isVerificationCurrent(port), "fresh verification is current");
+const secondPort = Object.keys(state.running.interfaces).find((name) => name !== port);
+state.updateInterface(secondPort, { description: "Separate pending change" }, "test-separate-interface");
+assert(!state.canSave().ok, "verification of one interface cannot authorize a pending change on another interface");
+state.verifyInterfaceDescription(secondPort, `show running-config interface ${secondPort}`, `interface ${secondPort}\n description Separate pending change`);
+state.verifyInterfaceDescription(port, `show running-config interface ${port}`, verificationOutput);
+assert(state.canSave().ok, "all pending changes require and accept their own current verification");
 state.updateInterface(port, { description: "Verification changed" }, "test-stale-verification");
 assert(!state.isVerificationCurrent(port), "a later configuration change invalidates verification");
 for (let index = 0; index < 150; index += 1) {

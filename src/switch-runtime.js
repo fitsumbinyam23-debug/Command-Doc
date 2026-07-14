@@ -4,7 +4,7 @@
   const normalise = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
   const clone = (value) => value === undefined ? undefined : JSON.parse(JSON.stringify(value));
   const STORAGE_KEY = "command-doctor.switch-runtime.v1";
-  const RUNTIME_SCHEMA_VERSION = 3;
+  const RUNTIME_SCHEMA_VERSION = 4;
   const SUPPORT_LEVELS = {
     fully_simulated: "full_state_simulation",
     partially_simulated: "simplified_state_simulation",
@@ -177,29 +177,36 @@
         return { ...command, simulator_support, support_level: simulator_support, grammar: command.grammar || compileGrammar(command.canonical_command), vendor_id: command.vendor_id || command.vendor, compatible_os_ids: command.compatible_os_ids || [], compatible_os_family_ids: command.compatible_os_family_ids || [], compatible_platform_family_ids: command.compatible_platform_family_ids || (command.platform_family && command.platform_family !== "Any" ? [command.platform_family] : []), available_modes: derivedModes, required_privilege: requiredPrivilege, metadata_source: command.metadata_source || (command.available_modes?.length ? "catalog" : "derived") };
       });
       this.profile = normaliseProfile(profile || {});
-      this.catalog = this.commands.filter((command) => this.availability(command).available);
+      // Profile filtering must not depend on the currently selected CLI mode.
+      this.catalog = this.commands.filter((command) => this.profileAvailability(command).available);
     }
 
     setProfile(profile) {
       this.profile = normaliseProfile(profile || {});
-      this.catalog = this.commands.filter((command) => this.availability(command).available);
+      this.catalog = this.commands.filter((command) => this.profileAvailability(command).available);
       return this.catalog;
     }
 
-    availability(command, mode = "exec", privilege = "privileged") {
+    profileAvailability(command) {
       const profile = normaliseProfile(this.profile || {});
       if (!profile) return { available: true };
       if ((command.vendor_id || command.vendor) !== profile.vendor_id) return { available: false, reason: "wrong_vendor" };
       if (command.compatible_os_ids?.length && !command.compatible_os_ids.includes(profile.operating_system_id)) return { available: false, reason: "wrong_operating_system" };
       if (command.compatible_os_family_ids?.length && !command.compatible_os_family_ids.includes(profile.operating_system_family_id)) return { available: false, reason: "wrong_operating_system_family" };
       if (command.compatible_platform_family_ids?.length && !command.compatible_platform_family_ids.includes(profile.platform_family_id)) return { available: false, reason: "wrong_model" };
-      if (command.minimum_version && compareVersion(profile.software_version, command.minimum_version) < 0) return { available: false, reason: "version_too_old" };
-      if (command.maximum_version && compareVersion(profile.software_version, command.maximum_version) > 0) return { available: false, reason: "version_too_new" };
-      if (command.excluded_versions?.some((version) => compareVersion(profile.software_version, version) === 0)) return { available: false, reason: "excluded_version" };
+      if (command.minimum_version && compareVersion(profile.software_version, command.minimum_version) < 0) return { available: false, reason: "wrong_version" };
+      if (command.maximum_version && compareVersion(profile.software_version, command.maximum_version) > 0) return { available: false, reason: "wrong_version" };
+      if (command.excluded_versions?.some((version) => compareVersion(profile.software_version, version) === 0)) return { available: false, reason: "wrong_version" };
       if (Array.isArray(command.supported_model_profiles) && command.supported_model_profiles.length && !command.supported_model_profiles.includes(profile.profile_id)) return { available: false, reason: "wrong_model" };
       if (Array.isArray(command.required_capabilities) && command.required_capabilities.some((capability) => !profile.capability_ids.includes(capability))) return { available: false, reason: "capability_missing" };
       if (Array.isArray(command.feature_dependencies) && command.feature_dependencies.some((feature) => !profile.feature_ids.includes(feature))) return { available: false, reason: "feature_disabled" };
       if (Array.isArray(command.license_dependencies) && command.license_dependencies.some((license) => !profile.license_ids.includes(license))) return { available: false, reason: "license_unavailable" };
+      return { available: true };
+    }
+
+    availability(command, mode = "exec", privilege = "privileged") {
+      const profileResult = this.profileAvailability(command);
+      if (!profileResult.available) return profileResult;
       if (Array.isArray(command.available_modes) && command.available_modes.length && !command.available_modes.includes(mode)) return { available: false, reason: "wrong_mode" };
       if (command.required_privilege === "enable" && privilege !== "privileged") return { available: false, reason: "insufficient_privilege" };
       return { available: true };
@@ -209,10 +216,15 @@
       const entered = normalise(text);
       const candidates = this.commands.filter((command) => (command.vendor_id || command.vendor) === this.profile?.vendor_id);
       const parsed = candidates.flatMap((command) => [...new Set([command.canonical_command, ...(command.aliases || [])].map(normalise))].map((syntax) => ({ command, syntax, parsed: parseTokens(command, entered, this.profile, syntax), availability: this.availability(command, context.mode, context.privilege) })));
+      // An exact command that is valid only in another mode must not be hidden by
+      // a broader duplicate grammar that happens to match in the current mode.
+      const exactModeBlocked = parsed.filter((item) => item.parsed.status === "matched" && item.availability.reason === "wrong_mode")
+        .sort((left, right) => (right.command.grammar?.nodes?.filter((node) => node.type === "literal").length || 0) - (left.command.grammar?.nodes?.filter((node) => node.type === "literal").length || 0))[0];
+      if (exactModeBlocked) return { ...exactModeBlocked.parsed, status: "wrong_mode", command: exactModeBlocked.command };
       const matches = parsed.filter((item) => item.parsed.status === "matched").sort((left, right) => this.rank(right, context, entered) - this.rank(left, context, entered));
       const match = matches[0];
       if (matches.length > 1 && this.rank(matches[0], context, entered) === this.rank(matches[1], context, entered)) return { status: "ambiguous", matches: matches.slice(0, 8).map((item) => item.command), expected_tokens: [] };
-      if (match) return match.availability.available ? { status: "matched", command: match.command, entered_alias: normalise(match.command.canonical_command) !== normalise(match.syntax), ...match.parsed } : { status: match.availability.reason, command: match.command, ...match.parsed };
+      if (match) return match.availability.available ? { ...match.parsed, status: "matched", command: match.command, entered_alias: normalise(match.command.canonical_command) !== normalise(match.syntax) } : { ...match.parsed, status: match.availability.reason, command: match.command };
       const incomplete = parsed.filter((item) => item.parsed.status === "incomplete" && item.availability.available);
       if (incomplete.length === 1) return { status: "incomplete", command: incomplete[0].command, ...incomplete[0].parsed };
       if (incomplete.length > 1) return { status: "ambiguous", matches: incomplete.slice(0, 8).map((item) => item.command), expected_tokens: [...new Set(incomplete.flatMap((item) => item.parsed.expected_tokens))] };
@@ -244,11 +256,11 @@
       return unique;
     }
 
-    complete(text = "") {
+    complete(text = "", context = {}) {
       const prefix = String(text || "");
       const parts = prefix.trim().split(/\s+/).filter(Boolean);
       const current = parts.pop() || "";
-      const candidates = this.help(prefix).filter((item) => item.token !== "<cr>").flatMap((item) => item.possible_values?.length ? item.possible_values : item.token.startsWith("<") ? [] : [item.token]).filter((value) => normalise(value).startsWith(normalise(current)));
+      const candidates = this.help(prefix, context).filter((item) => item.token !== "<cr>" && item.availability).flatMap((item) => item.possible_values?.length ? item.possible_values : item.token.startsWith("<") ? [] : [item.token]).filter((value) => normalise(value).startsWith(normalise(current)));
       if (!candidates.length) return null;
       const common = candidates.reduce((prefixValue, value) => { let index = 0; while (index < prefixValue.length && index < value.length && prefixValue[index].toLowerCase() === value[index].toLowerCase()) index += 1; return prefixValue.slice(0, index); });
       if (!common) return { status: "ambiguous", candidates };
@@ -305,7 +317,7 @@
       this.running.session.command_history = compact(commands, 120, 320);
       this.persist();
     }
-    verification(name) { return this.running.session.verification?.[name] || { verified: false }; }
+    verification(name) { return this.running.session.verification?.[name] || { verified: false, covered_change_ids: [] }; }
     revision() { return Number(this.running.session.revision || 0); }
     bumpRevision() { this.running.session.revision = this.revision() + 1; return this.running.session.revision; }
     invalidateVerification(name = "") {
@@ -314,21 +326,23 @@
     }
     isVerificationCurrent(name) {
       const verification = this.verification(name);
-      return Boolean(verification.verified && verification.revision === this.revision());
+      const pending = this.changes().filter((change) => String(change.field || "").startsWith(`interfaces.${name}.`));
+      return Boolean(verification.verified && verification.revision === this.revision() && pending.length && pending.every((change) => verification.covered_change_ids?.includes(change.change_id)));
     }
     verifyInterfaceDescription(name, command, output) {
       const port = this.interface(name);
       const expected = `description ${port?.description || ""}`.trim();
       const expectedCommands = [`show running-config interface ${name}`, `display current-configuration interface ${name}`].map(normalise);
       const passed = Boolean(port?.description) && expectedCommands.includes(normalise(command)) && String(output || "").includes(name) && String(output || "").includes(expected);
-      this.running.session.verification[name] = { verified: passed, command, output: String(output || "").slice(-2400), timestamp: new Date().toISOString(), revision: this.revision(), expected_description: port?.description || "" };
+      const covered = this.changes().filter((change) => String(change.field || "").startsWith(`interfaces.${name}.`)).map((change) => change.change_id);
+      this.running.session.verification[name] = { verified: passed, command, output: String(output || "").slice(-2400), timestamp: new Date().toISOString(), revision: this.revision(), expected_description: port?.description || "", covered_change_ids: passed ? covered : [] };
       this.record({ command_id: "verify-interface-description", canonical_command: command, entered_text: command, success: passed, verification_result: passed ? "passed" : "failed" });
       this.persist();
       return passed;
     }
     change(field, before, after, commandId = "inspector") {
       if (before === after) return;
-      this.running.unsaved_changes.push({ field, before, after, timestamp: new Date().toISOString(), command_id: commandId });
+      this.running.unsaved_changes.push({ change_id: crypto.randomUUID?.() || `${Date.now()}-${this.running.unsaved_changes.length}`, field, before, after, timestamp: new Date().toISOString(), command_id: commandId, verified: false });
     }
     updateInterface(name, updates, commandId = "inspector", options = {}) {
       const port = this.interface(name);
@@ -370,6 +384,13 @@
       return true;
     }
     deleteByPath(path, commandId = "inspector") { const keys = String(path || "").split(".").filter(Boolean); if (!keys.length) return false; const before = this.getByPath(path); let target = this.running; for (const key of keys.slice(0, -1)) { target = target?.[key]; if (target == null) return false; } if (!(keys.at(-1) in target)) return false; delete target[keys.at(-1)]; this.change(path, before, undefined, commandId); return true; }
+    canSave() {
+      const changes = this.changes();
+      if (!changes.length) return { ok: true, uncovered: [] };
+      const covered = new Set(Object.values(this.running.session.verification || {}).flatMap((verification) => verification?.verified && verification.revision === this.revision() ? verification.covered_change_ids || [] : []));
+      const uncovered = changes.filter((change) => !covered.has(change.change_id));
+      return { ok: !uncovered.length, uncovered };
+    }
     save(commandId = "save") {
       const cleanRunning = cleanSnapshot(this.running);
       this.startup = clone(cleanRunning);
@@ -419,6 +440,14 @@
       migrated.startup = normaliseState(migrated.startup || {}, this.profile);
       migrated.baseline = normaliseState(migrated.baseline || {}, this.profile);
       migrated.factoryBaseline = normaliseState(migrated.factoryBaseline || {}, this.profile);
+      migrated.running.unsaved_changes = (migrated.running.unsaved_changes || []).map((change, index) => {
+        const field = String(change.field || "");
+        const selected = migrated.running.session?.selected_interface || Object.keys(migrated.running.interfaces || {})[0] || "GigabitEthernet1/0/1";
+        return { ...change, change_id: change.change_id || `migrated-${index}-${field}`, field: field.startsWith("interfaces.") || field.startsWith("system.") ? field : `interfaces.${selected}.${field}`, verified: false };
+      });
+      migrated.running.session ||= {};
+      migrated.running.session.verification ||= {};
+      Object.values(migrated.running.session.verification).forEach((verification) => { verification.covered_change_ids ||= []; });
       migrated.eventLog = Array.isArray(migrated.eventLog) ? migrated.eventLog.slice(-200).map((event) => {
         const compact = { ...event };
         delete compact.state_before; delete compact.state_after;

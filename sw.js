@@ -1,18 +1,24 @@
 "use strict";
 
-const CACHE_NAME = "command-doctor-2026-07-lab-29-navigation";
+const CACHE_NAME = "command-doctor-2026-07-runtime-rc";
 const OFFLINE_ASSETS = [
   "./",
   "./index.html",
   "./refresh.html",
   "./lab.html",
   "./sw-refresh.js",
-  "./styles.css?v=2026.07-lab.27",
-  "./src/app.js?v=2026.07-lab.13",
-  "./src/lab-engine.js?v=2026.07-lab.27",
-  "./src/diagnostics-engine.js?v=2026.07-lab.27",
-  "./src/app-release-21.js?v=2026.07-lab.27",
-  "./src/topology-workspace.js?v=2026.07-lab.27",
+  "./styles.css?v=2026.07-runtime-rc",
+  "./src/lab-engine.js?v=2026.07-runtime-rc",
+  "./src/diagnostics-engine.js?v=2026.07-runtime-rc",
+  "./src/topology-workspace.js?v=2026.07-runtime-rc",
+  "./src/curriculum-services.js?v=2026.07-runtime-rc",
+  "./src/switch-runtime.js?v=2026.07-runtime-rc",
+  "./src/app-release-21.js?v=2026.07-runtime-rc",
+  "./data/platforms/switch-profiles.json",
+  "./data/generated/command-inventory.json",
+  "./data/generated/route-inventory.json",
+  "./data/generated/curriculum-index.json",
+  "./data/generated/curriculum-health.json",
   "./data/commands/admin_commands.json",
   "./data/commands/aruba_cx.json",
   "./data/commands/cisco_ios.json",
