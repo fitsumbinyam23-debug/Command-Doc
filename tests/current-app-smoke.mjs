@@ -89,8 +89,18 @@ for (const candidateProfile of profiles) {
   assert(candidateRegistry.catalog.every((command) => normalizedSupportLevels.has(command.simulator_support)), `support levels normalize for ${candidateProfile.profile_id}`);
   const modeBoundCommand = candidateRegistry.catalog.find((command) => command.available_modes?.length);
   if (modeBoundCommand) assert(candidateRegistry.resolve(substitute(modeBoundCommand.canonical_command, candidateProfile), { mode: "exec", privilege: "privileged" }).status === "wrong_mode", `wrong mode remains explicit for ${candidateProfile.profile_id}`);
+  const enterConfiguration = candidateProfile.vendor === "hp_comware" ? "system-view" : "configure terminal";
+  assert(candidateRegistry.resolve(enterConfiguration, { mode: "exec", privilege: "privileged" }).status === "matched", `configuration entry resolves without ambiguity for ${candidateProfile.profile_id}`);
+  const prefixHelp = candidateRegistry.help("i", { mode: "config", privilege: "privileged" });
+  assert(prefixHelp.some((item) => item.token === "interface"), `keyword-prefix help includes interface for ${candidateProfile.profile_id}`);
 }
-assert((await read("src/app-release-21.js")).includes('const ACTIVE_BUILD_VERSION = "2026.07-runtime-rc"'), "runtime reports the current RC build identity");
+for (const arubaProfile of profiles.filter((candidateProfile) => candidateProfile.vendor === "aruba_cx")) {
+  const generatedConfigure = inventoryFile.commands.find((command) => command.vendor === "aruba_cx" && command.canonical_command === "configure terminal");
+  if (!generatedConfigure) continue;
+  const augmentedRegistry = new Runtime.CommandRegistry([...inventoryFile.commands, { ...generatedConfigure, command_id: "runtime-enter-config-aruba", metadata_source: "runtime" }], arubaProfile);
+  assert(augmentedRegistry.resolve("configure terminal", { mode: "exec", privilege: "privileged" }).status === "matched", `runtime command augmentation does not create Aruba ambiguity for ${arubaProfile.profile_id}`);
+}
+assert((await read("src/app-release-21.js")).includes('const ACTIVE_BUILD_VERSION = "2026.07-runtime-rc.2"'), "runtime reports the current RC build identity");
 for (const route of routeFile.routes) {
   if (!["cisco_ios", "hp_comware", "aruba_cx"].includes(route.vendor)) continue;
   const compatible = profiles.filter((candidateProfile) => candidateProfile.vendor === route.vendor && (!route.supported_model_profiles?.length || route.supported_model_profiles.includes(candidateProfile.profile_id)));
@@ -124,11 +134,14 @@ for (const candidateProfile of profiles) {
     assert(!rejected.ok && candidateState.startup.interfaces[candidatePort].description === startupBeforeSave && candidateState.changes().length === 1, `save alias ${alias} uses the authoritative rejection gate for ${candidateProfile.profile_id}`);
   }
   const verificationCommand = candidateProfile.vendor === "hp_comware" ? `display current-configuration interface ${candidatePort}` : `show running-config interface ${candidatePort}`;
+  assert(candidateState.verificationTargetForCommand(verificationCommand)?.interface_name === candidatePort, `verification policy recognizes ${verificationCommand} for ${candidateProfile.profile_id}`);
   assert(candidateState.verifyInterfaceDescription(candidatePort, verificationCommand, `interface ${candidatePort}\n description Save gate test`), `field-scoped verification works for ${candidateProfile.profile_id}`);
   assert(candidateState.save(saveAliases[0]).ok && candidateState.startup.interfaces[candidatePort].description === "Save gate test", `verified save alias succeeds for ${candidateProfile.profile_id}`);
 }
 const activeAppSource = await read("src/app-release-21.js");
 assert(activeAppSource.includes("const isSaveRequest") && activeAppSource.includes("const saved = shared.save(commandId)"), "terminal save aliases invoke the shared authoritative save gate");
+assert(activeAppSource.includes("vendor_id: route.vendor") && activeAppSource.includes("const routeVendorId = route.vendor_id || route.vendor"), "route vendor IDs remain machine-readable through launch selection");
+assert(activeAppSource.includes("output: saved.message") && activeAppSource.includes("verificationTargetForCommand(command)"), "terminal save feedback and verification use authoritative shared-state results");
 
 const state = new Runtime.SharedSwitchState(profile, null, { command_catalog_version: "test", profile_catalog_version: "test", active_build_version: "test" });
 const port = Object.keys(state.running.interfaces)[0];
@@ -177,6 +190,14 @@ const legacySnapshot = JSON.parse(JSON.stringify(state.snapshot()));
 legacySnapshot.running.unsaved_changes = [{ field: `${port}.description`, before: "Changed again", after: "Migrated", command_id: "legacy-change" }];
 const migrated = new Runtime.SharedSwitchState(profile, legacySnapshot, { command_catalog_version: "test", profile_catalog_version: "test", active_build_version: "test" });
 assert(migrated.changes()[0].field === `interfaces.${port}.description` && migrated.changes()[0].verification_required && migrated.changes()[0].verification_status === "required", "legacy pending changes migrate to complete root-scoped verification metadata");
+const retentionState = new Runtime.SharedSwitchState(profile, null, { command_catalog_version: "test", profile_catalog_version: "test", active_build_version: "test" });
+const retentionPort = Object.keys(retentionState.running.interfaces)[0];
+for (let index = 0; index < Runtime.MAX_VERIFICATION_RECORDS + 25; index += 1) {
+  retentionState.updateInterface(retentionPort, { description: `Evidence ${index}` }, "retention-test");
+  assert(retentionState.verifyInterfaceDescription(retentionPort, `show running-config interface ${retentionPort}`, `interface ${retentionPort}\n description Evidence ${index}`), "retention verification succeeds");
+  assert(retentionState.save("retention-save").ok, "retention save succeeds");
+}
+assert(retentionState.verificationRecords().length <= Runtime.MAX_VERIFICATION_RECORDS, "verification history remains bounded for long-lived local sessions");
 
 console.log(JSON.stringify({
   suite: "current application",
@@ -184,5 +205,5 @@ console.log(JSON.stringify({
   active_styles: activeStyles.length,
   canonical_commands: inventoryFile.commands.length,
   routes: routeFile.routes.length,
-  passed: 38
+  passed: 47
 }));

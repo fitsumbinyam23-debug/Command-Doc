@@ -18,6 +18,7 @@
   const normaliseSupportLevel = (value) => SUPPORT_LEVELS[normalise(value).replace(/-/g, "_")] || "unsupported_for_profile";
   const groupBy = (items, key) => items.reduce((groups, item) => { const name = key(item); (groups[name] ||= []).push(item); return groups; }, {});
   const cleanSnapshot = (value) => { const next = clone(value); delete next.unsaved_changes; return next; };
+  const MAX_VERIFICATION_RECORDS = 200;
   const vendorIds = {
     cisco_ios: { operating_system_id: "cisco_ios", operating_system_family_id: "cisco_ios" },
     hp_comware: { operating_system_id: "hp_comware", operating_system_family_id: "hp_comware" },
@@ -175,7 +176,17 @@
 
   class CommandRegistry {
     constructor(commands = [], profile = null) {
-      this.commands = commands.map((command) => {
+      const commandBySignature = new Map();
+      commands.forEach((command) => {
+        const vendor = command.vendor_id || command.vendor || "";
+        const modes = [...(command.available_modes || [])].map(normalise).sort().join(",");
+        const signature = `${vendor}|${normalise(command.canonical_command)}|${modes}`;
+        const existing = commandBySignature.get(signature);
+        // Runtime handlers intentionally replace matching generated metadata. This
+        // keeps one parser grammar per vendor/command/mode instead of ambiguity.
+        if (!existing || /^runtime-/.test(command.command_id || "")) commandBySignature.set(signature, command);
+      });
+      this.commands = [...commandBySignature.values()].map((command) => {
         const simulator_support = normaliseSupportLevel(command.simulator_support || command.support_level);
         const derivedModes = Array.isArray(command.available_modes) && command.available_modes.length
           ? command.available_modes
@@ -258,7 +269,16 @@
     help(text = "", context = {}) {
       const value = normalise(text.replace(/\?$/, ""));
       const candidates = this.catalog.flatMap((command) => [command.canonical_command, ...(command.aliases || [])].map((syntax) => ({ command, parsed: parseTokens(command, value, this.profile, syntax) }))).filter((item) => item.parsed.status === "matched" || item.parsed.status === "incomplete");
-      const entries = candidates.flatMap((item) => item.parsed.expected_tokens.map((token) => ({ token, token_type: token.startsWith("<") ? "parameter" : "keyword", description: token.startsWith("<") ? `Enter ${token.slice(1, -1)}.` : `Keyword for ${item.command.canonical_command}.`, allowed_range: token.includes("vlan") ? "1-4094" : "", possible_values: token === "<interface>" ? interfaceNames(this.profile) : [], availability: this.availability(item.command, context.mode, context.privilege).available, reason_unavailable: this.availability(item.command, context.mode, context.privilege).reason || "", related_command_ids: [item.command.command_id] })));
+      const toEntry = (item, token) => ({ token, token_type: token.startsWith("<") ? "parameter" : "keyword", description: token.startsWith("<") ? `Enter ${token.slice(1, -1)}.` : `Keyword for ${item.command.canonical_command}.`, allowed_range: token.includes("vlan") ? "1-4094" : "", possible_values: token === "<interface>" ? interfaceNames(this.profile) : [], availability: this.availability(item.command, context.mode, context.privilege).available, reason_unavailable: this.availability(item.command, context.mode, context.privilege).reason || "", related_command_ids: [item.command.command_id] });
+      const parts = value.split(/\s+/).filter(Boolean);
+      const partial = parts.at(-1) || "";
+      const prior = parts.slice(0, -1).join(" ");
+      const prefixEntries = partial
+        ? this.catalog.flatMap((command) => [command.canonical_command, ...(command.aliases || [])].map((syntax) => ({ command, parsed: parseTokens(command, prior, this.profile, syntax) })))
+          .filter((item) => item.parsed.status === "incomplete")
+          .flatMap((item) => item.parsed.expected_tokens.filter((token) => !token.startsWith("<") && normalise(token).startsWith(partial)).map((token) => toEntry(item, token)))
+        : [];
+      const entries = candidates.flatMap((item) => item.parsed.expected_tokens.map((token) => toEntry(item, token))).concat(prefixEntries);
       const unique = entries.filter((item, index, all) => all.findIndex((candidate) => candidate.token === item.token) === index).slice(0, 12);
       if (candidates.some((item) => item.parsed.status === "matched")) unique.push({ token: "<cr>", token_type: "execute", description: "Execute command", allowed_range: "", possible_values: [], availability: true, reason_unavailable: "", related_command_ids: candidates.filter((item) => item.parsed.status === "matched").map((item) => item.command.command_id) });
       return unique;
@@ -327,9 +347,19 @@
     }
     verificationPolicies() {
       return [{
-        policy_id: "interface-description-running-config",
-        vendor_ids: ["cisco_ios", "hp_comware", "aruba_cx"],
-        command_patterns: ["show running-config interface <interface>", "display current-configuration interface <interface>"],
+        policy_id: "interface-description-cisco-running-config",
+        vendor_ids: ["cisco_ios", "aruba_cx"],
+        command_patterns: ["show running-config interface <interface>"],
+        object_type: "interface",
+        field_pattern: "interfaces.<interface>.description",
+        required_evidence: "interface name and exact description line",
+        invalidating_fields: ["interfaces.<interface>.description"],
+        support_level: "full_state_simulation",
+        authorizes_save: true
+      }, {
+        policy_id: "interface-description-comware-running-config",
+        vendor_ids: ["hp_comware"],
+        command_patterns: ["display current-configuration interface <interface>"],
         object_type: "interface",
         field_pattern: "interfaces.<interface>.description",
         required_evidence: "interface name and exact description line",
@@ -338,10 +368,24 @@
         authorizes_save: true
       }];
     }
+    verificationTargetForCommand(command) {
+      const entered = normalise(command);
+      const patterns = [
+        { pattern: /^show running-config interface\s+(\S+)$/i, syntax: "show running-config interface <interface>" },
+        { pattern: /^display current-configuration interface\s+(\S+)$/i, syntax: "display current-configuration interface <interface>" }
+      ];
+      const match = patterns.map((candidate) => ({ ...candidate, found: String(command || "").match(candidate.pattern) })).find((candidate) => candidate.found);
+      if (!match) return null;
+      const policy = this.verificationPolicies().find((item) => item.vendor_ids.includes(this.profile.vendor) && item.command_patterns.includes(match.syntax));
+      return policy ? { policy, interface_name: match.found[1], command: entered } : null;
+    }
     verificationPolicyForChange(change) {
       const field = String(change?.field || "");
       const description = field.match(/^interfaces\.([^\.]+)\.description$/);
-      if (description) return { ...this.verificationPolicies()[0], object_id: description[1], verified_field_path: field };
+      if (description) {
+        const policy = this.verificationPolicies().find((item) => item.vendor_ids.includes(this.profile.vendor));
+        return policy ? { ...policy, object_id: description[1], verified_field_path: field } : { policy_id: "unverified-pending-change", authorizes_save: false, verified_field_path: field };
+      }
       return { policy_id: "unverified-pending-change", object_type: field.startsWith("interfaces.") ? "interface" : "system", object_id: field.split(".")[1] || "system", verified_field_path: field, required_evidence: "No current verification policy proves this field.", invalidating_fields: [field], support_level: "unsupported_for_profile", authorizes_save: false };
     }
     verificationRecords() { return Object.values(this.running.session.verification_records || {}); }
@@ -393,9 +437,9 @@
     verifyInterfaceDescription(name, command, output) {
       const port = this.interface(name);
       const expected = `description ${port?.description || ""}`.trim();
-      const expectedCommands = [`show running-config interface ${name}`, `display current-configuration interface ${name}`].map(normalise);
-      const passed = Boolean(port?.description) && expectedCommands.includes(normalise(command)) && String(output || "").includes(name) && String(output || "").includes(expected);
-      const policy = this.verificationPolicies()[0];
+      const target = this.verificationTargetForCommand(command);
+      const passed = Boolean(port?.description) && target?.interface_name === name && String(output || "").includes(name) && normalise(output).includes(normalise(expected));
+      const policy = target?.policy || this.verificationPolicyForChange({ field: `interfaces.${name}.description` });
       const field = `interfaces.${name}.description`;
       const covered = this.changes().filter((change) => change.field === field).map((change) => change.change_id);
       const verificationId = `verification-${crypto.randomUUID?.() || Date.now()}-${this.verificationRecords().length}`;
@@ -408,9 +452,22 @@
       });
       this.running.session.verification ||= {};
       this.running.session.verification[name] = verification;
+      this.compactVerificationRecords();
       this.record({ command_id: "verify-interface-description", canonical_command: command, entered_text: command, success: passed, verification_result: passed ? "passed" : "failed" });
       this.persist();
       return passed;
+    }
+    compactVerificationRecords() {
+      const records = this.running.session.verification_records || {};
+      const protectedIds = new Set(this.changes().map((change) => change.verification_record_id).filter(Boolean));
+      Object.values(records).forEach((record) => {
+        if ((record.covered_change_ids || []).some((changeId) => this.changes().some((change) => change.change_id === changeId))) protectedIds.add(record.verification_id);
+      });
+      const removable = Object.values(records).filter((record) => !protectedIds.has(record.verification_id)).sort((left, right) => String(left.timestamp).localeCompare(String(right.timestamp)));
+      while (Object.keys(records).length > MAX_VERIFICATION_RECORDS && removable.length) delete records[removable.shift().verification_id];
+      Object.entries(this.running.session.verification || {}).forEach(([name, record]) => {
+        if (record?.verification_id && !records[record.verification_id]) delete this.running.session.verification[name];
+      });
     }
     change(field, before, after, commandId = "inspector") {
       if (before === after) return;
@@ -563,6 +620,9 @@
         delete compact.state_before; delete compact.state_after;
         return compact;
       }) : [];
+      const savedRecords = migrated.running.session.verification_records;
+      const records = Object.values(savedRecords).sort((left, right) => String(left.timestamp).localeCompare(String(right.timestamp)));
+      while (records.length > MAX_VERIFICATION_RECORDS) delete savedRecords[records.shift().verification_id];
       return migrated;
     }
     snapshot() { return { schema_version: RUNTIME_SCHEMA_VERSION, ...this.catalogMetadata, profile_id: this.profile.profile_id, running: this.running, startup: this.startup, baseline: this.baseline, factoryBaseline: this.factoryBaseline, eventLog: this.eventLog }; }
@@ -575,5 +635,5 @@
     byVendor(vendor) { return this.profiles.filter((profile) => profile.vendor === vendor); }
   }
 
-  window.CommandDoctorSwitchRuntime = { CommandRegistry, SharedSwitchState, ProfileRegistry, STORAGE_KEY, RUNTIME_SCHEMA_VERSION, normaliseSupportLevel, normalise, clone, normaliseProfile, compileGrammar, parseTokens, validateParameterDetail, compareVersion };
+  window.CommandDoctorSwitchRuntime = { CommandRegistry, SharedSwitchState, ProfileRegistry, STORAGE_KEY, RUNTIME_SCHEMA_VERSION, MAX_VERIFICATION_RECORDS, normaliseSupportLevel, normalise, clone, normaliseProfile, compileGrammar, parseTokens, validateParameterDetail, compareVersion };
 })();

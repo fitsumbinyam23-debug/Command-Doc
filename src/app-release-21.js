@@ -40,7 +40,7 @@ const LAB_PROGRESS_KEY = "commandDoctorLabProgress";
 const VENDOR_PROGRESS_KEY = "commandDoctorVendorProgress";
 const VISUAL_NETWORK_STORAGE_KEY = "command-doctor.visual-network";
 const VISUAL_NETWORK_SCHEMA_VERSION = 3;
-const ACTIVE_BUILD_VERSION = "2026.07-runtime-rc";
+const ACTIVE_BUILD_VERSION = "2026.07-runtime-rc.2";
 
 const SIMULATOR_MISSIONS = [
   { id: "first-check", device: "access", phase: "Foundation", title: "Read an Access Port", description: "Use a safe read-only command to understand the simulated endpoint state.", command: "show interface status" },
@@ -2887,6 +2887,7 @@ function executeWorkbenchCommand(command, source = "workbench") {
   if (!runtime || !engine) return { ok: false, output: "The local switch runtime is not ready." };
   const modeBefore = engine.mode || "exec";
   let resolution = runtime.registry.resolve(command, { mode: modeBefore, privilege: "privileged" });
+  const verificationTarget = runtime.state.verificationTargetForCommand(command);
   const internalSequenceCommand = (modeBefore === "exec" && /^system-view$/i.test(command))
     || (modeBefore === "config" && /^interface[\s]+\S+$/i.test(command))
     || (/^description[\s]+.+$/i.test(command) && modeBefore === "interface")
@@ -2897,10 +2898,13 @@ function executeWorkbenchCommand(command, source = "workbench") {
   const runningConfigMatch = command.match(/^show running-config interface\s+(\S+)$/i);
   // The engine already owns this Cisco read-only command, while older catalog
   // metadata may classify the parameterised form as incomplete.
-  if (resolution.status !== "matched" && !runningConfigMatch) return { ok: false, output: resolution.corrective_message || `Command cannot run here: ${resolution.status}.`, resolution };
+  if (resolution.status !== "matched" && !runningConfigMatch && !verificationTarget) return { ok: false, output: resolution.corrective_message || `Command cannot run here: ${resolution.status}.`, resolution };
   const before = JSON.parse(JSON.stringify(runtime.state.running));
-  const result = engine.execute(command);
+  const result = verificationTarget
+    ? { ok: true, kind: "verification", output: runtimeInterfaceConfiguration(runtime.state, verificationTarget.interface_name, "running", activeSwitchProfile()) }
+    : engine.execute(command);
   if (result.ok && runningConfigMatch) result.output = runtimeInterfaceConfiguration(runtime.state, runningConfigMatch[1], "running", activeSwitchProfile());
+  if (result.ok && verificationTarget) result.verified = runtime.state.verifyInterfaceDescription(verificationTarget.interface_name, command, result.output);
   if (result.ok) {
     const commandId = resolution.command?.command_id || "show-running-config-interface";
     const canonicalCommand = resolution.command?.canonical_command || "show running-config interface <ACCESS_PORT>";
@@ -3241,7 +3245,9 @@ function runtimeTrainingRoutes() {
     id: route.route_id,
     label: route.title,
     category: route.category || route.topic,
-    vendor: route.vendor_label || route.vendor,
+    vendor_id: route.vendor,
+    vendor_label: route.vendor_label || route.vendor,
+    vendor: route.vendor,
     device: route.vendor === "hp_comware" ? "irf" : route.vendor === "aruba_cx" ? "aruba" : route.vendor === "windows_cmd" || route.vendor === "linux" ? "access" : "access",
     purpose: route.description,
     goal: route.expected_final_state,
@@ -3967,8 +3973,8 @@ function startFreshTrainingSwitch(route = currentTrainingRoute()) {
   state.lab.console.focusRequested = true;
   state.lab.visualNetwork = createVisualNetwork();
   state.lab.visualNetwork.hostname = "TRAINING-SWITCH";
-  recordTrackActivity(route.vendor || activeTrack(), { lastLabRouteId: route.id });
-  const track = trackProgress(route.vendor || activeTrack());
+  recordTrackActivity(route.vendor_id || route.vendor || activeTrack(), { lastLabRouteId: route.id });
+  const track = trackProgress(route.vendor_id || route.vendor || activeTrack());
   track.practisedRoutes[route.id] = true;
   saveVendorProgress();
   window.CommandDoctorTopology?.ensureTopology?.(state.lab.visualNetwork);
@@ -4278,11 +4284,14 @@ function runLabConsoleCommand(input) {
     : {};
   let result = engine ? engine.execute(command) : { output: simulateLabCommand(command), diff: "Simulator engine unavailable." };
   const runtime = state.lab.switchRuntime?.state;
+  const verificationTarget = runtime?.verificationTargetForCommand(command);
   const runningConfigMatch = command.match(/^show running-config interface\s+(\S+)$/i);
-  if (result.ok && runtime && runningConfigMatch) {
+  if (runtime && verificationTarget) {
+    result = { ...result, ok: true, kind: "verification", output: runtimeInterfaceConfiguration(runtime, verificationTarget.interface_name, "running", activeSwitchProfile()) };
+    result.verified = runtime.verifyInterfaceDescription(verificationTarget.interface_name, command, result.output);
+  } else if (result.ok && runtime && runningConfigMatch) {
     const interfaceName = runningConfigMatch[1];
-    result = { ...result, output: runtimeInterfaceConfiguration(runtime, interfaceName) };
-    result.verified = runtime.verifyInterfaceDescription(interfaceName, command, result.output);
+    result = { ...result, output: runtimeInterfaceConfiguration(runtime, interfaceName, "running", activeSwitchProfile()) };
   }
   if (result.ok && runtime && /^show startup-config$/i.test(command)) {
     result = { ...result, output: runtimeStartupConfiguration(runtime) };
@@ -4306,7 +4315,7 @@ function runLabConsoleCommand(input) {
       const commandId = catalogResolution?.command?.command_id || "unclassified";
       if (isSaveRequest) {
         const saved = shared.save(commandId);
-        result = { ...result, ok: saved.ok, kind: saved.ok ? "save" : "warning", output: saved.ok ? result.output : saved.message, save_gate: saved };
+        result = { ...result, ok: saved.ok, kind: saved.ok ? "save" : "warning", output: saved.message, save_gate: saved };
       } else if (result.ok && result.kind === "rollback") {
         shared.rollbackUnsaved();
         hydrateEngineFromRuntime(engine);
@@ -5098,8 +5107,9 @@ function startPracticeRoute(routeId, action = "") {
     const saved = state.lab.switchRuntime?.state?.save("route-start-save");
     if (saved && !saved.ok) { showToast(saved.message); return; }
   }
-  const routeProfile = state.lab.switchProfiles.find((profile) => profile.vendor === route.vendor);
-  if (routeProfile && activeSwitchProfile()?.vendor !== route.vendor) activateSwitchProfile(routeProfile.profile_id);
+  const routeVendorId = route.vendor_id || route.vendor;
+  const routeProfile = state.lab.switchProfiles.find((profile) => profile.vendor === routeVendorId);
+  if (routeProfile && activeSwitchProfile()?.vendor !== routeVendorId) activateSwitchProfile(routeProfile.profile_id);
   startFreshTrainingSwitch(route);
 }
 
@@ -5108,7 +5118,7 @@ function renderPracticeLibrary(parent) {
   const track = activeTrack();
   const normalizedRoutes = runtimeTrainingRoutes().map((route) => {
     const generated = state.curriculum?.routes?.find((item) => item.route_id === route.id);
-    return generated ? { ...route, ...generated, vendor: generated.vendor_label, operatingSystem: generated.operating_system, modelFamily: generated.platform, routeType: generated.route_type, support: generated.support_level.replace(/_/g, " "), estimatedMinutes: route.estimatedMinutes || 10 } : route;
+    return generated ? { ...route, ...generated, vendor_id: generated.vendor, vendor_label: generated.vendor_label, vendor: generated.vendor, operatingSystem: generated.operating_system, modelFamily: generated.platform, routeType: generated.route_type, support: generated.support_level.replace(/_/g, " "), estimatedMinutes: route.estimatedMinutes || 10 } : route;
   });
   const pendingRoute = normalizedRoutes.find((route) => route.id === state.lab.pendingRouteStartId);
   if (pendingRoute) {
