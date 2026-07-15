@@ -1,16 +1,20 @@
 # Public Test Status
 
-Candidate build: `2026.07-runtime-rc.2`
-Final source candidate: `ea4bf7ce2223dc1a22db3de18c9f48c1427b155c`
+Candidate build: `2026.07-runtime-rc.3`
+Functional source candidate: `084b11789304fa326f7275e3279d6bf7c0847134`
+Planned release tag: `v0.2.0-rc.2`
 
 ## Candidate status
 
 | Check | Status | Evidence |
 | --- | --- | --- |
 | Core smoke tests | Passed | 30 passed. |
-| Current application tests | Passed | 214 passed. |
+| Current application tests | Passed | 246 passed, including the Practice Library visible-filter matrix. |
 | Startup test | Passed | 37 passed. |
-| Independent Chromium review | Passed | All 9 profile terminal workflows and representative Cisco, HP, and Aruba Workbench flows passed. |
+| Practice Library visible-filter hotfix | Passed | All visible filters clear returns the complete current route inventory, which is dynamically derived as 127 routes. Cisco, HP, and Windows filtering works. ArubaOS-CX and Linux have honest zero-route states. |
+| Route-scoped progress and launch alignment | Passed | Route-vendor progress is isolated correctly and route launch vendor/profile alignment is preserved. |
+| Runtime behaviour, route data, and learning data | Unchanged | Release preparation updates build identity, active asset versions, service-worker cache identity, active documentation, and identity tests only. |
+| Independent Chromium review | Passed | Approved functional hotfix review completed for the Practice Library filters, route launch, mobile layout, and console checks. |
 | Mobile Chromium 390px overflow | Passed | No exercised mobile overflow failures. |
 | Candidate deployment | Pending merge | Not yet deployed until the merge step and GitHub Pages publication complete. |
 | Microsoft Edge interaction | Blocked | Not executed for this RC. Do not treat as passed. |

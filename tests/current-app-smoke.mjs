@@ -5,10 +5,13 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (relative) => fs.readFile(path.join(root, relative), "utf8");
+const ACTIVE_BUILD_VERSION = "2026.07-runtime-rc.3";
+const ACTIVE_CACHE_NAME = "command-doctor-2026-07-runtime-rc-3";
 const assert = (condition, message) => {
   if (!condition) throw new Error(`Current app smoke test failed: ${message}`);
 };
 const references = (html, expression) => [...html.matchAll(expression)].map((match) => match[1].split("?")[0]);
+const queryVersions = (source) => [...source.matchAll(/[?&]v=([^"'\s)]+)/g)].map((match) => match[1]);
 const substitute = (syntax, profile) => syntax.replace(/<([^>]+)>/g, (_, name) => {
   const value = name.toLowerCase();
   if (value.includes("interface") || value.includes("port")) return profile.interface_naming.replace("{port}", "1");
@@ -26,10 +29,12 @@ assert(indexHtml.includes('location.replace("lab.html")'), "root redirects to la
 const activeScripts = references(labHtml, /<script[^>]+\bsrc=["']([^"']+)["']/gi);
 const activeStyles = references(labHtml, /<link[^>]+\bhref=["']([^"']+)["']/gi);
 assert(activeScripts.length > 0, "lab.html has active scripts");
+assert(queryVersions(labHtml).every((version) => version === ACTIVE_BUILD_VERSION), "lab.html active assets use the current RC query version");
 for (const asset of [...activeScripts, ...activeStyles]) {
   await fs.access(path.join(root, asset));
 }
-assert(!serviceWorker.includes("lab-29") && serviceWorker.includes("command-doctor-2026-07-runtime-rc"), "service worker uses the current RC cache identity");
+assert(!serviceWorker.includes("lab-29") && serviceWorker.includes(`const CACHE_NAME = "${ACTIVE_CACHE_NAME}"`), "service worker uses the current RC cache identity");
+assert(queryVersions(serviceWorker).every((version) => version === ACTIVE_BUILD_VERSION), "service worker active offline assets use the current RC query version");
 for (const asset of ["src/lab-engine.js", "src/diagnostics-engine.js", "src/topology-workspace.js", "src/curriculum-services.js", "src/switch-runtime.js", "src/app-release-21.js", "data/platforms/switch-profiles.json", "data/generated/command-inventory.json", "data/generated/route-inventory.json"]) {
   assert(serviceWorker.includes(asset), `service worker includes current offline asset ${asset}`);
 }
@@ -126,7 +131,7 @@ for (const candidateProfile of profiles) {
   const exactInterface = augmentedRegistry.commands.filter((command) => command.vendor_id === candidateProfile.vendor && command.canonical_command === "interface <interface>" && command.available_modes.includes("config"));
   assert(exactInterface.length === 1, `normalized effective interface grammar is unique for ${candidateProfile.profile_id}`);
 }
-assert((await read("src/app-release-21.js")).includes('const ACTIVE_BUILD_VERSION = "2026.07-runtime-rc.2"'), "runtime reports the current RC build identity");
+assert((await read("src/app-release-21.js")).includes(`const ACTIVE_BUILD_VERSION = "${ACTIVE_BUILD_VERSION}"`), "runtime reports the current RC build identity");
 for (const route of routeFile.routes) {
   if (!["cisco_ios", "hp_comware", "aruba_cx"].includes(route.vendor)) continue;
   const compatible = profiles.filter((candidateProfile) => candidateProfile.vendor === route.vendor && (!route.supported_model_profiles?.length || route.supported_model_profiles.includes(candidateProfile.profile_id)));

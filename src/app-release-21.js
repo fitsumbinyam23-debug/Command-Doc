@@ -40,7 +40,7 @@ const LAB_PROGRESS_KEY = "commandDoctorLabProgress";
 const VENDOR_PROGRESS_KEY = "commandDoctorVendorProgress";
 const VISUAL_NETWORK_STORAGE_KEY = "command-doctor.visual-network";
 const VISUAL_NETWORK_SCHEMA_VERSION = 3;
-const ACTIVE_BUILD_VERSION = "2026.07-runtime-rc.2";
+const ACTIVE_BUILD_VERSION = "2026.07-runtime-rc.3";
 
 const SIMULATOR_MISSIONS = [
   { id: "first-check", device: "access", phase: "Foundation", title: "Read an Access Port", description: "Use a safe read-only command to understand the simulated endpoint state.", command: "show interface status" },
