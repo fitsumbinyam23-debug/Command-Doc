@@ -654,7 +654,10 @@ function initializeSwitchRuntime() {
     { command_id: "runtime_interface_comware", canonical_command: "interface <interface>", aliases: [], vendor: "hp_comware", vendor_id: "hp_comware", compatible_os_family_ids: ["hp_comware"], available_modes: ["config"], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "Interface configuration" },
     { command_id: "runtime_interface_description", canonical_command: "description <free_text>", aliases: [], vendor: "cisco_ios", vendor_id: "cisco_ios", compatible_os_family_ids: ["cisco_ios"], available_modes: ["interface"], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "Interface configuration" },
     { command_id: "runtime_interface_description_comware", canonical_command: "description <free_text>", aliases: [], vendor: "hp_comware", vendor_id: "hp_comware", compatible_os_family_ids: ["hp_comware"], available_modes: ["interface"], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "Interface configuration" },
-    { command_id: "runtime_interface_description_aruba", canonical_command: "description <free_text>", aliases: [], vendor: "aruba_cx", vendor_id: "aruba_cx", compatible_os_family_ids: ["arubaos_cx"], available_modes: ["interface"], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "Interface configuration" }
+    { command_id: "runtime_interface_description_aruba", canonical_command: "description <free_text>", aliases: [], vendor: "aruba_cx", vendor_id: "aruba_cx", compatible_os_family_ids: ["arubaos_cx"], available_modes: ["interface"], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "Interface configuration" },
+    { command_id: "runtime_verify_interface_cisco", canonical_command: "show running-config interface <interface>", aliases: ["show run interface <interface>", "sh run int <interface>"], vendor: "cisco_ios", vendor_id: "cisco_ios", compatible_os_family_ids: ["cisco_ios"], available_modes: [], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "Verification" },
+    { command_id: "runtime_verify_interface_aruba", canonical_command: "show running-config interface <interface>", aliases: ["show run interface <interface>"], vendor: "aruba_cx", vendor_id: "aruba_cx", compatible_os_family_ids: ["arubaos_cx"], available_modes: [], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "Verification" },
+    { command_id: "runtime_verify_interface_comware", canonical_command: "display current-configuration interface <interface>", aliases: ["display current-configuration interface <interface>"], vendor: "hp_comware", vendor_id: "hp_comware", compatible_os_family_ids: ["hp_comware"], available_modes: [], required_privilege: "enable", simulator_support: "full_state_simulation", topic: "Verification" }
   ];
   state.lab.switchRuntime = {
     registry: new runtime.CommandRegistry([...state.curriculum.inventory, ...engineCommands], profile),
@@ -690,27 +693,48 @@ function persistSwitchRuntime() {
   state.lab.switchRuntime?.state?.persist();
 }
 
-function syncRuntimeFromEngine(engine, commandId = "cli") {
+function syncRuntimeFromEngine(engine, commandId = "cli", enteredCommand = "") {
   const shared = state.lab.switchRuntime?.state;
   if (!shared || !engine?.state) return;
-  if (engine.state.hostname && engine.state.hostname !== shared.running.system.hostname) shared.updateHostname(engine.state.hostname, commandId);
-  Object.entries(engine.state.interfaces || {}).forEach(([name, port]) => {
-    shared.running.interfaces[name] ||= { name, description: "", mode: "access", vlan: 1, admin_up: true, operational_up: false, connected_device: "", allowed_vlans: "", native_vlan: 1 };
-    shared.updateInterface(name, {
-      description: port.description || "",
-      mode: port.mode || "access",
-      vlan: Number(port.vlan) || port.vlan || 1,
-      admin_up: !port.shutdown,
-      operational_up: Boolean(port.connected && !port.shutdown),
-      allowed_vlans: port.allowedVlans || ""
-    }, commandId);
-  });
-  Object.entries(engine.state.vlanNames || {}).forEach(([id, name]) => { shared.running.vlans[id] = { name }; });
+  const command = String(enteredCommand || "").trim().toLowerCase();
+  const selected = engine.selectedInterface;
+  const port = engine.state.interfaces?.[selected];
+  // The engine is a presentation adapter. Synchronize only explicit mutations
+  // made by this command, never its default fields for every interface.
+  if (/^(hostname|sysname)\s+/.test(command) && engine.state.hostname) shared.updateHostname(engine.state.hostname, commandId);
+  if (port && /^(description|no description|undo description)\b/.test(command)) shared.updateInterface(selected, { description: port.description || "" }, commandId);
+  if (port && /^(switchport mode|port link-type)\b/.test(command)) shared.updateInterface(selected, { mode: port.mode || "access" }, commandId);
+  if (port && /^(switchport access vlan|port access vlan|vlan access)\b/.test(command)) shared.updateInterface(selected, { vlan: Number(port.vlan) || port.vlan || 1 }, commandId);
+  if (port && /^(switchport trunk allowed vlan|port trunk permit vlan|vlan trunk allowed)\b/.test(command)) shared.updateInterface(selected, { allowed_vlans: port.allowedVlans || "" }, commandId);
+  if (port && /^(shutdown|no shutdown|undo shutdown)$/.test(command)) shared.updateInterface(selected, { admin_up: !port.shutdown, operational_up: Boolean(port.connected && !port.shutdown) }, commandId);
+  if (engine.selectedVlan && /^name\s+/.test(command)) shared.running.vlans[engine.selectedVlan] = { name: engine.state.vlanNames?.[engine.selectedVlan] || `VLAN-${engine.selectedVlan}` };
   shared.running.logs = [...(engine.logs || [])];
   if (engine.selectedInterface && shared.interface(engine.selectedInterface)) shared.running.session.selected_interface = engine.selectedInterface;
   shared.storeTerminal(engine.transcript || [], engine.commands || []);
   syncVisualFromRuntime();
   persistSwitchRuntime();
+}
+
+function pendingChangePathsSince(shared, beforeChanges = []) {
+  const before = new Map(beforeChanges.map((change) => [change.change_id, JSON.stringify(change)]));
+  return shared.changes().filter((change) => before.get(change.change_id) !== JSON.stringify(change)).map((change) => change.field);
+}
+
+function commandEventMetadata(resolution, command, modeBefore, modeAfter, changedFields = [], result = {}) {
+  const matched = resolution?.command || {};
+  return {
+    command_id: matched.command_id || "unclassified",
+    handler_id: matched.handler_id || matched.handler_identity || "",
+    canonical_command: matched.canonical_command || command,
+    entered_text: command,
+    entered_alias: Boolean(resolution?.entered_alias),
+    parsed_parameters: resolution?.parsed_parameters || {},
+    mode_before: modeBefore,
+    mode_after: modeAfter,
+    changed_fields: changedFields,
+    verification_policy_id: result.verification_policy_id || "",
+    verification_record_id: result.verification_record_id || ""
+  };
 }
 
 function syncVisualFromRuntime() {
@@ -2888,28 +2912,22 @@ function executeWorkbenchCommand(command, source = "workbench") {
   const modeBefore = engine.mode || "exec";
   let resolution = runtime.registry.resolve(command, { mode: modeBefore, privilege: "privileged" });
   const verificationTarget = runtime.state.verificationTargetForCommand(command);
-  const internalSequenceCommand = (modeBefore === "exec" && /^system-view$/i.test(command))
-    || (modeBefore === "config" && /^interface[\s]+\S+$/i.test(command))
-    || (/^description[\s]+.+$/i.test(command) && modeBefore === "interface")
-    || (/^return$/i.test(command) && ["config", "interface"].includes(modeBefore));
-  if (resolution.status !== "matched" && internalSequenceCommand) {
-    resolution = { status: "matched", command: { command_id: "runtime-workbench-comware", canonical_command: command }, entered_alias: false, parsed_parameters: {} };
-  }
-  const runningConfigMatch = command.match(/^show running-config interface\s+(\S+)$/i);
-  // The engine already owns this Cisco read-only command, while older catalog
-  // metadata may classify the parameterised form as incomplete.
-  if (resolution.status !== "matched" && !runningConfigMatch && !verificationTarget) return { ok: false, output: resolution.corrective_message || `Command cannot run here: ${resolution.status}.`, resolution };
+  if (resolution.status !== "matched") return { ok: false, output: resolution.corrective_message || `Command cannot run here: ${resolution.status}.`, resolution };
   const before = JSON.parse(JSON.stringify(runtime.state.running));
+  const changesBefore = JSON.parse(JSON.stringify(runtime.state.changes()));
   const result = verificationTarget
     ? { ok: true, kind: "verification", output: runtimeInterfaceConfiguration(runtime.state, verificationTarget.interface_name, "running", activeSwitchProfile()) }
     : engine.execute(command);
-  if (result.ok && runningConfigMatch) result.output = runtimeInterfaceConfiguration(runtime.state, runningConfigMatch[1], "running", activeSwitchProfile());
-  if (result.ok && verificationTarget) result.verified = runtime.state.verifyInterfaceDescription(verificationTarget.interface_name, command, result.output);
+  if (result.ok && verificationTarget) {
+    result.verified = runtime.state.verifyInterfaceDescription(verificationTarget.interface_name, command, result.output, { command_id: resolution.command.command_id, handler_id: resolution.command.handler_id, canonical_command: resolution.command.canonical_command });
+    const record = runtime.state.verification(verificationTarget.interface_name);
+    result.verification_policy_id = record.policy_id;
+    result.verification_record_id = record.verification_id;
+  }
   if (result.ok) {
-    const commandId = resolution.command?.command_id || "show-running-config-interface";
-    const canonicalCommand = resolution.command?.canonical_command || "show running-config interface <ACCESS_PORT>";
-    syncRuntimeFromEngine(engine, commandId);
-    runtime.state.record({ command_id: commandId, canonical_command: canonicalCommand, entered_text: command, entered_alias: resolution.entered_alias, parsed_parameters: resolution.parsed_parameters, mode_before: modeBefore, mode_after: engine.mode || "exec", success: true, state_before: before, state_after: JSON.parse(JSON.stringify(runtime.state.running)), changed_fields: result.kind === "config" ? ["runtime state"] : [], safety_result: source, verification_result: result.verified ? "passed" : "not_run", save_result: result.kind === "save" ? "saved" : "" });
+    syncRuntimeFromEngine(engine, resolution.command.command_id, command);
+    const changedFields = pendingChangePathsSince(runtime.state, changesBefore);
+    runtime.state.record({ ...commandEventMetadata(resolution, command, modeBefore, engine.mode || "exec", changedFields, result), success: true, state_before: before, state_after: JSON.parse(JSON.stringify(runtime.state.running)), safety_result: source, verification_result: result.verified ? "passed" : "not_run", save_result: result.kind === "save" ? "saved" : "" });
   }
   persistSwitchRuntime();
   return { ...result, resolution };
@@ -3943,9 +3961,10 @@ function bindTerminalKeyboard(input, engine, terminal) {
       event.preventDefault();
       const registry = activeCommandRegistry();
       const completion = registry?.complete(input.value, { mode: engine?.mode || "exec", privilege: "privileged" });
-      const match = typeof completion === "string" ? completion : ["show interfaces status", "show vlan brief", "show running-config", "configure terminal", "display irf", "display irf topology"].find((item) => item.startsWith(input.value.trim().toLowerCase()));
-      if (match) input.value = `${match} `;
-      else if (completion?.status === "ambiguous") showToast(`Possible completions: ${completion.candidates.slice(0, 4).join(", ")}`);
+      const fallback = registry ? null : ["show interfaces status", "show vlan brief", "show running-config", "configure terminal", "display irf", "display irf topology"].find((item) => item.startsWith(input.value.trim().toLowerCase()));
+      const match = typeof completion === "string" ? completion : fallback;
+      if (match && normalizeCommandText(match) !== normalizeCommandText(input.value)) input.value = `${match} `;
+      else if (completion?.status === "ambiguous") { showToast(`Possible completions: ${completion.candidates.slice(0, 4).join(", ")}`); input.focus(); }
       return;
     }
     if (event.key === "?" && !event.ctrlKey && !event.metaKey) { event.preventDefault(); appendTerminalHelp(engine, input.value); state.lab.console.focusRequested = true; renderLab(); return; }
@@ -4282,13 +4301,19 @@ function runLabConsoleCommand(input) {
   const runtimeBefore = state.lab.switchRuntime?.state
     ? JSON.parse(JSON.stringify(state.lab.switchRuntime.state.running))
     : {};
+  const changesBefore = state.lab.switchRuntime?.state
+    ? JSON.parse(JSON.stringify(state.lab.switchRuntime.state.changes()))
+    : [];
   let result = engine ? engine.execute(command) : { output: simulateLabCommand(command), diff: "Simulator engine unavailable." };
   const runtime = state.lab.switchRuntime?.state;
   const verificationTarget = runtime?.verificationTargetForCommand(command);
   const runningConfigMatch = command.match(/^show running-config interface\s+(\S+)$/i);
   if (runtime && verificationTarget) {
     result = { ...result, ok: true, kind: "verification", output: runtimeInterfaceConfiguration(runtime, verificationTarget.interface_name, "running", activeSwitchProfile()) };
-    result.verified = runtime.verifyInterfaceDescription(verificationTarget.interface_name, command, result.output);
+    result.verified = runtime.verifyInterfaceDescription(verificationTarget.interface_name, command, result.output, { command_id: catalogResolution?.command?.command_id, handler_id: catalogResolution?.command?.handler_id, canonical_command: catalogResolution?.command?.canonical_command });
+    const record = runtime.verification(verificationTarget.interface_name);
+    result.verification_policy_id = record.policy_id;
+    result.verification_record_id = record.verification_id;
   } else if (result.ok && runtime && runningConfigMatch) {
     const interfaceName = runningConfigMatch[1];
     result = { ...result, output: runtimeInterfaceConfiguration(runtime, interfaceName, "running", activeSwitchProfile()) };
@@ -4314,16 +4339,17 @@ function runLabConsoleCommand(input) {
       const shared = state.lab.switchRuntime.state;
       const commandId = catalogResolution?.command?.command_id || "unclassified";
       if (isSaveRequest) {
-        const saved = shared.save(commandId);
+        const saved = shared.save(commandId, commandEventMetadata(catalogResolution, command, prompt.includes("config-if") ? "interface" : prompt.includes("config") ? "config" : "exec", engine.mode || "exec"));
         result = { ...result, ok: saved.ok, kind: saved.ok ? "save" : "warning", output: saved.message, save_gate: saved };
       } else if (result.ok && result.kind === "rollback") {
         shared.rollbackUnsaved();
         hydrateEngineFromRuntime(engine);
       } else if (result.ok) {
-        syncRuntimeFromEngine(engine, commandId);
+        syncRuntimeFromEngine(engine, commandId, command);
       }
       if (result.kind !== "save" && result.kind !== "rollback" && !result.save_gate) {
-        shared.record({ command_id: commandId, canonical_command: catalogResolution?.command?.canonical_command || command, entered_text: command, entered_alias: Boolean(catalogResolution?.entered_alias), parsed_parameters: catalogResolution?.parsed_parameters || {}, mode_before: prompt.includes("config-if") ? "interface" : prompt.includes("config") ? "config" : "exec", mode_after: engine.mode || "exec", success: Boolean(result.ok), failure_type: result.ok ? "" : (catalogResolution?.status || result.kind || "command_rejected"), state_before: runtimeBefore, state_after: result.ok ? JSON.parse(JSON.stringify(shared.running)) : runtimeBefore, changed_fields: result.ok && result.kind === "config" ? ["simulated configuration"] : [], safety_result: result.ok ? "accepted" : "rejected", verification_result: result.verified ? "passed" : "not_run", save_result: "" });
+        const changedFields = result.ok ? pendingChangePathsSince(shared, changesBefore) : [];
+        shared.record({ ...commandEventMetadata(catalogResolution, command, prompt.includes("config-if") ? "interface" : prompt.includes("config") ? "config" : "exec", engine.mode || "exec", changedFields, result), success: Boolean(result.ok), failure_type: result.ok ? "" : (catalogResolution?.status || result.kind || "command_rejected"), state_before: runtimeBefore, state_after: result.ok ? JSON.parse(JSON.stringify(shared.running)) : runtimeBefore, safety_result: result.ok ? "accepted" : "rejected", verification_result: result.verified ? "passed" : "not_run", save_result: "" });
       }
       persistSwitchRuntime();
     }

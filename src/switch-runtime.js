@@ -75,6 +75,7 @@
     next.session.terminal_history ||= [];
     next.session.command_history ||= [];
     next.session.verification ||= {};
+    next.session.verification_records ||= {};
     next.session.revision = Number.isInteger(next.session.revision) ? next.session.revision : 0;
     delete next.hostname;
     delete next.profile_id;
@@ -134,6 +135,80 @@
   }
   const compileGrammar = (syntax) => ({ type: "sequence", syntax, nodes: tokeniseSyntax(syntax).map((token) => ({ ...token, node_type: token.type === "literal" ? "literal" : token.type === "choice" ? "choice" : token.type === "free_text" ? "free_text" : "parameter" })) });
 
+  // Generated catalog files and the small runtime handler catalog do not always
+  // express modes in the same form. Normalize both before any parser index or
+  // duplicate decision is made so one effective grammar has one candidate.
+  const normaliseCommand = (raw = {}) => {
+    const canonical_command = String(raw.canonical_command || raw.command || "").trim();
+    const vendor_id = raw.vendor_id || raw.vendor || "";
+    const explicitModes = Array.isArray(raw.available_modes) ? raw.available_modes.filter(Boolean) : [];
+    const available_modes = explicitModes.length
+      ? [...new Set(explicitModes.map(normalise))]
+      : (/^(description|switchport|port access|port link-type|vlan access|shutdown|no shutdown|undo shutdown)\b/i.test(canonical_command) ? ["interface"]
+        : (/^(hostname|sysname|interface|vlan|switch \S+ priority|irf member)\b/i.test(canonical_command) ? ["config"] : []));
+    const aliases = [...new Set((raw.aliases || []).map(String).filter(Boolean))];
+    const compatible_os_ids = [...new Set(raw.compatible_os_ids || [])].sort();
+    const compatible_os_family_ids = [...new Set(raw.compatible_os_family_ids || [])].sort();
+    const compatible_platform_family_ids = [...new Set(raw.compatible_platform_family_ids || (raw.platform_family && raw.platform_family !== "Any" ? [raw.platform_family] : []))].sort();
+    const supported_model_profiles = [...new Set(raw.supported_model_profiles || [])].sort();
+    const required_capabilities = [...new Set(raw.required_capabilities || [])].sort();
+    const feature_dependencies = [...new Set(raw.feature_dependencies || [])].sort();
+    const license_dependencies = [...new Set(raw.license_dependencies || [])].sort();
+    const required_privilege = raw.required_privilege || (available_modes.length || /^(show|display|copy|write|save|rollback|end|return|configure terminal|system-view)\b/i.test(canonical_command) ? "enable" : "user");
+    return {
+      ...raw,
+      command_id: raw.command_id || `generated-${vendor_id}-${normalise(canonical_command).replace(/[^a-z0-9]+/g, "-")}`,
+      vendor_id,
+      vendor: vendor_id,
+      canonical_command,
+      aliases,
+      grammar: raw.grammar || compileGrammar(canonical_command),
+      available_modes,
+      required_privilege,
+      compatible_os_ids,
+      compatible_os_family_ids,
+      compatible_platform_family_ids,
+      supported_model_profiles,
+      required_capabilities,
+      feature_dependencies,
+      license_dependencies,
+      simulator_support: normaliseSupportLevel(raw.simulator_support || raw.support_level),
+      support_level: normaliseSupportLevel(raw.simulator_support || raw.support_level),
+      handler_id: raw.handler_id || (/^runtime[-_]/.test(raw.command_id || "") ? raw.command_id : ""),
+      metadata_source: raw.metadata_source || (/^runtime[-_]/.test(raw.command_id || "") ? "runtime" : (explicitModes.length ? "catalog" : "derived")),
+      priority: Number(raw.priority || (/^runtime[-_]/.test(raw.command_id || "") ? 100 : 0))
+    };
+  };
+  const commandIdentity = (command) => [
+    command.vendor_id,
+    normalise(command.canonical_command),
+    command.available_modes.join(","),
+    command.required_privilege,
+    command.compatible_os_ids.join(","),
+    command.compatible_os_family_ids.join(","),
+    command.compatible_platform_family_ids.join(","),
+    command.supported_model_profiles.join(","),
+    command.minimum_version || "",
+    command.maximum_version || "",
+    (command.excluded_versions || []).join(","),
+    command.required_capabilities.join(","),
+    command.feature_dependencies.join(","),
+    command.license_dependencies.join(",")
+  ].join("|");
+  const mergeCommands = (left, right) => {
+    const runtime = [left, right].find((command) => command.handler_id);
+    const catalog = [left, right].find((command) => !command.handler_id);
+    const primary = catalog || (left.priority >= right.priority ? left : right);
+    return {
+      ...primary,
+      aliases: [...new Set([...left.aliases, ...right.aliases])],
+      handler_id: runtime?.handler_id || primary.handler_id || "",
+      handler_identity: runtime?.handler_id || primary.handler_id || "",
+      metadata_source: runtime && catalog ? "merged" : primary.metadata_source,
+      merged_command_ids: [...new Set([...(primary.merged_command_ids || []), left.command_id, right.command_id])]
+    };
+  };
+
   function parseTokens(command, text, profile = null, syntaxOverride = "") {
     const entered = String(text || "").trim().split(/\s+/).filter(Boolean);
     // A command can have a compiled canonical grammar and a different alias grammar.
@@ -177,24 +252,24 @@
   class CommandRegistry {
     constructor(commands = [], profile = null) {
       const commandBySignature = new Map();
-      commands.forEach((command) => {
-        const vendor = command.vendor_id || command.vendor || "";
-        const modes = [...(command.available_modes || [])].map(normalise).sort().join(",");
-        const signature = `${vendor}|${normalise(command.canonical_command)}|${modes}`;
+      const mergeReport = { duplicates_detected: 0, records_merged: 0, aliases_combined: 0, handler_chosen: [], command_ids_retained: [], conflicts: [] };
+      commands.map(normaliseCommand).forEach((command) => {
+        const signature = commandIdentity(command);
         const existing = commandBySignature.get(signature);
-        // Runtime handlers intentionally replace matching generated metadata. This
-        // keeps one parser grammar per vendor/command/mode instead of ambiguity.
-        if (!existing || /^runtime-/.test(command.command_id || "")) commandBySignature.set(signature, command);
+        if (!existing) {
+          commandBySignature.set(signature, command);
+          return;
+        }
+        const merged = mergeCommands(existing, command);
+        mergeReport.duplicates_detected += 1;
+        mergeReport.records_merged += 1;
+        mergeReport.aliases_combined += merged.aliases.length - Math.max(existing.aliases.length, command.aliases.length);
+        mergeReport.handler_chosen.push({ identity: signature, handler_id: merged.handler_id || "" });
+        mergeReport.command_ids_retained.push(merged.command_id);
+        commandBySignature.set(signature, merged);
       });
-      this.commands = [...commandBySignature.values()].map((command) => {
-        const simulator_support = normaliseSupportLevel(command.simulator_support || command.support_level);
-        const derivedModes = Array.isArray(command.available_modes) && command.available_modes.length
-          ? command.available_modes
-          : (/^(description|switchport|port access|port link-type|vlan access|shutdown|no shutdown|undo shutdown)\b/i.test(command.canonical_command || "") ? ["interface"]
-            : (/^(hostname|sysname|interface|vlan|switch \S+ priority|irf member)\b/i.test(command.canonical_command || "") ? ["config"] : []));
-        const requiredPrivilege = command.required_privilege || (derivedModes.length || /^(show|display|copy|write|save|rollback|end|return)\b/i.test(command.canonical_command || "") ? "enable" : "user");
-        return { ...command, simulator_support, support_level: simulator_support, grammar: command.grammar || compileGrammar(command.canonical_command), vendor_id: command.vendor_id || command.vendor, compatible_os_ids: command.compatible_os_ids || [], compatible_os_family_ids: command.compatible_os_family_ids || [], compatible_platform_family_ids: command.compatible_platform_family_ids || (command.platform_family && command.platform_family !== "Any" ? [command.platform_family] : []), available_modes: derivedModes, required_privilege: requiredPrivilege, metadata_source: command.metadata_source || (command.available_modes?.length ? "catalog" : "derived") };
-      });
+      this.commands = [...commandBySignature.values()];
+      this.mergeReport = mergeReport;
       this.profile = normaliseProfile(profile || {});
       // Profile filtering must not depend on the currently selected CLI mode.
       this.catalog = this.commands.filter((command) => this.profileAvailability(command).available);
@@ -285,14 +360,29 @@
     }
 
     complete(text = "", context = {}) {
-      const prefix = String(text || "");
-      const parts = prefix.trim().split(/\s+/).filter(Boolean);
-      const current = parts.pop() || "";
-      const candidates = this.help(prefix, context).filter((item) => item.token !== "<cr>" && item.availability).flatMap((item) => item.possible_values?.length ? item.possible_values : item.token.startsWith("<") ? [] : [item.token]).filter((value) => normalise(value).startsWith(normalise(current)));
-      if (!candidates.length) return null;
-      const common = candidates.reduce((prefixValue, value) => { let index = 0; while (index < prefixValue.length && index < value.length && prefixValue[index].toLowerCase() === value[index].toLowerCase()) index += 1; return prefixValue.slice(0, index); });
-      if (!common) return { status: "ambiguous", candidates };
-      return `${parts.join(" ")}${parts.length ? " " : ""}${common}`;
+      const input = String(text || "");
+      const endsWithSpace = /\s$/.test(input);
+      const inputParts = input.trim().split(/\s+/).filter(Boolean);
+      const current = endsWithSpace ? "" : inputParts.at(-1) || "";
+      const priorParts = endsWithSpace ? inputParts : inputParts.slice(0, -1);
+      const uniqueValues = (values) => [...new Set(values.map((value) => String(value || "")).filter(Boolean))];
+      const valuesFor = (baseText, tokenPrefix) => uniqueValues(this.catalog
+        .filter((command) => this.availability(command, context.mode, context.privilege).available)
+        .flatMap((command) => [command.canonical_command, ...(command.aliases || [])].map((syntax) => parseTokens(command, baseText, this.profile, syntax)))
+        .filter((parsed) => parsed.status === "incomplete")
+        .flatMap((parsed) => parsed.expected_tokens.flatMap((token) => token === "<interface>" ? interfaceNames(this.profile) : token.startsWith("<") ? [] : token.split("|")))
+        .filter((value) => normalise(value).startsWith(normalise(tokenPrefix))));
+      const completeFrom = (baseParts, tokenPrefix, values) => {
+        const candidates = uniqueValues(values);
+        if (!candidates.length) return null;
+        const common = candidates.reduce((prefixValue, value) => { let index = 0; while (index < prefixValue.length && index < value.length && prefixValue[index].toLowerCase() === value[index].toLowerCase()) index += 1; return prefixValue.slice(0, index); });
+        if (common && normalise(common) !== normalise(tokenPrefix) && normalise(common).startsWith(normalise(tokenPrefix))) return `${baseParts.join(" ")}${baseParts.length ? " " : ""}${common}`;
+        return { status: "ambiguous", candidates, current_token: tokenPrefix, common_prefix: common || "" };
+      };
+      const primary = completeFrom(priorParts, current, valuesFor(priorParts.join(" "), current));
+      if (typeof primary === "string" || endsWithSpace) return primary;
+      const nextToken = completeFrom(inputParts, "", valuesFor(inputParts.join(" "), ""));
+      return nextToken || primary;
     }
 
     summary() {
@@ -434,7 +524,7 @@
       const pending = this.changes().filter((change) => String(change.field || "").startsWith(`interfaces.${name}.`));
       return Boolean(pending.length && pending.every((change) => this.verificationRecords().some((record) => this.isVerificationRecordCurrent(record) && record.covered_change_ids?.includes(change.change_id))));
     }
-    verifyInterfaceDescription(name, command, output) {
+    verifyInterfaceDescription(name, command, output, commandMetadata = {}) {
       const port = this.interface(name);
       const expected = `description ${port?.description || ""}`.trim();
       const target = this.verificationTargetForCommand(command);
@@ -443,7 +533,7 @@
       const field = `interfaces.${name}.description`;
       const covered = this.changes().filter((change) => change.field === field).map((change) => change.change_id);
       const verificationId = `verification-${crypto.randomUUID?.() || Date.now()}-${this.verificationRecords().length}`;
-      const verification = { verification_id: verificationId, policy_id: policy.policy_id, vendor: this.profile.vendor, profile_id: this.profile.profile_id, object_type: policy.object_type, object_id: name, command_id: "verify-interface-description", entered_command: command, output_evidence: String(output || "").slice(-2400), state_revision: this.revision(), verified_field_paths: passed ? [field] : [], covered_change_ids: passed ? covered : [], values_proved: passed ? { [field]: port?.description || "" } : {}, timestamp: new Date().toISOString(), result: passed ? "passed" : "failed", failure_reason: passed ? "" : "The required interface description evidence was not present.", support_level: policy.support_level, verified: passed, command, output: String(output || "").slice(-2400), expected_description: port?.description || "" };
+      const verification = { verification_id: verificationId, policy_id: policy.policy_id, vendor: this.profile.vendor, profile_id: this.profile.profile_id, object_type: policy.object_type, object_id: name, command_id: commandMetadata.command_id || "verify-interface-description", handler_id: commandMetadata.handler_id || "", canonical_command: commandMetadata.canonical_command || command, entered_command: command, output_evidence: String(output || "").slice(-2400), state_revision: this.revision(), verified_field_paths: passed ? [field] : [], covered_change_ids: passed ? covered : [], values_proved: passed ? { [field]: port?.description || "" } : {}, timestamp: new Date().toISOString(), result: passed ? "passed" : "failed", failure_reason: passed ? "" : "The required interface description evidence was not present.", support_level: policy.support_level, verified: passed, command, output: String(output || "").slice(-2400), expected_description: port?.description || "" };
       this.running.session.verification_records ||= {};
       this.running.session.verification_records[verification.verification_id] = verification;
       if (passed) this.changes().filter((change) => covered.includes(change.change_id)).forEach((change) => {
@@ -453,7 +543,7 @@
       this.running.session.verification ||= {};
       this.running.session.verification[name] = verification;
       this.compactVerificationRecords();
-      this.record({ command_id: "verify-interface-description", canonical_command: command, entered_text: command, success: passed, verification_result: passed ? "passed" : "failed" });
+      this.record({ command_id: verification.command_id, handler_id: verification.handler_id, canonical_command: verification.canonical_command, entered_text: command, success: passed, changed_fields: [], verification_policy_id: policy.policy_id, verification_record_id: verificationId, verification_result: passed ? "passed" : "failed" });
       this.persist();
       return passed;
     }
@@ -534,11 +624,11 @@
       const uncovered = changes.filter((change) => !this.verificationRecords().some((record) => this.isVerificationRecordCurrent(record) && record.covered_change_ids?.includes(change.change_id)));
       return { ok: !uncovered.length, uncovered, uncovered_change_ids: uncovered.map((change) => change.change_id), uncovered_fields: uncovered.map((change) => change.field), required_policy_ids: [...new Set(uncovered.map((change) => this.verificationPolicyForChange(change).policy_id))] };
     }
-    save(commandId = "save") {
+    save(commandId = "save", event = {}) {
       const eligibility = this.canSave();
       if (!eligibility.ok) {
         const message = `Save blocked: verify ${eligibility.uncovered_fields.join(", ")} before saving.`;
-        this.record({ command_id: commandId, canonical_command: commandId, entered_text: commandId, success: false, failure_type: "verification_required", changed_fields: [], safety_result: "save_rejected", save_result: "rejected" });
+        this.record({ command_id: commandId, canonical_command: event.canonical_command || commandId, entered_text: event.entered_text || commandId, entered_alias: Boolean(event.entered_alias), parsed_parameters: event.parsed_parameters || {}, handler_id: event.handler_id || "", mode_before: event.mode_before || "exec", mode_after: event.mode_after || "exec", success: false, failure_type: "verification_required", changed_fields: [], safety_result: "save_rejected", save_result: "rejected" });
         this.persist();
         return { ok: false, saved: false, ...eligibility, message };
       }
@@ -546,7 +636,7 @@
       this.startup = clone(cleanRunning);
       this.baseline = clone(cleanRunning);
       this.running.unsaved_changes = [];
-      this.record({ command_id: commandId, canonical_command: commandId, entered_text: commandId, success: true, save_result: "saved" });
+      this.record({ command_id: commandId, canonical_command: event.canonical_command || commandId, entered_text: event.entered_text || commandId, entered_alias: Boolean(event.entered_alias), parsed_parameters: event.parsed_parameters || {}, handler_id: event.handler_id || "", mode_before: event.mode_before || "exec", mode_after: event.mode_after || "exec", success: true, changed_fields: [], save_result: "saved" });
       this.persist();
       return { ok: true, saved: true, uncovered_change_ids: [], uncovered_fields: [], required_policy_ids: [], message: "Local startup configuration updated from verified running state." };
     }
@@ -576,7 +666,7 @@
     }
     rollback() { this.rollbackUnsaved(); }
     record(event) {
-      const required = { event_id: crypto.randomUUID?.() || `${Date.now()}-${this.eventLog.length}`, timestamp: new Date().toISOString(), command_id: "unclassified", canonical_command: "", entered_text: "", entered_alias: false, parsed_parameters: {}, vendor: this.profile.vendor, profile_id: this.profile.profile_id, operating_system_version: this.profile.default_version, mode_before: "exec", mode_after: "exec", privilege_before: "privileged", privilege_after: "privileged", success: false, failure_type: "", changed_fields: [], output_id: "", route_id: "", route_step: null, lesson_id: "", safety_result: "", verification_result: "", save_result: "" };
+      const required = { event_id: crypto.randomUUID?.() || `${Date.now()}-${this.eventLog.length}`, timestamp: new Date().toISOString(), command_id: "unclassified", handler_id: "", canonical_command: "", entered_text: "", entered_alias: false, parsed_parameters: {}, vendor: this.profile.vendor, profile_id: this.profile.profile_id, operating_system_version: this.profile.default_version, mode_before: "exec", mode_after: "exec", privilege_before: "privileged", privilege_after: "privileged", success: false, failure_type: "", changed_fields: [], output_id: "", route_id: "", route_step: null, lesson_id: "", verification_policy_id: "", verification_record_id: "", safety_result: "", verification_result: "", save_result: "" };
       const next = { ...required, ...event };
       delete next.state_before;
       delete next.state_after;
@@ -635,5 +725,5 @@
     byVendor(vendor) { return this.profiles.filter((profile) => profile.vendor === vendor); }
   }
 
-  window.CommandDoctorSwitchRuntime = { CommandRegistry, SharedSwitchState, ProfileRegistry, STORAGE_KEY, RUNTIME_SCHEMA_VERSION, MAX_VERIFICATION_RECORDS, normaliseSupportLevel, normalise, clone, normaliseProfile, compileGrammar, parseTokens, validateParameterDetail, compareVersion };
+  window.CommandDoctorSwitchRuntime = { CommandRegistry, SharedSwitchState, ProfileRegistry, STORAGE_KEY, RUNTIME_SCHEMA_VERSION, MAX_VERIFICATION_RECORDS, normaliseSupportLevel, normaliseCommand, commandIdentity, normalise, clone, normaliseProfile, compileGrammar, parseTokens, validateParameterDetail, compareVersion };
 })();
