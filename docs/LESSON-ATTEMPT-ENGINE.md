@@ -1,0 +1,217 @@
+# Lesson Attempt Engine
+
+Stage 2 adds a reusable learning attempt engine for Command Doctor. It is not wired into the visible app, the switch runtime, mastery persistence, or review scheduling.
+
+## Module Responsibilities
+
+- `src/learning/lesson-definition.js` defines controlled vocabularies, lesson-definition validation, command-target lookup, support-level dimension rules, and safe lesson projections.
+- `src/learning/lesson-evaluators.js` evaluates controlled stage responses without executable lesson code.
+- `src/learning/lesson-evidence.js` defines trusted external-evidence envelopes and provider validation.
+- `src/learning/lesson-attempt-engine.js` creates, restores, progresses, scores, finalizes, serializes, and redacts isolated lesson attempts.
+- `src/learning/catalog-compatibility-audit.js` maps every command in `data/generated/learning-command-catalog.json` to an engine compatibility row without changing migration readiness or review coverage.
+
+## Definition Contract
+
+Lesson definitions use schema version `lesson-definition.v1`.
+
+Required identity fields:
+
+```js
+lesson_id
+vendor_id
+operating_system_family_id
+command_targets[].canonical_command_id
+```
+
+Attempt identity is always:
+
+```text
+lesson_id:vendor_id:canonical_command_id:mode:attempt_id
+```
+
+Lesson title and display syntax are never identity. Grouped lessons may share stages, but each target keeps separate objectives, required stages, completion thresholds, blocking reasons, and mastery dimensions.
+
+Definitions contain only declarative evaluator data. They must not store JavaScript functions, `eval`, or dynamic `Function` bodies.
+
+## Attempt Contract
+
+Attempt states use schema version `lesson-attempt-state.v1` and serialize as JSON. The engine rejects unknown future attempt schemas instead of silently migrating them.
+
+An attempt records:
+
+- identity and mode
+- controlled attempt status
+- controlled stage states
+- submitted trusted-evidence summaries
+- hint and failure history
+- critical failures
+- dimension result candidates
+- completion result
+- definition version
+
+## Engine API
+
+The `LessonAttemptEngine` class exposes operations for:
+
+- `validateDefinition(definition)`
+- `createAttempt(definition, options)`
+- `restoreAttempt(serialized)`
+- `serializeAttempt(attempt)`
+- `getPublicLessonView(definition, mode)`
+- `getPublicAttemptView(attempt)`
+- `getCurrentStage(attempt, definition)`
+- `markStageViewed(attempt, definition, stageId)`
+- `submitStudentResponse(attempt, definition, stageId, response)`
+- `requestHint(attempt, definition, stageId)`
+- `ingestTrustedExternalEvidence(attempt, definition, stageId, envelope)`
+- `recordSafetyDecision(...)`
+- `recordSaveOrRollbackDecision(...)`
+- `submitTicketNote(...)`
+- `submitConfidence(...)`
+- `evaluateCompletion(attempt, definition)`
+- `finalizeAttempt(attempt, definition)`
+- `produceMasteryCandidates(attempt, definition)`
+
+Small example:
+
+```js
+const engine = new LessonAttemptEngine({
+  catalog,
+  clock,
+  idGenerator,
+  evidenceProvider
+});
+
+const validation = engine.validateDefinition(definition);
+if (!validation.valid) throw new Error(validation.errors.join("; "));
+
+const attempt = engine.createAttempt(definition, {
+  mode: "INDEPENDENT",
+  canonical_command_id: "cisco_interface_config"
+});
+
+engine.submitTicketNote(attempt, definition, "technician_ticket", "Student ticket note");
+engine.submitStudentResponse(attempt, definition, "prediction_before_output", "evidence present");
+engine.submitStudentResponse(attempt, definition, "choose_next_command", "interface Gi1/0/1");
+engine.ingestTrustedExternalEvidence(attempt, definition, "runtime_execution", envelope);
+engine.ingestTrustedExternalEvidence(attempt, definition, "runtime_verification", verificationEnvelope);
+engine.recordSaveOrRollbackDecision(attempt, definition, "save_or_rollback", "rollback");
+
+const result = engine.finalizeAttempt(attempt, definition);
+```
+
+## Stage State Machine
+
+Stages use controlled statuses:
+
+```text
+locked
+available
+in_progress
+submitted
+passed
+failed
+not_applicable
+not_supported
+blocked
+```
+
+Dependencies unlock only after their prerequisite stages pass or are honestly classified as not applicable or not supported. Required unsupported stages invalidate a lesson definition. Optional unsupported stages remain represented as `not_supported` with a reason.
+
+## Learning Modes
+
+`GUIDED` allows worked examples, progressive hints, and immediate reasoning feedback. It still requires assessed stages and records hint penalties only against relevant dimensions.
+
+`ASSISTED` limits hints and delays solution reveal until submission or declared failure conditions.
+
+`INDEPENDENT` exposes no hints and no solution reveal before finalization. It is the default mode for full mastery claims where support exists.
+
+Each mode has a separate attempt identity. Guided answers, hints, evidence, and scores do not populate Assisted or Independent attempts.
+
+## Prediction Gate
+
+Assessed output stages remain locked until the declared prediction stage is submitted. Guided demonstration content must be represented separately from assessed output. A prediction-gate violation is recorded as a critical failure and blocks completion.
+
+## Answer Redaction
+
+Public projections omit:
+
+- answer keys before permitted reveal
+- accepted command lists
+- evaluator criteria
+- trusted-provider internals
+- hidden evidence payloads
+- another mode's state
+- complete Independent-mode solutions before finalization
+
+The full attempt object may be serialized for trusted storage, but UI adapters should use public projections.
+
+## Evidence Provider Contract
+
+Trusted evidence uses schema version `trusted-lesson-evidence.v1`.
+
+Required identity fields include:
+
+```text
+evidence_id
+provider_id
+attempt_id
+lesson_id
+vendor_id
+canonical_command_id
+stage_id
+integrity_result
+```
+
+The engine rejects a plain `verified: true` flag, mismatched attempt/vendor/command/stage identity, unverified envelopes, missing provider verification, and reused evidence IDs.
+
+Stage 2 includes only the contract and fixture provider. The production runtime adapter belongs to Stage 4.
+
+## Scoring Contract
+
+The engine emits mastery candidates, not persisted mastery records.
+
+Candidate dimensions:
+
+```text
+concept
+syntax
+prediction
+output_interpretation
+command_selection
+practical_execution
+troubleshooting
+verification
+safety
+documentation
+```
+
+Support-level rules come from the normalized learning command record. Explanation-only and output-simulation commands cannot receive practical configuration mastery merely because a lesson says so. Confidence never increases a score. Administrative unlocks never create mastery evidence.
+
+## Critical Failures
+
+Critical failures have stable codes, stage identity, remediation flags, and final-result visibility. Examples include wrong-vendor syntax, unsafe command choice, mismatched trusted evidence, reused evidence, Save before required verification, and answer leakage.
+
+Unresolved critical failures block completion.
+
+## Catalog Compatibility
+
+`reports/learning-integrity-stage-2.json` and `.md` are generated from the current authoritative learning command catalog. Every command receives one row. The audit does not mark production lesson content complete, upgrade migration status, or change review coverage.
+
+## Deliberate Stage 2 Limits
+
+Stage 2 does not:
+
+- integrate with `lab.html` or current Learn screens
+- connect to `SharedSwitchState`, `CommandRegistry`, terminal execution, or runtime verification
+- create production pilot lessons
+- persist mastery
+- schedule review
+- change Practice Library behavior
+- change runtime command data or route data
+
+Stage 3 should add visible pilot lessons using this engine.
+
+Stage 4 should add the trusted runtime evidence adapter.
+
+Stage 5 should persist mastery and review records.

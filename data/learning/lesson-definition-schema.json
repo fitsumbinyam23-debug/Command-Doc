@@ -1,0 +1,114 @@
+{
+  "schema_version": "lesson-definition.v1",
+  "description": "Reusable lesson definition contract for Command Doctor learning attempt engine fixtures and future lesson content.",
+  "required_fields": [
+    "schema_version",
+    "lesson_id",
+    "title",
+    "module_id",
+    "learning_level",
+    "vendor_id",
+    "operating_system_family_id",
+    "command_targets",
+    "prerequisites",
+    "stages",
+    "supported_modes",
+    "mode_policies",
+    "completion_policy",
+    "critical_failure_rules",
+    "review_eligibility",
+    "migration_status"
+  ],
+  "identity": {
+    "lesson_identity_fields": ["lesson_id"],
+    "attempt_identity_fields": ["lesson_id", "vendor_id", "canonical_command_id", "mode", "attempt_id"],
+    "forbidden_identity_fields": ["title", "display_syntax"]
+  },
+  "controlled_values": {
+    "modes": ["GUIDED", "ASSISTED", "INDEPENDENT"],
+    "stage_requirement_statuses": ["required", "conditional", "optional", "unavailable", "unsupported"],
+    "stage_statuses": ["locked", "available", "in_progress", "submitted", "passed", "failed", "not_applicable", "not_supported", "blocked"],
+    "evaluator_types": [
+      "exact_text",
+      "normalized_command",
+      "one_of",
+      "ordered_selection",
+      "evidence_line_selection",
+      "structured_fields",
+      "non_empty_text",
+      "confidence_selection",
+      "trusted_external_evidence",
+      "trusted_verification_evidence",
+      "save_or_rollback_decision",
+      "safety_decision",
+      "composite"
+    ],
+    "mastery_dimensions": [
+      "concept",
+      "syntax",
+      "prediction",
+      "output_interpretation",
+      "command_selection",
+      "practical_execution",
+      "troubleshooting",
+      "verification",
+      "safety",
+      "documentation"
+    ],
+    "migration_statuses": [
+      "pilot_ready",
+      "batch_ready",
+      "blocked_by_runtime",
+      "blocked_by_verification",
+      "blocked_by_practice",
+      "blocked_by_content",
+      "explanation_only",
+      "unsupported"
+    ]
+  },
+  "command_target": {
+    "required_fields": [
+      "canonical_command_id",
+      "vendor_id",
+      "operating_system_family_id",
+      "objective_ids",
+      "runtime_support",
+      "practice_status",
+      "verification_status",
+      "rollback_status",
+      "mastery_dimensions",
+      "blocking_reasons",
+      "required_stage_ids",
+      "completion_thresholds",
+      "migration_status"
+    ],
+    "traceability": "Grouped lessons may share stages, but each target keeps its own objectives, evidence requirements, mastery dimensions, review eligibility, and migration status."
+  },
+  "stage": {
+    "required_fields": [
+      "stage_id",
+      "stage_type",
+      "requirement_status",
+      "dependencies",
+      "mode_availability",
+      "evidence_source",
+      "evaluator",
+      "eligible_dimensions",
+      "pass_criteria",
+      "failure_behavior",
+      "answer_visibility_policy"
+    ],
+    "unsupported_rule": "A required stage with unsupported support_status invalidates the definition. Optional or conditional unsupported stages remain visible as not_supported with a reason."
+  },
+  "security": {
+    "no_executable_lesson_code": true,
+    "forbidden_json_members": ["function", "eval", "dynamic_function"],
+    "public_projection_must_redact": [
+      "answer keys before permitted reveal",
+      "accepted command lists",
+      "trusted-provider internals",
+      "hidden evidence",
+      "another mode's attempt state"
+    ]
+  }
+}

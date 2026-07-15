@@ -1,0 +1,89 @@
+{
+  "schema_version": "lesson-attempt-state.v1",
+  "description": "Serializable attempt-state contract for the reusable Command Doctor lesson attempt engine.",
+  "required_fields": [
+    "schema_version",
+    "attempt_id",
+    "attempt_key",
+    "lesson_id",
+    "module_id",
+    "vendor_id",
+    "canonical_command_id",
+    "mode",
+    "status",
+    "created_at",
+    "updated_at",
+    "current_stage_id",
+    "stage_states",
+    "submitted_evidence",
+    "hint_history",
+    "failure_history",
+    "dimension_results",
+    "critical_failures",
+    "completion_result",
+    "definition_version"
+  ],
+  "attempt_key": {
+    "format": "lesson_id:vendor_id:canonical_command_id:mode:attempt_id",
+    "purpose": "Prevents answers, evidence, hints, and completion state from leaking across modes, vendors, commands, or attempts."
+  },
+  "controlled_values": {
+    "attempt_statuses": ["active", "completed", "failed", "abandoned", "invalid_definition"],
+    "stage_statuses": ["locked", "available", "in_progress", "submitted", "passed", "failed", "not_applicable", "not_supported", "blocked"],
+    "modes": ["GUIDED", "ASSISTED", "INDEPENDENT"],
+    "critical_failure_codes": [
+      "wrong_vendor_syntax",
+      "unsafe_command_choice",
+      "configuration_claim_without_trusted_execution",
+      "verification_claim_without_trusted_evidence",
+      "save_before_required_verification",
+      "skipped_rollback_decision",
+      "false_or_contradictory_ticket_note",
+      "cross_mode_evidence_reuse",
+      "cross_attempt_evidence_reuse",
+      "mismatched_trusted_evidence",
+      "answer_leakage_violation"
+    ]
+  },
+  "trusted_evidence_envelope": {
+    "schema_version": "trusted-lesson-evidence.v1",
+    "required_fields": [
+      "evidence_id",
+      "provider_id",
+      "evidence_type",
+      "attempt_id",
+      "lesson_id",
+      "vendor_id",
+      "canonical_command_id",
+      "stage_id",
+      "timestamp",
+      "payload",
+      "source_event_id",
+      "verification_policy_id",
+      "verification_record_id",
+      "integrity_result"
+    ],
+    "plain_verified_flag_allowed": false,
+    "provider_verification_required": true
+  },
+  "serialization": {
+    "format": "JSON",
+    "unknown_future_schema_behavior": "reject",
+    "determinism_inputs": ["clock", "attempt ID generator", "evidence ID generator", "evidence provider"]
+  },
+  "mastery_candidate": {
+    "dimensions": [
+      "concept",
+      "syntax",
+      "prediction",
+      "output_interpretation",
+      "command_selection",
+      "practical_execution",
+      "troubleshooting",
+      "verification",
+      "safety",
+      "documentation"
+    ],
+    "note": "The engine emits candidate results only. It does not persist mastery or schedule review in Stage 2."
+  }
+}

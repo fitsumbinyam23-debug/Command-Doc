@@ -9,6 +9,7 @@
     "test:core": "node tests/smoke-tests.mjs",
     "test:current": "node tests/current-app-smoke.mjs",
     "test:startup": "node tests/current-app-startup.mjs",
-    "test:learning": "node tools/generate-learning-integrity.mjs --check && node tools/validate-learning-integrity.mjs && node tests/learning-integrity.mjs"
+    "test:lesson-engine": "node tests/lesson-attempt-engine.mjs",
+    "test:learning": "node tools/generate-learning-integrity.mjs --check && node tools/validate-learning-integrity.mjs && node tests/learning-integrity.mjs && node tests/lesson-attempt-engine.mjs"
   }
 }
