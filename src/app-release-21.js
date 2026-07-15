@@ -4805,16 +4805,39 @@ function renderHome() {
   els.homeRoot.append(details);
 }
 
+const DEFAULT_VENDOR_LABELS = { cisco_ios: "Cisco IOS", hp_comware: "HP Comware", aruba_cx: "ArubaOS-CX", windows_cmd: "Windows CMD", linux: "Linux" };
 const LEARNING_TRACKS = ["Cisco IOS", "HP Comware", "ArubaOS-CX", "Windows CMD", "Linux", "all"];
 
-function matchingVendor(value, track) {
-  if (track === "all") return true;
-  return String(value || "").toLowerCase() === String(track).toLowerCase();
+function vendorLabelMap() {
+  return { ...DEFAULT_VENDOR_LABELS, ...(state.curriculum?.index?.vendors || {}) };
 }
 
 function vendorTrackKey(track = activeTrack()) {
-  const map = { "Cisco IOS": "cisco_ios", "HP Comware": "hp_comware", "ArubaOS-CX": "aruba_cx", "Windows CMD": "windows_cmd", Linux: "linux" };
-  return map[track] || track;
+  const value = String(track || "all").trim();
+  if (!value || value === "all") return "all";
+  const labels = vendorLabelMap();
+  if (labels[value]) return value;
+  const normalized = value.toLowerCase();
+  const match = Object.entries(labels).find(([id, label]) => id.toLowerCase() === normalized || String(label).toLowerCase() === normalized);
+  return match?.[0] || value;
+}
+
+function vendorLabelFor(value) {
+  const key = vendorTrackKey(value);
+  return vendorLabelMap()[key] || String(value || "Unknown vendor");
+}
+
+function routeVendorId(route) {
+  return vendorTrackKey(route?.vendor_id || route?.vendor || route?.vendor_label || "all");
+}
+
+function routeVendorLabel(route) {
+  return route?.vendor_label || vendorLabelFor(routeVendorId(route));
+}
+
+function matchingVendor(value, track) {
+  const key = vendorTrackKey(track);
+  return key === "all" || vendorTrackKey(value) === key;
 }
 
 function commandsForTrack(track = activeTrack()) {
@@ -4984,7 +5007,7 @@ function renderLearn() {
   const panel = labCreate("section", "learn-track-panel");
   panel.append(labCreate("div", "lab-card-kicker", "Choose your active learning track"));
   panel.append(labCreate("h3", "", "What do you want to learn?"));
-  panel.append(labCreate("p", "", "Your selection filters the course, Practice Library, and command coverage. Progress is stored independently for each vendor on this browser."));
+  panel.append(labCreate("p", "", "Your selection filters the course and command coverage. Opening Practice Library from here applies the track as a visible Vendor filter. Progress is stored independently for each vendor on this browser."));
   els.learnRoot.append(panel);
   const grid = labCreate("div", "learn-track-grid");
   LEARNING_TRACKS.forEach((id) => {
@@ -5002,8 +5025,15 @@ function renderLearn() {
   const trackLessons = lessonsForTrack(track);
   const learned = Object.keys(progress.learnedCommands).length;
   summary.append(labCreate("span", "badge", `Current level: ${learned < 5 ? "Foundation" : learned < 16 ? "Basic configuration" : "Existing advanced content"}`), labCreate("span", "badge", `Current module: ${trackLessons[0]?.section_id || "Command coverage"}`), labCreate("span", "badge", `Progress: ${learned}/${commandsForTrack(track).length} commands`), labCreate("span", "badge", `Needs review: ${Object.keys(progress.reviewRoutes).length}`));
-  summary.append(labButton("Continue Course", "primary", () => { state.lab.learnPanel = "modules"; renderLearn(); }), labButton("Browse Modules", "secondary", () => { state.lab.learnPanel = "modules"; renderLearn(); }), labButton("Command Coverage", "secondary", () => { state.lab.learnPanel = "coverage"; renderLearn(); }), labButton("Practice Library", "secondary", () => { state.lab.libraryTab = "practice"; switchView("library"); }), labButton("Change Track", "secondary", () => { state.lab.vendorTrack = "all"; renderLearn(); }));
+  summary.append(labButton("Continue Course", "primary", () => { state.lab.learnPanel = "modules"; renderLearn(); }), labButton("Browse Modules", "secondary", () => { state.lab.learnPanel = "modules"; renderLearn(); }), labButton("Command Coverage", "secondary", () => { state.lab.learnPanel = "coverage"; renderLearn(); }), labButton("Practice Library", "secondary", openPracticeLibraryFromLearn), labButton("Change Track", "secondary", () => { state.lab.vendorTrack = "all"; renderLearn(); }));
   els.learnRoot.append(summary);
+}
+
+function openPracticeLibraryFromLearn() {
+  const trackVendor = vendorTrackKey(activeTrack());
+  state.lab.libraryFilters.vendor = trackVendor === "all" ? "" : trackVendor;
+  state.lab.libraryTab = "practice";
+  switchView("library");
 }
 
 function generatedModulesForTrack(track = activeTrack()) {
@@ -5142,7 +5172,7 @@ function startPracticeRoute(routeId, action = "") {
   state.lab.pendingRouteStartId = "";
   state.lab.playgroundTaskId = route.id;
   state.lab.screen = "guided-cli";
-  recordTrackActivity(route.vendor, { lastLabRouteId: route.id });
+  recordTrackActivity(routeVendorId(route), { lastLabRouteId: route.id });
   switchView("lab");
   if (action === "reuse") {
     state.lab.console.routeStarted = route.id;
@@ -5155,19 +5185,98 @@ function startPracticeRoute(routeId, action = "") {
     const saved = state.lab.switchRuntime?.state?.save("route-start-save");
     if (saved && !saved.ok) { showToast(saved.message); return; }
   }
-  const routeVendorId = route.vendor_id || route.vendor;
-  const routeProfile = state.lab.switchProfiles.find((profile) => profile.vendor === routeVendorId);
-  if (routeProfile && activeSwitchProfile()?.vendor !== routeVendorId) activateSwitchProfile(routeProfile.profile_id);
+  const routeVendorKey = routeVendorId(route);
+  const routeProfile = state.lab.switchProfiles.find((profile) => profile.vendor === routeVendorKey);
+  if (routeProfile && activeSwitchProfile()?.vendor !== routeVendorKey) activateSwitchProfile(routeProfile.profile_id);
   startFreshTrainingSwitch(route);
+}
+
+function defaultPracticeLibraryFilters() {
+  return { search: "", vendor: "", operatingSystem: "", platform: "", modelFamily: "", topic: "", difficulty: "", routeType: "", support: "", status: "" };
+}
+
+function clearPracticeLibraryFilters() {
+  Object.assign(state.lab.libraryFilters, defaultPracticeLibraryFilters());
+}
+
+function normalizedPracticeRoutes() {
+  return runtimeTrainingRoutes().map((route) => {
+    const generated = state.curriculum?.routes?.find((item) => item.route_id === route.id);
+    if (!generated) return { ...route, vendor_id: routeVendorId(route), vendor_label: routeVendorLabel(route) };
+    return {
+      ...route,
+      ...generated,
+      vendor_id: generated.vendor,
+      vendor_label: generated.vendor_label || vendorLabelFor(generated.vendor),
+      vendor: generated.vendor,
+      operatingSystem: generated.operating_system,
+      modelFamily: generated.platform,
+      routeType: generated.route_type,
+      support: String(generated.support_level || route.supportLevel || "").replace(/_/g, " "),
+      estimatedMinutes: route.estimatedMinutes || 10
+    };
+  });
+}
+
+function practiceLibraryFilterDefinitions(routes) {
+  const values = (key) => [...new Set(routes.map((route) => route[key]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b))).map((value) => ({ value, label: value }));
+  return [
+    { key: "vendor", label: "Vendor", allLabel: "All vendors", options: Object.entries(vendorLabelMap()).map(([value, label]) => ({ value, label })) },
+    { key: "operatingSystem", label: "Operating system", allLabel: "All operating systems", options: values("operatingSystem") },
+    { key: "platform", label: "Platform", allLabel: "All platforms", options: values("platform") },
+    { key: "modelFamily", label: "Model family", allLabel: "All model families", options: values("modelFamily") },
+    { key: "topic", label: "Topic", allLabel: "All topics", options: values("topic") },
+    { key: "difficulty", label: "Difficulty", allLabel: "All difficulties", options: values("difficulty") },
+    { key: "routeType", label: "Route type", allLabel: "All route types", options: values("routeType") },
+    { key: "support", label: "Support level", allLabel: "All support levels", options: values("support") },
+    { key: "status", label: "Learning status", allLabel: "All learning statuses", options: ["Learned", "Not learned", "Needs review"].map((value) => ({ value, label: value })) }
+  ];
+}
+
+function practiceLibraryRouteProgress(route) {
+  return trackProgress(routeVendorId(route));
+}
+
+function practiceLibraryRouteMatches(route, filters) {
+  const vendorFilter = vendorTrackKey(filters.vendor) === "all" ? "" : vendorTrackKey(filters.vendor);
+  const searched = !filters.search || `${route.label} ${route.topic} ${route.category} ${routeVendorLabel(route)} ${route.vendor}`.toLowerCase().includes(filters.search.toLowerCase());
+  const fieldsMatch = [
+    ["vendor", routeVendorId(route), vendorFilter],
+    ["operatingSystem", route.operatingSystem, filters.operatingSystem],
+    ["platform", route.platform, filters.platform],
+    ["modelFamily", route.modelFamily, filters.modelFamily],
+    ["topic", route.topic, filters.topic],
+    ["difficulty", route.difficulty, filters.difficulty],
+    ["routeType", route.routeType, filters.routeType],
+    ["support", route.support, filters.support]
+  ].every(([, value, selected]) => !selected || value === selected);
+  const progress = practiceLibraryRouteProgress(route);
+  const learned = Boolean(progress.practisedRoutes?.[route.id]);
+  const review = Boolean(progress.reviewRoutes?.[route.id]);
+  const statusMatch = !filters.status || (filters.status === "Learned" && learned) || (filters.status === "Not learned" && !learned) || (filters.status === "Needs review" && review);
+  return searched && fieldsMatch && statusMatch;
+}
+
+function filteredPracticeRoutes(routes, filters) {
+  return routes.filter((route) => practiceLibraryRouteMatches(route, filters));
+}
+
+function practiceLibraryEmptyMessage(filters, allRoutes) {
+  const vendorFilter = vendorTrackKey(filters.vendor) === "all" ? "" : vendorTrackKey(filters.vendor);
+  if (vendorFilter && !allRoutes.some((route) => routeVendorId(route) === vendorFilter)) {
+    return `No ${vendorLabelFor(vendorFilter)} practice routes are authored yet. Command learning remains available, and route migration is planned.`;
+  }
+  return "No practice routes match the visible filters. Clear filters to return to the full local route library.";
+}
+
+function practiceRouteVendorDisplay(route) {
+  return `${routeVendorLabel(route)} | ${route.platform || route.operatingSystem || "Local route"}`;
 }
 
 function renderPracticeLibrary(parent) {
   const filters = state.lab.libraryFilters;
-  const track = activeTrack();
-  const normalizedRoutes = runtimeTrainingRoutes().map((route) => {
-    const generated = state.curriculum?.routes?.find((item) => item.route_id === route.id);
-    return generated ? { ...route, ...generated, vendor_id: generated.vendor, vendor_label: generated.vendor_label, vendor: generated.vendor, operatingSystem: generated.operating_system, modelFamily: generated.platform, routeType: generated.route_type, support: generated.support_level.replace(/_/g, " "), estimatedMinutes: route.estimatedMinutes || 10 } : route;
-  });
+  filters.vendor = vendorTrackKey(filters.vendor) === "all" ? "" : vendorTrackKey(filters.vendor);
+  const normalizedRoutes = normalizedPracticeRoutes();
   const pendingRoute = normalizedRoutes.find((route) => route.id === state.lab.pendingRouteStartId);
   if (pendingRoute) {
     const choice = labCreate("section", "lab-workspace-intro route-start-choice");
@@ -5188,49 +5297,35 @@ function renderPracticeLibrary(parent) {
   search.setAttribute("aria-label", "Search practice routes");
   search.addEventListener("input", () => { filters.search = search.value; renderLibrary(); });
   filterPanel.append(search);
-  const definitions = [
-    ["vendor", "Vendor", [...new Set(normalizedRoutes.map((route) => route.vendor))]],
-    ["operatingSystem", "Operating system", [...new Set(normalizedRoutes.map((route) => route.operatingSystem).filter(Boolean))]],
-    ["platform", "Platform", [...new Set(normalizedRoutes.map((route) => route.platform))]],
-    ["modelFamily", "Model family", [...new Set(normalizedRoutes.map((route) => route.modelFamily).filter(Boolean))]],
-    ["topic", "Topic", [...new Set(normalizedRoutes.map((route) => route.topic))]],
-    ["difficulty", "Difficulty", [...new Set(normalizedRoutes.map((route) => route.difficulty))]],
-    ["routeType", "Route type", [...new Set(normalizedRoutes.map((route) => route.routeType))]],
-    ["support", "Support level", [...new Set(normalizedRoutes.map((route) => route.support))]],
-    ["status", "Learning status", ["Learned", "Not learned", "Needs review"]]
-  ];
-  definitions.forEach(([key, label, values]) => {
+  practiceLibraryFilterDefinitions(normalizedRoutes).forEach(({ key, label, allLabel, options }) => {
     const select = document.createElement("select");
     select.setAttribute("aria-label", label);
-    select.append(new Option(`All ${label.toLowerCase()}`, ""));
-    values.forEach((value) => select.append(new Option(value, value)));
+    select.append(new Option(allLabel, ""));
+    options.forEach(({ value, label }) => select.append(new Option(label, value)));
     select.value = filters[key];
     select.addEventListener("change", () => { filters[key] = select.value; renderLibrary(); });
     filterPanel.append(select);
   });
   filterPanel.append(labButton("Clear filters", "secondary", () => {
-    Object.assign(filters, { search: "", vendor: "", operatingSystem: "", platform: "", modelFamily: "", topic: "", difficulty: "", routeType: "", support: "", status: "" });
+    clearPracticeLibraryFilters();
     renderLibrary();
   }));
   parent.append(filterPanel);
-  const progress = trackProgress(track);
-  const routes = normalizedRoutes.filter((route) => {
-    const searched = !filters.search || `${route.label} ${route.topic} ${route.vendor}`.toLowerCase().includes(filters.search.toLowerCase());
-    const activeVendor = track === "all" || route.vendor === track;
-    const fieldsMatch = ["vendor", "operatingSystem", "platform", "modelFamily", "topic", "difficulty", "routeType", "support"].every((key) => !filters[key] || route[key] === filters[key]);
-    const learned = Boolean(progress.practisedRoutes[route.id]);
-    const review = Boolean(progress.reviewRoutes[route.id]);
-    const statusMatch = !filters.status || (filters.status === "Learned" && learned) || (filters.status === "Not learned" && !learned) || (filters.status === "Needs review" && review);
-    return searched && activeVendor && fieldsMatch && statusMatch;
-  });
+  const routes = filteredPracticeRoutes(normalizedRoutes, filters);
   const count = labCreate("p", "", `${routes.length} route${routes.length === 1 ? "" : "s"} match the current filters.`);
   parent.append(count);
+  if (!routes.length) {
+    const empty = labCreate("section", "library-card");
+    empty.append(labCreate("h3", "", "No practice routes found"), labCreate("p", "", practiceLibraryEmptyMessage(filters, normalizedRoutes)), labButton("Clear filters", "secondary", () => { clearPracticeLibraryFilters(); renderLibrary(); }));
+    parent.append(empty);
+    return;
+  }
   const grid = labCreate("div", "practice-route-grid");
   routes.forEach((route) => {
     const lesson = relatedLessonForRoute(route);
     const card = labCreate("article", "practice-route-card");
     card.dataset.routeId = route.id;
-    card.append(labCreate("div", "lab-card-kicker", `${route.vendor} | ${route.platform}`), labCreate("h3", "", route.label), labCreate("p", "", `${route.topic} | ${route.difficulty}`));
+    card.append(labCreate("div", "lab-card-kicker", practiceRouteVendorDisplay(route)), labCreate("h3", "", route.label), labCreate("p", "", `${route.topic} | ${route.difficulty}`));
     const facts = labCreate("div", "route-facts");
     [route.routeType, route.support, `${route.estimatedMinutes} min`, `Lesson: ${lesson?.title || "Planned command group"}`].forEach((fact) => facts.append(labCreate("span", "badge", fact)));
     card.append(facts, labButton("Start route", "primary", () => startPracticeRoute(route.id)));
