@@ -1,0 +1,249 @@
+{
+  "schema_version": "learning-source-precedence-report.v1",
+  "source_precedence": {
+    "schema_version": "learning-source-precedence.v1",
+    "purpose": "Defines authoritative source precedence for Stage 1 normalized learning metadata.",
+    "source_inventory": [
+      {
+        "source": "data/generated/command-inventory.json",
+        "influences": [
+          "canonical command identity",
+          "aliases",
+          "vendor",
+          "topic",
+          "runtime support",
+          "verification guidance",
+          "rollback guidance"
+        ],
+        "precedence": 1,
+        "reason": "Current generated command catalog is the app-facing normalized command source for the v0.2.0 runtime baseline."
+      },
+      {
+        "source": "data/generated/curriculum-index.json",
+        "influences": [
+          "module",
+          "generated grouped lesson",
+          "current level"
+        ],
+        "precedence": 2,
+        "reason": "Current generated index is the app-facing source for module and grouped lesson organization."
+      },
+      {
+        "source": "data/generated/route-inventory.json",
+        "influences": [
+          "practice routes",
+          "route vendor",
+          "route verification",
+          "route rollback",
+          "missing CLI handlers"
+        ],
+        "precedence": 3,
+        "reason": "Current route inventory is the app-facing route and practice mapping source."
+      },
+      {
+        "source": "data/learning/status-vocabularies.json",
+        "influences": [
+          "allowed status values"
+        ],
+        "precedence": 4,
+        "reason": "Stage 1 normalized records must use controlled vocabularies."
+      },
+      {
+        "source": "data/learning/command-id-migrations.json",
+        "influences": [
+          "duplicate source ID resolution",
+          "ID migrations"
+        ],
+        "precedence": 5,
+        "reason": "Stage 1 migration file documents duplicate source command handling without changing runtime behavior."
+      },
+      {
+        "source": "data/labs/curriculum_vendor_tracks.json",
+        "influences": [
+          "active hand-authored lab lessons",
+          "active quizzes",
+          "foundation final"
+        ],
+        "precedence": 6,
+        "reason": "This is the active student-facing lab curriculum file."
+      },
+      {
+        "source": "data/labs/lessons/*.json",
+        "influences": [
+          "dedicated lesson signals",
+          "lesson objectives",
+          "configuration lesson content"
+        ],
+        "precedence": 7,
+        "reason": "These files provide existing hand-authored lesson coverage but are not the canonical command catalog."
+      },
+      {
+        "source": "data/labs/quizzes/*.json",
+        "influences": [
+          "quiz coverage"
+        ],
+        "precedence": 8,
+        "reason": "Quiz banks influence assessment inventory but do not create mastery by themselves."
+      },
+      {
+        "source": "data/labs/stages.json",
+        "influences": [
+          "current stage labels"
+        ],
+        "precedence": 9,
+        "reason": "Current stage metadata informs sequencing only."
+      },
+      {
+        "source": "data/labs/sections.json",
+        "influences": [
+          "section and prerequisite grouping"
+        ],
+        "precedence": 10,
+        "reason": "Current sections inform existing progression but do not override command identity."
+      },
+      {
+        "source": "data/labs/scenarios/scenarios.json",
+        "influences": [
+          "scenario coverage"
+        ],
+        "precedence": 11,
+        "reason": "Scenario coverage informs troubleshooting readiness."
+      },
+      {
+        "source": "data/flows/*.json",
+        "influences": [
+          "troubleshooting flow coverage"
+        ],
+        "precedence": 12,
+        "reason": "Flow files describe diagnosis paths and related evidence."
+      },
+      {
+        "source": "data/commands/*.json",
+        "influences": [
+          "raw command authoring records",
+          "duplicate source ID audit"
+        ],
+        "precedence": 13,
+        "reason": "Raw command files are inspected for source defects, but the generated inventory remains authoritative for Stage 1 normalized records."
+      },
+      {
+        "source": "data/platforms/switch-profiles.json",
+        "influences": [
+          "switch profiles"
+        ],
+        "precedence": 14,
+        "reason": "Read-only profile reference for coverage reporting; runtime profile behavior is frozen."
+      },
+      {
+        "source": "docs/*.md and docs/LEARNING-TRACEABILITY-MATRIX.json",
+        "influences": [
+          "product policy",
+          "learning standard",
+          "roadmap"
+        ],
+        "precedence": 15,
+        "reason": "Stage 0 documents define policy and acceptance criteria, not executable data."
+      },
+      {
+        "source": "src/app-release-21.js",
+        "influences": [
+          "current progress/mastery/review structures"
+        ],
+        "precedence": 16,
+        "reason": "Read-only inspection source; application behavior is frozen in Stage 1."
+      }
+    ],
+    "conflict_rules": [
+      {
+        "field": "canonical command identity",
+        "authoritative_source": "data/generated/command-inventory.json",
+        "rule": "Use command_id plus vendor_id as the mastery identity. Raw duplicate source IDs are documented through command-id migrations."
+      },
+      {
+        "field": "module and lesson grouping",
+        "authoritative_source": "data/generated/curriculum-index.json",
+        "rule": "Use generated module and lesson IDs, then add dedicated lesson references from active and hand-authored lab lessons."
+      },
+      {
+        "field": "practice and handler status",
+        "authoritative_source": "data/generated/route-inventory.json",
+        "rule": "Use route required/allowed/verification/rollback command IDs and route missing_cli_handler_ids. Routes with missing handlers do not authorize full practical mastery."
+      },
+      {
+        "field": "status values",
+        "authoritative_source": "data/learning/status-vocabularies.json",
+        "rule": "Reject free-form status values in generated learning records."
+      },
+      {
+        "field": "runtime support",
+        "authoritative_source": "data/generated/command-inventory.json",
+        "rule": "Do not infer stronger runtime support from lesson text or route titles."
+      },
+      {
+        "field": "review coverage",
+        "authoritative_source": "reports/learning-integrity-stage-1.json",
+        "rule": "Review eligibility may be planned, but current review coverage remains 0 until real review records exist."
+      }
+    ]
+  },
+  "raw_command_source_files": [
+    "data/commands/admin_commands.json",
+    "data/commands/aruba_cx.json",
+    "data/commands/cisco_ios.json",
+    "data/commands/hp_comware.json",
+    "data/commands/linux.json",
+    "data/commands/network_commands_extended.json",
+    "data/commands/platform_commands.json",
+    "data/commands/switch_configuration_extended.json",
+    "data/commands/vendor_learning_extended.json",
+    "data/commands/windows_cmd.json"
+  ],
+  "flow_source_files": [
+    "data/flows/dns_troubleshooting.json",
+    "data/flows/gateway_troubleshooting.json",
+    "data/flows/interface_troubleshooting.json",
+    "data/flows/stack_troubleshooting.json",
+    "data/flows/vlan_troubleshooting.json"
+  ],
+  "duplicate_source_ids": [
+    {
+      "command_id": "aruba_show_spanning_tree",
+      "records": [
+        {
+          "source_file": "data/commands/network_commands_extended.json",
+          "index": 12,
+          "vendor_id": "aruba_cx",
+          "syntax": "show spanning-tree"
+        },
+        {
+          "source_file": "data/commands/vendor_learning_extended.json",
+          "index": 12,
+          "vendor_id": "aruba_cx",
+          "syntax": "show spanning-tree"
+        }
+      ]
+    },
+    {
+      "command_id": "windows_netstat_ano",
+      "records": [
+        {
+          "source_file": "data/commands/platform_commands.json",
+          "index": 13,
+          "vendor_id": "windows_cmd",
+          "syntax": "netstat -ano"
+        },
+        {
+          "source_file": "data/commands/vendor_learning_extended.json",
+          "index": 14,
+          "vendor_id": "windows_cmd",
+          "syntax": "netstat -ano"
+        }
+      ]
+    }
+  ],
+  "resolved_duplicate_ids": [
+    "aruba_show_spanning_tree",
+    "windows_netstat_ano"
+  ],
+  "unresolved_duplicate_ids": []
+}

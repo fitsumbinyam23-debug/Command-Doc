@@ -1,0 +1,31 @@
+{
+  "schema_version": "learning-command-id-migrations.v1",
+  "policy": "Do not rename a command ID when duplicate raw source records represent the same vendor and canonical syntax. Consolidate them into one normalized learning record and preserve all source file references.",
+  "migrations": [],
+  "consolidations": [
+    {
+      "source_command_id": "aruba_show_spanning_tree",
+      "canonical_command_id": "aruba_show_spanning_tree",
+      "vendor_id": "aruba_cx",
+      "canonical_syntax": "show spanning-tree",
+      "duplicate_source_files": [
+        "data/commands/network_commands_extended.json",
+        "data/commands/vendor_learning_extended.json"
+      ],
+      "resolution": "same_canonical_command_consolidated_in_learning_catalog",
+      "notes": "The records describe the same ArubaOS-CX read-only STP command with complementary evidence metadata; no executable command rename is required."
+    },
+    {
+      "source_command_id": "windows_netstat_ano",
+      "canonical_command_id": "windows_netstat_ano",
+      "vendor_id": "windows_cmd",
+      "canonical_syntax": "netstat -ano",
+      "duplicate_source_files": [
+        "data/commands/platform_commands.json",
+        "data/commands/vendor_learning_extended.json"
+      ],
+      "resolution": "same_canonical_command_consolidated_in_learning_catalog",
+      "notes": "The records describe the same Windows netstat command with complementary endpoint/process metadata; no executable command rename is required."
+    }
+  ]
+}

@@ -1,0 +1,363 @@
+{
+  "schema_version": "learning-integrity-report.v1",
+  "canonical_command_count": 163,
+  "command_count_per_vendor": {
+    "aruba_cx": 33,
+    "cisco_ios": 43,
+    "hp_comware": 42,
+    "linux": 23,
+    "windows_cmd": 22
+  },
+  "duplicate_ids_found": [
+    "aruba_show_spanning_tree",
+    "windows_netstat_ano"
+  ],
+  "duplicate_ids_resolved": [
+    "aruba_show_spanning_tree",
+    "windows_netstat_ano"
+  ],
+  "unresolved_duplicate_ids": [],
+  "objective_count": 163,
+  "module_count": 44,
+  "status_counts": {
+    "lesson_status": {
+      "dedicated": 35,
+      "grouped": 128
+    },
+    "practice_status": {
+      "runtime_free_practice": 29,
+      "explanation_only": 24,
+      "planned": 69,
+      "blocked_by_missing_handler": 33,
+      "grouped_route": 8
+    },
+    "verification_status": {
+      "command_guidance": 119,
+      "missing": 3,
+      "route_guidance": 33,
+      "runtime_policy": 8
+    },
+    "rollback_status": {
+      "command_guidance": 30,
+      "missing": 10,
+      "not_applicable": 112,
+      "route_guidance": 11
+    },
+    "review_status": {
+      "planned": 163
+    },
+    "migration_status": {
+      "blocked_by_practice": 97,
+      "explanation_only": 22,
+      "blocked_by_verification": 3,
+      "blocked_by_runtime": 33,
+      "batch_ready": 5,
+      "pilot_ready": 3
+    },
+    "handler_status": {
+      "simplified_state_handler": 39,
+      "explanation_only_no_handler": 24,
+      "output_simulation_only": 69,
+      "full_state_handler": 10,
+      "route_missing_handler": 21
+    },
+    "runtime_support": {
+      "simplified_state_simulation": 39,
+      "explanation_only": 30,
+      "output_simulation": 84,
+      "full_state_simulation": 10
+    }
+  },
+  "commands_without_practice": [
+    "aruba_configure_terminal",
+    "aruba_hostname",
+    "aruba_interface_config",
+    "aruba_lacp_mode_active",
+    "aruba_lacp_system_priority",
+    "aruba_no_shutdown",
+    "aruba_reload",
+    "aruba_show_events_reverse_count",
+    "aruba_show_flash",
+    "aruba_show_interface",
+    "aruba_show_interface_brief",
+    "aruba_show_interface_error_statistics",
+    "aruba_show_ip_interface_brief",
+    "aruba_show_ip_route",
+    "aruba_show_lacp_interfaces",
+    "aruba_show_lldp_neighbor_info",
+    "aruba_show_logging",
+    "aruba_show_mac_address_table",
+    "aruba_show_power_over_ethernet",
+    "aruba_show_running_config",
+    "aruba_show_running_config_interface",
+    "aruba_show_spanning_tree",
+    "aruba_show_system",
+    "aruba_show_system_resource_utilization",
+    "aruba_show_version",
+    "aruba_show_vlan",
+    "aruba_shutdown",
+    "aruba_stp_priority",
+    "aruba_vlan",
+    "aruba_vlan_access",
+    "aruba_vlan_trunk_allowed",
+    "aruba_vlan_trunk_native",
+    "aruba_write_memory",
+    "cisco_dir_flash",
+    "cisco_interface_range",
+    "cisco_reload",
+    "cisco_show_boot",
+    "cisco_show_diagnostic_result",
+    "cisco_show_file_systems",
+    "cisco_show_interfaces",
+    "cisco_show_interfaces_counters_errors",
+    "cisco_show_inventory",
+    "cisco_show_ip_arp",
+    "cisco_show_ip_dhcp_binding",
+    "cisco_show_ip_interface_brief",
+    "cisco_show_ip_route",
+    "cisco_show_logging",
+    "cisco_show_power_inline",
+    "cisco_show_processes_cpu_sorted",
+    "cisco_show_startup_config",
+    "cisco_show_version",
+    "cisco_shutdown",
+    "cisco_stp_root_primary",
+    "cisco_svi_ip_address",
+    "cisco_voice_vlan",
+    "hp_dir",
+    "hp_display_arp",
+    "hp_display_cpu_usage",
+    "hp_display_current_configuration_interface",
+    "hp_display_device",
+    "hp_display_diagnostic_information",
+    "hp_display_interface",
+    "hp_display_ip_interface_brief",
+    "hp_display_ip_routing_table",
+    "hp_display_irf",
+    "hp_display_irf_configuration",
+    "hp_display_irf_port_configuration",
+    "hp_display_link_aggregation_summary",
+    "hp_display_link_aggregation_verbose",
+    "hp_display_logbuffer",
+    "hp_display_memory",
+    "hp_display_poe_interface",
+    "hp_display_saved_configuration",
+    "hp_display_stp",
+    "hp_display_stp_brief",
+    "hp_display_version",
+    "hp_irf_member_renumber",
+    "hp_reboot",
+    "hp_save_force",
+    "hp_shutdown",
+    "hp_sysname",
+    "hp_undo_shutdown",
+    "linux_arp_a",
+    "linux_df_h",
+    "linux_dhclient_release",
+    "linux_dhclient_renew",
+    "linux_dig",
+    "linux_dmesg",
+    "linux_ethtool_interface",
+    "linux_ip_addr",
+    "linux_ip_link",
+    "linux_ip_link_down",
+    "linux_ip_link_up",
+    "linux_ip_neigh",
+    "linux_ip_route",
+    "linux_journalctl_errors",
+    "linux_journalctl_networkmanager",
+    "linux_lsblk",
+    "linux_ping",
+    "linux_resolvectl_status",
+    "linux_restart_networking",
+    "linux_restart_networkmanager",
+    "linux_ss_listening",
+    "linux_systemctl_status_networkmanager",
+    "linux_traceroute",
+    "windows_dir",
+    "windows_dism_scanhealth",
+    "windows_getmac_verbose",
+    "windows_ipconfig_release",
+    "windows_ipconfig_renew",
+    "windows_netsh_interface_disable",
+    "windows_netsh_interface_enable",
+    "windows_netsh_interface_show_interface",
+    "windows_netsh_ipv4_show_interfaces",
+    "windows_netsh_lan_show_interfaces",
+    "windows_netsh_set_static_ip",
+    "windows_netsh_winsock_reset",
+    "windows_netsh_wlan_show_interfaces",
+    "windows_netstat_ano",
+    "windows_pathping_host",
+    "windows_route_print",
+    "windows_systeminfo"
+  ],
+  "routes_with_missing_handlers": [
+    "full-switch-configuration",
+    "route-10-1",
+    "route-10-10",
+    "route-10-2",
+    "route-10-3",
+    "route-10-4",
+    "route-10-5",
+    "route-10-6",
+    "route-10-7",
+    "route-10-8",
+    "route-10-9",
+    "route-11-10",
+    "route-11-2",
+    "route-11-4",
+    "route-11-5",
+    "route-11-6",
+    "route-11-8",
+    "route-11-9",
+    "route-12-4",
+    "route-12-5",
+    "route-12-6",
+    "route-12-7",
+    "route-12-8",
+    "route-2-5",
+    "route-3-1",
+    "route-3-10",
+    "route-3-2",
+    "route-3-5",
+    "route-3-8",
+    "route-3-9",
+    "route-4-1",
+    "route-4-10",
+    "route-4-2",
+    "route-4-3",
+    "route-4-4",
+    "route-4-5",
+    "route-4-6",
+    "route-4-7",
+    "route-4-8",
+    "route-4-9",
+    "route-6-2",
+    "route-6-3",
+    "route-6-4",
+    "route-6-5",
+    "route-7-1",
+    "route-7-2",
+    "route-7-3",
+    "route-7-4",
+    "route-7-5",
+    "route-7-7",
+    "route-7-8",
+    "route-7-9",
+    "route-8-1",
+    "route-8-10",
+    "route-8-2",
+    "route-8-3",
+    "route-8-4",
+    "route-8-5",
+    "route-8-6",
+    "route-8-7",
+    "route-8-8",
+    "route-8-9",
+    "route-9-1",
+    "route-9-10",
+    "route-9-2",
+    "route-9-3",
+    "route-9-4",
+    "route-9-5",
+    "route-9-6",
+    "route-9-7",
+    "route-9-8",
+    "route-9-9"
+  ],
+  "commands_blocked_by_missing_handlers": [
+    "cisco_show_cdp_neighbors",
+    "cisco_show_etherchannel_summary",
+    "cisco_show_lldp_neighbors",
+    "cisco_show_mac_address_table",
+    "cisco_show_running_config",
+    "cisco_show_spanning_tree",
+    "cisco_switch_priority",
+    "cisco_switchport_mode_trunk",
+    "cisco_vlan_name",
+    "hp_display_current_configuration",
+    "hp_display_irf_port",
+    "hp_display_lldp_neighbor",
+    "hp_display_mac_address",
+    "hp_display_vlan",
+    "hp_irf_member_priority",
+    "hp_port_link_type_trunk",
+    "windows_arp_a",
+    "windows_ipconfig_all",
+    "windows_nslookup",
+    "windows_ping",
+    "windows_tracert"
+  ],
+  "commands_without_verification": [
+    "aruba_lacp_system_priority",
+    "aruba_vlan_trunk_native",
+    "hp_irf_member_renumber"
+  ],
+  "prerequisite_cycles": [],
+  "module_ordering_warnings": [
+    {
+      "module_id": "aruba_cx-device_information",
+      "notes": [
+        "current_order_before_prerequisite:aruba_cx-cli_foundation"
+      ]
+    },
+    {
+      "module_id": "aruba_cx-interfaces",
+      "notes": [
+        "current_order_before_prerequisite:aruba_cx-cli_foundation"
+      ]
+    },
+    {
+      "module_id": "cisco_ios-device_information",
+      "notes": [
+        "current_order_before_prerequisite:cisco_ios-cli_foundation"
+      ]
+    },
+    {
+      "module_id": "cisco_ios-interfaces",
+      "notes": [
+        "current_order_before_prerequisite:cisco_ios-cli_foundation"
+      ]
+    },
+    {
+      "module_id": "hp_comware-device_information",
+      "notes": [
+        "current_order_before_prerequisite:hp_comware-cli_foundation"
+      ]
+    },
+    {
+      "module_id": "hp_comware-interfaces",
+      "notes": [
+        "current_order_before_prerequisite:hp_comware-cli_foundation"
+      ]
+    },
+    {
+      "module_id": "linux-interfaces",
+      "notes": [
+        "current_order_before_prerequisite:linux-cli_foundation",
+        "current_order_before_prerequisite:linux-device_information"
+      ]
+    },
+    {
+      "module_id": "windows_cmd-interfaces",
+      "notes": [
+        "current_order_before_prerequisite:windows_cmd-device_information"
+      ]
+    },
+    {
+      "module_id": "windows_cmd-mac_neighbors",
+      "notes": [
+        "current_order_before_prerequisite:windows_cmd-interfaces"
+      ]
+    },
+    {
+      "module_id": "windows_cmd-networking",
+      "notes": [
+        "current_order_before_prerequisite:windows_cmd-interfaces"
+      ]
+    }
+  ],
+  "route_vendor_errors": [],
+  "broken_references": []
+}

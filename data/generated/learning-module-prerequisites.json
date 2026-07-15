@@ -1,0 +1,674 @@
+{
+  "schema_version": "learning-module-prerequisites.v1",
+  "levels": [
+    {
+      "level_id": "level_1",
+      "title": "Foundation evidence and safe read-only orientation"
+    },
+    {
+      "level_id": "level_2",
+      "title": "Operational evidence interpretation and relationships"
+    },
+    {
+      "level_id": "level_3",
+      "title": "Configuration, troubleshooting, lifecycle, and advanced workflows"
+    }
+  ],
+  "topic_order": [
+    "cli_foundation",
+    "device_information",
+    "interfaces",
+    "vlans",
+    "mac_neighbors",
+    "networking",
+    "switching",
+    "trunks",
+    "configuration",
+    "stacking",
+    "diagnostics",
+    "file_system",
+    "device_lifecycle"
+  ],
+  "modules": [
+    {
+      "module_id": "aruba_cx-cli_foundation",
+      "vendor_id": "aruba_cx",
+      "title": "5. Cli Foundation",
+      "topic_id": "cli_foundation",
+      "current_level": 2,
+      "target_level_id": "level_1",
+      "target_order": 1,
+      "current_order": 5,
+      "prerequisite_module_ids": [],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "aruba_cx-device_information",
+      "vendor_id": "aruba_cx",
+      "title": "1. Device Information",
+      "topic_id": "device_information",
+      "current_level": 1,
+      "target_level_id": "level_1",
+      "target_order": 2,
+      "current_order": 1,
+      "prerequisite_module_ids": [
+        "aruba_cx-cli_foundation"
+      ],
+      "ordering_notes": [
+        "current_order_before_prerequisite:aruba_cx-cli_foundation"
+      ]
+    },
+    {
+      "module_id": "aruba_cx-interfaces",
+      "vendor_id": "aruba_cx",
+      "title": "2. Interfaces",
+      "topic_id": "interfaces",
+      "current_level": 1,
+      "target_level_id": "level_1",
+      "target_order": 3,
+      "current_order": 2,
+      "prerequisite_module_ids": [
+        "aruba_cx-cli_foundation",
+        "aruba_cx-device_information"
+      ],
+      "ordering_notes": [
+        "current_order_before_prerequisite:aruba_cx-cli_foundation"
+      ]
+    },
+    {
+      "module_id": "aruba_cx-vlans",
+      "vendor_id": "aruba_cx",
+      "title": "3. Vlans",
+      "topic_id": "vlans",
+      "current_level": 2,
+      "target_level_id": "level_2",
+      "target_order": 4,
+      "current_order": 3,
+      "prerequisite_module_ids": [
+        "aruba_cx-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "aruba_cx-mac_neighbors",
+      "vendor_id": "aruba_cx",
+      "title": "4. Mac Neighbors",
+      "topic_id": "mac_neighbors",
+      "current_level": 2,
+      "target_level_id": "level_2",
+      "target_order": 5,
+      "current_order": 4,
+      "prerequisite_module_ids": [
+        "aruba_cx-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "aruba_cx-networking",
+      "vendor_id": "aruba_cx",
+      "title": "8. Networking",
+      "topic_id": "networking",
+      "current_level": 3,
+      "target_level_id": "level_2",
+      "target_order": 6,
+      "current_order": 8,
+      "prerequisite_module_ids": [
+        "aruba_cx-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "aruba_cx-switching",
+      "vendor_id": "aruba_cx",
+      "title": "9. Switching",
+      "topic_id": "switching",
+      "current_level": 3,
+      "target_level_id": "level_2",
+      "target_order": 7,
+      "current_order": 9,
+      "prerequisite_module_ids": [
+        "aruba_cx-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "aruba_cx-trunks",
+      "vendor_id": "aruba_cx",
+      "title": "10. Trunks",
+      "topic_id": "trunks",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 8,
+      "current_order": 10,
+      "prerequisite_module_ids": [
+        "aruba_cx-interfaces",
+        "aruba_cx-vlans"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "aruba_cx-configuration",
+      "vendor_id": "aruba_cx",
+      "title": "6. Configuration",
+      "topic_id": "configuration",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 9,
+      "current_order": 6,
+      "prerequisite_module_ids": [
+        "aruba_cx-cli_foundation",
+        "aruba_cx-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "aruba_cx-device_lifecycle",
+      "vendor_id": "aruba_cx",
+      "title": "7. Device Lifecycle",
+      "topic_id": "device_lifecycle",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 13,
+      "current_order": 7,
+      "prerequisite_module_ids": [
+        "aruba_cx-device_information"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "cisco_ios-cli_foundation",
+      "vendor_id": "cisco_ios",
+      "title": "6. Cli Foundation",
+      "topic_id": "cli_foundation",
+      "current_level": 3,
+      "target_level_id": "level_1",
+      "target_order": 1,
+      "current_order": 6,
+      "prerequisite_module_ids": [],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "cisco_ios-device_information",
+      "vendor_id": "cisco_ios",
+      "title": "1. Device Information",
+      "topic_id": "device_information",
+      "current_level": 1,
+      "target_level_id": "level_1",
+      "target_order": 2,
+      "current_order": 1,
+      "prerequisite_module_ids": [
+        "cisco_ios-cli_foundation"
+      ],
+      "ordering_notes": [
+        "current_order_before_prerequisite:cisco_ios-cli_foundation"
+      ]
+    },
+    {
+      "module_id": "cisco_ios-interfaces",
+      "vendor_id": "cisco_ios",
+      "title": "2. Interfaces",
+      "topic_id": "interfaces",
+      "current_level": 1,
+      "target_level_id": "level_1",
+      "target_order": 3,
+      "current_order": 2,
+      "prerequisite_module_ids": [
+        "cisco_ios-cli_foundation",
+        "cisco_ios-device_information"
+      ],
+      "ordering_notes": [
+        "current_order_before_prerequisite:cisco_ios-cli_foundation"
+      ]
+    },
+    {
+      "module_id": "cisco_ios-vlans",
+      "vendor_id": "cisco_ios",
+      "title": "3. Vlans",
+      "topic_id": "vlans",
+      "current_level": 2,
+      "target_level_id": "level_2",
+      "target_order": 4,
+      "current_order": 3,
+      "prerequisite_module_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "cisco_ios-mac_neighbors",
+      "vendor_id": "cisco_ios",
+      "title": "4. Mac Neighbors",
+      "topic_id": "mac_neighbors",
+      "current_level": 2,
+      "target_level_id": "level_2",
+      "target_order": 5,
+      "current_order": 4,
+      "prerequisite_module_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "cisco_ios-networking",
+      "vendor_id": "cisco_ios",
+      "title": "11. Networking",
+      "topic_id": "networking",
+      "current_level": 3,
+      "target_level_id": "level_2",
+      "target_order": 6,
+      "current_order": 11,
+      "prerequisite_module_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "cisco_ios-switching",
+      "vendor_id": "cisco_ios",
+      "title": "5. Switching",
+      "topic_id": "switching",
+      "current_level": 2,
+      "target_level_id": "level_2",
+      "target_order": 7,
+      "current_order": 5,
+      "prerequisite_module_ids": [
+        "cisco_ios-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "cisco_ios-trunks",
+      "vendor_id": "cisco_ios",
+      "title": "12. Trunks",
+      "topic_id": "trunks",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 8,
+      "current_order": 12,
+      "prerequisite_module_ids": [
+        "cisco_ios-interfaces",
+        "cisco_ios-vlans"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "cisco_ios-configuration",
+      "vendor_id": "cisco_ios",
+      "title": "7. Configuration",
+      "topic_id": "configuration",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 9,
+      "current_order": 7,
+      "prerequisite_module_ids": [
+        "cisco_ios-cli_foundation",
+        "cisco_ios-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "cisco_ios-stacking",
+      "vendor_id": "cisco_ios",
+      "title": "13. Stacking",
+      "topic_id": "stacking",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 10,
+      "current_order": 13,
+      "prerequisite_module_ids": [
+        "cisco_ios-device_information",
+        "cisco_ios-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "cisco_ios-diagnostics",
+      "vendor_id": "cisco_ios",
+      "title": "9. Diagnostics",
+      "topic_id": "diagnostics",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 11,
+      "current_order": 9,
+      "prerequisite_module_ids": [
+        "cisco_ios-device_information"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "cisco_ios-file_system",
+      "vendor_id": "cisco_ios",
+      "title": "10. File System",
+      "topic_id": "file_system",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 12,
+      "current_order": 10,
+      "prerequisite_module_ids": [
+        "cisco_ios-device_information"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "cisco_ios-device_lifecycle",
+      "vendor_id": "cisco_ios",
+      "title": "8. Device Lifecycle",
+      "topic_id": "device_lifecycle",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 13,
+      "current_order": 8,
+      "prerequisite_module_ids": [
+        "cisco_ios-device_information"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "hp_comware-cli_foundation",
+      "vendor_id": "hp_comware",
+      "title": "6. Cli Foundation",
+      "topic_id": "cli_foundation",
+      "current_level": 3,
+      "target_level_id": "level_1",
+      "target_order": 1,
+      "current_order": 6,
+      "prerequisite_module_ids": [],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "hp_comware-device_information",
+      "vendor_id": "hp_comware",
+      "title": "1. Device Information",
+      "topic_id": "device_information",
+      "current_level": 1,
+      "target_level_id": "level_1",
+      "target_order": 2,
+      "current_order": 1,
+      "prerequisite_module_ids": [
+        "hp_comware-cli_foundation"
+      ],
+      "ordering_notes": [
+        "current_order_before_prerequisite:hp_comware-cli_foundation"
+      ]
+    },
+    {
+      "module_id": "hp_comware-interfaces",
+      "vendor_id": "hp_comware",
+      "title": "2. Interfaces",
+      "topic_id": "interfaces",
+      "current_level": 1,
+      "target_level_id": "level_1",
+      "target_order": 3,
+      "current_order": 2,
+      "prerequisite_module_ids": [
+        "hp_comware-cli_foundation",
+        "hp_comware-device_information"
+      ],
+      "ordering_notes": [
+        "current_order_before_prerequisite:hp_comware-cli_foundation"
+      ]
+    },
+    {
+      "module_id": "hp_comware-vlans",
+      "vendor_id": "hp_comware",
+      "title": "3. Vlans",
+      "topic_id": "vlans",
+      "current_level": 2,
+      "target_level_id": "level_2",
+      "target_order": 4,
+      "current_order": 3,
+      "prerequisite_module_ids": [
+        "hp_comware-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "hp_comware-mac_neighbors",
+      "vendor_id": "hp_comware",
+      "title": "4. Mac Neighbors",
+      "topic_id": "mac_neighbors",
+      "current_level": 2,
+      "target_level_id": "level_2",
+      "target_order": 5,
+      "current_order": 4,
+      "prerequisite_module_ids": [
+        "hp_comware-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "hp_comware-networking",
+      "vendor_id": "hp_comware",
+      "title": "10. Networking",
+      "topic_id": "networking",
+      "current_level": 3,
+      "target_level_id": "level_2",
+      "target_order": 6,
+      "current_order": 10,
+      "prerequisite_module_ids": [
+        "hp_comware-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "hp_comware-switching",
+      "vendor_id": "hp_comware",
+      "title": "11. Switching",
+      "topic_id": "switching",
+      "current_level": 3,
+      "target_level_id": "level_2",
+      "target_order": 7,
+      "current_order": 11,
+      "prerequisite_module_ids": [
+        "hp_comware-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "hp_comware-trunks",
+      "vendor_id": "hp_comware",
+      "title": "12. Trunks",
+      "topic_id": "trunks",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 8,
+      "current_order": 12,
+      "prerequisite_module_ids": [
+        "hp_comware-interfaces",
+        "hp_comware-vlans"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "hp_comware-configuration",
+      "vendor_id": "hp_comware",
+      "title": "7. Configuration",
+      "topic_id": "configuration",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 9,
+      "current_order": 7,
+      "prerequisite_module_ids": [
+        "hp_comware-cli_foundation",
+        "hp_comware-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "hp_comware-stacking",
+      "vendor_id": "hp_comware",
+      "title": "5. Stacking",
+      "topic_id": "stacking",
+      "current_level": 2,
+      "target_level_id": "level_3",
+      "target_order": 10,
+      "current_order": 5,
+      "prerequisite_module_ids": [
+        "hp_comware-device_information",
+        "hp_comware-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "hp_comware-diagnostics",
+      "vendor_id": "hp_comware",
+      "title": "9. Diagnostics",
+      "topic_id": "diagnostics",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 11,
+      "current_order": 9,
+      "prerequisite_module_ids": [
+        "hp_comware-device_information"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "hp_comware-device_lifecycle",
+      "vendor_id": "hp_comware",
+      "title": "8. Device Lifecycle",
+      "topic_id": "device_lifecycle",
+      "current_level": 3,
+      "target_level_id": "level_3",
+      "target_order": 13,
+      "current_order": 8,
+      "prerequisite_module_ids": [
+        "hp_comware-device_information"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "linux-cli_foundation",
+      "vendor_id": "linux",
+      "title": "4. Cli Foundation",
+      "topic_id": "cli_foundation",
+      "current_level": 2,
+      "target_level_id": "level_1",
+      "target_order": 1,
+      "current_order": 4,
+      "prerequisite_module_ids": [],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "linux-device_information",
+      "vendor_id": "linux",
+      "title": "5. Device Information",
+      "topic_id": "device_information",
+      "current_level": 2,
+      "target_level_id": "level_1",
+      "target_order": 2,
+      "current_order": 5,
+      "prerequisite_module_ids": [
+        "linux-cli_foundation"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "linux-interfaces",
+      "vendor_id": "linux",
+      "title": "1. Interfaces",
+      "topic_id": "interfaces",
+      "current_level": 1,
+      "target_level_id": "level_1",
+      "target_order": 3,
+      "current_order": 1,
+      "prerequisite_module_ids": [
+        "linux-cli_foundation",
+        "linux-device_information"
+      ],
+      "ordering_notes": [
+        "current_order_before_prerequisite:linux-cli_foundation",
+        "current_order_before_prerequisite:linux-device_information"
+      ]
+    },
+    {
+      "module_id": "linux-mac_neighbors",
+      "vendor_id": "linux",
+      "title": "3. Mac Neighbors",
+      "topic_id": "mac_neighbors",
+      "current_level": 2,
+      "target_level_id": "level_2",
+      "target_order": 5,
+      "current_order": 3,
+      "prerequisite_module_ids": [
+        "linux-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "linux-networking",
+      "vendor_id": "linux",
+      "title": "2. Networking",
+      "topic_id": "networking",
+      "current_level": 1,
+      "target_level_id": "level_2",
+      "target_order": 6,
+      "current_order": 2,
+      "prerequisite_module_ids": [
+        "linux-interfaces"
+      ],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "windows_cmd-device_information",
+      "vendor_id": "windows_cmd",
+      "title": "4. Device Information",
+      "topic_id": "device_information",
+      "current_level": 2,
+      "target_level_id": "level_1",
+      "target_order": 2,
+      "current_order": 4,
+      "prerequisite_module_ids": [],
+      "ordering_notes": []
+    },
+    {
+      "module_id": "windows_cmd-interfaces",
+      "vendor_id": "windows_cmd",
+      "title": "3. Interfaces",
+      "topic_id": "interfaces",
+      "current_level": 2,
+      "target_level_id": "level_1",
+      "target_order": 3,
+      "current_order": 3,
+      "prerequisite_module_ids": [
+        "windows_cmd-device_information"
+      ],
+      "ordering_notes": [
+        "current_order_before_prerequisite:windows_cmd-device_information"
+      ]
+    },
+    {
+      "module_id": "windows_cmd-mac_neighbors",
+      "vendor_id": "windows_cmd",
+      "title": "1. Mac Neighbors",
+      "topic_id": "mac_neighbors",
+      "current_level": 1,
+      "target_level_id": "level_2",
+      "target_order": 5,
+      "current_order": 1,
+      "prerequisite_module_ids": [
+        "windows_cmd-interfaces"
+      ],
+      "ordering_notes": [
+        "current_order_before_prerequisite:windows_cmd-interfaces"
+      ]
+    },
+    {
+      "module_id": "windows_cmd-networking",
+      "vendor_id": "windows_cmd",
+      "title": "2. Networking",
+      "topic_id": "networking",
+      "current_level": 1,
+      "target_level_id": "level_2",
+      "target_order": 6,
+      "current_order": 2,
+      "prerequisite_module_ids": [
+        "windows_cmd-interfaces"
+      ],
+      "ordering_notes": [
+        "current_order_before_prerequisite:windows_cmd-interfaces"
+      ]
+    }
+  ],
+  "prerequisite_cycles": []
+}

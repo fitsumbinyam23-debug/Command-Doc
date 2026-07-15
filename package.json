@@ -8,6 +8,7 @@
     "test": "node tests/smoke-tests.mjs && node tests/current-app-smoke.mjs",
     "test:core": "node tests/smoke-tests.mjs",
     "test:current": "node tests/current-app-smoke.mjs",
-    "test:startup": "node tests/current-app-startup.mjs"
+    "test:startup": "node tests/current-app-startup.mjs",
+    "test:learning": "node tools/generate-learning-integrity.mjs --check && node tools/validate-learning-integrity.mjs && node tests/learning-integrity.mjs"
   }
 }

@@ -1,0 +1,116 @@
+{
+  "schema_version": "learning-status-vocabularies.v1",
+  "lesson_status": [
+    "dedicated",
+    "grouped",
+    "planned",
+    "explanation_only",
+    "unsupported"
+  ],
+  "practice_status": [
+    "dedicated_route",
+    "grouped_route",
+    "runtime_free_practice",
+    "planned",
+    "explanation_only",
+    "blocked_by_missing_handler",
+    "unsupported"
+  ],
+  "verification_status": [
+    "runtime_policy",
+    "command_guidance",
+    "route_guidance",
+    "planned",
+    "not_applicable",
+    "missing"
+  ],
+  "rollback_status": [
+    "command_guidance",
+    "route_guidance",
+    "planned",
+    "not_applicable",
+    "missing"
+  ],
+  "handler_status": [
+    "full_state_handler",
+    "simplified_state_handler",
+    "output_simulation_only",
+    "explanation_only_no_handler",
+    "route_missing_handler",
+    "unsupported"
+  ],
+  "review_status": [
+    "ready",
+    "planned",
+    "not_applicable",
+    "blocked"
+  ],
+  "migration_status": [
+    "pilot_ready",
+    "batch_ready",
+    "blocked_by_runtime",
+    "blocked_by_verification",
+    "blocked_by_practice",
+    "blocked_by_content",
+    "explanation_only",
+    "unsupported"
+  ],
+  "runtime_support": [
+    "full_state_simulation",
+    "simplified_state_simulation",
+    "output_simulation",
+    "explanation_only",
+    "unsupported_for_profile"
+  ],
+  "mastery_dimensions": [
+    "concept",
+    "syntax",
+    "prediction",
+    "output_interpretation",
+    "command_selection",
+    "practical_execution",
+    "troubleshooting",
+    "verification",
+    "safety",
+    "documentation"
+  ],
+  "review_types": [
+    "recall_syntax",
+    "select_command",
+    "interpret_output",
+    "identify_evidence",
+    "correct_an_error",
+    "choose_verification",
+    "complete_a_short_ticket",
+    "perform_a_short_runtime_task"
+  ],
+  "lesson_stages": [
+    "technician_ticket",
+    "learning_objective",
+    "prerequisites",
+    "command_purpose",
+    "required_cli_mode",
+    "syntax_breakdown",
+    "aliases_and_abbreviations",
+    "worked_example",
+    "prediction_before_output",
+    "healthy_output",
+    "fault_output",
+    "evidence_identification",
+    "evidence_interpretation",
+    "choose_next_command",
+    "runtime_execution",
+    "guided_practice",
+    "assisted_practice",
+    "independent_troubleshooting",
+    "runtime_verification",
+    "save_or_rollback",
+    "ticket_note",
+    "knowledge_check",
+    "confidence_rating",
+    "multidimensional_mastery",
+    "review_scheduling",
+    "related_commands",
+    "equivalent_vendor_concepts"
+  ]
+}
