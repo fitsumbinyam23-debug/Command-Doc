@@ -1,0 +1,230 @@
+{
+  "schema_version": "lesson-attempt-state.v1",
+  "description": "Serializable attempt-state contract for the reusable Command Doctor lesson attempt engine.",
+  "required_fields": [
+    "schema_version",
+    "attempt_id",
+    "attempt_key",
+    "lesson_id",
+    "module_id",
+    "vendor_id",
+    "canonical_command_id",
+    "mode",
+    "status",
+    "created_at",
+    "updated_at",
+    "current_stage_id",
+    "stage_states",
+    "submitted_evidence",
+    "hint_history",
+    "failure_history",
+    "dimension_results",
+    "critical_failures",
+    "completion_result",
+    "event_journal",
+    "validation_state",
+    "restore_diagnostics",
+    "definition_version"
+  ],
+  "attempt_key": {
+    "format": "lesson_id:vendor_id:canonical_command_id:mode:attempt_id",
+    "purpose": "Prevents answers, evidence, hints, and completion state from leaking across modes, vendors, commands, or attempts."
+  },
+  "controlled_values": {
+    "attempt_statuses": ["active", "completed", "failed", "abandoned", "invalid_definition"],
+    "stage_statuses": ["locked", "available", "in_progress", "submitted", "passed", "failed", "not_applicable", "not_supported", "blocked"],
+    "modes": ["GUIDED", "ASSISTED", "INDEPENDENT"],
+    "validation_states": ["validated", "pending_provider_revalidation", "unvalidated_transport_only", "invalid"],
+    "attempt_event_types": [
+      "attempt_created",
+      "stage_viewed",
+      "stage_content_revealed",
+      "student_response_submitted",
+      "hint_requested",
+      "trusted_evidence_ingested",
+      "safety_decision_submitted",
+      "save_or_rollback_submitted",
+      "confidence_submitted",
+      "critical_failure_recorded",
+      "critical_failure_resolved",
+      "attempt_finalized",
+      "attempt_abandoned"
+    ],
+    "evidence_types": ["execution", "verification"],
+    "critical_failure_codes": [
+      "wrong_vendor_syntax",
+      "unsafe_command_choice",
+      "configuration_claim_without_trusted_execution",
+      "verification_claim_without_trusted_evidence",
+      "save_before_required_verification",
+      "skipped_rollback_decision",
+      "false_or_contradictory_ticket_note",
+      "cross_mode_evidence_reuse",
+      "cross_attempt_evidence_reuse",
+      "mismatched_trusted_evidence",
+      "answer_leakage_violation"
+    ]
+  },
+  "trusted_evidence_envelope": {
+    "schema_version": "trusted-lesson-evidence.v1",
+    "common_required_fields": [
+      "evidence_id",
+      "provider_id",
+      "evidence_type",
+      "attempt_id",
+      "lesson_id",
+      "vendor_id",
+      "canonical_command_id",
+      "stage_id",
+      "timestamp",
+      "payload",
+      "source_event_id",
+      "integrity_result"
+    ],
+    "required_by_evidence_type": {
+      "execution": [],
+      "verification": ["verification_policy_id", "verification_record_id"]
+    },
+    "plain_verified_flag_allowed": false,
+    "provider_verification_required": true,
+    "student_response_api_allowed": false,
+    "ingest_api_required": true,
+    "provider_receipt_schema_version": "trusted-provider-receipt.v1",
+    "provider_receipt_required_fields": [
+      "schema_version",
+      "provider_id",
+      "evidence_id",
+      "accepted",
+      "errors",
+      "checked_at"
+    ],
+    "expected_evidence_type_by_stage": {
+      "runtime_execution": "execution",
+      "trusted_external_evidence": "execution",
+      "runtime_verification": "verification",
+      "trusted_verification_evidence": "verification"
+    }
+  },
+  "submitted_evidence_summary": {
+    "required_fields": [
+      "evidence_id",
+      "provider_id",
+      "evidence_type",
+      "attempt_id",
+      "lesson_id",
+      "vendor_id",
+      "canonical_command_id",
+      "stage_id",
+      "timestamp",
+      "source_event_id",
+      "integrity_result"
+    ],
+    "required_by_evidence_type": {
+      "execution": [],
+      "verification": ["verification_policy_id", "verification_record_id"]
+    },
+    "restore_rules": [
+      "evidence_id must be unique within the attempt",
+      "stage_id must exist in the supplied definition",
+      "stage_id must refer to a trusted runtime evidence stage",
+      "identity fields must match the restored attempt",
+      "integrity_result must be passed",
+      "the authoritative trusted-evidence event must retain a provider-replayable envelope",
+      "the matching provider must accept the evidence again during restore"
+    ]
+  },
+  "critical_failure_resolution": {
+    "arbitrary_code_clear_allowed": false,
+    "allowed_resolution_types": ["stage_retry", "remediation_stage", "trusted_evidence"],
+    "required_resolution_record_fields": [
+      "failure_code",
+      "affected_stage_id",
+      "resolved_at",
+      "resolution_type",
+      "resolution_stage_id",
+      "resolution_evidence_ids"
+    ],
+    "non_remediable_failures": "remain permanently unresolved"
+  },
+  "restore_consistency": {
+    "recompute_attempt_key": true,
+    "event_journal_required_when_definition_supplied": true,
+    "validate_event_schema": true,
+    "validate_event_identity": true,
+    "validate_event_sequence": true,
+    "validate_event_timestamps": true,
+    "validate_event_stage_applicability": true,
+    "re_evaluate_student_response_events": true,
+    "revalidate_trusted_evidence_events_with_provider": true,
+    "reconstruct_stage_states_from_events": true,
+    "reconstruct_dimension_results_from_events": true,
+    "reconstruct_hint_history_from_events": true,
+    "reconstruct_critical_failures_from_events": true,
+    "reconstruct_prediction_gate_from_events": true,
+    "recompute_completion_result": true,
+    "snapshot_mismatch_policy": "replace_with_replayed_event_journal",
+    "no_definition_restore_validation_state": "unvalidated_transport_only",
+    "missing_provider_validation_state": "pending_provider_revalidation",
+    "provider_rejection_validation_state": "invalid"
+  },
+  "evidence_ownership_registry": {
+    "stage_2_contract": true,
+    "default_implementation": "deterministic in-memory registry",
+    "persistence_stage": "Stage 5",
+    "tracked_keys": [
+      "evidence_id",
+      "source_event_id",
+      "verification_record_id for verification evidence"
+    ],
+    "owner_identity_fields": [
+      "attempt_id",
+      "lesson_id",
+      "vendor_id",
+      "canonical_command_id",
+      "stage_id",
+      "evidence_type"
+    ],
+    "rules": [
+      "the same exact attempt may replay the same exact evidence idempotently",
+      "a different attempt, lesson, vendor, command, stage, or evidence type cannot claim the same evidence identity",
+      "changing evidence_id cannot bypass source_event_id ownership",
+      "changing evidence_id cannot bypass verification_record_id ownership"
+    ]
+  },
+  "completion_result": {
+    "fields": [
+      "completed",
+      "eligible_for_limited_credit",
+      "eligible_for_full_mastery",
+      "blockers",
+      "finalized_at",
+      "critical_failures",
+      "resolution_history",
+      "mastery_candidates"
+    ],
+    "rules": [
+      "Guided and Assisted completion may emit limited candidates only",
+      "Independent full mastery requires completion, mode policy permission, supported required dimensions, trusted evidence where required, and no unresolved critical failures"
+    ]
+  },
+  "serialization": {
+    "format": "JSON",
+    "unknown_future_schema_behavior": "reject",
+    "determinism_inputs": ["clock", "attempt ID generator", "attempt event ID generator", "evidence ID generator", "evidence provider"]
+  },
+  "mastery_candidate": {
+    "dimensions": [
+      "concept",
+      "syntax",
+      "prediction",
+      "output_interpretation",
+      "command_selection",
+      "practical_execution",
+      "troubleshooting",
+      "verification",
+      "safety",
+      "documentation"
+    ],
+    "note": "The engine emits candidate results only. It does not persist mastery or schedule review in Stage 2."
+  }
+}
