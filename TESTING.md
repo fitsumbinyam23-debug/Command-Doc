@@ -1,15 +1,16 @@
 # Command Doctor Independent Testing
 
-## Review candidate
+## Released hotfix
 
-- Candidate branch: `fix/practice-library-visible-filters`
-- Application build: `2026.07-runtime-rc.3`
-- Functional source candidate: `084b11789304fa326f7275e3279d6bf7c0847134`
+- Release branch: `main`
+- Released build: `2026.07-runtime-rc.3`
+- Release tag: `v0.2.0-rc.2`
+- Functional source: `084b11789304fa326f7275e3279d6bf7c0847134`
 - Application commit: https://github.com/fitsumbinyam23-debug/Command-Doc/commit/084b11789304fa326f7275e3279d6bf7c0847134
-- Planned release tag after merge: `v0.2.0-rc.2`
+- Public release target: https://fitsumbinyam23-debug.github.io/Command-Doc/
 - Build record: `BUILD-MANIFEST.json`
 
-The functional Practice Library hotfix was independently reviewed before this release-preparation identity update. Before the release merge and GitHub Pages publication complete, use the independent review ZIP or the draft branch; do not treat the GitHub Pages URL as candidate evidence.
+The functional Practice Library hotfix was independently reviewed before release preparation, merged to `main`, and prepared for GitHub Pages publication as the public release target.
 
 ## Verified RC evidence
 
@@ -27,6 +28,7 @@ The functional Practice Library hotfix was independently reviewed before this re
 - Independent Chromium review: approved functional hotfix review covered Practice Library filters, route launch, mobile layout, and console checks.
 - Exact terminal diffs, one audit event per entered command, Save gate, and field-scoped verification passed.
 - Mobile Chromium 390px overflow check passed.
+- GitHub Pages publication is the release target for `2026.07-runtime-rc.3`.
 
 ## First-time reset
 

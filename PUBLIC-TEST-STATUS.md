@@ -1,10 +1,10 @@
 # Public Test Status
 
-Candidate build: `2026.07-runtime-rc.3`
-Functional source candidate: `084b11789304fa326f7275e3279d6bf7c0847134`
-Planned release tag: `v0.2.0-rc.2`
+Released build: `2026.07-runtime-rc.3`
+Release tag: `v0.2.0-rc.2`
+Functional source: `084b11789304fa326f7275e3279d6bf7c0847134`
 
-## Candidate status
+## Release status
 
 | Check | Status | Evidence |
 | --- | --- | --- |
@@ -16,16 +16,18 @@ Planned release tag: `v0.2.0-rc.2`
 | Runtime behaviour, route data, and learning data | Unchanged | Release preparation updates build identity, active asset versions, service-worker cache identity, active documentation, and identity tests only. |
 | Independent Chromium review | Passed | Approved functional hotfix review completed for the Practice Library filters, route launch, mobile layout, and console checks. |
 | Mobile Chromium 390px overflow | Passed | No exercised mobile overflow failures. |
-| Candidate deployment | Pending merge | Not yet deployed until the merge step and GitHub Pages publication complete. |
+| Practice Library hotfix merge | Complete | The approved Practice Library hotfix is merged to `main`. |
+| GitHub Pages publication | Release target | Official public release target: `https://fitsumbinyam23-debug.github.io/Command-Doc/`. |
 | Microsoft Edge interaction | Blocked | Not executed for this RC. Do not treat as passed. |
 | Service-worker offline update transition | Blocked | True update/offline transition is not executed for this RC. Do not treat as passed. |
 
-## Not yet published
+## Release limits
 
 | Item | Status |
 | --- | --- |
-| Public Playwright HTML/JSON report, traces, videos | Not implemented |
 | Edge browser execution evidence | Blocked |
+| True service-worker offline-update transition evidence | Blocked |
+| Public Playwright HTML/JSON report, traces, videos | Not implemented |
 | Formal accessibility scan/report | Not implemented |
 | One-click public test-state presets | Not implemented |
 
