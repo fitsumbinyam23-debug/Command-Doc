@@ -34,10 +34,20 @@
     "aruba_show_spanning_tree",
     "windows_netstat_ano"
   ],
+  "raw_duplicate_ids_detected": [
+    "aruba_show_spanning_tree",
+    "windows_netstat_ano"
+  ],
   "duplicate_ids_resolved": [
     "aruba_show_spanning_tree",
     "windows_netstat_ano"
   ],
+  "normalized_learning_records_consolidated": [
+    "aruba_show_spanning_tree",
+    "windows_netstat_ano"
+  ],
+  "raw_command_source_records_deleted": false,
+  "executable_command_id_renames_required": false,
   "id_migrations": [],
   "id_consolidations": [
     {
@@ -84,6 +94,12 @@
     "route_guidance": 33,
     "runtime_policy": 8
   },
+  "rollback_status_counts": {
+    "command_guidance": 30,
+    "missing": 10,
+    "not_applicable": 112,
+    "route_guidance": 11
+  },
   "review_status_counts": {
     "planned": 163
   },
@@ -122,6 +138,108 @@
     "aruba_lacp_system_priority",
     "aruba_vlan_trunk_native",
     "hp_irf_member_renumber"
+  ],
+  "commands_without_rollback_guidance": [
+    {
+      "command_id": "aruba_lacp_mode_active",
+      "vendor_id": "aruba_cx",
+      "canonical_syntax": "lacp mode active",
+      "runtime_support": "explanation_only",
+      "changes_configuration": true,
+      "lesson_status": "grouped",
+      "migration_status": "explanation_only",
+      "rollback_classification": "explanation_only_but_still_recommended"
+    },
+    {
+      "command_id": "aruba_lacp_system_priority",
+      "vendor_id": "aruba_cx",
+      "canonical_syntax": "lacp system-priority <priority>",
+      "runtime_support": "explanation_only",
+      "changes_configuration": true,
+      "lesson_status": "grouped",
+      "migration_status": "blocked_by_verification",
+      "rollback_classification": "explanation_only_but_still_recommended"
+    },
+    {
+      "command_id": "aruba_reload",
+      "vendor_id": "aruba_cx",
+      "canonical_syntax": "reload",
+      "runtime_support": "explanation_only",
+      "changes_configuration": true,
+      "lesson_status": "grouped",
+      "migration_status": "explanation_only",
+      "rollback_classification": "explanation_only_but_still_recommended"
+    },
+    {
+      "command_id": "aruba_stp_priority",
+      "vendor_id": "aruba_cx",
+      "canonical_syntax": "spanning-tree priority <priority>",
+      "runtime_support": "explanation_only",
+      "changes_configuration": true,
+      "lesson_status": "grouped",
+      "migration_status": "explanation_only",
+      "rollback_classification": "explanation_only_but_still_recommended"
+    },
+    {
+      "command_id": "cisco_reload",
+      "vendor_id": "cisco_ios",
+      "canonical_syntax": "reload",
+      "runtime_support": "explanation_only",
+      "changes_configuration": true,
+      "lesson_status": "dedicated",
+      "migration_status": "explanation_only",
+      "rollback_classification": "explanation_only_but_still_recommended"
+    },
+    {
+      "command_id": "cisco_stp_root_primary",
+      "vendor_id": "cisco_ios",
+      "canonical_syntax": "spanning-tree vlan <vlan-id> root primary",
+      "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
+      "lesson_status": "grouped",
+      "migration_status": "blocked_by_practice",
+      "rollback_classification": "genuinely_missing"
+    },
+    {
+      "command_id": "cisco_svi_ip_address",
+      "vendor_id": "cisco_ios",
+      "canonical_syntax": "ip address <ip-address> <mask>",
+      "runtime_support": "explanation_only",
+      "changes_configuration": true,
+      "lesson_status": "grouped",
+      "migration_status": "explanation_only",
+      "rollback_classification": "explanation_only_but_still_recommended"
+    },
+    {
+      "command_id": "hp_irf_member_priority",
+      "vendor_id": "hp_comware",
+      "canonical_syntax": "irf member <member-id> priority <priority>",
+      "runtime_support": "explanation_only",
+      "changes_configuration": true,
+      "lesson_status": "grouped",
+      "migration_status": "blocked_by_runtime",
+      "rollback_classification": "explanation_only_but_still_recommended"
+    },
+    {
+      "command_id": "hp_irf_member_renumber",
+      "vendor_id": "hp_comware",
+      "canonical_syntax": "irf member <member-id> renumber <new-member-id>",
+      "runtime_support": "explanation_only",
+      "changes_configuration": true,
+      "lesson_status": "grouped",
+      "migration_status": "blocked_by_verification",
+      "rollback_classification": "explanation_only_but_still_recommended"
+    },
+    {
+      "command_id": "hp_reboot",
+      "vendor_id": "hp_comware",
+      "canonical_syntax": "reboot",
+      "runtime_support": "explanation_only",
+      "changes_configuration": true,
+      "lesson_status": "grouped",
+      "migration_status": "explanation_only",
+      "rollback_classification": "explanation_only_but_still_recommended"
+    }
   ],
   "commands_without_practice": [
     "aruba_configure_terminal",
@@ -303,6 +421,7 @@
       "commands_without_practice": 122,
       "routes_with_missing_handlers": 72,
       "commands_without_verification": 3,
+      "commands_without_rollback_guidance": 10,
       "review_coverage": 0
     }
   }

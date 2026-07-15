@@ -18,6 +18,12 @@
     "route_guidance": 33,
     "runtime_policy": 8
   },
+  "rollback_status_counts": {
+    "command_guidance": 30,
+    "missing": 10,
+    "not_applicable": 112,
+    "route_guidance": 11
+  },
   "review_status_counts": {
     "planned": 163
   },

@@ -9,11 +9,15 @@ Approved runtime source: ea4bf7ce2223dc1a22db3de18c9f48c1427b155c
 - Canonical command count: 163
 - Objective count: 163
 - Module count: 44
-- Duplicate IDs found and resolved: aruba_show_spanning_tree, windows_netstat_ano
+- Raw duplicate IDs detected: aruba_show_spanning_tree, windows_netstat_ano
+- Normalized learning records consolidated: aruba_show_spanning_tree, windows_netstat_ano
+- Raw command source records deleted: no
+- Executable command ID renames required: no
 - ID migrations: 0 renames; 2 consolidations.
 - Commands without practice: 122
 - Routes with missing handlers: 72
 - Commands without verification: 3
+- Commands without rollback guidance: 10
 - Review coverage: 0%
 
 ## Status Counts
@@ -35,6 +39,12 @@ Approved runtime source: ea4bf7ce2223dc1a22db3de18c9f48c1427b155c
     "missing": 3,
     "route_guidance": 33,
     "runtime_policy": 8
+  },
+  "rollback_status_counts": {
+    "command_guidance": 30,
+    "missing": 10,
+    "not_applicable": 112,
+    "route_guidance": 11
   },
   "review_status_counts": {
     "planned": 163
@@ -66,6 +76,18 @@ Approved runtime source: ea4bf7ce2223dc1a22db3de18c9f48c1427b155c
 - Prerequisite cycles: 0
 - Module ordering warnings: 10
 - Deterministic generation: passed
+
+## Rollback Gaps
+- aruba_lacp_mode_active (aruba_cx, explanation_only_but_still_recommended)
+- aruba_lacp_system_priority (aruba_cx, explanation_only_but_still_recommended)
+- aruba_reload (aruba_cx, explanation_only_but_still_recommended)
+- aruba_stp_priority (aruba_cx, explanation_only_but_still_recommended)
+- cisco_reload (cisco_ios, explanation_only_but_still_recommended)
+- cisco_stp_root_primary (cisco_ios, genuinely_missing)
+- cisco_svi_ip_address (cisco_ios, explanation_only_but_still_recommended)
+- hp_irf_member_priority (hp_comware, explanation_only_but_still_recommended)
+- hp_irf_member_renumber (hp_comware, explanation_only_but_still_recommended)
+- hp_reboot (hp_comware, explanation_only_but_still_recommended)
 
 ## Required Honesty Notes
 - Planned or blocked content is not presented as complete.

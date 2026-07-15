@@ -219,6 +219,14 @@ function reviewTypesFor(command, configLike, practicalEligible, verificationStat
   return uniq(types);
 }
 
+function rollbackGuidanceClassification(record) {
+  if (record.rollback_status === "not_applicable") return "not_applicable";
+  if (record.rollback_status !== "missing") return "has_guidance";
+  if ((record.rollback_guidance_unresolved || []).length) return "blocked_by_incomplete_source_metadata";
+  if (record.runtime_support === "explanation_only") return "explanation_only_but_still_recommended";
+  return "genuinely_missing";
+}
+
 function detectCycles(nodes) {
   const byId = new Map(nodes.map((node) => [node.module_id, node]));
   const visiting = new Set();
@@ -457,6 +465,7 @@ export async function buildLearningIntegritySystem() {
 
   const learningRecords = [];
   const objectives = [];
+  const changesConfigurationByCommandId = new Map();
   const routeMissingHandlerCommands = new Map();
   for (const route of routes) {
     for (const commandId of route.missing_cli_handler_ids || []) {
@@ -481,6 +490,7 @@ export async function buildLearningIntegritySystem() {
     const blockedPracticeRouteIds = practiceRouteIds.filter((routeId) => (routeById.get(routeId)?.missing_cli_handler_ids || []).length).sort();
     const missingHandlerRouteIds = uniq([...(routeMissingHandlerCommands.get(command.command_id) || []), ...blockedPracticeRouteIds.filter((routeId) => (routeById.get(routeId)?.missing_cli_handler_ids || []).includes(command.command_id))]).sort();
     const configLike = isConfigurationLike(command);
+    changesConfigurationByCommandId.set(command.command_id, configLike);
     const handlerStatus = statusForHandler(command, missingHandlerRouteIds);
     let practiceStatus = "planned";
     if (command.simulator_support === "unsupported_for_profile") practiceStatus = "unsupported";
@@ -611,7 +621,11 @@ export async function buildLearningIntegritySystem() {
     raw_command_source_files: sources.rawCommandFiles.map((item) => item.file),
     flow_source_files: sources.flows.map((item) => item.file),
     duplicate_source_ids: rawDuplicateAudit.raw_duplicate_ids,
+    raw_duplicate_ids_detected: rawDuplicateAudit.raw_duplicate_ids,
     resolved_duplicate_ids: rawDuplicateAudit.resolved_duplicate_ids,
+    normalized_learning_records_consolidated: rawDuplicateAudit.resolved_duplicate_ids,
+    raw_command_source_records_deleted: false,
+    executable_command_id_renames_required: false,
     unresolved_duplicate_ids: rawDuplicateAudit.unresolved_duplicate_ids
   };
 
@@ -627,6 +641,18 @@ export async function buildLearningIntegritySystem() {
   };
   const commandsWithoutPractice = learningRecords.filter((record) => !record.practice_route_ids.length).map((record) => record.canonical_command_id).sort();
   const commandsWithoutVerification = learningRecords.filter((record) => record.verification_status === "missing").map((record) => record.canonical_command_id).sort();
+  const commandsWithoutRollbackGuidance = sortBy(learningRecords
+    .filter((record) => record.rollback_status === "missing")
+    .map((record) => ({
+      command_id: record.canonical_command_id,
+      vendor_id: record.vendor_id,
+      canonical_syntax: record.source_command.syntax,
+      runtime_support: record.runtime_support,
+      changes_configuration: Boolean(changesConfigurationByCommandId.get(record.canonical_command_id)),
+      lesson_status: record.lesson_status,
+      migration_status: record.migration_status,
+      rollback_classification: rollbackGuidanceClassification(record)
+    })), (item) => item.command_id);
   const routesWithMissingHandlers = routes.filter((route) => (route.missing_cli_handler_ids || []).length).map((route) => route.route_id).sort();
   const commandsBlockedByMissingHandlers = learningRecords.filter((record) => record.blocking_reasons.includes("missing_cli_handler")).map((record) => record.canonical_command_id).sort();
   const integrityReport = {
@@ -634,7 +660,11 @@ export async function buildLearningIntegritySystem() {
     canonical_command_count: learningRecords.length,
     command_count_per_vendor: byCount(learningRecords.map((record) => record.vendor_id)),
     duplicate_ids_found: rawDuplicateAudit.raw_duplicate_ids.map((item) => item.command_id),
+    raw_duplicate_ids_detected: rawDuplicateAudit.raw_duplicate_ids.map((item) => item.command_id),
     duplicate_ids_resolved: rawDuplicateAudit.resolved_duplicate_ids,
+    normalized_learning_records_consolidated: rawDuplicateAudit.resolved_duplicate_ids,
+    raw_command_source_records_deleted: false,
+    executable_command_id_renames_required: false,
     unresolved_duplicate_ids: rawDuplicateAudit.unresolved_duplicate_ids,
     objective_count: objectiveIndex.objective_count,
     module_count: modules.modules.length,
@@ -643,6 +673,7 @@ export async function buildLearningIntegritySystem() {
     routes_with_missing_handlers: routesWithMissingHandlers,
     commands_blocked_by_missing_handlers: commandsBlockedByMissingHandlers,
     commands_without_verification: commandsWithoutVerification,
+    commands_without_rollback_guidance: commandsWithoutRollbackGuidance,
     prerequisite_cycles: modules.prerequisite_cycles,
     module_ordering_warnings: modules.modules.filter((module) => module.ordering_notes.length).map((module) => ({ module_id: module.module_id, notes: module.ordering_notes })),
     route_vendor_errors: [],
@@ -654,6 +685,7 @@ export async function buildLearningIntegritySystem() {
     lesson_status_counts: statusCounts.lesson_status,
     practice_status_counts: statusCounts.practice_status,
     verification_status_counts: statusCounts.verification_status,
+    rollback_status_counts: statusCounts.rollback_status,
     review_status_counts: statusCounts.review_status,
     migration_status_counts: statusCounts.migration_status,
     review_coverage: 0,
@@ -686,23 +718,27 @@ export async function buildLearningIntegritySystem() {
       modules: modules.modules.length,
       commands_without_practice: commandsWithoutPractice.length,
       commands_without_verification: commandsWithoutVerification.length,
+      commands_without_rollback_guidance: commandsWithoutRollbackGuidance.length,
       routes_with_missing_handlers: routesWithMissingHandlers.length,
       review_coverage: 0
     },
     commands: learningRecords.map((record) => ({
       command_id: record.canonical_command_id,
       vendor: record.vendor_id,
+      canonical_syntax: record.source_command.syntax,
       module: record.module_id,
       lesson: record.lesson_ids,
       learning_objectives: record.objective_ids,
       practice_route: record.practice_route_ids,
       runtime_support: record.runtime_support,
+      changes_configuration: Boolean(changesConfigurationByCommandId.get(record.canonical_command_id)),
       handler_status: record.handler_status,
       verification_status: record.verification_status,
       verification_policy: record.verification_policy_ids,
       verification_command_ids: record.verification_command_ids,
       rollback_status: record.rollback_status,
       rollback_command_ids: record.rollback_command_ids,
+      rollback_gap_classification: record.rollback_status === "missing" ? rollbackGuidanceClassification(record) : null,
       mastery_dimensions: record.mastery_dimensions,
       review_types: record.review_types,
       migration_status: record.migration_status,
@@ -733,7 +769,11 @@ export async function buildLearningIntegritySystem() {
     canonical_command_count: learningRecords.length,
     command_count_per_vendor: integrityReport.command_count_per_vendor,
     duplicate_ids_found: integrityReport.duplicate_ids_found,
+    raw_duplicate_ids_detected: integrityReport.raw_duplicate_ids_detected,
     duplicate_ids_resolved: integrityReport.duplicate_ids_resolved,
+    normalized_learning_records_consolidated: integrityReport.normalized_learning_records_consolidated,
+    raw_command_source_records_deleted: false,
+    executable_command_id_renames_required: false,
     id_migrations: migrationReport.id_migrations,
     id_consolidations: migrationReport.id_consolidations,
     objective_count: objectiveIndex.objective_count,
@@ -741,10 +781,12 @@ export async function buildLearningIntegritySystem() {
     lesson_status_counts: statusCounts.lesson_status,
     practice_status_counts: statusCounts.practice_status,
     verification_status_counts: statusCounts.verification_status,
+    rollback_status_counts: statusCounts.rollback_status,
     review_status_counts: statusCounts.review_status,
     migration_status_counts: statusCounts.migration_status,
     commands_blocked_by_missing_handlers: commandsBlockedByMissingHandlers,
     commands_blocked_by_missing_verification: commandsWithoutVerification,
+    commands_without_rollback_guidance: commandsWithoutRollbackGuidance,
     commands_without_practice: commandsWithoutPractice,
     commands_pilot_ready: migrationReport.pilot_ready,
     commands_batch_ready: migrationReport.batch_ready,
@@ -795,11 +837,15 @@ function markdownReport(report, coverage, migration, integrity) {
     "- Canonical command count: " + report.canonical_command_count,
     "- Objective count: " + report.objective_count,
     "- Module count: " + report.module_count,
-    "- Duplicate IDs found and resolved: " + report.duplicate_ids_resolved.join(", "),
+    "- Raw duplicate IDs detected: " + report.raw_duplicate_ids_detected.join(", "),
+    "- Normalized learning records consolidated: " + report.normalized_learning_records_consolidated.join(", "),
+    "- Raw command source records deleted: " + (report.raw_command_source_records_deleted ? "yes" : "no"),
+    "- Executable command ID renames required: " + (report.executable_command_id_renames_required ? "yes" : "no"),
     "- ID migrations: " + report.id_migrations.length + " renames; " + report.id_consolidations.length + " consolidations.",
     "- Commands without practice: " + report.commands_without_practice.length,
     "- Routes with missing handlers: " + coverage.routes_with_missing_handlers_count,
     "- Commands without verification: " + report.commands_blocked_by_missing_verification.length,
+    "- Commands without rollback guidance: " + report.commands_without_rollback_guidance.length,
     "- Review coverage: 0%",
     "",
     "## Status Counts",
@@ -808,6 +854,7 @@ function markdownReport(report, coverage, migration, integrity) {
       lesson_status_counts: report.lesson_status_counts,
       practice_status_counts: report.practice_status_counts,
       verification_status_counts: report.verification_status_counts,
+      rollback_status_counts: report.rollback_status_counts,
       review_status_counts: report.review_status_counts,
       migration_status_counts: report.migration_status_counts
     }, null, 2),
@@ -829,6 +876,11 @@ function markdownReport(report, coverage, migration, integrity) {
     "- Prerequisite cycles: " + report.prerequisite_cycles.length,
     "- Module ordering warnings: " + integrity.module_ordering_warnings.length,
     "- Deterministic generation: " + report.deterministic_generation,
+    "",
+    "## Rollback Gaps",
+    report.commands_without_rollback_guidance.length
+      ? report.commands_without_rollback_guidance.map((item) => "- " + item.command_id + " (" + item.vendor_id + ", " + item.rollback_classification + ")").join("\n")
+      : "- None",
     "",
     "## Required Honesty Notes",
     "- Planned or blocked content is not presented as complete.",
@@ -878,14 +930,16 @@ export async function compareOutputFiles(artifacts) {
 }
 
 export function validateLearningArtifacts(bundle) {
-  const { sources, catalog, objectiveIndex, modules, integrityReport } = bundle;
+  const { sources, catalog, objectiveIndex, modules, integrityReport, migrationReport } = bundle;
   const errors = [];
   const warnings = [];
   const brokenReferences = [];
   const vendorErrors = [];
   const vocab = sources.statusVocabularies;
   const vendors = new Set(Object.keys(sources.curriculumIndex.vendors || {}));
-  const commandIds = new Set((sources.commandInventory.commands || []).map((command) => command.command_id));
+  const sourceCommands = sources.commandInventory.commands || [];
+  const commandIds = new Set(sourceCommands.map((command) => command.command_id));
+  const commandById = new Map(sourceCommands.map((command) => [command.command_id, command]));
   const routeIds = new Set((sources.routeInventory.routes || []).map((route) => route.route_id));
   const routeById = new Map((sources.routeInventory.routes || []).map((route) => [route.route_id, route]));
   const generatedLessonIds = new Set([...modules.generatedLessonById.keys()]);
@@ -899,7 +953,9 @@ export function validateLearningArtifacts(bundle) {
   const lessonIds = new Set([...generatedLessonIds, ...dedicatedLessonIds]);
   const moduleIds = new Set(modules.modules.map((module) => module.module_id));
   const objectiveIds = new Set();
+  const objectiveReferenceCounts = new Map();
   const recordIds = new Set();
+  const recordById = new Map();
   const aliasMasteryKeys = new Set();
 
   const requireAllowed = (value, allowed, label) => {
@@ -910,6 +966,7 @@ export function validateLearningArtifacts(bundle) {
     if (objectiveIds.has(objective.objective_id)) errors.push("Duplicate objective ID: " + objective.objective_id);
     objectiveIds.add(objective.objective_id);
     if (!vendors.has(objective.vendor_scope)) vendorErrors.push("Unknown objective vendor: " + objective.objective_id + " -> " + objective.vendor_scope);
+    if (!(objective.related_command_ids || []).length) errors.push("Objective has no command reference: " + objective.objective_id);
     for (const commandId of objective.related_command_ids || []) if (!commandIds.has(commandId)) brokenReferences.push("Objective command missing: " + objective.objective_id + " -> " + commandId);
     for (const prereq of objective.prerequisite_objective_ids || []) if (!objectiveIds.has(prereq) && !(objectiveIndex.objectives || []).some((candidate) => candidate.objective_id === prereq)) brokenReferences.push("Objective prerequisite missing: " + objective.objective_id + " -> " + prereq);
     for (const dimension of objective.mastery_dimensions || []) requireAllowed(dimension, vocab.mastery_dimensions, "objective mastery dimension");
@@ -923,12 +980,17 @@ export function validateLearningArtifacts(bundle) {
   for (const record of catalog.commands || []) {
     if (recordIds.has(record.canonical_command_id)) errors.push("Duplicate learning command record: " + record.canonical_command_id);
     recordIds.add(record.canonical_command_id);
+    recordById.set(record.canonical_command_id, record);
     if (!commandIds.has(record.canonical_command_id)) brokenReferences.push("Learning record command missing: " + record.canonical_command_id);
     if (!vendors.has(record.vendor_id)) vendorErrors.push("Unknown command vendor: " + record.canonical_command_id + " -> " + record.vendor_id);
     if (record.module_id && !moduleIds.has(record.module_id)) brokenReferences.push("Command module missing: " + record.canonical_command_id + " -> " + record.module_id);
     for (const id of record.prerequisite_module_ids || []) if (!moduleIds.has(id)) brokenReferences.push("Command prerequisite module missing: " + record.canonical_command_id + " -> " + id);
     for (const id of record.prerequisite_command_ids || []) if (!commandIds.has(id)) brokenReferences.push("Command prerequisite command missing: " + record.canonical_command_id + " -> " + id);
-    for (const id of record.objective_ids || []) if (!objectiveIds.has(id)) brokenReferences.push("Command objective missing: " + record.canonical_command_id + " -> " + id);
+    if (!(record.objective_ids || []).length) errors.push("Command has no objective reference: " + record.canonical_command_id);
+    for (const id of record.objective_ids || []) {
+      if (!objectiveIds.has(id)) brokenReferences.push("Command objective missing: " + record.canonical_command_id + " -> " + id);
+      objectiveReferenceCounts.set(id, (objectiveReferenceCounts.get(id) || 0) + 1);
+    }
     for (const id of record.lesson_ids || []) if (!lessonIds.has(id)) brokenReferences.push("Command lesson missing: " + record.canonical_command_id + " -> " + id);
     for (const id of record.practice_route_ids || []) {
       if (!routeIds.has(id)) brokenReferences.push("Command route missing: " + record.canonical_command_id + " -> " + id);
@@ -960,6 +1022,45 @@ export function validateLearningArtifacts(bundle) {
     if ((record.review_types || []).length && record.review_status !== "planned") errors.push("Stage 1 review status must remain planned: " + record.canonical_command_id);
   }
 
+  for (const objective of objectiveIndex.objectives || []) {
+    if (!objectiveReferenceCounts.has(objective.objective_id)) errors.push("Objective is not referenced by any command: " + objective.objective_id);
+    for (const commandId of objective.related_command_ids || []) {
+      const record = recordById.get(commandId);
+      if (record && record.vendor_id !== objective.vendor_scope) vendorErrors.push("Cross-vendor executable objective mapping: " + objective.objective_id + " -> " + commandId);
+    }
+  }
+
+  const missingVerificationIds = (catalog.commands || []).filter((record) => record.verification_status === "missing").map((record) => record.canonical_command_id).sort();
+  const reportedMissingVerificationIds = [...(integrityReport.commands_without_verification || [])].sort();
+  if (JSON.stringify(missingVerificationIds) !== JSON.stringify(reportedMissingVerificationIds)) errors.push("Missing verification report does not match learning records.");
+  const expectedBlockedByVerificationIds = (catalog.commands || []).filter((record) => record.verification_status === "missing" && record.migration_status === "blocked_by_verification").map((record) => record.canonical_command_id).sort();
+  const reportedBlockedByVerificationIds = [...(migrationReport?.blocked_by_verification || [])].sort();
+  if (JSON.stringify(expectedBlockedByVerificationIds) !== JSON.stringify(reportedBlockedByVerificationIds)) errors.push("Blocked-by-verification report does not match migration records.");
+
+  const missingRollbackIds = new Set((catalog.commands || []).filter((record) => record.rollback_status === "missing").map((record) => record.canonical_command_id));
+  const reportedRollbackGapIds = new Set();
+  const rollbackClassifications = new Set(["genuinely_missing", "not_applicable", "explanation_only_but_still_recommended", "blocked_by_incomplete_source_metadata"]);
+  for (const item of integrityReport.commands_without_rollback_guidance || []) {
+    reportedRollbackGapIds.add(item.command_id);
+    const record = recordById.get(item.command_id);
+    const sourceCommand = commandById.get(item.command_id);
+    if (!record) {
+      brokenReferences.push("Rollback gap command missing: " + item.command_id);
+      continue;
+    }
+    if (record.rollback_status !== "missing") errors.push("Rollback gap listed for non-missing command: " + item.command_id);
+    if (item.vendor_id !== record.vendor_id) vendorErrors.push("Rollback gap vendor mismatch: " + item.command_id);
+    if (item.canonical_syntax !== record.source_command.syntax) errors.push("Rollback gap syntax mismatch: " + item.command_id);
+    if (item.runtime_support !== record.runtime_support) errors.push("Rollback gap runtime mismatch: " + item.command_id);
+    if (item.changes_configuration !== isConfigurationLike(sourceCommand || {})) errors.push("Rollback gap configuration flag mismatch: " + item.command_id);
+    if (item.lesson_status !== record.lesson_status) errors.push("Rollback gap lesson status mismatch: " + item.command_id);
+    if (item.migration_status !== record.migration_status) errors.push("Rollback gap migration status mismatch: " + item.command_id);
+    if (!rollbackClassifications.has(item.rollback_classification)) errors.push("Invalid rollback gap classification: " + item.command_id);
+    if (item.rollback_classification === "genuinely_missing" && item.changes_configuration && ["pilot_ready", "batch_ready"].includes(record.migration_status)) errors.push("Premium migration candidate lacks rollback guidance: " + item.command_id);
+  }
+  for (const commandId of missingRollbackIds) if (!reportedRollbackGapIds.has(commandId)) errors.push("Missing rollback guidance not reported: " + commandId);
+  for (const commandId of reportedRollbackGapIds) if (!missingRollbackIds.has(commandId)) errors.push("Rollback gap report includes non-missing command: " + commandId);
+
   for (const commandId of commandIds) if (!recordIds.has(commandId)) errors.push("Canonical command has no learning record: " + commandId);
   if ((catalog.commands || []).length !== commandIds.size) errors.push("Learning record count does not match canonical inventory count.");
   if (sources.commandIdMigrations.migrations?.length && sources.commandIdMigrations.migrations.some((item) => !commandIds.has(item.to_command_id))) brokenReferences.push("ID migration target missing.");
@@ -983,6 +1084,7 @@ export function validateLearningArtifacts(bundle) {
       commands_without_practice: integrityReport.commands_without_practice.length,
       routes_with_missing_handlers: integrityReport.routes_with_missing_handlers.length,
       commands_without_verification: integrityReport.commands_without_verification.length,
+      commands_without_rollback_guidance: (integrityReport.commands_without_rollback_guidance || []).length,
       review_coverage: 0
     }
   };

@@ -241,9 +241,51 @@
       ]
     }
   ],
+  "raw_duplicate_ids_detected": [
+    {
+      "command_id": "aruba_show_spanning_tree",
+      "records": [
+        {
+          "source_file": "data/commands/network_commands_extended.json",
+          "index": 12,
+          "vendor_id": "aruba_cx",
+          "syntax": "show spanning-tree"
+        },
+        {
+          "source_file": "data/commands/vendor_learning_extended.json",
+          "index": 12,
+          "vendor_id": "aruba_cx",
+          "syntax": "show spanning-tree"
+        }
+      ]
+    },
+    {
+      "command_id": "windows_netstat_ano",
+      "records": [
+        {
+          "source_file": "data/commands/platform_commands.json",
+          "index": 13,
+          "vendor_id": "windows_cmd",
+          "syntax": "netstat -ano"
+        },
+        {
+          "source_file": "data/commands/vendor_learning_extended.json",
+          "index": 14,
+          "vendor_id": "windows_cmd",
+          "syntax": "netstat -ano"
+        }
+      ]
+    }
+  ],
   "resolved_duplicate_ids": [
     "aruba_show_spanning_tree",
     "windows_netstat_ano"
   ],
+  "normalized_learning_records_consolidated": [
+    "aruba_show_spanning_tree",
+    "windows_netstat_ano"
+  ],
+  "raw_command_source_records_deleted": false,
+  "executable_command_id_renames_required": false,
   "unresolved_duplicate_ids": []
 }

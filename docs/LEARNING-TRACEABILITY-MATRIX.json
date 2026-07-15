@@ -10,6 +10,7 @@
     "modules": 44,
     "commands_without_practice": 122,
     "commands_without_verification": 3,
+    "commands_without_rollback_guidance": 10,
     "routes_with_missing_handlers": 72,
     "review_coverage": 0
   },
@@ -17,6 +18,7 @@
     {
       "command_id": "aruba_configure_terminal",
       "vendor": "aruba_cx",
+      "canonical_syntax": "configure terminal",
       "module": "aruba_cx-cli_foundation",
       "lesson": [
         "aruba-configure-access",
@@ -27,6 +29,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -35,6 +38,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -59,6 +63,7 @@
     {
       "command_id": "aruba_hostname",
       "vendor": "aruba_cx",
+      "canonical_syntax": "hostname <name>",
       "module": "aruba_cx-device_information",
       "lesson": [
         "aruba_cx-device_information"
@@ -68,6 +73,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -76,6 +82,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -100,6 +107,7 @@
     {
       "command_id": "aruba_interface_config",
       "vendor": "aruba_cx",
+      "canonical_syntax": "interface <interface>",
       "module": "aruba_cx-interfaces",
       "lesson": [
         "aruba_cx-interfaces"
@@ -109,6 +117,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -117,6 +126,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -141,6 +151,7 @@
     {
       "command_id": "aruba_lacp_mode_active",
       "vendor": "aruba_cx",
+      "canonical_syntax": "lacp mode active",
       "module": "aruba_cx-switching",
       "lesson": [
         "aruba_cx-switching"
@@ -150,6 +161,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -158,6 +170,7 @@
       ],
       "rollback_status": "missing",
       "rollback_command_ids": [],
+      "rollback_gap_classification": "explanation_only_but_still_recommended",
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -181,6 +194,7 @@
     {
       "command_id": "aruba_lacp_system_priority",
       "vendor": "aruba_cx",
+      "canonical_syntax": "lacp system-priority <priority>",
       "module": "aruba_cx-switching",
       "lesson": [
         "aruba_cx-switching"
@@ -190,12 +204,14 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "missing",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "missing",
       "rollback_command_ids": [],
+      "rollback_gap_classification": "explanation_only_but_still_recommended",
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -219,6 +235,7 @@
     {
       "command_id": "aruba_no_shutdown",
       "vendor": "aruba_cx",
+      "canonical_syntax": "no shutdown",
       "module": "aruba_cx-interfaces",
       "lesson": [
         "aruba_cx-interfaces"
@@ -228,6 +245,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -236,6 +254,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -260,6 +279,7 @@
     {
       "command_id": "aruba_reload",
       "vendor": "aruba_cx",
+      "canonical_syntax": "reload",
       "module": "aruba_cx-device_lifecycle",
       "lesson": [
         "aruba_cx-device_lifecycle"
@@ -269,6 +289,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -277,6 +298,7 @@
       ],
       "rollback_status": "missing",
       "rollback_command_ids": [],
+      "rollback_gap_classification": "explanation_only_but_still_recommended",
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -300,6 +322,7 @@
     {
       "command_id": "aruba_show_events_reverse_count",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show events -r -n <count>",
       "module": "aruba_cx-device_information",
       "lesson": [
         "aruba_cx-device_information"
@@ -309,6 +332,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -317,6 +341,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -340,6 +365,7 @@
     {
       "command_id": "aruba_show_flash",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show flash",
       "module": "aruba_cx-device_information",
       "lesson": [
         "aruba_cx-device_information"
@@ -349,6 +375,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -357,6 +384,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -380,6 +408,7 @@
     {
       "command_id": "aruba_show_interface",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show interface",
       "module": "aruba_cx-interfaces",
       "lesson": [
         "aruba_cx-interfaces"
@@ -389,6 +418,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -398,6 +428,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -421,6 +452,7 @@
     {
       "command_id": "aruba_show_interface_brief",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show interface brief",
       "module": "aruba_cx-interfaces",
       "lesson": [
         "aruba-interface-brief",
@@ -431,6 +463,7 @@
       ],
       "practice_route": [],
       "runtime_support": "full_state_simulation",
+      "changes_configuration": false,
       "handler_status": "full_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -440,6 +473,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -463,6 +497,7 @@
     {
       "command_id": "aruba_show_interface_error_statistics",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show interface error-statistics",
       "module": "aruba_cx-interfaces",
       "lesson": [
         "aruba_cx-interfaces"
@@ -472,6 +507,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": false,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -480,6 +516,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -503,6 +540,7 @@
     {
       "command_id": "aruba_show_ip_interface_brief",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show ip interface brief",
       "module": "aruba_cx-interfaces",
       "lesson": [
         "aruba_cx-interfaces"
@@ -512,6 +550,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": false,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -520,6 +559,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -543,6 +583,7 @@
     {
       "command_id": "aruba_show_ip_route",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show ip route",
       "module": "aruba_cx-networking",
       "lesson": [
         "aruba_cx-networking"
@@ -552,6 +593,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -560,6 +602,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -583,6 +626,7 @@
     {
       "command_id": "aruba_show_lacp_interfaces",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show lacp interfaces",
       "module": "aruba_cx-switching",
       "lesson": [
         "aruba_cx-switching"
@@ -592,6 +636,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -600,6 +645,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -623,6 +669,7 @@
     {
       "command_id": "aruba_show_lldp_neighbor_info",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show lldp neighbor-info",
       "module": "aruba_cx-mac_neighbors",
       "lesson": [
         "aruba_cx-mac_neighbors"
@@ -632,6 +679,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -640,6 +688,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -663,6 +712,7 @@
     {
       "command_id": "aruba_show_logging",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show logging",
       "module": "aruba_cx-device_information",
       "lesson": [
         "aruba_cx-device_information"
@@ -672,6 +722,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -680,6 +731,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -703,6 +755,7 @@
     {
       "command_id": "aruba_show_mac_address_table",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show mac-address-table",
       "module": "aruba_cx-mac_neighbors",
       "lesson": [
         "aruba_cx-mac_neighbors"
@@ -712,6 +765,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -721,6 +775,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -744,6 +799,7 @@
     {
       "command_id": "aruba_show_power_over_ethernet",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show power-over-ethernet",
       "module": "aruba_cx-interfaces",
       "lesson": [
         "aruba_cx-interfaces"
@@ -753,6 +809,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -761,6 +818,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -784,6 +842,7 @@
     {
       "command_id": "aruba_show_running_config",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show running-config",
       "module": "aruba_cx-configuration",
       "lesson": [
         "aruba_cx-configuration"
@@ -793,6 +852,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -801,6 +861,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -823,6 +884,7 @@
     {
       "command_id": "aruba_show_running_config_interface",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show running-config interface",
       "module": "aruba_cx-interfaces",
       "lesson": [
         "aruba_cx-interfaces"
@@ -832,6 +894,7 @@
       ],
       "practice_route": [],
       "runtime_support": "full_state_simulation",
+      "changes_configuration": false,
       "handler_status": "full_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -841,6 +904,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -864,6 +928,7 @@
     {
       "command_id": "aruba_show_spanning_tree",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show spanning-tree",
       "module": "aruba_cx-switching",
       "lesson": [
         "aruba_cx-switching"
@@ -873,6 +938,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -881,6 +947,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -904,6 +971,7 @@
     {
       "command_id": "aruba_show_system",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show system",
       "module": "aruba_cx-device_information",
       "lesson": [
         "aruba_cx-device_information"
@@ -913,6 +981,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -921,6 +990,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -944,6 +1014,7 @@
     {
       "command_id": "aruba_show_system_resource_utilization",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show system resource-utilization",
       "module": "aruba_cx-device_information",
       "lesson": [
         "aruba_cx-device_information"
@@ -953,6 +1024,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -961,6 +1033,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -984,6 +1057,7 @@
     {
       "command_id": "aruba_show_version",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show version",
       "module": "aruba_cx-device_information",
       "lesson": [
         "aruba-version",
@@ -994,6 +1068,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1002,6 +1077,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1025,6 +1101,7 @@
     {
       "command_id": "aruba_show_vlan",
       "vendor": "aruba_cx",
+      "canonical_syntax": "show vlan",
       "module": "aruba_cx-vlans",
       "lesson": [
         "aruba_cx-vlans"
@@ -1034,6 +1111,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1042,6 +1120,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1065,6 +1144,7 @@
     {
       "command_id": "aruba_shutdown",
       "vendor": "aruba_cx",
+      "canonical_syntax": "shutdown",
       "module": "aruba_cx-interfaces",
       "lesson": [
         "aruba_cx-interfaces"
@@ -1074,6 +1154,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1082,6 +1163,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1106,6 +1188,7 @@
     {
       "command_id": "aruba_stp_priority",
       "vendor": "aruba_cx",
+      "canonical_syntax": "spanning-tree priority <priority>",
       "module": "aruba_cx-switching",
       "lesson": [
         "aruba_cx-switching"
@@ -1115,6 +1198,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1123,6 +1207,7 @@
       ],
       "rollback_status": "missing",
       "rollback_command_ids": [],
+      "rollback_gap_classification": "explanation_only_but_still_recommended",
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1146,6 +1231,7 @@
     {
       "command_id": "aruba_vlan",
       "vendor": "aruba_cx",
+      "canonical_syntax": "vlan <vlan-id>",
       "module": "aruba_cx-vlans",
       "lesson": [
         "aruba_cx-vlans"
@@ -1155,6 +1241,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1163,6 +1250,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1187,6 +1275,7 @@
     {
       "command_id": "aruba_vlan_access",
       "vendor": "aruba_cx",
+      "canonical_syntax": "vlan access <vlan>",
       "module": "aruba_cx-vlans",
       "lesson": [
         "aruba_cx-vlans"
@@ -1196,6 +1285,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1204,6 +1294,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1228,6 +1319,7 @@
     {
       "command_id": "aruba_vlan_trunk_allowed",
       "vendor": "aruba_cx",
+      "canonical_syntax": "vlan trunk allowed <vlan-list>",
       "module": "aruba_cx-trunks",
       "lesson": [
         "aruba_cx-trunks"
@@ -1237,6 +1329,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1245,6 +1338,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1269,6 +1363,7 @@
     {
       "command_id": "aruba_vlan_trunk_native",
       "vendor": "aruba_cx",
+      "canonical_syntax": "vlan trunk native <vlan-id>",
       "module": "aruba_cx-trunks",
       "lesson": [
         "aruba_cx-trunks"
@@ -1278,12 +1373,14 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "missing",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1308,6 +1405,7 @@
     {
       "command_id": "aruba_write_memory",
       "vendor": "aruba_cx",
+      "canonical_syntax": "write memory",
       "module": "aruba_cx-configuration",
       "lesson": [
         "aruba_cx-configuration"
@@ -1317,12 +1415,14 @@
       ],
       "practice_route": [],
       "runtime_support": "full_state_simulation",
+      "changes_configuration": true,
       "handler_status": "full_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1347,6 +1447,7 @@
     {
       "command_id": "cisco_configure_terminal",
       "vendor": "cisco_ios",
+      "canonical_syntax": "configure terminal",
       "module": "cisco_ios-cli_foundation",
       "lesson": [
         "branch-access-port",
@@ -1374,6 +1475,7 @@
         "route-7-7"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -1385,6 +1487,7 @@
       "rollback_command_ids": [
         "cisco_no_shutdown"
       ],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1408,6 +1511,7 @@
     {
       "command_id": "cisco_copy_running_startup",
       "vendor": "cisco_ios",
+      "canonical_syntax": "copy running-config startup-config",
       "module": "cisco_ios-configuration",
       "lesson": [
         "cisco-configure-access-port",
@@ -1436,6 +1540,7 @@
         "route-6-5"
       ],
       "runtime_support": "full_state_simulation",
+      "changes_configuration": true,
       "handler_status": "full_state_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -1447,6 +1552,7 @@
       "rollback_command_ids": [
         "cisco_no_shutdown"
       ],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1470,6 +1576,7 @@
     {
       "command_id": "cisco_dir_flash",
       "vendor": "cisco_ios",
+      "canonical_syntax": "dir flash:",
       "module": "cisco_ios-file_system",
       "lesson": [
         "cisco_ios-file_system"
@@ -1479,6 +1586,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1487,6 +1595,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1510,6 +1619,7 @@
     {
       "command_id": "cisco_hostname",
       "vendor": "cisco_ios",
+      "canonical_syntax": "hostname <name>",
       "module": "cisco_ios-device_information",
       "lesson": [
         "cisco_ios-device_information"
@@ -1521,6 +1631,7 @@
         "full-switch-configuration"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -1532,6 +1643,7 @@
       "rollback_command_ids": [
         "cisco_no_shutdown"
       ],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1555,6 +1667,7 @@
     {
       "command_id": "cisco_interface_config",
       "vendor": "cisco_ios",
+      "canonical_syntax": "interface <interface>",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "branch-access-port",
@@ -1596,6 +1709,7 @@
         "route-7-7"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "runtime_policy",
       "verification_policy": [
@@ -1609,6 +1723,7 @@
       "rollback_command_ids": [
         "cisco_no_shutdown"
       ],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1635,6 +1750,7 @@
     {
       "command_id": "cisco_interface_range",
       "vendor": "cisco_ios",
+      "canonical_syntax": "interface range <interfaces>",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "cisco_ios-interfaces"
@@ -1644,6 +1760,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1652,6 +1769,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1676,6 +1794,7 @@
     {
       "command_id": "cisco_no_shutdown",
       "vendor": "cisco_ios",
+      "canonical_syntax": "no shutdown",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "branch-access-port",
@@ -1692,6 +1811,7 @@
         "full-switch-configuration"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -1702,6 +1822,7 @@
       "rollback_command_ids": [
         "cisco_no_shutdown"
       ],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1725,6 +1846,7 @@
     {
       "command_id": "cisco_reload",
       "vendor": "cisco_ios",
+      "canonical_syntax": "reload",
       "module": "cisco_ios-device_lifecycle",
       "lesson": [
         "cisco_ios-device_lifecycle",
@@ -1735,6 +1857,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1743,6 +1866,7 @@
       ],
       "rollback_status": "missing",
       "rollback_command_ids": [],
+      "rollback_gap_classification": "explanation_only_but_still_recommended",
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1766,6 +1890,7 @@
     {
       "command_id": "cisco_show_boot",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show boot",
       "module": "cisco_ios-device_information",
       "lesson": [
         "cisco_ios-device_information"
@@ -1775,6 +1900,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1783,6 +1909,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1806,6 +1933,7 @@
     {
       "command_id": "cisco_show_cdp_neighbors",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show cdp neighbors",
       "module": "cisco_ios-mac_neighbors",
       "lesson": [
         "cisco-cdp-neighbors",
@@ -1830,6 +1958,7 @@
         "route-4-9"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -1839,6 +1968,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1863,6 +1993,7 @@
     {
       "command_id": "cisco_show_diagnostic_result",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show diagnostic result",
       "module": "cisco_ios-diagnostics",
       "lesson": [
         "cisco_ios-diagnostics"
@@ -1872,6 +2003,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1880,6 +2012,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1903,6 +2036,7 @@
     {
       "command_id": "cisco_show_etherchannel_summary",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show etherchannel summary",
       "module": "cisco_ios-switching",
       "lesson": [
         "cisco-trunk-stp",
@@ -1915,6 +2049,7 @@
         "route-7-4"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -1924,6 +2059,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1948,6 +2084,7 @@
     {
       "command_id": "cisco_show_file_systems",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show file systems",
       "module": "cisco_ios-file_system",
       "lesson": [
         "cisco_ios-file_system"
@@ -1957,6 +2094,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -1965,6 +2103,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -1988,6 +2127,7 @@
     {
       "command_id": "cisco_show_interface_status",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show interface status",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "cisco-interface-status",
@@ -2099,6 +2239,7 @@
         "wrong-vlan"
       ],
       "runtime_support": "full_state_simulation",
+      "changes_configuration": false,
       "handler_status": "full_state_handler",
       "verification_status": "runtime_policy",
       "verification_policy": [
@@ -2112,6 +2253,7 @@
       "rollback_command_ids": [
         "cisco_no_shutdown"
       ],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2137,6 +2279,7 @@
     {
       "command_id": "cisco_show_interfaces",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show interfaces",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "cisco_ios-interfaces"
@@ -2146,6 +2289,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -2155,6 +2299,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2178,6 +2323,7 @@
     {
       "command_id": "cisco_show_interfaces_counters_errors",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show interfaces counters errors",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "cisco_ios-interfaces"
@@ -2187,12 +2333,14 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2216,6 +2364,7 @@
     {
       "command_id": "cisco_show_inventory",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show inventory",
       "module": "cisco_ios-device_information",
       "lesson": [
         "cisco_ios-device_information"
@@ -2225,6 +2374,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -2233,6 +2383,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2256,6 +2407,7 @@
     {
       "command_id": "cisco_show_ip_arp",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show ip arp",
       "module": "cisco_ios-mac_neighbors",
       "lesson": [
         "cisco-ip-arp",
@@ -2266,12 +2418,14 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2295,6 +2449,7 @@
     {
       "command_id": "cisco_show_ip_dhcp_binding",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show ip dhcp binding",
       "module": "cisco_ios-cli_foundation",
       "lesson": [
         "cisco_ios-cli_foundation"
@@ -2304,12 +2459,14 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2333,6 +2490,7 @@
     {
       "command_id": "cisco_show_ip_interface_brief",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show ip interface brief",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "cisco-ip-interface-brief",
@@ -2343,6 +2501,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": false,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -2351,6 +2510,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2374,6 +2534,7 @@
     {
       "command_id": "cisco_show_ip_route",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show ip route",
       "module": "cisco_ios-networking",
       "lesson": [
         "cisco_ios-networking"
@@ -2383,6 +2544,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -2391,6 +2553,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2414,6 +2577,7 @@
     {
       "command_id": "cisco_show_lldp_neighbors",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show lldp neighbors",
       "module": "cisco_ios-mac_neighbors",
       "lesson": [
         "cisco-neighbors",
@@ -2437,6 +2601,7 @@
         "route-4-9"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -2446,6 +2611,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2470,6 +2636,7 @@
     {
       "command_id": "cisco_show_logging",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show logging",
       "module": "cisco_ios-device_information",
       "lesson": [
         "cisco_ios-device_information"
@@ -2479,6 +2646,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -2487,6 +2655,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2510,6 +2679,7 @@
     {
       "command_id": "cisco_show_mac_address_table",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show mac address-table",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "cisco-mac-table",
@@ -2522,6 +2692,7 @@
         "route-12-5"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -2531,6 +2702,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2555,6 +2727,7 @@
     {
       "command_id": "cisco_show_port_security_interface",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show port-security interface <interface>",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "cisco_ios-interfaces"
@@ -2575,6 +2748,7 @@
         "route-5-9"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": false,
       "handler_status": "simplified_state_handler",
       "verification_status": "runtime_policy",
       "verification_policy": [
@@ -2586,6 +2760,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2611,6 +2786,7 @@
     {
       "command_id": "cisco_show_power_inline",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show power inline",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "cisco_ios-interfaces"
@@ -2620,12 +2796,14 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2649,6 +2827,7 @@
     {
       "command_id": "cisco_show_processes_cpu_sorted",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show processes cpu sorted",
       "module": "cisco_ios-device_information",
       "lesson": [
         "cisco_ios-device_information"
@@ -2658,6 +2837,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -2666,6 +2846,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2689,6 +2870,7 @@
     {
       "command_id": "cisco_show_running_config",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show running-config",
       "module": "cisco_ios-device_information",
       "lesson": [
         "cisco_ios-device_information",
@@ -2716,6 +2898,7 @@
         "route-6-5"
       ],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -2725,6 +2908,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2747,6 +2931,7 @@
     {
       "command_id": "cisco_show_running_config_interface",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show running-config interface",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "cisco-save-verify",
@@ -2761,6 +2946,7 @@
         "full-switch-configuration"
       ],
       "runtime_support": "full_state_simulation",
+      "changes_configuration": false,
       "handler_status": "full_state_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -2771,6 +2957,7 @@
       "rollback_command_ids": [
         "cisco_no_shutdown"
       ],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2793,6 +2980,7 @@
     {
       "command_id": "cisco_show_spanning_tree",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show spanning-tree",
       "module": "cisco_ios-switching",
       "lesson": [
         "cisco-trunk-stp",
@@ -2809,6 +2997,7 @@
         "route-7-9"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -2818,6 +3007,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2842,6 +3032,7 @@
     {
       "command_id": "cisco_show_startup_config",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show startup-config",
       "module": "cisco_ios-device_information",
       "lesson": [
         "cisco_ios-device_information"
@@ -2851,6 +3042,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -2859,6 +3051,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2881,6 +3074,7 @@
     {
       "command_id": "cisco_show_version",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show version",
       "module": "cisco_ios-device_information",
       "lesson": [
         "cisco-version",
@@ -2891,6 +3085,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -2900,6 +3095,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2923,6 +3119,7 @@
     {
       "command_id": "cisco_show_vlan_brief",
       "vendor": "cisco_ios",
+      "canonical_syntax": "show vlan brief",
       "module": "cisco_ios-vlans",
       "lesson": [
         "cisco-verify-configuration",
@@ -2956,6 +3153,7 @@
         "wrong-vlan"
       ],
       "runtime_support": "full_state_simulation",
+      "changes_configuration": false,
       "handler_status": "full_state_handler",
       "verification_status": "runtime_policy",
       "verification_policy": [
@@ -2968,6 +3166,7 @@
       "rollback_command_ids": [
         "cisco_no_shutdown"
       ],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -2993,6 +3192,7 @@
     {
       "command_id": "cisco_shutdown",
       "vendor": "cisco_ios",
+      "canonical_syntax": "shutdown",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "cisco-shutdown-safety",
@@ -3004,6 +3204,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -3012,6 +3213,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3036,6 +3238,7 @@
     {
       "command_id": "cisco_stp_root_primary",
       "vendor": "cisco_ios",
+      "canonical_syntax": "spanning-tree vlan <vlan-id> root primary",
       "module": "cisco_ios-vlans",
       "lesson": [
         "cisco_ios-vlans"
@@ -3045,12 +3248,14 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "missing",
       "rollback_command_ids": [],
+      "rollback_gap_classification": "genuinely_missing",
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3075,6 +3280,7 @@
     {
       "command_id": "cisco_svi_ip_address",
       "vendor": "cisco_ios",
+      "canonical_syntax": "ip address <ip-address> <mask>",
       "module": "cisco_ios-interfaces",
       "lesson": [
         "cisco_ios-interfaces"
@@ -3084,6 +3290,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -3092,6 +3299,7 @@
       ],
       "rollback_status": "missing",
       "rollback_command_ids": [],
+      "rollback_gap_classification": "explanation_only_but_still_recommended",
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3115,6 +3323,7 @@
     {
       "command_id": "cisco_switch_priority",
       "vendor": "cisco_ios",
+      "canonical_syntax": "switch <member> priority <priority>",
       "module": "cisco_ios-stacking",
       "lesson": [
         "cisco_ios-stacking"
@@ -3127,6 +3336,7 @@
         "route-7-5"
       ],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -3135,6 +3345,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3157,6 +3368,7 @@
     {
       "command_id": "cisco_switchport_access_vlan",
       "vendor": "cisco_ios",
+      "canonical_syntax": "switchport access vlan <vlan>",
       "module": "cisco_ios-vlans",
       "lesson": [
         "branch-access-port",
@@ -3190,6 +3402,7 @@
         "wrong-vlan"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "runtime_policy",
       "verification_policy": [
@@ -3203,6 +3416,7 @@
       "rollback_command_ids": [
         "cisco_no_shutdown"
       ],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3229,6 +3443,7 @@
     {
       "command_id": "cisco_switchport_mode_trunk",
       "vendor": "cisco_ios",
+      "canonical_syntax": "switchport mode trunk",
       "module": "cisco_ios-trunks",
       "lesson": [
         "cisco-configure-trunk",
@@ -3248,6 +3463,7 @@
         "route-7-7"
       ],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -3256,6 +3472,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3279,6 +3496,7 @@
     {
       "command_id": "cisco_switchport_trunk_allowed",
       "vendor": "cisco_ios",
+      "canonical_syntax": "switchport trunk allowed vlan <vlan-list>",
       "module": "cisco_ios-trunks",
       "lesson": [
         "cisco-configure-trunk",
@@ -3298,6 +3516,7 @@
         "route-7-7"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -3306,6 +3525,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3329,6 +3549,7 @@
     {
       "command_id": "cisco_vlan_create",
       "vendor": "cisco_ios",
+      "canonical_syntax": "vlan <vlan-id>",
       "module": "cisco_ios-vlans",
       "lesson": [
         "cisco-create-vlan",
@@ -3360,6 +3581,7 @@
         "wrong-vlan"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "runtime_policy",
       "verification_policy": [
@@ -3373,6 +3595,7 @@
       "rollback_command_ids": [
         "cisco_no_shutdown"
       ],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3398,6 +3621,7 @@
     {
       "command_id": "cisco_vlan_name",
       "vendor": "cisco_ios",
+      "canonical_syntax": "name <vlan-name>",
       "module": "cisco_ios-vlans",
       "lesson": [
         "cisco-create-vlan",
@@ -3410,6 +3634,7 @@
         "full-switch-configuration"
       ],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -3420,6 +3645,7 @@
       "rollback_command_ids": [
         "cisco_no_shutdown"
       ],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3443,6 +3669,7 @@
     {
       "command_id": "cisco_voice_vlan",
       "vendor": "cisco_ios",
+      "canonical_syntax": "switchport voice vlan <vlan-id>",
       "module": "cisco_ios-vlans",
       "lesson": [
         "cisco_ios-vlans"
@@ -3452,12 +3679,14 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3482,6 +3711,7 @@
     {
       "command_id": "hp_dir",
       "vendor": "hp_comware",
+      "canonical_syntax": "dir",
       "module": "hp_comware-device_information",
       "lesson": [
         "hp_comware-device_information"
@@ -3491,12 +3721,14 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3520,6 +3752,7 @@
     {
       "command_id": "hp_display_arp",
       "vendor": "hp_comware",
+      "canonical_syntax": "display arp",
       "module": "hp_comware-mac_neighbors",
       "lesson": [
         "hp_comware-mac_neighbors"
@@ -3529,6 +3762,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -3537,6 +3771,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3560,6 +3795,7 @@
     {
       "command_id": "hp_display_cpu_usage",
       "vendor": "hp_comware",
+      "canonical_syntax": "display cpu-usage",
       "module": "hp_comware-device_information",
       "lesson": [
         "hp_comware-device_information"
@@ -3569,6 +3805,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -3577,6 +3814,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3600,6 +3838,7 @@
     {
       "command_id": "hp_display_current_configuration",
       "vendor": "hp_comware",
+      "canonical_syntax": "display current-configuration",
       "module": "hp_comware-device_information",
       "lesson": [
         "hp_comware-device_information"
@@ -3611,6 +3850,7 @@
         "route-11-10"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -3620,6 +3860,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3644,6 +3885,7 @@
     {
       "command_id": "hp_display_current_configuration_interface",
       "vendor": "hp_comware",
+      "canonical_syntax": "display current-configuration interface",
       "module": "hp_comware-interfaces",
       "lesson": [
         "hp_comware-interfaces"
@@ -3653,6 +3895,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -3662,6 +3905,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3685,6 +3929,7 @@
     {
       "command_id": "hp_display_device",
       "vendor": "hp_comware",
+      "canonical_syntax": "display device",
       "module": "hp_comware-device_information",
       "lesson": [
         "hp_comware-device_information"
@@ -3694,6 +3939,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -3703,6 +3949,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3726,6 +3973,7 @@
     {
       "command_id": "hp_display_diagnostic_information",
       "vendor": "hp_comware",
+      "canonical_syntax": "display diagnostic-information",
       "module": "hp_comware-diagnostics",
       "lesson": [
         "hp_comware-diagnostics"
@@ -3735,6 +3983,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -3743,6 +3992,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3765,6 +4015,7 @@
     {
       "command_id": "hp_display_interface",
       "vendor": "hp_comware",
+      "canonical_syntax": "display interface",
       "module": "hp_comware-interfaces",
       "lesson": [
         "hp_comware-interfaces"
@@ -3774,6 +4025,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -3783,6 +4035,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3806,6 +4059,7 @@
     {
       "command_id": "hp_display_interface_brief",
       "vendor": "hp_comware",
+      "canonical_syntax": "display interface brief",
       "module": "hp_comware-interfaces",
       "lesson": [
         "hp-interface-brief",
@@ -3837,6 +4091,7 @@
         "route-8-9"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": false,
       "handler_status": "simplified_state_handler",
       "verification_status": "runtime_policy",
       "verification_policy": [
@@ -3849,6 +4104,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3874,6 +4130,7 @@
     {
       "command_id": "hp_display_ip_interface_brief",
       "vendor": "hp_comware",
+      "canonical_syntax": "display ip interface brief",
       "module": "hp_comware-interfaces",
       "lesson": [
         "hp_comware-interfaces"
@@ -3883,6 +4140,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": false,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -3891,6 +4149,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3914,6 +4173,7 @@
     {
       "command_id": "hp_display_ip_routing_table",
       "vendor": "hp_comware",
+      "canonical_syntax": "display ip routing-table",
       "module": "hp_comware-networking",
       "lesson": [
         "hp_comware-networking"
@@ -3923,6 +4183,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -3931,6 +4192,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3954,6 +4216,7 @@
     {
       "command_id": "hp_display_irf",
       "vendor": "hp_comware",
+      "canonical_syntax": "display irf",
       "module": "hp_comware-stacking",
       "lesson": [
         "hp-irf",
@@ -3965,6 +4228,7 @@
       ],
       "practice_route": [],
       "runtime_support": "full_state_simulation",
+      "changes_configuration": false,
       "handler_status": "full_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -3974,6 +4238,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -3997,6 +4262,7 @@
     {
       "command_id": "hp_display_irf_configuration",
       "vendor": "hp_comware",
+      "canonical_syntax": "display irf configuration",
       "module": "hp_comware-stacking",
       "lesson": [
         "hp_comware-stacking"
@@ -4006,6 +4272,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -4014,6 +4281,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4037,6 +4305,7 @@
     {
       "command_id": "hp_display_irf_port",
       "vendor": "hp_comware",
+      "canonical_syntax": "display irf-port",
       "module": "hp_comware-stacking",
       "lesson": [
         "hp_comware-stacking"
@@ -4059,6 +4328,7 @@
         "route-8-9"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -4069,6 +4339,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4093,6 +4364,7 @@
     {
       "command_id": "hp_display_irf_port_configuration",
       "vendor": "hp_comware",
+      "canonical_syntax": "display irf-port configuration",
       "module": "hp_comware-stacking",
       "lesson": [
         "hp_comware-stacking"
@@ -4102,6 +4374,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -4111,6 +4384,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4134,6 +4408,7 @@
     {
       "command_id": "hp_display_irf_topology",
       "vendor": "hp_comware",
+      "canonical_syntax": "display irf topology",
       "module": "hp_comware-stacking",
       "lesson": [
         "hp-irf-topology",
@@ -4157,6 +4432,7 @@
         "route-8-9"
       ],
       "runtime_support": "full_state_simulation",
+      "changes_configuration": false,
       "handler_status": "full_state_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -4167,6 +4443,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4189,6 +4466,7 @@
     {
       "command_id": "hp_display_link_aggregation_summary",
       "vendor": "hp_comware",
+      "canonical_syntax": "display link-aggregation summary",
       "module": "hp_comware-switching",
       "lesson": [
         "hp_comware-switching"
@@ -4198,6 +4476,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -4206,6 +4485,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4229,6 +4509,7 @@
     {
       "command_id": "hp_display_link_aggregation_verbose",
       "vendor": "hp_comware",
+      "canonical_syntax": "display link-aggregation verbose",
       "module": "hp_comware-switching",
       "lesson": [
         "hp_comware-switching"
@@ -4238,6 +4519,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -4246,6 +4528,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4269,6 +4552,7 @@
     {
       "command_id": "hp_display_lldp_neighbor",
       "vendor": "hp_comware",
+      "canonical_syntax": "display lldp neighbor-information",
       "module": "hp_comware-mac_neighbors",
       "lesson": [
         "hp_comware-mac_neighbors"
@@ -4280,6 +4564,7 @@
         "route-11-6"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -4288,6 +4573,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4312,6 +4598,7 @@
     {
       "command_id": "hp_display_logbuffer",
       "vendor": "hp_comware",
+      "canonical_syntax": "display logbuffer",
       "module": "hp_comware-device_information",
       "lesson": [
         "hp_comware-device_information"
@@ -4321,6 +4608,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -4330,6 +4618,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4353,6 +4642,7 @@
     {
       "command_id": "hp_display_mac_address",
       "vendor": "hp_comware",
+      "canonical_syntax": "display mac-address",
       "module": "hp_comware-mac_neighbors",
       "lesson": [
         "hp_comware-mac_neighbors"
@@ -4364,6 +4654,7 @@
         "route-11-5"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -4374,6 +4665,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4398,6 +4690,7 @@
     {
       "command_id": "hp_display_memory",
       "vendor": "hp_comware",
+      "canonical_syntax": "display memory",
       "module": "hp_comware-device_information",
       "lesson": [
         "hp_comware-device_information"
@@ -4407,6 +4700,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -4415,6 +4709,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4438,6 +4733,7 @@
     {
       "command_id": "hp_display_poe_interface",
       "vendor": "hp_comware",
+      "canonical_syntax": "display poe interface",
       "module": "hp_comware-interfaces",
       "lesson": [
         "hp_comware-interfaces"
@@ -4447,6 +4743,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -4455,6 +4752,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4478,6 +4776,7 @@
     {
       "command_id": "hp_display_saved_configuration",
       "vendor": "hp_comware",
+      "canonical_syntax": "display saved-configuration",
       "module": "hp_comware-device_information",
       "lesson": [
         "hp_comware-device_information"
@@ -4487,6 +4786,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -4495,6 +4795,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4517,6 +4818,7 @@
     {
       "command_id": "hp_display_stp",
       "vendor": "hp_comware",
+      "canonical_syntax": "display stp",
       "module": "hp_comware-switching",
       "lesson": [
         "hp_comware-switching"
@@ -4526,6 +4828,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -4534,6 +4837,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4557,6 +4861,7 @@
     {
       "command_id": "hp_display_stp_brief",
       "vendor": "hp_comware",
+      "canonical_syntax": "display stp brief",
       "module": "hp_comware-switching",
       "lesson": [
         "hp_comware-switching"
@@ -4566,6 +4871,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -4574,6 +4880,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4597,6 +4904,7 @@
     {
       "command_id": "hp_display_version",
       "vendor": "hp_comware",
+      "canonical_syntax": "display version",
       "module": "hp_comware-device_information",
       "lesson": [
         "hp-version",
@@ -4607,6 +4915,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -4616,6 +4925,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4639,6 +4949,7 @@
     {
       "command_id": "hp_display_vlan",
       "vendor": "hp_comware",
+      "canonical_syntax": "display vlan",
       "module": "hp_comware-vlans",
       "lesson": [
         "hp_comware-vlans"
@@ -4650,6 +4961,7 @@
         "route-11-2"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -4659,6 +4971,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4683,6 +4996,7 @@
     {
       "command_id": "hp_interface_config",
       "vendor": "hp_comware",
+      "canonical_syntax": "interface <interface>",
       "module": "hp_comware-interfaces",
       "lesson": [
         "hp_comware-interfaces"
@@ -4696,6 +5010,7 @@
         "route-11-4"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "runtime_policy",
       "verification_policy": [
@@ -4707,6 +5022,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4733,6 +5049,7 @@
     {
       "command_id": "hp_irf_member_priority",
       "vendor": "hp_comware",
+      "canonical_syntax": "irf member <member-id> priority <priority>",
       "module": "hp_comware-stacking",
       "lesson": [
         "hp_comware-stacking"
@@ -4755,6 +5072,7 @@
         "route-8-9"
       ],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -4764,6 +5082,7 @@
       ],
       "rollback_status": "missing",
       "rollback_command_ids": [],
+      "rollback_gap_classification": "explanation_only_but_still_recommended",
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4787,6 +5106,7 @@
     {
       "command_id": "hp_irf_member_renumber",
       "vendor": "hp_comware",
+      "canonical_syntax": "irf member <member-id> renumber <new-member-id>",
       "module": "hp_comware-stacking",
       "lesson": [
         "hp_comware-stacking"
@@ -4796,12 +5116,14 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "missing",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "missing",
       "rollback_command_ids": [],
+      "rollback_gap_classification": "explanation_only_but_still_recommended",
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4825,6 +5147,7 @@
     {
       "command_id": "hp_port_access_vlan",
       "vendor": "hp_comware",
+      "canonical_syntax": "port access vlan <vlan>",
       "module": "hp_comware-vlans",
       "lesson": [
         "hp_comware-vlans"
@@ -4836,6 +5159,7 @@
         "route-11-2"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -4845,6 +5169,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4868,6 +5193,7 @@
     {
       "command_id": "hp_port_link_type_trunk",
       "vendor": "hp_comware",
+      "canonical_syntax": "port link-type trunk",
       "module": "hp_comware-trunks",
       "lesson": [
         "hp_comware-trunks"
@@ -4879,6 +5205,7 @@
         "route-11-4"
       ],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -4888,6 +5215,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4911,6 +5239,7 @@
     {
       "command_id": "hp_port_trunk_permit",
       "vendor": "hp_comware",
+      "canonical_syntax": "port trunk permit vlan <vlan-list>",
       "module": "hp_comware-trunks",
       "lesson": [
         "hp_comware-trunks"
@@ -4922,6 +5251,7 @@
         "route-11-4"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -4930,6 +5260,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4953,6 +5284,7 @@
     {
       "command_id": "hp_reboot",
       "vendor": "hp_comware",
+      "canonical_syntax": "reboot",
       "module": "hp_comware-device_lifecycle",
       "lesson": [
         "hp_comware-device_lifecycle"
@@ -4962,6 +5294,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -4970,6 +5303,7 @@
       ],
       "rollback_status": "missing",
       "rollback_command_ids": [],
+      "rollback_gap_classification": "explanation_only_but_still_recommended",
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -4993,6 +5327,7 @@
     {
       "command_id": "hp_save",
       "vendor": "hp_comware",
+      "canonical_syntax": "save",
       "module": "hp_comware-configuration",
       "lesson": [
         "hp_comware-configuration"
@@ -5004,6 +5339,7 @@
         "route-11-10"
       ],
       "runtime_support": "full_state_simulation",
+      "changes_configuration": true,
       "handler_status": "full_state_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -5013,6 +5349,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5036,6 +5373,7 @@
     {
       "command_id": "hp_save_force",
       "vendor": "hp_comware",
+      "canonical_syntax": "save force",
       "module": "hp_comware-configuration",
       "lesson": [
         "hp_comware-configuration"
@@ -5045,6 +5383,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5053,6 +5392,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5076,6 +5416,7 @@
     {
       "command_id": "hp_shutdown",
       "vendor": "hp_comware",
+      "canonical_syntax": "shutdown",
       "module": "hp_comware-interfaces",
       "lesson": [
         "hp_comware-interfaces"
@@ -5085,6 +5426,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5093,6 +5435,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5117,6 +5460,7 @@
     {
       "command_id": "hp_sysname",
       "vendor": "hp_comware",
+      "canonical_syntax": "sysname <name>",
       "module": "hp_comware-device_information",
       "lesson": [
         "hp_comware-device_information"
@@ -5126,6 +5470,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5134,6 +5479,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5158,6 +5504,7 @@
     {
       "command_id": "hp_system_view",
       "vendor": "hp_comware",
+      "canonical_syntax": "system-view",
       "module": "hp_comware-cli_foundation",
       "lesson": [
         "hp-configure-access",
@@ -5170,6 +5517,7 @@
         "route-11-4"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -5179,6 +5527,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5202,6 +5551,7 @@
     {
       "command_id": "hp_undo_shutdown",
       "vendor": "hp_comware",
+      "canonical_syntax": "undo shutdown",
       "module": "hp_comware-interfaces",
       "lesson": [
         "hp_comware-interfaces"
@@ -5211,6 +5561,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5219,6 +5570,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5243,6 +5595,7 @@
     {
       "command_id": "hp_vlan",
       "vendor": "hp_comware",
+      "canonical_syntax": "vlan <vlan-id>",
       "module": "hp_comware-vlans",
       "lesson": [
         "hp_comware-vlans"
@@ -5254,6 +5607,7 @@
         "route-11-2"
       ],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -5263,6 +5617,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5286,6 +5641,7 @@
     {
       "command_id": "linux_arp_a",
       "vendor": "linux",
+      "canonical_syntax": "arp -a",
       "module": "linux-mac_neighbors",
       "lesson": [
         "linux-mac_neighbors"
@@ -5295,6 +5651,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5303,6 +5660,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5326,6 +5684,7 @@
     {
       "command_id": "linux_df_h",
       "vendor": "linux",
+      "canonical_syntax": "df -h",
       "module": "linux-device_information",
       "lesson": [
         "linux-device_information"
@@ -5335,6 +5694,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5343,6 +5703,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5366,6 +5727,7 @@
     {
       "command_id": "linux_dhclient_release",
       "vendor": "linux",
+      "canonical_syntax": "sudo dhclient -r <interface>",
       "module": "linux-interfaces",
       "lesson": [
         "linux-interfaces"
@@ -5375,6 +5737,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5383,6 +5746,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5405,6 +5769,7 @@
     {
       "command_id": "linux_dhclient_renew",
       "vendor": "linux",
+      "canonical_syntax": "sudo dhclient <interface>",
       "module": "linux-interfaces",
       "lesson": [
         "linux-interfaces"
@@ -5414,6 +5779,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5422,6 +5788,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5444,6 +5811,7 @@
     {
       "command_id": "linux_dig",
       "vendor": "linux",
+      "canonical_syntax": "dig",
       "module": "linux-networking",
       "lesson": [
         "linux-networking"
@@ -5453,6 +5821,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5461,6 +5830,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5484,6 +5854,7 @@
     {
       "command_id": "linux_dmesg",
       "vendor": "linux",
+      "canonical_syntax": "dmesg",
       "module": "linux-device_information",
       "lesson": [
         "linux-device_information"
@@ -5493,6 +5864,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5501,6 +5873,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5524,6 +5897,7 @@
     {
       "command_id": "linux_ethtool_interface",
       "vendor": "linux",
+      "canonical_syntax": "ethtool <interface>",
       "module": "linux-interfaces",
       "lesson": [
         "linux-interfaces"
@@ -5533,6 +5907,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5541,6 +5916,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5564,6 +5940,7 @@
     {
       "command_id": "linux_ip_addr",
       "vendor": "linux",
+      "canonical_syntax": "ip addr",
       "module": "linux-interfaces",
       "lesson": [
         "linux-interfaces",
@@ -5574,6 +5951,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5582,6 +5960,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5605,6 +5984,7 @@
     {
       "command_id": "linux_ip_link",
       "vendor": "linux",
+      "canonical_syntax": "ip link",
       "module": "linux-interfaces",
       "lesson": [
         "linux-interfaces",
@@ -5615,6 +5995,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5623,6 +6004,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5646,6 +6028,7 @@
     {
       "command_id": "linux_ip_link_down",
       "vendor": "linux",
+      "canonical_syntax": "sudo ip link set <interface> down",
       "module": "linux-interfaces",
       "lesson": [
         "linux-interfaces"
@@ -5655,6 +6038,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5663,6 +6047,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5685,6 +6070,7 @@
     {
       "command_id": "linux_ip_link_up",
       "vendor": "linux",
+      "canonical_syntax": "sudo ip link set <interface> up",
       "module": "linux-interfaces",
       "lesson": [
         "linux-interfaces"
@@ -5694,6 +6080,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5702,6 +6089,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5724,6 +6112,7 @@
     {
       "command_id": "linux_ip_neigh",
       "vendor": "linux",
+      "canonical_syntax": "ip neigh",
       "module": "linux-mac_neighbors",
       "lesson": [
         "linux-mac_neighbors"
@@ -5733,6 +6122,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5741,6 +6131,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5764,6 +6155,7 @@
     {
       "command_id": "linux_ip_route",
       "vendor": "linux",
+      "canonical_syntax": "ip route",
       "module": "linux-networking",
       "lesson": [
         "linux-network",
@@ -5774,6 +6166,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5782,6 +6175,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5805,6 +6199,7 @@
     {
       "command_id": "linux_journalctl_errors",
       "vendor": "linux",
+      "canonical_syntax": "journalctl -p err",
       "module": "linux-device_information",
       "lesson": [
         "linux-device_information"
@@ -5814,6 +6209,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5822,6 +6218,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5845,6 +6242,7 @@
     {
       "command_id": "linux_journalctl_networkmanager",
       "vendor": "linux",
+      "canonical_syntax": "journalctl -u NetworkManager",
       "module": "linux-device_information",
       "lesson": [
         "linux-device_information"
@@ -5854,6 +6252,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5862,6 +6261,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5885,6 +6285,7 @@
     {
       "command_id": "linux_lsblk",
       "vendor": "linux",
+      "canonical_syntax": "lsblk",
       "module": "linux-device_information",
       "lesson": [
         "linux-device_information"
@@ -5894,6 +6295,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5902,6 +6304,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5925,6 +6328,7 @@
     {
       "command_id": "linux_ping",
       "vendor": "linux",
+      "canonical_syntax": "ping",
       "module": "linux-networking",
       "lesson": [
         "linux-networking"
@@ -5934,6 +6338,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -5943,6 +6348,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -5966,6 +6372,7 @@
     {
       "command_id": "linux_resolvectl_status",
       "vendor": "linux",
+      "canonical_syntax": "resolvectl status",
       "module": "linux-networking",
       "lesson": [
         "linux-networking"
@@ -5975,12 +6382,14 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6004,6 +6413,7 @@
     {
       "command_id": "linux_restart_networking",
       "vendor": "linux",
+      "canonical_syntax": "sudo systemctl restart networking",
       "module": "linux-cli_foundation",
       "lesson": [
         "linux-cli_foundation"
@@ -6013,6 +6423,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6021,6 +6432,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6043,6 +6455,7 @@
     {
       "command_id": "linux_restart_networkmanager",
       "vendor": "linux",
+      "canonical_syntax": "sudo systemctl restart NetworkManager",
       "module": "linux-cli_foundation",
       "lesson": [
         "linux-cli_foundation"
@@ -6052,6 +6465,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6060,6 +6474,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6082,6 +6497,7 @@
     {
       "command_id": "linux_ss_listening",
       "vendor": "linux",
+      "canonical_syntax": "ss -tulpn",
       "module": "linux-interfaces",
       "lesson": [
         "linux-interfaces"
@@ -6091,12 +6507,14 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6120,6 +6538,7 @@
     {
       "command_id": "linux_systemctl_status_networkmanager",
       "vendor": "linux",
+      "canonical_syntax": "systemctl status NetworkManager",
       "module": "linux-device_information",
       "lesson": [
         "linux-device_information"
@@ -6129,6 +6548,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6137,6 +6557,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6160,6 +6581,7 @@
     {
       "command_id": "linux_traceroute",
       "vendor": "linux",
+      "canonical_syntax": "traceroute",
       "module": "linux-networking",
       "lesson": [
         "linux-networking"
@@ -6169,6 +6591,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6177,6 +6600,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6200,6 +6624,7 @@
     {
       "command_id": "windows_arp_a",
       "vendor": "windows_cmd",
+      "canonical_syntax": "arp -a",
       "module": "windows_cmd-mac_neighbors",
       "lesson": [
         "windows_cmd-mac_neighbors"
@@ -6211,6 +6636,7 @@
         "route-9-7"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -6219,6 +6645,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6243,6 +6670,7 @@
     {
       "command_id": "windows_dir",
       "vendor": "windows_cmd",
+      "canonical_syntax": "dir",
       "module": "windows_cmd-device_information",
       "lesson": [
         "windows_cmd-device_information"
@@ -6252,6 +6680,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6260,6 +6689,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6283,6 +6713,7 @@
     {
       "command_id": "windows_dism_scanhealth",
       "vendor": "windows_cmd",
+      "canonical_syntax": "dism /online /cleanup-image /scanhealth",
       "module": "windows_cmd-device_information",
       "lesson": [
         "windows_cmd-device_information"
@@ -6292,12 +6723,14 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6320,6 +6753,7 @@
     {
       "command_id": "windows_getmac_verbose",
       "vendor": "windows_cmd",
+      "canonical_syntax": "getmac /v",
       "module": "windows_cmd-interfaces",
       "lesson": [
         "windows_cmd-interfaces"
@@ -6329,6 +6763,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6337,6 +6772,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6360,6 +6796,7 @@
     {
       "command_id": "windows_ipconfig_all",
       "vendor": "windows_cmd",
+      "canonical_syntax": "ipconfig /all",
       "module": "windows_cmd-mac_neighbors",
       "lesson": [
         "safety-dangerous-commands",
@@ -6382,6 +6819,7 @@
         "route-9-9"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -6391,6 +6829,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6415,6 +6854,7 @@
     {
       "command_id": "windows_ipconfig_release",
       "vendor": "windows_cmd",
+      "canonical_syntax": "ipconfig /release",
       "module": "windows_cmd-networking",
       "lesson": [
         "windows_cmd-networking"
@@ -6424,6 +6864,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6432,6 +6873,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6454,6 +6896,7 @@
     {
       "command_id": "windows_ipconfig_renew",
       "vendor": "windows_cmd",
+      "canonical_syntax": "ipconfig /renew",
       "module": "windows_cmd-networking",
       "lesson": [
         "windows_cmd-networking"
@@ -6463,6 +6906,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6471,6 +6915,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6493,6 +6938,7 @@
     {
       "command_id": "windows_netsh_interface_disable",
       "vendor": "windows_cmd",
+      "canonical_syntax": "netsh interface set interface <name> admin=disabled",
       "module": "windows_cmd-interfaces",
       "lesson": [
         "windows_cmd-interfaces"
@@ -6502,6 +6948,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6510,6 +6957,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6534,6 +6982,7 @@
     {
       "command_id": "windows_netsh_interface_enable",
       "vendor": "windows_cmd",
+      "canonical_syntax": "netsh interface set interface <name> admin=enabled",
       "module": "windows_cmd-interfaces",
       "lesson": [
         "windows_cmd-interfaces"
@@ -6543,6 +6992,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6551,6 +7001,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6575,6 +7026,7 @@
     {
       "command_id": "windows_netsh_interface_show_interface",
       "vendor": "windows_cmd",
+      "canonical_syntax": "netsh interface show interface",
       "module": "windows_cmd-interfaces",
       "lesson": [
         "windows_cmd-interfaces"
@@ -6584,6 +7036,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": false,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6592,6 +7045,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6615,6 +7069,7 @@
     {
       "command_id": "windows_netsh_ipv4_show_interfaces",
       "vendor": "windows_cmd",
+      "canonical_syntax": "netsh interface ipv4 show interfaces",
       "module": "windows_cmd-interfaces",
       "lesson": [
         "windows_cmd-interfaces"
@@ -6624,6 +7079,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": false,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6632,6 +7088,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6655,6 +7112,7 @@
     {
       "command_id": "windows_netsh_lan_show_interfaces",
       "vendor": "windows_cmd",
+      "canonical_syntax": "netsh lan show interfaces",
       "module": "windows_cmd-interfaces",
       "lesson": [
         "windows_cmd-interfaces"
@@ -6664,6 +7122,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6672,6 +7131,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6695,6 +7155,7 @@
     {
       "command_id": "windows_netsh_set_static_ip",
       "vendor": "windows_cmd",
+      "canonical_syntax": "netsh interface ipv4 set address name=<name> static <ip> <mask> <gateway>",
       "module": "windows_cmd-interfaces",
       "lesson": [
         "windows_cmd-interfaces"
@@ -6704,6 +7165,7 @@
       ],
       "practice_route": [],
       "runtime_support": "simplified_state_simulation",
+      "changes_configuration": true,
       "handler_status": "simplified_state_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6712,6 +7174,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6736,6 +7199,7 @@
     {
       "command_id": "windows_netsh_winsock_reset",
       "vendor": "windows_cmd",
+      "canonical_syntax": "netsh winsock reset",
       "module": "windows_cmd-device_information",
       "lesson": [
         "windows_cmd-device_information"
@@ -6745,6 +7209,7 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": true,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6753,6 +7218,7 @@
       ],
       "rollback_status": "command_guidance",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6776,6 +7242,7 @@
     {
       "command_id": "windows_netsh_wlan_show_interfaces",
       "vendor": "windows_cmd",
+      "canonical_syntax": "netsh wlan show interfaces",
       "module": "windows_cmd-interfaces",
       "lesson": [
         "windows_cmd-interfaces"
@@ -6785,6 +7252,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -6793,6 +7261,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6816,6 +7285,7 @@
     {
       "command_id": "windows_netstat_ano",
       "vendor": "windows_cmd",
+      "canonical_syntax": "netstat -ano",
       "module": "windows_cmd-interfaces",
       "lesson": [
         "windows_cmd-interfaces"
@@ -6825,12 +7295,14 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6854,6 +7326,7 @@
     {
       "command_id": "windows_nslookup",
       "vendor": "windows_cmd",
+      "canonical_syntax": "nslookup",
       "module": "windows_cmd-networking",
       "lesson": [
         "windows_cmd-networking"
@@ -6869,6 +7342,7 @@
         "route-9-8"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -6877,6 +7351,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6901,6 +7376,7 @@
     {
       "command_id": "windows_pathping_host",
       "vendor": "windows_cmd",
+      "canonical_syntax": "pathping <host>",
       "module": "windows_cmd-networking",
       "lesson": [
         "windows_cmd-networking"
@@ -6910,12 +7386,14 @@
       ],
       "practice_route": [],
       "runtime_support": "explanation_only",
+      "changes_configuration": false,
       "handler_status": "explanation_only_no_handler",
       "verification_status": "command_guidance",
       "verification_policy": [],
       "verification_command_ids": [],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6938,6 +7416,7 @@
     {
       "command_id": "windows_ping",
       "vendor": "windows_cmd",
+      "canonical_syntax": "ping",
       "module": "windows_cmd-networking",
       "lesson": [
         "windows_cmd-networking"
@@ -6953,6 +7432,7 @@
         "route-9-8"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -6961,6 +7441,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -6985,6 +7466,7 @@
     {
       "command_id": "windows_route_print",
       "vendor": "windows_cmd",
+      "canonical_syntax": "route print",
       "module": "windows_cmd-networking",
       "lesson": [
         "windows_cmd-networking"
@@ -6994,6 +7476,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -7002,6 +7485,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -7025,6 +7509,7 @@
     {
       "command_id": "windows_systeminfo",
       "vendor": "windows_cmd",
+      "canonical_syntax": "systeminfo",
       "module": "windows_cmd-device_information",
       "lesson": [
         "windows_cmd-device_information"
@@ -7034,6 +7519,7 @@
       ],
       "practice_route": [],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "output_simulation_only",
       "verification_status": "command_guidance",
       "verification_policy": [],
@@ -7042,6 +7528,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
@@ -7065,6 +7552,7 @@
     {
       "command_id": "windows_tracert",
       "vendor": "windows_cmd",
+      "canonical_syntax": "tracert",
       "module": "windows_cmd-networking",
       "lesson": [
         "windows_cmd-networking"
@@ -7080,6 +7568,7 @@
         "route-9-8"
       ],
       "runtime_support": "output_simulation",
+      "changes_configuration": false,
       "handler_status": "route_missing_handler",
       "verification_status": "route_guidance",
       "verification_policy": [],
@@ -7089,6 +7578,7 @@
       ],
       "rollback_status": "not_applicable",
       "rollback_command_ids": [],
+      "rollback_gap_classification": null,
       "mastery_dimensions": [
         "concept",
         "syntax",
