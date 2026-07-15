@@ -1,0 +1,33 @@
+{
+  "report_type": "runtime_integrity_rc",
+  "base_commit": "620e8c4c83d817835cefe1bd7a21f63166f6af4d",
+  "source_candidate_commit": "d952da745bc9080970bd64f7973945e654a7b79d",
+  "branch": "repair/runtime-integrity-and-verification",
+  "build_version": "2026.07-runtime-rc",
+  "runtime_schema_version": 4,
+  "command_catalog": "command-inventory@schema:generated",
+  "profile_catalog": "switch-profiles@schema:1",
+  "route_count": 127,
+  "profile_count": 9,
+  "tests": {
+    "core": "passed",
+    "current_app": "passed",
+    "build": "passed",
+    "startup": "passed",
+    "profile_matrix": "passed",
+    "route_matrix": "passed",
+    "vendor_workbench_matrix": "passed",
+    "verification_coverage_matrix": "passed",
+    "mode_completion_matrix": "passed",
+    "service_worker_static_graph": "passed",
+    "browser": "blocked",
+    "edge": "blocked",
+    "responsive": "blocked",
+    "service_worker_offline_update": "blocked"
+  },
+  "release_decision": "do_not_merge_or_deploy",
+  "known_limitations": [
+    "Interactive browser, responsive, Edge, and service-worker offline-update evidence was unavailable in this session.",
+    "The current Workbench exposes only the interface-description mutation; the test matrix covers exposed actions without inventing unsupported ones."
+  ]
+}
