@@ -44,6 +44,21 @@
       "trusted_provider",
       "system"
     ],
+    "event_source_types": {
+      "attempt_created": ["engine", "system"],
+      "stage_viewed": ["student"],
+      "stage_content_revealed": ["student"],
+      "student_response_submitted": ["student"],
+      "hint_requested": ["student"],
+      "trusted_evidence_ingested": ["trusted_provider", "system"],
+      "safety_decision_submitted": ["student"],
+      "save_or_rollback_submitted": ["student"],
+      "confidence_submitted": ["student"],
+      "critical_failure_recorded": ["engine", "system"],
+      "critical_failure_resolved": ["engine", "system"],
+      "attempt_finalized": ["engine", "system"],
+      "attempt_abandoned": ["engine", "system"]
+    },
     "modes": ["GUIDED", "ASSISTED", "INDEPENDENT"]
   },
   "ordering_rules": [
@@ -55,6 +70,13 @@
     "all identity fields must match the attempt identity",
     "stage events must reference a stage in the matching lesson definition",
     "stage events must reference a stage applicable to the attempt mode"
+  ],
+  "shape_rules": [
+    "student response events require a replayable sanitized response",
+    "trusted evidence events require an evidence envelope and provider receipt",
+    "resolution events require failure code and resolution metadata",
+    "finalization and abandonment events must not carry student responses or trusted evidence payloads",
+    "event source_type must be allowed for event_type"
   ],
   "student_response_events": {
     "event_types": [
@@ -69,8 +91,38 @@
   "trusted_evidence_events": {
     "event_type": "trusted_evidence_ingested",
     "required_payload": "sanitized full evidence envelope plus controlled provider receipt",
+    "required_outcome": {
+      "accepted": "boolean",
+      "rejection_code": "controlled code or null",
+      "rejection_errors": "controlled error list",
+      "critical_failure_code": "controlled failure code or null",
+      "checked_provider": "boolean",
+      "provider_receipt": "trusted-provider-receipt.v1 or null",
+      "ownership_result": "ownership registry result or null"
+    },
     "restore_rule": "the matching provider must revalidate the stored envelope before execution or verification credit is restored"
   },
+  "trusted_stage_admission": {
+    "shared_by_live_and_replay": true,
+    "rejects": [
+      "trusted_attempt_not_active",
+      "trusted_stage_locked",
+      "trusted_stage_not_available",
+      "trusted_stage_complete",
+      "trusted_dependency_not_satisfied"
+    ]
+  },
+  "evidence_type_binding": {
+    "runtime_execution": "execution",
+    "trusted_external_evidence": "execution",
+    "runtime_verification": "verification",
+    "trusted_verification_evidence": "verification"
+  },
+  "ownership_keys": [
+    "evidence_id",
+    "source_event_id",
+    "verification_record_id for verification evidence"
+  ],
   "derived_state_not_authoritative": [
     "stage_states",
     "submitted_evidence",

@@ -85,6 +85,54 @@ function ingestTrusted(engine, attempt, definition, stageId, overrides = {}) {
   return result;
 }
 
+function trustedEvent(attempt, stageId) {
+  return attempt.event_journal.find((event) => event.event_type === "trusted_evidence_ingested" && event.stage_id === stageId);
+}
+
+function resequenceEvents(attempt) {
+  attempt.event_journal = attempt.event_journal.map((event, index) => ({ ...event, sequence: index + 1 }));
+}
+
+function normalizeEventTimestamps(attempt, start = Date.UTC(2026, 6, 15, 9, 0, 0)) {
+  attempt.event_journal = attempt.event_journal.map((event, index) => ({
+    ...event,
+    timestamp: new Date(start + index * 1000).toISOString()
+  }));
+}
+
+function moveTrustedEventBefore(attempt, movedStageId, beforeStageId) {
+  const movedIndex = attempt.event_journal.findIndex((event) => event.event_type === "trusted_evidence_ingested" && event.stage_id === movedStageId);
+  const beforeIndex = attempt.event_journal.findIndex((event) => event.event_type === "trusted_evidence_ingested" && event.stage_id === beforeStageId);
+  const [event] = attempt.event_journal.splice(movedIndex, 1);
+  attempt.event_journal.splice(beforeIndex, 0, event);
+  resequenceEvents(attempt);
+  normalizeEventTimestamps(attempt);
+}
+
+function cloneAttemptWithFreshIdentity(attempt, nextAttempt, overrides = {}) {
+  const cloned = deepClone(attempt);
+  cloned.attempt_id = overrides.attempt_id || nextAttempt.attempt_id;
+  cloned.attempt_key = [
+    cloned.lesson_id,
+    cloned.vendor_id,
+    cloned.canonical_command_id,
+    cloned.mode,
+    cloned.attempt_id
+  ].join(":");
+  for (const event of cloned.event_journal) {
+    event.attempt_id = cloned.attempt_id;
+    event.event_id = `${cloned.attempt_id}-replay-${String(event.sequence).padStart(4, "0")}`;
+    if (event.evidence_envelope) {
+      event.evidence_envelope.attempt_id = cloned.attempt_id;
+      if (overrides.evidence_id) event.evidence_envelope.evidence_id = overrides.evidence_id;
+      if (overrides.source_event_id) event.evidence_envelope.source_event_id = overrides.source_event_id;
+      if (overrides.verification_record_id) event.evidence_envelope.verification_record_id = overrides.verification_record_id;
+    }
+    if (event.provider_receipt && overrides.evidence_id) event.provider_receipt.evidence_id = overrides.evidence_id;
+  }
+  return cloned;
+}
+
 function completeExplanationAttempt(engine, attempt, definition, commandText) {
   passTicketPredictionCommand(engine, attempt, definition, commandText);
   assertSubmissionPassed(engine, attempt, definition, "ticket_note", () => engine.submitTicketNote(attempt, definition, "ticket_note", "Lesson ticket completed by student."));
@@ -1212,6 +1260,245 @@ check("Duplicate trusted evidence event IDs are rejected.", () => {
   trustedEvent.timestamp = "2026-07-15T09:00:00.000Z";
   attempt.event_journal.push(trustedEvent);
   assertThrowsCode(() => duplicateEngine.restoreAttempt(attempt, fixtures.config), "duplicate_event_evidence");
+});
+
+check("Replay rejects runtime_verification before runtime_execution.", () => {
+  const parityEngine = makeEngine(catalog, "reorder-verification");
+  const attempt = parityEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  completeConfigAttempt(parityEngine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  const reordered = deepClone(attempt);
+  moveTrustedEventBefore(reordered, "runtime_verification", "runtime_execution");
+  assertThrowsCode(() => parityEngine.restoreAttempt(reordered, fixtures.config), "trusted_stage_locked");
+});
+
+check("Evidence type is bound to trusted stage.", () => {
+  const parityEngine = makeEngine(catalog, "type-binding");
+  const attempt = parityEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(parityEngine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  ingestTrusted(parityEngine, attempt, fixtures.config, "runtime_execution");
+  const wrongType = makeTrustedEvidence(attempt, "runtime_verification", { evidence_type: "execution" });
+  wrongType.verification_policy_id = null;
+  wrongType.verification_record_id = null;
+  const result = parityEngine.ingestTrustedExternalEvidence(attempt, fixtures.config, "runtime_verification", wrongType);
+  assert.equal(result.accepted, false);
+  assert.ok(result.errors.includes("mismatched_evidence_type"));
+  assert.ok(result.errors.includes("verification_policy_required"));
+  assert.ok(result.errors.includes("verification_record_required"));
+  assert.equal(attempt.stage_states.runtime_verification.status, "available");
+});
+
+check("Verification evidence cannot satisfy runtime_execution.", () => {
+  const parityEngine = makeEngine(catalog, "verification-as-execution");
+  const attempt = parityEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(parityEngine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  const wrongType = makeTrustedEvidence(attempt, "runtime_execution", { evidence_type: "verification" });
+  const result = parityEngine.ingestTrustedExternalEvidence(attempt, fixtures.config, "runtime_execution", wrongType);
+  assert.equal(result.accepted, false);
+  assert.ok(result.errors.includes("mismatched_evidence_type"));
+  assert.equal(attempt.stage_states.runtime_execution.status, "available");
+});
+
+check("Evidence ownership registry rejects cross-attempt replay reuse.", () => {
+  const registryEngine = makeEngine(catalog, "ownership-reuse");
+  const first = registryEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(registryEngine, first, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  ingestTrusted(registryEngine, first, fixtures.config, "runtime_execution", {
+    evidence_id: "shared-evidence-id",
+    source_event_id: "shared-source-event"
+  });
+  registryEngine.restoreAttempt(first, fixtures.config);
+
+  const secondAttemptIdentity = registryEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  const reusedEvidence = cloneAttemptWithFreshIdentity(first, secondAttemptIdentity);
+  const restored = registryEngine.restoreAttempt(reusedEvidence, fixtures.config);
+  assert.equal(restored.stage_states.runtime_execution.status, "available");
+  assert.equal(restored.dimension_results.practical_execution.score, 0);
+  assert.equal(restored.critical_failures.some((failure) => failure.code === "cross_attempt_evidence_reuse"), true);
+
+  const reusedSource = cloneAttemptWithFreshIdentity(first, registryEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id }), {
+    evidence_id: "changed-evidence-id",
+    source_event_id: "shared-source-event"
+  });
+  const restoredSource = registryEngine.restoreAttempt(reusedSource, fixtures.config);
+  assert.equal(restoredSource.dimension_results.practical_execution.score, 0);
+  assert.equal(restoredSource.critical_failures.some((failure) => failure.code === "cross_attempt_evidence_reuse"), true);
+});
+
+check("Verification record ownership rejects reuse under another evidence ID.", () => {
+  const firstProducer = makeEngine(catalog, "verification-owner-a");
+  const first = firstProducer.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(firstProducer, first, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  ingestTrusted(firstProducer, first, fixtures.config, "runtime_execution", { evidence_id: "owner-a-exec", source_event_id: "owner-a-exec-source" });
+  ingestTrusted(firstProducer, first, fixtures.config, "runtime_verification", { evidence_id: "owner-a-ver", source_event_id: "owner-a-ver-source", verification_record_id: "shared-verification-record" });
+
+  const secondProducer = makeEngine(catalog, "verification-owner-b");
+  const second = secondProducer.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(secondProducer, second, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  ingestTrusted(secondProducer, second, fixtures.config, "runtime_execution", { evidence_id: "owner-b-exec", source_event_id: "owner-b-exec-source" });
+  ingestTrusted(secondProducer, second, fixtures.config, "runtime_verification", { evidence_id: "owner-b-ver", source_event_id: "owner-b-ver-source", verification_record_id: "shared-verification-record" });
+
+  const restoreEngine = makeEngine(catalog, "verification-owner-restore");
+  assert.equal(restoreEngine.restoreAttempt(first, fixtures.config).stage_states.runtime_verification.status, "passed");
+  const restoredSecond = restoreEngine.restoreAttempt(second, fixtures.config);
+  assert.equal(restoredSecond.stage_states.runtime_verification.status, "available");
+  assert.equal(restoredSecond.dimension_results.verification.score, 0);
+  assert.equal(restoredSecond.critical_failures.some((failure) => failure.code === "cross_attempt_evidence_reuse"), true);
+});
+
+check("Restoring the same attempt twice is ownership-idempotent.", () => {
+  const producer = makeEngine(catalog, "same-attempt-source");
+  const attempt = producer.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  completeConfigAttempt(producer, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  const restoreEngine = makeEngine(catalog, "same-attempt-restore");
+  const firstRestore = restoreEngine.restoreAttempt(attempt, fixtures.config);
+  const secondRestore = restoreEngine.restoreAttempt(attempt, fixtures.config);
+  assert.equal(firstRestore.completion_result.eligible_for_full_mastery, true);
+  assert.equal(secondRestore.completion_result.eligible_for_full_mastery, true);
+  assert.equal(secondRestore.critical_failures.length, 0);
+});
+
+check("Live rejected trusted evidence remains rejected on replay.", () => {
+  const liveEngine = makeEngine(catalog, "rejected-live");
+  const first = liveEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(liveEngine, first, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  ingestTrusted(liveEngine, first, fixtures.config, "runtime_execution", { evidence_id: "live-reused-evidence" });
+
+  const rejected = liveEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(liveEngine, rejected, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  const liveResult = liveEngine.ingestTrustedExternalEvidence(rejected, fixtures.config, "runtime_execution", makeTrustedEvidence(rejected, "runtime_execution", { evidence_id: "live-reused-evidence" }));
+  assert.equal(liveResult.accepted, false);
+  assert.equal(rejected.critical_failures.some((failure) => failure.code === "cross_attempt_evidence_reuse"), true);
+
+  const freshEngine = makeEngine(catalog, "fresh-rejected-replay");
+  const restored = freshEngine.restoreAttempt(rejected, fixtures.config);
+  assert.equal(restored.stage_states.runtime_execution.status, "available");
+  assert.equal(restored.dimension_results.practical_execution.score, 0);
+  assert.equal(restored.critical_failures.some((failure) => failure.code === "cross_attempt_evidence_reuse"), true);
+  assert.equal(restored.completion_result.completed, false);
+});
+
+check("Live mismatched trusted evidence critical failure survives replay.", () => {
+  const liveEngine = makeEngine(catalog, "mismatch-live");
+  const attempt = liveEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(liveEngine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  const liveResult = liveEngine.ingestTrustedExternalEvidence(attempt, fixtures.config, "runtime_execution", makeTrustedEvidence(attempt, "runtime_execution", { vendor_id: "hp_comware" }));
+  assert.equal(liveResult.accepted, false);
+  assert.equal(attempt.critical_failures.some((failure) => failure.code === "mismatched_trusted_evidence"), true);
+  const restored = makeEngine(catalog, "mismatch-fresh").restoreAttempt(attempt, fixtures.config);
+  assert.equal(restored.stage_states.runtime_execution.status, "available");
+  assert.equal(restored.dimension_results.practical_execution.score, 0);
+  assert.equal(restored.critical_failures.some((failure) => failure.code === "mismatched_trusted_evidence"), true);
+});
+
+check("Replay rejects critical-failure resolution before successful retry.", () => {
+  const resolutionEngine = makeEngine(catalog, "early-resolution");
+  const attempt = resolutionEngine.createAttempt(fixtures.explanationOnly, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  resolutionEngine.submitTicketNote(attempt, fixtures.explanationOnly, "technician_ticket", "Ticket opened by the student.");
+  resolutionEngine.submitStudentResponse(attempt, fixtures.explanationOnly, "prediction_before_output", "evidence present");
+  resolutionEngine.submitStudentResponse(attempt, fixtures.explanationOnly, "choose_next_command", "display interface brief");
+  resolutionEngine.submitStudentResponse(attempt, fixtures.explanationOnly, "choose_next_command", primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id));
+  const resolution = resolutionEngine.resolveCriticalFailure(attempt, fixtures.explanationOnly, "wrong_vendor_syntax", "choose_next_command", { type: "stage_retry", stage_id: "choose_next_command" });
+  assert.equal(resolution.resolved, true);
+
+  const tampered = deepClone(attempt);
+  const resolutionIndex = tampered.event_journal.findIndex((event) => event.event_type === "critical_failure_resolved");
+  const retryIndex = tampered.event_journal.findLastIndex((event) => event.event_type === "student_response_submitted" && event.stage_id === "choose_next_command");
+  const [resolutionEvent] = tampered.event_journal.splice(resolutionIndex, 1);
+  resolutionEvent.timestamp = tampered.event_journal[retryIndex - 1].timestamp;
+  tampered.event_journal.splice(retryIndex, 0, resolutionEvent);
+  resequenceEvents(tampered);
+  assertThrowsCode(() => resolutionEngine.restoreAttempt(tampered, fixtures.explanationOnly), "event_replay_resolution_stage_not_passed");
+});
+
+check("Replay accepts critical-failure resolution after successful retry.", () => {
+  const resolutionEngine = makeEngine(catalog, "ordered-resolution");
+  const attempt = resolutionEngine.createAttempt(fixtures.explanationOnly, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  resolutionEngine.submitTicketNote(attempt, fixtures.explanationOnly, "technician_ticket", "Ticket opened by the student.");
+  resolutionEngine.submitStudentResponse(attempt, fixtures.explanationOnly, "prediction_before_output", "evidence present");
+  resolutionEngine.submitStudentResponse(attempt, fixtures.explanationOnly, "choose_next_command", "display interface brief");
+  resolutionEngine.submitStudentResponse(attempt, fixtures.explanationOnly, "choose_next_command", primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id));
+  resolutionEngine.resolveCriticalFailure(attempt, fixtures.explanationOnly, "wrong_vendor_syntax", "choose_next_command", { type: "stage_retry", stage_id: "choose_next_command" });
+  const restored = resolutionEngine.restoreAttempt(attempt, fixtures.explanationOnly);
+  assert.equal(restored.critical_failures.find((failure) => failure.code === "wrong_vendor_syntax").resolved, true);
+});
+
+check("Replay rejects resolution before remediation stage.", () => {
+  const definition = deepClone(fixtures.explanationOnly);
+  definition.stages.find((stage) => stage.stage_id === "ticket_note").remediates_critical_failures = ["wrong_vendor_syntax"];
+  const resolutionEngine = makeEngine(catalog, "remediation-order");
+  const attempt = resolutionEngine.createAttempt(definition, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  resolutionEngine.submitTicketNote(attempt, definition, "technician_ticket", "Ticket opened by the student.");
+  resolutionEngine.submitStudentResponse(attempt, definition, "prediction_before_output", "evidence present");
+  resolutionEngine.submitStudentResponse(attempt, definition, "choose_next_command", "display interface brief");
+  resolutionEngine.submitStudentResponse(attempt, definition, "choose_next_command", primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id));
+  resolutionEngine.submitTicketNote(attempt, definition, "ticket_note", "Remediation note after retry.");
+  resolutionEngine.resolveCriticalFailure(attempt, definition, "wrong_vendor_syntax", "choose_next_command", { type: "remediation_stage", stage_id: "ticket_note" });
+  const tampered = deepClone(attempt);
+  const resolutionIndex = tampered.event_journal.findIndex((event) => event.event_type === "critical_failure_resolved");
+  const remediationIndex = tampered.event_journal.findIndex((event) => event.event_type === "student_response_submitted" && event.stage_id === "ticket_note");
+  const [resolutionEvent] = tampered.event_journal.splice(resolutionIndex, 1);
+  tampered.event_journal.splice(remediationIndex, 0, resolutionEvent);
+  resequenceEvents(tampered);
+  normalizeEventTimestamps(tampered);
+  assertThrowsCode(() => resolutionEngine.restoreAttempt(tampered, definition), "event_replay_resolution_stage_not_passed");
+});
+
+check("Replay rejects trusted resolution before matching evidence.", () => {
+  const definition = deepClone(fixtures.config);
+  definition.stages.find((stage) => stage.stage_id === "runtime_execution").remediates_critical_failures = ["wrong_vendor_syntax"];
+  const resolutionEngine = makeEngine(catalog, "trusted-resolution-order");
+  const attempt = resolutionEngine.createAttempt(definition, { mode: "GUIDED", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  resolutionEngine.submitTicketNote(attempt, definition, "technician_ticket", "Ticket opened by the student.");
+  resolutionEngine.submitStudentResponse(attempt, definition, "prediction_before_output", "evidence present");
+  resolutionEngine.submitStudentResponse(attempt, definition, "choose_next_command", "display interface brief");
+  resolutionEngine.submitStudentResponse(attempt, definition, "choose_next_command", primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  ingestTrusted(resolutionEngine, attempt, definition, "runtime_execution", { evidence_id: "future-remediation-evidence" });
+  resolutionEngine.resolveCriticalFailure(attempt, definition, "wrong_vendor_syntax", "choose_next_command", { type: "trusted_evidence", stage_id: "runtime_execution", evidence_id: "future-remediation-evidence" });
+  const tampered = deepClone(attempt);
+  const resolutionIndex = tampered.event_journal.findIndex((event) => event.event_type === "critical_failure_resolved");
+  const evidenceIndex = tampered.event_journal.findIndex((event) => event.event_type === "trusted_evidence_ingested" && event.stage_id === "runtime_execution");
+  const [resolutionEvent] = tampered.event_journal.splice(resolutionIndex, 1);
+  tampered.event_journal.splice(evidenceIndex, 0, resolutionEvent);
+  resequenceEvents(tampered);
+  normalizeEventTimestamps(tampered);
+  assertThrowsCode(() => resolutionEngine.restoreAttempt(tampered, definition), "event_replay_resolution_evidence_not_matched");
+});
+
+check("Event source and shape validation rejects impossible journals.", () => {
+  const shapeEngine = makeEngine(catalog, "event-shape");
+  const attempt = shapeEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  completeConfigAttempt(shapeEngine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+
+  const wrongSource = deepClone(attempt);
+  wrongSource.event_journal.find((event) => event.event_type === "student_response_submitted").source_type = "engine";
+  assertThrowsCode(() => shapeEngine.restoreAttempt(wrongSource, fixtures.config), "event_source_type_mismatch");
+
+  const missingReceipt = deepClone(attempt);
+  delete trustedEvent(missingReceipt, "runtime_execution").provider_receipt;
+  assertThrowsCode(() => shapeEngine.restoreAttempt(missingReceipt, fixtures.config), "missing_event_provider_receipt");
+
+  const missingResponse = deepClone(attempt);
+  missingResponse.event_journal.find((event) => event.event_type === "student_response_submitted").response = null;
+  assertThrowsCode(() => shapeEngine.restoreAttempt(missingResponse, fixtures.config), "missing_event_response");
+
+  const finalizationPayload = deepClone(attempt);
+  finalizationPayload.event_journal.find((event) => event.event_type === "attempt_finalized").evidence_envelope = trustedEvent(attempt, "runtime_execution").evidence_envelope;
+  assertThrowsCode(() => shapeEngine.restoreAttempt(finalizationPayload, fixtures.config), "invalid_event_shape");
+});
+
+check("Live and replay trusted-stage admission results match.", () => {
+  const parityEngine = makeEngine(catalog, "live-replay-parity");
+  const attempt = parityEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(parityEngine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  const liveResult = parityEngine.ingestTrustedExternalEvidence(attempt, fixtures.config, "runtime_verification", makeTrustedEvidence(attempt, "runtime_verification", { evidence_id: "locked-verification" }));
+  assert.equal(liveResult.accepted, false);
+  assert.ok(liveResult.errors.includes("trusted_stage_locked"));
+  const restored = parityEngine.restoreAttempt(attempt, fixtures.config);
+  assert.equal(restored.stage_states.runtime_verification.status, "locked");
+  assert.equal(restored.submitted_evidence.length, 0);
+  assert.deepEqual(restored.dimension_results.verification, attempt.dimension_results.verification);
+  assert.equal(restored.completion_result.completed, attempt.completion_result.completed);
+  assert.equal(restored.completion_result.eligible_for_full_mastery, attempt.completion_result.eligible_for_full_mastery);
 });
 
 check("Legitimate completed Independent attempt round-trips through event replay.", () => {

@@ -36,9 +36,17 @@ export function validateTrustedEvidenceEnvelope(envelope, context, provider) {
   }
   if (!Number.isFinite(Date.parse(envelope.timestamp))) errors.push("invalid_evidence_timestamp");
   if (!["execution", "verification"].includes(envelope.evidence_type)) errors.push("unknown_evidence_type");
-  if (envelope.evidence_type === "verification") {
-    for (const field of ["verification_policy_id", "verification_record_id"]) {
-      if (!envelope[field]) errors.push(`missing_${field}`);
+  if (context?.expected_evidence_type && envelope.evidence_type !== context.expected_evidence_type) {
+    errors.push("mismatched_evidence_type");
+  }
+  if (envelope.evidence_type === "verification" || context?.expected_evidence_type === "verification") {
+    if (!envelope.verification_policy_id) {
+      errors.push("verification_policy_required");
+      errors.push("missing_verification_policy_id");
+    }
+    if (!envelope.verification_record_id) {
+      errors.push("verification_record_required");
+      errors.push("missing_verification_record_id");
     }
   }
   for (const field of ["attempt_id", "lesson_id", "vendor_id", "canonical_command_id", "stage_id"]) {

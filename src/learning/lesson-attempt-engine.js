@@ -44,6 +44,23 @@ export const ATTEMPT_EVENT_TYPES = Object.freeze([
 ]);
 const STAGE_EVENT_TYPES = new Set(ATTEMPT_EVENT_TYPES.filter((eventType) => !["attempt_created", "attempt_finalized", "attempt_abandoned"].includes(eventType)));
 const SNAPSHOT_REPLACE_POLICY = "replace_with_replayed_event_journal";
+const EVENT_SOURCE_TYPES = Object.freeze(["engine", "student", "trusted_provider", "system"]);
+const STUDENT_RESPONSE_EVENT_TYPES = new Set(["student_response_submitted", "safety_decision_submitted", "save_or_rollback_submitted", "confidence_submitted"]);
+const EVENT_SOURCE_BY_TYPE = Object.freeze({
+  attempt_created: ["engine", "system"],
+  stage_viewed: ["student"],
+  stage_content_revealed: ["student"],
+  student_response_submitted: ["student"],
+  hint_requested: ["student"],
+  trusted_evidence_ingested: ["trusted_provider", "system"],
+  safety_decision_submitted: ["student"],
+  save_or_rollback_submitted: ["student"],
+  confidence_submitted: ["student"],
+  critical_failure_recorded: ["engine", "system"],
+  critical_failure_resolved: ["engine", "system"],
+  attempt_finalized: ["engine", "system"],
+  attempt_abandoned: ["engine", "system"]
+});
 
 function nowFrom(clock) {
   return clock ? clock() : new Date().toISOString();
@@ -78,6 +95,12 @@ function isStageRequiredForTarget(target, stage) {
 
 function isTrustedEvidenceStage(stage) {
   return TRUSTED_STAGE_TYPES.has(stage?.stage_type) || TRUSTED_EVALUATOR_TYPES.has(stage?.evaluator?.type);
+}
+
+function expectedEvidenceTypeForStage(stage) {
+  if (stage?.stage_type === "runtime_verification" || stage?.evaluator?.type === "trusted_verification_evidence") return "verification";
+  if (stage?.stage_type === "runtime_execution" || stage?.evaluator?.type === "trusted_external_evidence") return "execution";
+  return null;
 }
 
 function defaultDimensionResult(dimension, attempt, supported) {
@@ -126,6 +149,7 @@ function trustedEvidenceRequirementsSatisfied(attempt, requiredStageIds, definit
     return resultIds.every((evidenceId) => evidence.some((record) => (
       record.evidence_id === evidenceId &&
       record.stage_id === stageId &&
+      record.evidence_type === expectedEvidenceTypeForStage(stage) &&
       record.integrity_result === "passed"
     )));
   });
@@ -155,6 +179,80 @@ function safeSubmissionAcknowledgement(stageId, result) {
   };
 }
 
+function evidenceOwnershipRecord(envelope) {
+  return {
+    evidence_id: envelope.evidence_id || null,
+    source_event_id: envelope.source_event_id || null,
+    verification_record_id: envelope.verification_record_id || null,
+    attempt_id: envelope.attempt_id || null,
+    lesson_id: envelope.lesson_id || null,
+    vendor_id: envelope.vendor_id || null,
+    canonical_command_id: envelope.canonical_command_id || null,
+    stage_id: envelope.stage_id || null,
+    evidence_type: envelope.evidence_type || null
+  };
+}
+
+function sameEvidenceOwner(a, b) {
+  return [
+    "evidence_id",
+    "source_event_id",
+    "verification_record_id",
+    "attempt_id",
+    "lesson_id",
+    "vendor_id",
+    "canonical_command_id",
+    "stage_id",
+    "evidence_type"
+  ].every((field) => (a?.[field] || null) === (b?.[field] || null));
+}
+
+export class InMemoryEvidenceOwnershipRegistry {
+  constructor(records = []) {
+    this.claims = new Map();
+    for (const record of asArray(records)) {
+      this.#store(evidenceOwnershipRecord(record));
+    }
+  }
+
+  claim(envelope) {
+    const record = evidenceOwnershipRecord(envelope);
+    const conflicts = [];
+    for (const key of this.#keys(record)) {
+      const existing = this.claims.get(key.value);
+      if (existing && !sameEvidenceOwner(existing, record)) {
+        conflicts.push(key.code);
+      }
+    }
+    if (conflicts.length) {
+      return {
+        accepted: false,
+        code: conflicts[0],
+        errors: [...new Set(conflicts)],
+        owner: record
+      };
+    }
+    this.#store(record);
+    return { accepted: true, code: "owned", errors: [], owner: record };
+  }
+
+  #store(record) {
+    for (const key of this.#keys(record)) {
+      if (!this.claims.has(key.value)) this.claims.set(key.value, record);
+    }
+  }
+
+  #keys(record) {
+    const keys = [];
+    if (record.evidence_id) keys.push({ value: `evidence_id:${record.evidence_id}`, code: "reused_evidence" });
+    if (record.source_event_id) keys.push({ value: `source_event_id:${record.source_event_id}`, code: "reused_source_event" });
+    if (record.evidence_type === "verification" && record.verification_record_id) {
+      keys.push({ value: `verification_record_id:${record.verification_record_id}`, code: "reused_verification_record" });
+    }
+    return keys;
+  }
+}
+
 export class LessonAttemptEngine {
   constructor(options = {}) {
     this.catalog = options.catalog || { commands: [] };
@@ -164,6 +262,7 @@ export class LessonAttemptEngine {
     this.evidenceIdGenerator = options.evidenceIdGenerator || (() => `evidence-${Math.random().toString(36).slice(2)}`);
     this.eventIdGenerator = options.eventIdGenerator || ((attempt, sequence) => `${attempt.attempt_id}-event-${String(sequence).padStart(4, "0")}`);
     this.usedEvidenceIds = new Set(asArray(options.usedEvidenceIds));
+    this.evidenceOwnershipRegistry = options.evidenceOwnershipRegistry || new InMemoryEvidenceOwnershipRegistry();
   }
 
   validateDefinition(definition) {
@@ -545,36 +644,35 @@ export class LessonAttemptEngine {
 
   ingestTrustedExternalEvidence(attempt, definition, stageId, envelope) {
     const stage = stageById(definition, stageId);
-    this.#ensureStageCanSubmit(attempt, stage);
     const timestamp = nowFrom(this.clock);
-    const context = {
-      attempt_id: attempt.attempt_id,
-      lesson_id: attempt.lesson_id,
-      vendor_id: attempt.vendor_id,
-      canonical_command_id: attempt.canonical_command_id,
-      stage_id: stageId,
-      checked_at: timestamp
-    };
+    const admission = isTrustedEvidenceStage(stage)
+      ? this.#trustedStageAdmission(attempt, definition, stage)
+      : { accepted: false, code: "trusted_stage_not_available", errors: ["trusted_stage_not_available"] };
+    const context = this.#trustedEvidenceContext(attempt, stage, timestamp);
     const validation = validateTrustedEvidenceEnvelope(envelope, context, this.evidenceProvider);
+    const errors = [...asArray(admission.accepted ? [] : admission.errors), ...asArray(validation.errors)];
+    let ownershipResult = null;
+    if (admission.accepted && validation.accepted) {
+      ownershipResult = this.evidenceOwnershipRegistry.claim(validation.envelope);
+      if (!ownershipResult.accepted) errors.push(...ownershipResult.errors);
+    }
     if (validation.accepted && this.usedEvidenceIds.has(envelope.evidence_id)) {
       validation.accepted = false;
-      validation.errors.push("reused_evidence");
+      errors.push("reused_evidence");
     }
-    if (!validation.accepted) {
-      const failureCode = validation.errors.includes("reused_evidence") ? "cross_attempt_evidence_reuse" : "trusted_evidence_rejected";
-      attempt.failure_history.push({ stage_id: stageId, code: failureCode, timestamp, errors: validation.errors });
-      if (validation.errors.some((error) => error.startsWith("mismatched_")) || validation.errors.includes("reused_evidence")) {
-        this.#recordCriticalFailure(attempt, stageId, validation.errors.includes("reused_evidence") ? "cross_attempt_evidence_reuse" : "mismatched_trusted_evidence", true, timestamp);
-      }
+    if (!admission.accepted || !validation.accepted || errors.length) {
+      const outcome = this.#trustedOutcome(false, errors[0] || "trusted_evidence_rejected", errors, validation.provider_receipt, ownershipResult);
+      this.#applyTrustedRejection(attempt, stage, timestamp, outcome);
       attempt.updated_at = timestamp;
       this.#appendEvent(attempt, {
         event_type: "trusted_evidence_ingested",
         stage_id: stageId,
         source_type: "trusted_provider",
         evidence_envelope: deepClone(envelope),
-        provider_receipt: validation.provider_receipt || { accepted: false, errors: validation.errors }
+        provider_receipt: validation.provider_receipt || { accepted: false, errors },
+        metadata: { trusted_outcome: outcome }
       }, timestamp);
-      return { accepted: false, errors: validation.errors };
+      return { accepted: false, errors };
     }
     this.usedEvidenceIds.add(envelope.evidence_id);
     const sanitizedEnvelope = validation.envelope;
@@ -604,7 +702,10 @@ export class LessonAttemptEngine {
       stage_id: stageId,
       source_type: "trusted_provider",
       evidence_envelope: sanitizedEnvelope,
-      provider_receipt: validation.provider_receipt
+      provider_receipt: validation.provider_receipt,
+      metadata: {
+        trusted_outcome: this.#trustedOutcome(true, null, [], validation.provider_receipt, ownershipResult)
+      }
     }, timestamp);
     return { accepted: true, result: applied };
   }
@@ -847,6 +948,7 @@ export class LessonAttemptEngine {
       const allEvidenceMatches = evidenceIds.every((evidenceId) => submitted.some((evidence) => (
         evidence.evidence_id === evidenceId &&
         evidence.stage_id === resolutionStageId &&
+        evidence.evidence_type === expectedEvidenceTypeForStage(resolutionStage) &&
         evidence.integrity_result === "passed"
       )));
       if (!allEvidenceMatches) return { resolved: false, reason: "resolution_evidence_not_matched_to_attempt" };
@@ -912,6 +1014,10 @@ export class LessonAttemptEngine {
 
   #appendEvent(attempt, event, timestamp = nowFrom(this.clock)) {
     if (!ATTEMPT_EVENT_TYPES.includes(event.event_type)) throw safeError("unknown_attempt_event_type", `unknown attempt event type ${event.event_type}`);
+    const sourceType = event.source_type || "engine";
+    if (!EVENT_SOURCE_TYPES.includes(sourceType) || !asArray(EVENT_SOURCE_BY_TYPE[event.event_type]).includes(sourceType)) {
+      throw safeError("event_source_type_mismatch", `source ${sourceType} cannot emit ${event.event_type}`);
+    }
     const sequence = asArray(attempt.event_journal).length + 1;
     const normalized = {
       schema_version: ATTEMPT_EVENT_SCHEMA_VERSION,
@@ -925,7 +1031,7 @@ export class LessonAttemptEngine {
       mode: attempt.mode,
       event_type: event.event_type,
       stage_id: event.stage_id || null,
-      source_type: event.source_type || "engine",
+      source_type: sourceType,
       response: event.response === undefined ? null : sanitizeResponse(event.response),
       response_reference: event.response_reference || null,
       evaluator_result: event.evaluator_result ? deepClone(event.evaluator_result) : null,
@@ -1003,6 +1109,8 @@ export class LessonAttemptEngine {
       const event = events[index];
       if (event.schema_version !== ATTEMPT_EVENT_SCHEMA_VERSION) throw safeError("unsupported_attempt_event_schema", `unsupported event schema ${event.schema_version || "<missing>"}`);
       if (!ATTEMPT_EVENT_TYPES.includes(event.event_type)) throw safeError("unknown_attempt_event_type", `unknown attempt event type ${event.event_type}`);
+      if (!EVENT_SOURCE_TYPES.includes(event.source_type)) throw safeError("unknown_event_source_type", `unknown event source ${event.source_type}`);
+      if (!asArray(EVENT_SOURCE_BY_TYPE[event.event_type]).includes(event.source_type)) throw safeError("event_source_type_mismatch", `source ${event.source_type} cannot emit ${event.event_type}`);
       if (!event.event_id) throw safeError("missing_event_id", "attempt event requires event_id");
       if (eventIds.has(event.event_id)) throw safeError("duplicate_event_id", `duplicate attempt event ${event.event_id}`);
       eventIds.add(event.event_id);
@@ -1024,6 +1132,12 @@ export class LessonAttemptEngine {
         if (["not_applicable", "not_supported"].includes(initial?.status)) {
           throw safeError("event_stage_not_applicable", `event ${event.event_id} references unavailable stage ${event.stage_id}`);
         }
+      }
+      if (STUDENT_RESPONSE_EVENT_TYPES.has(event.event_type) && event.response === null) throw safeError("missing_event_response", `event ${event.event_id} requires response`);
+      if (event.event_type === "trusted_evidence_ingested" && (!event.evidence_envelope || !event.provider_receipt)) throw safeError("missing_event_provider_receipt", `event ${event.event_id} requires trusted evidence envelope and receipt`);
+      if (event.event_type === "critical_failure_resolved" && (!event.metadata?.failure_code || !event.metadata?.resolution?.type)) throw safeError("missing_resolution_event_metadata", `event ${event.event_id} requires resolution metadata`);
+      if (["attempt_finalized", "attempt_abandoned"].includes(event.event_type) && (event.response !== null || event.evidence_envelope || event.provider_receipt)) {
+        throw safeError("invalid_event_shape", `event ${event.event_id} has forbidden payload`);
       }
     }
     return events;
@@ -1211,19 +1325,37 @@ export class LessonAttemptEngine {
   #replayTrustedEvidence(attempt, definition, stage, event, replayEvidenceIds) {
     const envelope = event.evidence_envelope;
     if (!envelope) throw safeError("missing_event_evidence_envelope", `event ${event.event_id} requires evidence envelope`);
+    if (!event.provider_receipt) throw safeError("missing_event_provider_receipt", `event ${event.event_id} requires provider receipt`);
     if (replayEvidenceIds.has(envelope.evidence_id)) throw safeError("duplicate_event_evidence", `duplicate evidence ${envelope.evidence_id}`);
     replayEvidenceIds.add(envelope.evidence_id);
-    const context = {
-      attempt_id: attempt.attempt_id,
-      lesson_id: attempt.lesson_id,
-      vendor_id: attempt.vendor_id,
-      canonical_command_id: attempt.canonical_command_id,
-      stage_id: stage.stage_id,
-      checked_at: event.timestamp
-    };
+    const admission = this.#trustedStageAdmission(attempt, definition, stage);
+    const context = this.#trustedEvidenceContext(attempt, stage, event.timestamp);
     const validation = validateTrustedEvidenceEnvelope(envelope, context, this.evidenceProvider);
     const providerUnavailable = validation.errors.includes("missing_evidence_provider");
     const originallyAccepted = event.provider_receipt?.accepted === true;
+    const recordedOutcome = event.metadata?.trusted_outcome || {
+      accepted: originallyAccepted,
+      rejection_code: originallyAccepted ? null : "trusted_evidence_rejected",
+      rejection_errors: asArray(event.provider_receipt?.errors),
+      critical_failure_code: originallyAccepted ? null : this.#trustedCriticalFailureCode(asArray(event.provider_receipt?.errors)),
+      provider_receipt: event.provider_receipt,
+      ownership_result: null
+    };
+    const eventAccepted = recordedOutcome.accepted === true;
+    if (admission.accepted === false) {
+      if (attempt.validation_state === "pending_provider_revalidation") {
+        attempt.failure_history.push({ stage_id: stage.stage_id, code: "event_blocked_by_provider_revalidation", timestamp: event.timestamp, errors: admission.errors });
+        attempt.updated_at = event.timestamp;
+        return { providerUnavailable: true, providerRejected: false };
+      }
+      if (eventAccepted) throw safeError(admission.code, `${event.event_id} violates trusted-stage admission`);
+      this.#applyTrustedRejection(attempt, stage, event, {
+        ...recordedOutcome,
+        rejection_code: recordedOutcome.rejection_code || admission.code,
+        rejection_errors: [...new Set([...asArray(recordedOutcome.rejection_errors), ...asArray(admission.errors)])]
+      });
+      return { providerUnavailable: false, providerRejected: false };
+    }
     if (providerUnavailable) {
       attempt.validation_state = "pending_provider_revalidation";
       attempt.failure_history.push({ stage_id: stage.stage_id, code: "evidence_provider_unavailable", timestamp: event.timestamp, errors: validation.errors });
@@ -1231,18 +1363,38 @@ export class LessonAttemptEngine {
       return { providerUnavailable: true, providerRejected: false };
     }
     if (!validation.accepted) {
+      if (!eventAccepted) {
+        this.#applyTrustedRejection(attempt, stage, event, {
+          ...recordedOutcome,
+          rejection_errors: [...new Set([...asArray(recordedOutcome.rejection_errors), ...asArray(validation.errors)])],
+          critical_failure_code: recordedOutcome.critical_failure_code || this.#trustedCriticalFailureCode([...asArray(recordedOutcome.rejection_errors), ...asArray(validation.errors)])
+        });
+        return { providerUnavailable: false, providerRejected: false };
+      }
       attempt.validation_state = "invalid";
       attempt.failure_history.push({ stage_id: stage.stage_id, code: "trusted_evidence_revalidation_failed", timestamp: event.timestamp, errors: validation.errors });
-      if (originallyAccepted) this.#recordCriticalFailure(attempt, stage.stage_id, "mismatched_trusted_evidence", true, event.timestamp);
+      if (eventAccepted) this.#recordCriticalFailure(attempt, stage.stage_id, "mismatched_trusted_evidence", true, event.timestamp);
       attempt.updated_at = event.timestamp;
       return { providerUnavailable: false, providerRejected: true };
     }
-    if (!originallyAccepted) {
-      attempt.failure_history.push({ stage_id: stage.stage_id, code: "trusted_evidence_rejected", timestamp: event.timestamp, errors: asArray(event.provider_receipt?.errors) });
+    if (!eventAccepted) {
+      if (recordedOutcome.provider_receipt?.provider_id && recordedOutcome.provider_receipt.provider_id !== envelope.provider_id) {
+        throw safeError("event_provider_receipt_mismatch", `event ${event.event_id} provider receipt does not match envelope`);
+      }
+      if (recordedOutcome.provider_receipt?.evidence_id && recordedOutcome.provider_receipt.evidence_id !== envelope.evidence_id) {
+        throw safeError("event_provider_receipt_mismatch", `event ${event.event_id} evidence receipt does not match envelope`);
+      }
+      this.#applyTrustedRejection(attempt, stage, event, recordedOutcome);
       attempt.updated_at = event.timestamp;
       return { providerUnavailable: false, providerRejected: false };
     }
     const sanitizedEnvelope = validation.envelope;
+    const ownershipResult = this.evidenceOwnershipRegistry.claim(sanitizedEnvelope);
+    if (!ownershipResult.accepted) {
+      const outcome = this.#trustedOutcome(false, ownershipResult.code, ownershipResult.errors, validation.provider_receipt, ownershipResult);
+      this.#applyTrustedRejection(attempt, stage, event, outcome);
+      return { providerUnavailable: false, providerRejected: true };
+    }
     attempt.submitted_evidence.push({
       evidence_id: sanitizedEnvelope.evidence_id,
       provider_id: sanitizedEnvelope.provider_id,
@@ -1276,14 +1428,33 @@ export class LessonAttemptEngine {
     const resolutionType = resolution.type || "stage_retry";
     const resolutionStageId = resolution.stage_id || stageId;
     const resolutionStage = stageById(definition, resolutionStageId);
+    const stageState = attempt.stage_states?.[resolutionStageId];
     const remediates = asArray(resolutionStage.remediates_critical_failures);
     const stageCanRemediate = resolutionStageId === stageId || remediates.includes(code);
+    const evidenceIds = asArray(resolution.evidence_ids || (resolution.evidence_id ? [resolution.evidence_id] : []));
+    if (!["stage_retry", "remediation_stage", "trusted_evidence"].includes(resolutionType)) throw safeError("event_replay_unknown_resolution_type", "unknown resolution type");
+    if (!failure.remediation_possible) throw safeError("event_replay_failure_not_remediable", "failure is not remediable");
     if (!stageCanRemediate) throw safeError("event_replay_resolution_not_allowed", "resolution stage does not remediate failure");
+    if (resolutionType === "stage_retry" && resolutionStageId !== stageId) throw safeError("event_replay_stage_retry_mismatch", "stage retry must use affected stage");
+    if (["stage_retry", "remediation_stage"].includes(resolutionType) && stageState?.status !== "passed") {
+      throw safeError("event_replay_resolution_stage_not_passed", "resolution stage has not passed yet");
+    }
+    if (resolutionType === "trusted_evidence") {
+      if (!evidenceIds.length) throw safeError("event_replay_resolution_evidence_required", "trusted resolution requires evidence");
+      const submitted = asArray(attempt.submitted_evidence);
+      const allEvidenceMatches = evidenceIds.every((evidenceId) => submitted.some((evidence) => (
+        evidence.evidence_id === evidenceId &&
+        evidence.stage_id === resolutionStageId &&
+        evidence.evidence_type === expectedEvidenceTypeForStage(resolutionStage) &&
+        evidence.integrity_result === "passed"
+      )));
+      if (!allEvidenceMatches) throw safeError("event_replay_resolution_evidence_not_matched", "resolution evidence is not available yet");
+    }
     failure.resolved = true;
     failure.resolved_at = event.timestamp;
     failure.resolution_type = resolutionType;
     failure.resolution_stage_id = resolutionStageId;
-    failure.resolution_evidence_ids = asArray(resolution.evidence_ids || (resolution.evidence_id ? [resolution.evidence_id] : []));
+    failure.resolution_evidence_ids = evidenceIds;
     attempt.resolution_history = [...asArray(attempt.resolution_history), {
       failure_code: code,
       affected_stage_id: stageId,
@@ -1494,6 +1665,66 @@ export class LessonAttemptEngine {
     if (state.status === "blocked") throw safeError("stage_blocked", `stage ${stage.stage_id} is blocked`);
     if (attempt.status !== "active") throw safeError("attempt_not_active", `attempt ${attempt.attempt_id} is not active`);
     return state;
+  }
+
+  #trustedStageAdmission(attempt, definition, stage) {
+    const state = this.#stageState(attempt, stage.stage_id);
+    if (attempt.status !== "active") return { accepted: false, code: "trusted_attempt_not_active", errors: ["trusted_attempt_not_active"] };
+    if (!stageAppliesToMode(stage, attempt.mode)) return { accepted: false, code: "trusted_stage_not_available", errors: ["trusted_stage_not_available"] };
+    if (state.status === "locked") return { accepted: false, code: "trusted_stage_locked", errors: ["trusted_stage_locked"] };
+    if (["not_applicable", "not_supported", "blocked"].includes(state.status)) return { accepted: false, code: "trusted_stage_not_available", errors: [`trusted_stage_${state.status}`] };
+    if (state.status === "passed") return { accepted: false, code: "trusted_stage_complete", errors: ["trusted_stage_complete"] };
+    for (const dependency of asArray(stage.dependencies)) {
+      if (!["passed", "not_applicable", "not_supported"].includes(attempt.stage_states?.[dependency]?.status)) {
+        return { accepted: false, code: "trusted_dependency_not_satisfied", errors: ["trusted_dependency_not_satisfied"] };
+      }
+    }
+    return { accepted: true, code: "trusted_stage_available", errors: [] };
+  }
+
+  #trustedEvidenceContext(attempt, stage, timestamp) {
+    return {
+      attempt_id: attempt.attempt_id,
+      lesson_id: attempt.lesson_id,
+      vendor_id: attempt.vendor_id,
+      canonical_command_id: attempt.canonical_command_id,
+      stage_id: stage.stage_id,
+      expected_evidence_type: expectedEvidenceTypeForStage(stage),
+      checked_at: timestamp
+    };
+  }
+
+  #trustedCriticalFailureCode(errors) {
+    if (errors.some((error) => ["reused_evidence", "reused_source_event", "reused_verification_record"].includes(error))) {
+      return "cross_attempt_evidence_reuse";
+    }
+    if (errors.some((error) => error.startsWith("mismatched_") || ["verification_policy_required", "verification_record_required", "missing_verification_policy_id", "missing_verification_record_id"].includes(error))) {
+      return "mismatched_trusted_evidence";
+    }
+    return null;
+  }
+
+  #trustedOutcome(accepted, code, errors, providerReceipt, ownershipResult = null) {
+    return {
+      accepted: Boolean(accepted),
+      rejection_code: accepted ? null : code,
+      rejection_errors: accepted ? [] : [...new Set(asArray(errors))],
+      critical_failure_code: accepted ? null : this.#trustedCriticalFailureCode(asArray(errors)),
+      checked_provider: Boolean(providerReceipt),
+      provider_receipt: providerReceipt ? deepClone(providerReceipt) : null,
+      ownership_result: ownershipResult ? deepClone(ownershipResult) : null
+    };
+  }
+
+  #applyTrustedRejection(attempt, stage, eventOrTimestamp, outcome) {
+    const timestamp = typeof eventOrTimestamp === "string" ? eventOrTimestamp : eventOrTimestamp.timestamp;
+    const code = outcome.rejection_code || "trusted_evidence_rejected";
+    const errors = [...new Set(asArray(outcome.rejection_errors || outcome.errors || code))];
+    attempt.failure_history.push({ stage_id: stage.stage_id, code, timestamp, errors });
+    if (outcome.critical_failure_code) {
+      this.#recordCriticalFailure(attempt, stage.stage_id, outcome.critical_failure_code, true, timestamp);
+    }
+    attempt.updated_at = timestamp;
   }
 
   #evaluationContext(attempt, definition, stage, overrides = {}) {

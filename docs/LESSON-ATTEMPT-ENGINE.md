@@ -76,6 +76,8 @@ attempt_abandoned
 
 The journal is append-only from the engine API perspective. Restore validates unique event IDs, contiguous sequence numbers, valid non-decreasing timestamps, attempt identity, controlled event type, and stage applicability for the restored mode. The first event must be `attempt_created`.
 
+Restore also validates event source and shape. Student response events must come from `student` and include a replayable sanitized response. Trusted-evidence events must come from `trusted_provider` or `system` and include a replayable envelope, provider receipt, and controlled trusted outcome. Finalization and abandonment events cannot carry response or trusted-evidence payloads.
+
 When a matching lesson definition is supplied, `restoreAttempt()` rebuilds stage states, submitted evidence, hints, failures, critical failures, prediction gate, confidence, dimensions, completion, and mastery candidates from the event journal. Serialized copies of those fields are compared with the replayed snapshot, then replaced according to the controlled policy:
 
 ```text
@@ -220,7 +222,13 @@ Trusted execution and verification stages are ingest-only. `submitStudentRespons
 
 Execution and verification evidence have different required metadata. Execution evidence may omit `verification_policy_id` and `verification_record_id`. Verification evidence must include both fields. Both evidence types require identity fields, `source_event_id`, `integrity_result: "passed"`, a valid timestamp, and provider acceptance.
 
+The stage determines the expected evidence type. `runtime_execution` and `trusted_external_evidence` require `execution`. `runtime_verification` and `trusted_verification_evidence` require `verification`. An envelope cannot choose a weaker contract by claiming `execution` for a verification stage.
+
 Trusted-evidence events retain the sanitized envelope plus a controlled provider receipt using schema version `trusted-provider-receipt.v1`. During restore, the engine validates the envelope, confirms identity, enforces evidence ID uniqueness, and calls the matching provider again. If the provider is unavailable, the attempt is preserved with `validation_state: "pending_provider_revalidation"` and trusted execution or verification credit is not awarded. If provider revalidation rejects previously accepted evidence, the attempt is restored as `validation_state: "invalid"` and full mastery is blocked.
+
+Live ingestion and replay share one trusted-stage admission rule. Trusted evidence is rejected when the attempt is inactive, the stage is locked, blocked, not applicable, not supported, already complete, outside the active mode, or missing a passed dependency. Replaying a journal-edited accepted verification event before execution is treated as an invalid event order and cannot unlock Save, rollback, completion, verification mastery, or full mastery.
+
+Stage 2 includes an injectable evidence-ownership registry contract with a deterministic in-memory implementation. It tracks `evidence_id`, `source_event_id`, and `verification_record_id` for verification evidence. The same exact attempt may replay the same exact evidence idempotently; another attempt, lesson, vendor, command, stage, or evidence type may not claim the same identity. Changing `evidence_id` does not bypass `source_event_id` or `verification_record_id` ownership. Cross-browser-session and cross-process persistence belongs to Stage 5; Stage 2 can enforce prior ownership only when the caller supplies a seeded registry or when the rejection is already recorded in the attempt journal.
 
 Stage 2 includes only the contract and fixture provider. The production runtime adapter belongs to Stage 4.
 
@@ -270,6 +278,10 @@ Critical failures cannot be cleared by code string alone. Resolution requires a 
 `restoreAttempt(serialized, definition)` recomputes `attempt_key`, validates identity fields, rejects unknown future schemas, and replays the event journal as the authoritative state. Student-response events are rerun through `evaluateStage()` using the stored sanitized response; serialized `last_result`, stage status, and dimension scores cannot create credit.
 
 Trusted-evidence events are replayed through the provider contract. Stored `provider_id`, `integrity_result`, `source_event_id`, policy IDs, and submitted-evidence summaries are not enough by themselves. The provider must accept the stored replayable envelope, and `integrity_result` must remain `passed`.
+
+Rejected trusted events are also authoritative history. Restore validates the recorded provider receipt and trusted outcome, reconstructs rejection failures and critical failures, and does not allow later provider acceptance or an empty fresh in-memory registry to turn a live rejected event into credit. Later valid evidence may pass the stage, but earlier unresolved critical failures continue to block completion until resolved by a valid earlier retry, remediation stage, or matching trusted evidence.
+
+Critical-failure resolution is sequence-aware during replay. `stage_retry` requires the affected stage to have already passed. `remediation_stage` requires the declared remediation stage to have already passed and to declare the failure code. `trusted_evidence` requires matching accepted evidence that already appeared in the journal, with valid ownership, provider revalidation, matching attempt/vendor/command/stage identity, and the expected evidence type.
 
 Restore validation states are:
 

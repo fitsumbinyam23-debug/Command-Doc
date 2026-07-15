@@ -97,7 +97,13 @@
       "accepted",
       "errors",
       "checked_at"
-    ]
+    ],
+    "expected_evidence_type_by_stage": {
+      "runtime_execution": "execution",
+      "trusted_external_evidence": "execution",
+      "runtime_verification": "verification",
+      "trusted_verification_evidence": "verification"
+    }
   },
   "submitted_evidence_summary": {
     "required_fields": [
@@ -160,6 +166,30 @@
     "no_definition_restore_validation_state": "unvalidated_transport_only",
     "missing_provider_validation_state": "pending_provider_revalidation",
     "provider_rejection_validation_state": "invalid"
+  },
+  "evidence_ownership_registry": {
+    "stage_2_contract": true,
+    "default_implementation": "deterministic in-memory registry",
+    "persistence_stage": "Stage 5",
+    "tracked_keys": [
+      "evidence_id",
+      "source_event_id",
+      "verification_record_id for verification evidence"
+    ],
+    "owner_identity_fields": [
+      "attempt_id",
+      "lesson_id",
+      "vendor_id",
+      "canonical_command_id",
+      "stage_id",
+      "evidence_type"
+    ],
+    "rules": [
+      "the same exact attempt may replay the same exact evidence idempotently",
+      "a different attempt, lesson, vendor, command, stage, or evidence type cannot claim the same evidence identity",
+      "changing evidence_id cannot bypass source_event_id ownership",
+      "changing evidence_id cannot bypass verification_record_id ownership"
+    ]
   },
   "completion_result": {
     "fields": [
