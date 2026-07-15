@@ -914,19 +914,31 @@ export async function writeOutputFiles(artifacts) {
   }
 }
 
-export async function compareOutputFiles(artifacts) {
+export function normalizeGeneratedText(text) {
+  return text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+}
+
+export function generatedTextMatches(actual, expected) {
+  return normalizeGeneratedText(actual) === normalizeGeneratedText(expected);
+}
+
+export async function compareOutputFileContents(expectedFiles, readText) {
   const differences = [];
-  for (const [relative, expected] of createOutputFiles(artifacts).entries()) {
+  for (const [relative, expected] of expectedFiles.entries()) {
     let actual = "";
     try {
-      actual = await fs.readFile(path.join(root, relative), "utf8");
+      actual = await readText(relative);
     } catch {
       differences.push({ file: relative, reason: "missing" });
       continue;
     }
-    if (actual !== expected) differences.push({ file: relative, reason: "content differs" });
+    if (!generatedTextMatches(actual, expected)) differences.push({ file: relative, reason: "content differs" });
   }
   return differences;
+}
+
+export async function compareOutputFiles(artifacts) {
+  return compareOutputFileContents(createOutputFiles(artifacts), (relative) => fs.readFile(path.join(root, relative), "utf8"));
 }
 
 export function validateLearningArtifacts(bundle) {

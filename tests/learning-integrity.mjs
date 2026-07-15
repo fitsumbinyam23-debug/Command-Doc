@@ -1,8 +1,25 @@
 import assert from "node:assert/strict";
-import { buildLearningIntegritySystem, compareOutputFiles } from "../tools/learning-integrity-lib.mjs";
+import {
+  buildLearningIntegritySystem,
+  compareOutputFileContents,
+  compareOutputFiles,
+  createOutputFiles,
+  generatedTextMatches
+} from "../tools/learning-integrity-lib.mjs";
 
 const sorted = (values) => [...values].sort();
 const total = (counts) => Object.values(counts || {}).reduce((sum, value) => sum + value, 0);
+
+assert.equal(generatedTextMatches("alpha\nbeta\n", "alpha\nbeta\n"), true, "LF actual and LF expected match");
+assert.equal(generatedTextMatches("alpha\r\nbeta\r\n", "alpha\nbeta\n"), true, "CRLF actual and LF expected match");
+assert.equal(generatedTextMatches("alpha\nbeta\n", "alpha\r\nbeta\r\n"), true, "LF actual and CRLF expected match");
+assert.equal(generatedTextMatches("alpha\rbeta\r", "alpha\nbeta\n"), true, "standalone CR is normalized safely");
+assert.equal(generatedTextMatches("alpha\nchanged\n", "alpha\nbeta\n"), false, "real textual changes are detected");
+assert.equal(generatedTextMatches("alpha\nbeta\nextra\n", "alpha\nbeta\n"), false, "added or removed lines are detected");
+assert.equal(generatedTextMatches("alpha\nbeta \n", "alpha\nbeta\n"), false, "spaces within a line are not ignored");
+assert.deepEqual(await compareOutputFileContents(new Map([["missing-generated.txt", "expected\n"]]), async () => {
+  throw new Error("missing");
+}), [{ file: "missing-generated.txt", reason: "missing" }], "missing files remain failures");
 
 const first = await buildLearningIntegritySystem();
 const second = await buildLearningIntegritySystem();
@@ -10,6 +27,16 @@ assert.equal(JSON.stringify(first.artifacts), JSON.stringify(second.artifacts), 
 assert.equal(first.validation.passed, true, "learning artifacts validate");
 assert.deepEqual(first.validation.errors, [], "no validation errors");
 assert.equal((await compareOutputFiles(first.artifacts)).length, 0, "generated learning outputs are current");
+const expectedOutputFiles = createOutputFiles(first.artifacts);
+const crlfOutputFiles = new Map([...expectedOutputFiles].map(([relative, content]) => [relative, content.replace(/\n/g, "\r\n")]));
+assert.equal((await compareOutputFileContents(expectedOutputFiles, async (relative) => crlfOutputFiles.get(relative))).length, 0, "simulated CRLF generated outputs compare current");
+const [changedGeneratedFile, changedGeneratedContent] = expectedOutputFiles.entries().next().value;
+const changedOutputFiles = new Map(crlfOutputFiles);
+changedOutputFiles.set(changedGeneratedFile, changedGeneratedContent.replace("learning-command-catalog.v1", "learning-command-catalog.v1_changed"));
+assert.deepEqual(await compareOutputFileContents(expectedOutputFiles, async (relative) => changedOutputFiles.get(relative)), [{
+  file: changedGeneratedFile,
+  reason: "content differs"
+}], "real generated output content differences remain detectable");
 
 const commands = first.artifacts.catalog.commands;
 const objectives = first.artifacts.objectives.objectives;
