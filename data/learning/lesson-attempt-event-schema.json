@@ -1,0 +1,89 @@
+{
+  "schema_version": "lesson-attempt-event.v1",
+  "description": "Append-only event-journal contract for replay-authoritative Command Doctor lesson attempts.",
+  "required_fields": [
+    "schema_version",
+    "event_id",
+    "sequence",
+    "timestamp",
+    "attempt_id",
+    "lesson_id",
+    "vendor_id",
+    "canonical_command_id",
+    "mode",
+    "event_type",
+    "source_type",
+    "metadata"
+  ],
+  "identity_fields": [
+    "attempt_id",
+    "lesson_id",
+    "vendor_id",
+    "canonical_command_id",
+    "mode"
+  ],
+  "controlled_values": {
+    "event_types": [
+      "attempt_created",
+      "stage_viewed",
+      "stage_content_revealed",
+      "student_response_submitted",
+      "hint_requested",
+      "trusted_evidence_ingested",
+      "safety_decision_submitted",
+      "save_or_rollback_submitted",
+      "confidence_submitted",
+      "critical_failure_recorded",
+      "critical_failure_resolved",
+      "attempt_finalized",
+      "attempt_abandoned"
+    ],
+    "source_types": [
+      "engine",
+      "student",
+      "trusted_provider",
+      "system"
+    ],
+    "modes": ["GUIDED", "ASSISTED", "INDEPENDENT"]
+  },
+  "ordering_rules": [
+    "event_id must be unique within an attempt journal",
+    "sequence starts at 1 and is contiguous",
+    "timestamps must parse and be non-decreasing",
+    "the first event must be attempt_created",
+    "attempt_created may appear only once",
+    "all identity fields must match the attempt identity",
+    "stage events must reference a stage in the matching lesson definition",
+    "stage events must reference a stage applicable to the attempt mode"
+  ],
+  "student_response_events": {
+    "event_types": [
+      "student_response_submitted",
+      "safety_decision_submitted",
+      "save_or_rollback_submitted",
+      "confidence_submitted"
+    ],
+    "required_payload": "sanitized response sufficient to rerun the controlled evaluator",
+    "restore_rule": "serialized evaluator_result is advisory only and must not create credit"
+  },
+  "trusted_evidence_events": {
+    "event_type": "trusted_evidence_ingested",
+    "required_payload": "sanitized full evidence envelope plus controlled provider receipt",
+    "restore_rule": "the matching provider must revalidate the stored envelope before execution or verification credit is restored"
+  },
+  "derived_state_not_authoritative": [
+    "stage_states",
+    "submitted_evidence",
+    "hint_history",
+    "failure_history",
+    "dimension_results",
+    "critical_failures",
+    "completion_result",
+    "prediction_gate",
+    "confidence",
+    "resolution_history",
+    "mastery_candidates"
+  ],
+  "snapshot_mismatch_policy": "replace_with_replayed_event_journal",
+  "no_definition_restore": "transport_only_no_credit"
+}

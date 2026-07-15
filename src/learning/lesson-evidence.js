@@ -34,6 +34,13 @@ export function validateTrustedEvidenceEnvelope(envelope, context, provider) {
   for (const field of ["evidence_id", "provider_id", "evidence_type", "attempt_id", "lesson_id", "vendor_id", "canonical_command_id", "stage_id", "timestamp", "integrity_result"]) {
     if (!envelope[field]) errors.push(`missing_${field}`);
   }
+  if (!Number.isFinite(Date.parse(envelope.timestamp))) errors.push("invalid_evidence_timestamp");
+  if (!["execution", "verification"].includes(envelope.evidence_type)) errors.push("unknown_evidence_type");
+  if (envelope.evidence_type === "verification") {
+    for (const field of ["verification_policy_id", "verification_record_id"]) {
+      if (!envelope[field]) errors.push(`missing_${field}`);
+    }
+  }
   for (const field of ["attempt_id", "lesson_id", "vendor_id", "canonical_command_id", "stage_id"]) {
     if (context?.[field] && envelope[field] !== context[field]) errors.push(`mismatched_${field}`);
   }
@@ -41,6 +48,17 @@ export function validateTrustedEvidenceEnvelope(envelope, context, provider) {
   if (!provider || typeof provider.verify !== "function") errors.push("missing_evidence_provider");
   const providerResult = provider?.verify ? provider.verify(envelope, context) : { accepted: false, errors: ["missing_evidence_provider"] };
   if (!providerResult?.accepted) errors.push(...(providerResult?.errors || ["provider_rejected_evidence"]));
-  return { accepted: errors.length === 0, errors, envelope: deepClone(envelope) };
+  return {
+    accepted: errors.length === 0,
+    errors,
+    envelope: deepClone(envelope),
+    provider_receipt: {
+      schema_version: "trusted-provider-receipt.v1",
+      provider_id: envelope.provider_id || null,
+      evidence_id: envelope.evidence_id || null,
+      accepted: Boolean(providerResult?.accepted) && errors.length === 0,
+      errors: errors.length ? [...new Set(errors)] : [],
+      checked_at: context?.checked_at || envelope.timestamp || null
+    }
+  };
 }
-

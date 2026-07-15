@@ -21,6 +21,9 @@
     "dimension_results",
     "critical_failures",
     "completion_result",
+    "event_journal",
+    "validation_state",
+    "restore_diagnostics",
     "definition_version"
   ],
   "attempt_key": {
@@ -31,6 +34,23 @@
     "attempt_statuses": ["active", "completed", "failed", "abandoned", "invalid_definition"],
     "stage_statuses": ["locked", "available", "in_progress", "submitted", "passed", "failed", "not_applicable", "not_supported", "blocked"],
     "modes": ["GUIDED", "ASSISTED", "INDEPENDENT"],
+    "validation_states": ["validated", "pending_provider_revalidation", "unvalidated_transport_only", "invalid"],
+    "attempt_event_types": [
+      "attempt_created",
+      "stage_viewed",
+      "stage_content_revealed",
+      "student_response_submitted",
+      "hint_requested",
+      "trusted_evidence_ingested",
+      "safety_decision_submitted",
+      "save_or_rollback_submitted",
+      "confidence_submitted",
+      "critical_failure_recorded",
+      "critical_failure_resolved",
+      "attempt_finalized",
+      "attempt_abandoned"
+    ],
+    "evidence_types": ["execution", "verification"],
     "critical_failure_codes": [
       "wrong_vendor_syntax",
       "unsafe_command_choice",
@@ -47,7 +67,7 @@
   },
   "trusted_evidence_envelope": {
     "schema_version": "trusted-lesson-evidence.v1",
-    "required_fields": [
+    "common_required_fields": [
       "evidence_id",
       "provider_id",
       "evidence_type",
@@ -59,14 +79,25 @@
       "timestamp",
       "payload",
       "source_event_id",
-      "verification_policy_id",
-      "verification_record_id",
       "integrity_result"
     ],
+    "required_by_evidence_type": {
+      "execution": [],
+      "verification": ["verification_policy_id", "verification_record_id"]
+    },
     "plain_verified_flag_allowed": false,
     "provider_verification_required": true,
     "student_response_api_allowed": false,
-    "ingest_api_required": true
+    "ingest_api_required": true,
+    "provider_receipt_schema_version": "trusted-provider-receipt.v1",
+    "provider_receipt_required_fields": [
+      "schema_version",
+      "provider_id",
+      "evidence_id",
+      "accepted",
+      "errors",
+      "checked_at"
+    ]
   },
   "submitted_evidence_summary": {
     "required_fields": [
@@ -80,16 +111,20 @@
       "stage_id",
       "timestamp",
       "source_event_id",
-      "verification_policy_id",
-      "verification_record_id",
       "integrity_result"
     ],
+    "required_by_evidence_type": {
+      "execution": [],
+      "verification": ["verification_policy_id", "verification_record_id"]
+    },
     "restore_rules": [
       "evidence_id must be unique within the attempt",
       "stage_id must exist in the supplied definition",
       "stage_id must refer to a trusted runtime evidence stage",
       "identity fields must match the restored attempt",
-      "integrity_result must be passed"
+      "integrity_result must be passed",
+      "the authoritative trusted-evidence event must retain a provider-replayable envelope",
+      "the matching provider must accept the evidence again during restore"
     ]
   },
   "critical_failure_resolution": {
@@ -107,15 +142,24 @@
   },
   "restore_consistency": {
     "recompute_attempt_key": true,
-    "validate_stage_state_ids_when_definition_supplied": true,
-    "validate_dimension_result_identities": true,
-    "validate_initial_stage_availability_when_definition_supplied": true,
-    "validate_passed_student_stage_provenance": true,
-    "validate_passed_trusted_stage_evidence": true,
-    "reconstruct_dimension_results_from_stage_provenance": true,
-    "reconstruct_prediction_gate_from_stage_provenance": true,
+    "event_journal_required_when_definition_supplied": true,
+    "validate_event_schema": true,
+    "validate_event_identity": true,
+    "validate_event_sequence": true,
+    "validate_event_timestamps": true,
+    "validate_event_stage_applicability": true,
+    "re_evaluate_student_response_events": true,
+    "revalidate_trusted_evidence_events_with_provider": true,
+    "reconstruct_stage_states_from_events": true,
+    "reconstruct_dimension_results_from_events": true,
+    "reconstruct_hint_history_from_events": true,
+    "reconstruct_critical_failures_from_events": true,
+    "reconstruct_prediction_gate_from_events": true,
     "recompute_completion_result": true,
-    "reject_inconsistent_completion_claims": true
+    "snapshot_mismatch_policy": "replace_with_replayed_event_journal",
+    "no_definition_restore_validation_state": "unvalidated_transport_only",
+    "missing_provider_validation_state": "pending_provider_revalidation",
+    "provider_rejection_validation_state": "invalid"
   },
   "completion_result": {
     "fields": [
@@ -136,7 +180,7 @@
   "serialization": {
     "format": "JSON",
     "unknown_future_schema_behavior": "reject",
-    "determinism_inputs": ["clock", "attempt ID generator", "evidence ID generator", "evidence provider"]
+    "determinism_inputs": ["clock", "attempt ID generator", "attempt event ID generator", "evidence ID generator", "evidence provider"]
   },
   "mastery_candidate": {
     "dimensions": [

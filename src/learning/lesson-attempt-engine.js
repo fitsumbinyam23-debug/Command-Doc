@@ -26,6 +26,24 @@ import { validateTrustedEvidenceEnvelope } from "./lesson-evidence.js";
 const ASSESSED_OUTPUT_STAGES = new Set(["healthy_output", "fault_output", "evidence_interpretation"]);
 const TRUSTED_STAGE_TYPES = new Set(["runtime_execution", "runtime_verification"]);
 const TRUSTED_EVALUATOR_TYPES = new Set(["trusted_external_evidence", "trusted_verification_evidence"]);
+export const ATTEMPT_EVENT_SCHEMA_VERSION = "lesson-attempt-event.v1";
+export const ATTEMPT_EVENT_TYPES = Object.freeze([
+  "attempt_created",
+  "stage_viewed",
+  "stage_content_revealed",
+  "student_response_submitted",
+  "hint_requested",
+  "trusted_evidence_ingested",
+  "safety_decision_submitted",
+  "save_or_rollback_submitted",
+  "confidence_submitted",
+  "critical_failure_recorded",
+  "critical_failure_resolved",
+  "attempt_finalized",
+  "attempt_abandoned"
+]);
+const STAGE_EVENT_TYPES = new Set(ATTEMPT_EVENT_TYPES.filter((eventType) => !["attempt_created", "attempt_finalized", "attempt_abandoned"].includes(eventType)));
+const SNAPSHOT_REPLACE_POLICY = "replace_with_replayed_event_journal";
 
 function nowFrom(clock) {
   return clock ? clock() : new Date().toISOString();
@@ -119,6 +137,24 @@ function safeError(code, message = code) {
   return error;
 }
 
+function sanitizeResponse(response) {
+  return deepClone(response);
+}
+
+function isIndependentActive(attempt) {
+  return attempt.mode === "INDEPENDENT" && attempt.status === "active";
+}
+
+function safeSubmissionAcknowledgement(stageId, result) {
+  return {
+    stage_id: stageId,
+    recorded: true,
+    feedback_deferred: true,
+    retry_allowed: Boolean(result?.retry_allowed),
+    status: "recorded"
+  };
+}
+
 export class LessonAttemptEngine {
   constructor(options = {}) {
     this.catalog = options.catalog || { commands: [] };
@@ -126,6 +162,7 @@ export class LessonAttemptEngine {
     this.clock = options.clock || (() => new Date().toISOString());
     this.idGenerator = options.idGenerator || (() => `attempt-${Math.random().toString(36).slice(2)}`);
     this.evidenceIdGenerator = options.evidenceIdGenerator || (() => `evidence-${Math.random().toString(36).slice(2)}`);
+    this.eventIdGenerator = options.eventIdGenerator || ((attempt, sequence) => `${attempt.attempt_id}-event-${String(sequence).padStart(4, "0")}`);
     this.usedEvidenceIds = new Set(asArray(options.usedEvidenceIds));
   }
 
@@ -195,9 +232,24 @@ export class LessonAttemptEngine {
       administrative_unlocks: [],
       confidence: null,
       resolution_history: [],
+      event_journal: [],
+      validation_state: "validated",
+      restore_diagnostics: {
+        snapshot_mismatch: false,
+        snapshot_mismatch_policy: SNAPSHOT_REPLACE_POLICY,
+        provider_revalidation: "not_required"
+      },
       definition_version: definition.definition_version || definition.schema_version
     };
     attempt.current_stage_id = this.#firstAvailableStageId(attempt, target);
+    this.#appendEvent(attempt, {
+      event_type: "attempt_created",
+      source_type: "engine",
+      metadata: {
+        definition_version: attempt.definition_version,
+        module_id: attempt.module_id
+      }
+    }, createdAt);
     return attempt;
   }
 
@@ -218,20 +270,32 @@ export class LessonAttemptEngine {
     if (attempt.attempt_key !== recomputedKey) {
       throw safeError("attempt_key_mismatch", "attempt_key does not match attempt identity fields");
     }
+    if (!definition) {
+      const transport = deepClone(attempt);
+      transport.validation_state = "unvalidated_transport_only";
+      transport.completion_result = {
+        completed: false,
+        eligible_for_limited_credit: false,
+        eligible_for_full_mastery: false,
+        blockers: ["unvalidated_transport_only"],
+        finalized_at: null
+      };
+      transport.restore_diagnostics = {
+        snapshot_mismatch: null,
+        snapshot_mismatch_policy: "definition_required_for_replay",
+        provider_revalidation: "not_run"
+      };
+      return transport;
+    }
     const stageStateEntries = Object.entries(attempt.stage_states || {});
     const stageIds = new Set();
-    const definitionStages = definition ? stageMap(definition) : null;
+    const definitionStages = stageMap(definition);
     for (const [stageId, state] of stageStateEntries) {
       if (stageIds.has(stageId)) throw safeError("duplicate_stage_state", `duplicate stage state ${stageId}`);
       stageIds.add(stageId);
       if (state.stage_id !== stageId) throw safeError("stage_state_identity_mismatch", `stage state key ${stageId} does not match ${state.stage_id}`);
       if (definitionStages && !definitionStages.has(stageId)) throw safeError("unknown_stage_state", `attempt has unknown stage state ${stageId}`);
       requireControlled(state.status, STAGE_STATUSES, `stage ${state.stage_id} status`);
-    }
-    if (definitionStages) {
-      for (const stageId of definitionStages.keys()) {
-        if (!stageIds.has(stageId)) throw safeError("missing_stage_state", `attempt is missing stage state ${stageId}`);
-      }
     }
     const dimensionIds = new Set();
     for (const [dimension, result] of Object.entries(attempt.dimension_results || {})) {
@@ -241,28 +305,12 @@ export class LessonAttemptEngine {
       if (result?.dimension !== dimension) throw safeError("dimension_result_identity_mismatch", `dimension result key ${dimension} does not match ${result?.dimension}`);
       if (result?.source_mode && result.source_mode !== attempt.mode) throw safeError("dimension_result_mode_mismatch", `dimension result ${dimension} has mode ${result.source_mode}`);
     }
-    if (definition) {
-      if (definition.lesson_id !== attempt.lesson_id) throw safeError("lesson_identity_mismatch", "attempt lesson_id does not match definition");
-      const target = targetByCommand(definition, attempt.canonical_command_id);
-      if (!target) throw safeError("unknown_command_target", `lesson does not target ${attempt.canonical_command_id}`);
-      if (target.vendor_id !== attempt.vendor_id) throw safeError("vendor_identity_mismatch", "attempt vendor does not match definition target");
-      this.#validateRestoredStageAvailability(attempt, definition, target);
-      this.#validateSubmittedEvidenceForRestore(attempt, definition);
-      this.#validateStageProvenanceForRestore(attempt, definition);
-      attempt.dimension_results = this.#reconstructDimensionResults(attempt, definition, target);
-      attempt.prediction_gate = this.#reconstructPredictionGate(attempt, definition, target);
-      const actualCompletion = this.evaluateCompletion(attempt, definition);
-      actualCompletion.finalized_at = attempt.completion_result?.finalized_at || null;
-      const serializedClaimedCompletion = Boolean(attempt.status === "completed" || attempt.completion_result?.completed || attempt.completion_result?.eligible_for_full_mastery || attempt.completion_result?.eligible_for_mastery);
-      if (serializedClaimedCompletion && !actualCompletion.completed) {
-        throw safeError("inconsistent_serialized_completion", "serialized completion_result does not match evaluated completion");
-      }
-      attempt.completion_result = actualCompletion;
-    }
-    for (const evidence of asArray(attempt.submitted_evidence)) {
+    if (definition.lesson_id !== attempt.lesson_id) throw safeError("lesson_identity_mismatch", "attempt lesson_id does not match definition");
+    const replayed = this.#replayAttemptFromEvents(attempt, definition);
+    for (const evidence of asArray(replayed.submitted_evidence)) {
       if (evidence.evidence_id) this.usedEvidenceIds.add(evidence.evidence_id);
     }
-    return attempt;
+    return replayed;
   }
 
   serializeAttempt(attempt) {
@@ -274,6 +322,7 @@ export class LessonAttemptEngine {
   }
 
   getPublicAttemptView(attempt) {
+    const independentActive = isIndependentActive(attempt);
     return {
       schema_version: attempt.schema_version,
       attempt_id: attempt.attempt_id,
@@ -290,17 +339,21 @@ export class LessonAttemptEngine {
       stage_states: Object.fromEntries(Object.entries(attempt.stage_states || {}).map(([stageId, state]) => [stageId, {
         stage_id: state.stage_id,
         stage_type: state.stage_type,
-        status: state.status,
+        status: independentActive && ["passed", "failed", "submitted"].includes(state.status) ? "submitted" : state.status,
         requirement_status: state.requirement_status,
         reason: state.reason || null,
         dependencies: asArray(state.dependencies),
-        attempt_count: state.attempt_count || 0,
-        hint_count: state.hint_count || 0,
-        revealed: Boolean(state.revealed_at),
-        passed_at: state.passed_at || null,
-        failed_at: state.failed_at || null
+        attempt_count: independentActive ? undefined : state.attempt_count || 0,
+        hint_count: independentActive ? undefined : state.hint_count || 0,
+        revealed: independentActive ? undefined : Boolean(state.revealed_at),
+        passed_at: independentActive ? undefined : state.passed_at || null,
+        failed_at: independentActive ? undefined : state.failed_at || null
       }])),
-      submitted_evidence: asArray(attempt.submitted_evidence).map((evidence) => ({
+      submitted_evidence: asArray(attempt.submitted_evidence).map((evidence) => independentActive ? ({
+        stage_id: evidence.stage_id,
+        received: true,
+        timestamp: evidence.timestamp
+      }) : ({
         evidence_id: evidence.evidence_id,
         provider_id: evidence.provider_id,
         evidence_type: evidence.evidence_type,
@@ -314,13 +367,13 @@ export class LessonAttemptEngine {
         timestamp: hint.timestamp,
         sequence: hint.sequence
       })),
-      failure_history: asArray(attempt.failure_history).map((failure) => ({
+      failure_history: independentActive ? [] : asArray(attempt.failure_history).map((failure) => ({
         stage_id: failure.stage_id,
         code: failure.code,
         timestamp: failure.timestamp
       })),
-      dimension_results: deepClone(attempt.dimension_results),
-      critical_failures: asArray(attempt.critical_failures).map((failure) => ({
+      dimension_results: independentActive ? {} : deepClone(attempt.dimension_results),
+      critical_failures: independentActive ? [] : asArray(attempt.critical_failures).map((failure) => ({
         code: failure.code,
         stage_id: failure.stage_id,
         remediation_possible: failure.remediation_possible,
@@ -331,9 +384,10 @@ export class LessonAttemptEngine {
         resolution_evidence_ids: asArray(failure.resolution_evidence_ids),
         timestamp: failure.timestamp
       })),
-      resolution_history: deepClone(attempt.resolution_history || []),
-      completion_result: deepClone(attempt.completion_result),
+      resolution_history: independentActive ? [] : deepClone(attempt.resolution_history || []),
+      completion_result: this.#publicCompletionResult(attempt),
       confidence: attempt.confidence ? { value: attempt.confidence.value, submitted_at: attempt.confidence.submitted_at } : null,
+      validation_state: attempt.validation_state || "validated",
       definition_version: attempt.definition_version
     };
   }
@@ -345,9 +399,9 @@ export class LessonAttemptEngine {
     return {
       available: true,
       lesson: publicLessonDefinition(definition, attempt.mode, { attempt, review: true, canonical_command_id: attempt.canonical_command_id }),
-      completion_result: deepClone(attempt.completion_result),
-      dimension_results: deepClone(attempt.dimension_results),
-      critical_failures: deepClone(attempt.critical_failures)
+      completion_result: this.#publicCompletionResult(attempt),
+      dimension_results: attempt.mode === "INDEPENDENT" ? {} : deepClone(attempt.dimension_results),
+      critical_failures: attempt.mode === "INDEPENDENT" ? [] : deepClone(attempt.critical_failures)
     };
   }
 
@@ -365,9 +419,16 @@ export class LessonAttemptEngine {
     if (state.status === "not_supported") throw safeError("stage_not_supported", `stage ${stageId} is not supported`);
     if (state.status === "blocked") throw safeError("stage_blocked", `stage ${stageId} is blocked`);
     if (state.status === "available") state.status = "in_progress";
-    state.viewed_at = nowFrom(this.clock);
+    const timestamp = nowFrom(this.clock);
+    state.viewed_at = timestamp;
     attempt.updated_at = state.viewed_at;
     attempt.current_stage_id = stageId;
+    this.#appendEvent(attempt, {
+      event_type: "stage_viewed",
+      stage_id: stageId,
+      source_type: "student",
+      metadata: { status: state.status }
+    }, timestamp);
     return { stage_id: stage.stage_id, status: state.status };
   }
 
@@ -394,6 +455,12 @@ export class LessonAttemptEngine {
       attempt.prediction_gate.assessed_output_revealed_at = timestamp;
     }
     attempt.updated_at = timestamp;
+    this.#appendEvent(attempt, {
+      event_type: "stage_content_revealed",
+      stage_id: stageId,
+      source_type: "student",
+      metadata: { answer_visible: Boolean(solutionVisible) }
+    }, timestamp);
     return {
       stage_id: stageId,
       prompt: stage.prompt || null,
@@ -412,11 +479,21 @@ export class LessonAttemptEngine {
     if (stage.content_role === "assessed" && ASSESSED_OUTPUT_STAGES.has(stage.stage_type) && attempt.prediction_gate.required && !attempt.prediction_gate.prediction_submitted_at) {
       throw safeError("prediction_required_before_assessed_output", `stage ${stageId} requires a prediction first`);
     }
+    const timestamp = nowFrom(this.clock);
     const result = evaluateStage(stage, response, this.#evaluationContext(attempt, definition, stage));
-    return this.#applyStageResult(attempt, definition, stage, result, {
+    const applied = this.#applyStageResult(attempt, definition, stage, result, {
       response_kind: "student_response",
-      response
+      response,
+      timestamp
     });
+    this.#appendEvent(attempt, {
+      event_type: "student_response_submitted",
+      stage_id: stageId,
+      source_type: "student",
+      response: sanitizeResponse(response),
+      evaluator_result: result
+    }, timestamp);
+    return isIndependentActive(attempt) ? safeSubmissionAcknowledgement(stageId, result) : applied;
   }
 
   requestHint(attempt, definition, stageId) {
@@ -454,18 +531,29 @@ export class LessonAttemptEngine {
       }
     }
     attempt.updated_at = timestamp;
+    this.#appendEvent(attempt, {
+      event_type: "hint_requested",
+      stage_id: stageId,
+      source_type: "student",
+      metadata: {
+        sequence: record.sequence,
+        hint_text: record.text
+      }
+    }, timestamp);
     return { allowed: true, hint: deepClone(record) };
   }
 
   ingestTrustedExternalEvidence(attempt, definition, stageId, envelope) {
     const stage = stageById(definition, stageId);
     this.#ensureStageCanSubmit(attempt, stage);
+    const timestamp = nowFrom(this.clock);
     const context = {
       attempt_id: attempt.attempt_id,
       lesson_id: attempt.lesson_id,
       vendor_id: attempt.vendor_id,
       canonical_command_id: attempt.canonical_command_id,
-      stage_id: stageId
+      stage_id: stageId,
+      checked_at: timestamp
     };
     const validation = validateTrustedEvidenceEnvelope(envelope, context, this.evidenceProvider);
     if (validation.accepted && this.usedEvidenceIds.has(envelope.evidence_id)) {
@@ -473,13 +561,19 @@ export class LessonAttemptEngine {
       validation.errors.push("reused_evidence");
     }
     if (!validation.accepted) {
-      const timestamp = nowFrom(this.clock);
       const failureCode = validation.errors.includes("reused_evidence") ? "cross_attempt_evidence_reuse" : "trusted_evidence_rejected";
       attempt.failure_history.push({ stage_id: stageId, code: failureCode, timestamp, errors: validation.errors });
       if (validation.errors.some((error) => error.startsWith("mismatched_")) || validation.errors.includes("reused_evidence")) {
-        this.#recordCriticalFailure(attempt, stageId, validation.errors.includes("reused_evidence") ? "cross_attempt_evidence_reuse" : "mismatched_trusted_evidence", true);
+        this.#recordCriticalFailure(attempt, stageId, validation.errors.includes("reused_evidence") ? "cross_attempt_evidence_reuse" : "mismatched_trusted_evidence", true, timestamp);
       }
       attempt.updated_at = timestamp;
+      this.#appendEvent(attempt, {
+        event_type: "trusted_evidence_ingested",
+        stage_id: stageId,
+        source_type: "trusted_provider",
+        evidence_envelope: deepClone(envelope),
+        provider_receipt: validation.provider_receipt || { accepted: false, errors: validation.errors }
+      }, timestamp);
       return { accepted: false, errors: validation.errors };
     }
     this.usedEvidenceIds.add(envelope.evidence_id);
@@ -502,23 +596,58 @@ export class LessonAttemptEngine {
     const result = evaluateStage(stage, { trusted_evidence: sanitizedEnvelope }, this.#evaluationContext(attempt, definition, stage, { trustedEvidenceValidated: true }));
     const applied = this.#applyStageResult(attempt, definition, stage, result, {
       response_kind: "trusted_evidence",
-      response: { evidence_id: sanitizedEnvelope.evidence_id }
+      response: { evidence_id: sanitizedEnvelope.evidence_id },
+      timestamp
     });
+    this.#appendEvent(attempt, {
+      event_type: "trusted_evidence_ingested",
+      stage_id: stageId,
+      source_type: "trusted_provider",
+      evidence_envelope: sanitizedEnvelope,
+      provider_receipt: validation.provider_receipt
+    }, timestamp);
     return { accepted: true, result: applied };
   }
 
   recordSafetyDecision(attempt, definition, stageId, decision) {
-    return this.submitStudentResponse(attempt, definition, stageId, { decision });
+    const stage = stageById(definition, stageId);
+    this.#ensureStageCanSubmit(attempt, stage);
+    const timestamp = nowFrom(this.clock);
+    const response = { decision };
+    const result = evaluateStage(stage, response, this.#evaluationContext(attempt, definition, stage));
+    const applied = this.#applyStageResult(attempt, definition, stage, result, {
+      response_kind: "student_response",
+      response,
+      timestamp
+    });
+    this.#appendEvent(attempt, {
+      event_type: "safety_decision_submitted",
+      stage_id: stageId,
+      source_type: "student",
+      response: sanitizeResponse(response),
+      evaluator_result: result
+    }, timestamp);
+    return isIndependentActive(attempt) ? safeSubmissionAcknowledgement(stageId, result) : applied;
   }
 
   recordSaveOrRollbackDecision(attempt, definition, stageId, decision) {
     const stage = stageById(definition, stageId);
     this.#ensureStageCanSubmit(attempt, stage);
+    const timestamp = nowFrom(this.clock);
     const result = evaluateStage(stage, { decision }, this.#evaluationContext(attempt, definition, stage));
-    return this.#applyStageResult(attempt, definition, stage, result, {
+    const applied = this.#applyStageResult(attempt, definition, stage, result, {
       response_kind: "save_or_rollback_decision",
-      response: { decision }
+      response: { decision },
+      timestamp
     });
+    this.#appendEvent(attempt, {
+      event_type: "save_or_rollback_submitted",
+      stage_id: stageId,
+      source_type: "student",
+      response: { decision },
+      evaluator_result: result
+    }, timestamp);
+    return isIndependentActive(attempt) ? safeSubmissionAcknowledgement(stageId, result) : applied;
   }
 
   submitTicketNote(attempt, definition, stageId, note) {
@@ -527,7 +656,16 @@ export class LessonAttemptEngine {
 
   submitConfidence(attempt, definition, stageId, confidence) {
     const before = deepClone(attempt.dimension_results);
-    const result = this.submitStudentResponse(attempt, definition, stageId, { confidence });
+    const stage = stageById(definition, stageId);
+    this.#ensureStageCanSubmit(attempt, stage);
+    const timestamp = nowFrom(this.clock);
+    const response = { confidence };
+    const result = evaluateStage(stage, response, this.#evaluationContext(attempt, definition, stage));
+    const applied = this.#applyStageResult(attempt, definition, stage, result, {
+      response_kind: "student_response",
+      response,
+      timestamp
+    });
     if (result.passed) {
       attempt.confidence = {
         value: confidence,
@@ -537,10 +675,18 @@ export class LessonAttemptEngine {
         attempt.dimension_results[dimension].score = before[dimension]?.score ?? attempt.dimension_results[dimension].score;
       }
     }
-    return result;
+    this.#appendEvent(attempt, {
+      event_type: "confidence_submitted",
+      stage_id: stageId,
+      source_type: "student",
+      response,
+      evaluator_result: result
+    }, timestamp);
+    return isIndependentActive(attempt) ? safeSubmissionAcknowledgement(stageId, result) : applied;
   }
 
   evaluateCompletion(attempt, definition) {
+    this.#ensureValidatedForCredit(attempt);
     const target = targetByCommand(definition, attempt.canonical_command_id);
     if (!target) throw safeError("unknown_command_target", `lesson does not target ${attempt.canonical_command_id}`);
     const blockers = [];
@@ -556,6 +702,12 @@ export class LessonAttemptEngine {
     }
     if (attempt.prediction_gate.violation) {
       blockers.push("prediction_gate_violated");
+    }
+    if (attempt.validation_state === "pending_provider_revalidation") {
+      blockers.push("evidence_provider_unavailable");
+    }
+    if (attempt.validation_state === "invalid") {
+      blockers.push("trusted_evidence_revalidation_failed");
     }
     if (requiredStageIds.includes("ticket_note") && !hasPassed(attempt, "ticket_note")) {
       blockers.push("ticket_note_missing");
@@ -586,6 +738,8 @@ export class LessonAttemptEngine {
     const eligibleForFullMastery = Boolean(
       completed &&
       modePolicy.can_produce_full_mastery &&
+      attempt.validation_state !== "pending_provider_revalidation" &&
+      attempt.validation_state !== "invalid" &&
       unsupportedRequiredDimensions.length === 0 &&
       trustedRequirementsSatisfied &&
       unresolvedCriticalFailures(attempt).length === 0
@@ -603,16 +757,27 @@ export class LessonAttemptEngine {
   }
 
   finalizeAttempt(attempt, definition) {
+    this.#ensureValidatedForCredit(attempt);
     const completion = this.evaluateCompletion(attempt, definition);
     const timestamp = nowFrom(this.clock);
     completion.finalized_at = timestamp;
     attempt.completion_result = completion;
     attempt.status = completion.completed ? "completed" : "failed";
     attempt.updated_at = timestamp;
+    this.#appendEvent(attempt, {
+      event_type: "attempt_finalized",
+      source_type: "engine",
+      metadata: {
+        completed: completion.completed,
+        eligible_for_limited_credit: completion.eligible_for_limited_credit,
+        eligible_for_full_mastery: completion.eligible_for_full_mastery
+      }
+    }, timestamp);
     return completion;
   }
 
   produceMasteryCandidates(attempt, definition) {
+    this.#ensureValidatedForCredit(attempt);
     const target = targetByCommand(definition, attempt.canonical_command_id);
     const catalogRecord = findCatalogCommand(this.catalog, attempt.canonical_command_id);
     const supportRecord = targetSupportRecord(target, catalogRecord);
@@ -704,7 +869,431 @@ export class LessonAttemptEngine {
     attempt.resolution_history = [...asArray(attempt.resolution_history), record];
     attempt.updated_at = timestamp;
     attempt.completion_result = this.evaluateCompletion(attempt, definition);
+    this.#appendEvent(attempt, {
+      event_type: "critical_failure_resolved",
+      stage_id: stageId,
+      source_type: "engine",
+      metadata: {
+        failure_code: code,
+        resolution
+      }
+    }, timestamp);
     return { resolved: true, resolution: deepClone(record) };
+  }
+
+  #ensureValidatedForCredit(attempt) {
+    if (attempt?.validation_state === "unvalidated_transport_only") {
+      throw safeError("attempt_not_validated", "attempt must be restored with a matching definition before credit operations");
+    }
+  }
+
+  #publicCompletionResult(attempt) {
+    const completion = attempt.completion_result || {};
+    if (attempt.mode !== "INDEPENDENT") return deepClone(completion);
+    if (attempt.status === "active") {
+      return {
+        completed: false,
+        eligible_for_limited_credit: false,
+        eligible_for_full_mastery: false,
+        blockers: [],
+        feedback_deferred: true,
+        finalized_at: null
+      };
+    }
+    return {
+      completed: Boolean(completion.completed),
+      eligible_for_limited_credit: Boolean(completion.eligible_for_limited_credit),
+      eligible_for_full_mastery: Boolean(completion.eligible_for_full_mastery),
+      blockers: completion.completed ? [] : ["final_feedback_limited"],
+      feedback_deferred: false,
+      finalized_at: completion.finalized_at || null
+    };
+  }
+
+  #appendEvent(attempt, event, timestamp = nowFrom(this.clock)) {
+    if (!ATTEMPT_EVENT_TYPES.includes(event.event_type)) throw safeError("unknown_attempt_event_type", `unknown attempt event type ${event.event_type}`);
+    const sequence = asArray(attempt.event_journal).length + 1;
+    const normalized = {
+      schema_version: ATTEMPT_EVENT_SCHEMA_VERSION,
+      event_id: event.event_id || this.eventIdGenerator(attempt, sequence),
+      sequence,
+      timestamp,
+      attempt_id: attempt.attempt_id,
+      lesson_id: attempt.lesson_id,
+      vendor_id: attempt.vendor_id,
+      canonical_command_id: attempt.canonical_command_id,
+      mode: attempt.mode,
+      event_type: event.event_type,
+      stage_id: event.stage_id || null,
+      source_type: event.source_type || "engine",
+      response: event.response === undefined ? null : sanitizeResponse(event.response),
+      response_reference: event.response_reference || null,
+      evaluator_result: event.evaluator_result ? deepClone(event.evaluator_result) : null,
+      evidence_envelope: event.evidence_envelope ? deepClone(event.evidence_envelope) : null,
+      provider_receipt: event.provider_receipt ? deepClone(event.provider_receipt) : null,
+      metadata: event.metadata ? deepClone(event.metadata) : {}
+    };
+    attempt.event_journal = [...asArray(attempt.event_journal), normalized];
+    return normalized;
+  }
+
+  #baseAttemptFromEvent(definition, target, catalogRecord, event) {
+    const modeRequiredStageIds = activeRequiredStageIds(target, definition, event.mode);
+    const attempt = {
+      schema_version: ATTEMPT_STATE_SCHEMA_VERSION,
+      attempt_id: event.attempt_id,
+      attempt_key: attemptKey({
+        lesson_id: event.lesson_id,
+        vendor_id: event.vendor_id,
+        canonical_command_id: event.canonical_command_id,
+        mode: event.mode,
+        attempt_id: event.attempt_id
+      }),
+      lesson_id: event.lesson_id,
+      module_id: definition.module_id,
+      vendor_id: event.vendor_id,
+      canonical_command_id: event.canonical_command_id,
+      mode: event.mode,
+      status: "active",
+      created_at: event.timestamp,
+      updated_at: event.timestamp,
+      current_stage_id: null,
+      stage_states: this.#initialStageStates(definition, target, event.mode, event.timestamp),
+      submitted_evidence: [],
+      hint_history: [],
+      failure_history: [],
+      dimension_results: this.#initialDimensionResults(target, catalogRecord, event.mode, event.attempt_id),
+      critical_failures: [],
+      completion_result: {
+        completed: false,
+        eligible_for_limited_credit: false,
+        eligible_for_full_mastery: false,
+        blockers: ["attempt_not_finalized"],
+        finalized_at: null
+      },
+      prediction_gate: {
+        required: modeRequiredStageIds.includes("prediction_before_output"),
+        prediction_submitted_at: null,
+        assessed_output_revealed_at: null,
+        violation: false
+      },
+      administrative_unlocks: [],
+      confidence: null,
+      resolution_history: [],
+      event_journal: [],
+      validation_state: "validated",
+      restore_diagnostics: {
+        snapshot_mismatch: false,
+        snapshot_mismatch_policy: SNAPSHOT_REPLACE_POLICY,
+        provider_revalidation: "not_required"
+      },
+      definition_version: event.metadata?.definition_version || definition.definition_version || definition.schema_version
+    };
+    attempt.current_stage_id = this.#firstAvailableStageId(attempt, target);
+    return attempt;
+  }
+
+  #validateEventJournal(attempt, definition, target) {
+    const events = asArray(attempt.event_journal);
+    if (!events.length) throw safeError("missing_event_journal", "attempt restore requires an event journal");
+    const eventIds = new Set();
+    let previousTimestamp = null;
+    const expectedStates = this.#initialStageStates(definition, target, attempt.mode, attempt.created_at || events[0]?.timestamp);
+    for (let index = 0; index < events.length; index += 1) {
+      const event = events[index];
+      if (event.schema_version !== ATTEMPT_EVENT_SCHEMA_VERSION) throw safeError("unsupported_attempt_event_schema", `unsupported event schema ${event.schema_version || "<missing>"}`);
+      if (!ATTEMPT_EVENT_TYPES.includes(event.event_type)) throw safeError("unknown_attempt_event_type", `unknown attempt event type ${event.event_type}`);
+      if (!event.event_id) throw safeError("missing_event_id", "attempt event requires event_id");
+      if (eventIds.has(event.event_id)) throw safeError("duplicate_event_id", `duplicate attempt event ${event.event_id}`);
+      eventIds.add(event.event_id);
+      if (event.sequence !== index + 1) throw safeError("non_contiguous_event_sequence", `event sequence ${event.sequence} is not ${index + 1}`);
+      const timestamp = Date.parse(event.timestamp);
+      if (!Number.isFinite(timestamp)) throw safeError("invalid_event_timestamp", `event ${event.event_id} has invalid timestamp`);
+      if (previousTimestamp !== null && timestamp < previousTimestamp) throw safeError("non_monotonic_event_timestamp", `event ${event.event_id} timestamp moved backward`);
+      previousTimestamp = timestamp;
+      for (const field of ["attempt_id", "lesson_id", "vendor_id", "canonical_command_id", "mode"]) {
+        if (event[field] !== attempt[field]) throw safeError("event_identity_mismatch", `event ${event.event_id} has mismatched ${field}`);
+      }
+      if (index === 0 && event.event_type !== "attempt_created") throw safeError("missing_attempt_created_event", "first attempt event must be attempt_created");
+      if (index > 0 && event.event_type === "attempt_created") throw safeError("duplicate_attempt_created_event", "attempt_created can only be first");
+      if (STAGE_EVENT_TYPES.has(event.event_type)) {
+        if (!event.stage_id) throw safeError("missing_event_stage", `event ${event.event_id} requires stage_id`);
+        const stage = stageMap(definition).get(event.stage_id);
+        if (!stage) throw safeError("unknown_event_stage", `event ${event.event_id} references unknown stage ${event.stage_id}`);
+        const initial = expectedStates[event.stage_id];
+        if (["not_applicable", "not_supported"].includes(initial?.status)) {
+          throw safeError("event_stage_not_applicable", `event ${event.event_id} references unavailable stage ${event.stage_id}`);
+        }
+      }
+    }
+    return events;
+  }
+
+  #snapshotForComparison(attempt) {
+    return JSON.stringify({
+      status: attempt.status,
+      current_stage_id: attempt.current_stage_id,
+      stage_states: attempt.stage_states,
+      submitted_evidence: attempt.submitted_evidence,
+      hint_history: attempt.hint_history,
+      failure_history: attempt.failure_history,
+      dimension_results: attempt.dimension_results,
+      critical_failures: attempt.critical_failures,
+      completion_result: attempt.completion_result,
+      prediction_gate: attempt.prediction_gate,
+      confidence: attempt.confidence,
+      resolution_history: attempt.resolution_history
+    });
+  }
+
+  #replayAttemptFromEvents(serializedAttempt, definition) {
+    const target = targetByCommand(definition, serializedAttempt.canonical_command_id);
+    if (!target) throw safeError("unknown_command_target", `lesson does not target ${serializedAttempt.canonical_command_id}`);
+    if (target.vendor_id !== serializedAttempt.vendor_id) throw safeError("vendor_identity_mismatch", "attempt vendor does not match definition target");
+    const catalogRecord = findCatalogCommand(this.catalog, serializedAttempt.canonical_command_id);
+    if (!catalogRecord) throw safeError("unknown_catalog_command", `catalog does not contain ${serializedAttempt.canonical_command_id}`);
+    const events = this.#validateEventJournal(serializedAttempt, definition, target);
+    const replayed = this.#baseAttemptFromEvent(definition, target, catalogRecord, events[0]);
+    const replayEvidenceIds = new Set();
+    let providerUnavailable = false;
+    let providerRejected = false;
+
+    for (const event of events) {
+      replayed.event_journal.push(deepClone(event));
+      if (event.event_type === "attempt_created") continue;
+      const stage = event.stage_id ? stageById(definition, event.stage_id) : null;
+      switch (event.event_type) {
+        case "stage_viewed":
+          this.#applyStageViewedForReplay(replayed, event.stage_id, event.timestamp);
+          break;
+        case "stage_content_revealed":
+          this.#applyStageRevealForReplay(replayed, stage, event.timestamp);
+          break;
+        case "student_response_submitted":
+        case "safety_decision_submitted":
+        case "save_or_rollback_submitted":
+        case "confidence_submitted":
+          this.#replayStudentSubmission(replayed, definition, stage, event);
+          break;
+        case "hint_requested":
+          this.#applyHintForReplay(replayed, definition, stage, event.timestamp);
+          break;
+        case "trusted_evidence_ingested": {
+          const result = this.#replayTrustedEvidence(replayed, definition, stage, event, replayEvidenceIds);
+          providerUnavailable = providerUnavailable || result.providerUnavailable;
+          providerRejected = providerRejected || result.providerRejected;
+          break;
+        }
+        case "critical_failure_recorded":
+          this.#recordCriticalFailure(replayed, event.stage_id, event.metadata?.code || "critical_failure_recorded", event.metadata?.remediation_possible !== false, event.timestamp);
+          break;
+        case "critical_failure_resolved":
+          this.#applyCriticalFailureResolutionForReplay(replayed, definition, event);
+          break;
+        case "attempt_finalized": {
+          const completion = this.evaluateCompletion(replayed, definition);
+          completion.finalized_at = event.timestamp;
+          replayed.completion_result = completion;
+          replayed.status = completion.completed ? "completed" : "failed";
+          replayed.updated_at = event.timestamp;
+          break;
+        }
+        case "attempt_abandoned":
+          replayed.status = "abandoned";
+          replayed.updated_at = event.timestamp;
+          break;
+        default:
+          throw safeError("unknown_attempt_event_type", `unknown attempt event type ${event.event_type}`);
+      }
+    }
+
+    const snapshotMismatch = this.#snapshotForComparison(serializedAttempt) !== this.#snapshotForComparison(replayed);
+    replayed.validation_state = providerUnavailable ? "pending_provider_revalidation" : (providerRejected ? "invalid" : "validated");
+    replayed.restore_diagnostics = {
+      snapshot_mismatch: snapshotMismatch,
+      snapshot_mismatch_policy: SNAPSHOT_REPLACE_POLICY,
+      provider_revalidation: providerUnavailable ? "evidence_provider_unavailable" : (providerRejected ? "provider_rejected_evidence" : "passed")
+    };
+    if (providerUnavailable || providerRejected) {
+      replayed.completion_result = this.evaluateCompletion(replayed, definition);
+      if (providerUnavailable) replayed.completion_result.blockers = [...new Set([...asArray(replayed.completion_result.blockers), "evidence_provider_unavailable"])];
+      if (providerRejected) replayed.completion_result.blockers = [...new Set([...asArray(replayed.completion_result.blockers), "trusted_evidence_revalidation_failed"])];
+      replayed.completion_result.eligible_for_full_mastery = false;
+    }
+    return replayed;
+  }
+
+  #applyStageViewedForReplay(attempt, stageId, timestamp) {
+    const state = this.#stageState(attempt, stageId);
+    if (attempt.status !== "active") throw safeError("event_replay_attempt_not_active", `stage ${stageId} viewed after attempt inactive`);
+    if (state.status === "locked") throw safeError("event_replay_stage_locked", `stage ${stageId} viewed while locked`);
+    if (["not_applicable", "not_supported", "blocked"].includes(state.status)) throw safeError("event_replay_stage_unavailable", `stage ${stageId} unavailable`);
+    if (state.status === "available") state.status = "in_progress";
+    state.viewed_at = timestamp;
+    attempt.current_stage_id = stageId;
+    attempt.updated_at = timestamp;
+  }
+
+  #applyStageRevealForReplay(attempt, stage, timestamp) {
+    const state = this.#stageState(attempt, stage.stage_id);
+    if (attempt.status !== "active") throw safeError("event_replay_attempt_not_active", `stage ${stage.stage_id} revealed after attempt inactive`);
+    if (state.status === "locked") throw safeError("event_replay_stage_locked", `stage ${stage.stage_id} revealed while locked`);
+    if (stage.content_role === "assessed" && ASSESSED_OUTPUT_STAGES.has(stage.stage_type) && attempt.prediction_gate.required && !attempt.prediction_gate.prediction_submitted_at) {
+      throw safeError("prediction_required_before_assessed_output", `stage ${stage.stage_id} requires a prediction first`);
+    }
+    state.revealed_at = timestamp;
+    if (stage.content_role === "assessed" && ASSESSED_OUTPUT_STAGES.has(stage.stage_type)) {
+      attempt.prediction_gate.assessed_output_revealed_at = timestamp;
+    }
+    attempt.updated_at = timestamp;
+  }
+
+  #replayStudentSubmission(attempt, definition, stage, event) {
+    const response = event.response;
+    if (response === null || response === undefined) throw safeError("missing_event_response", `event ${event.event_id} cannot be re-evaluated without response`);
+    try {
+      this.#ensureStageCanSubmit(attempt, stage);
+    } catch (error) {
+      if (attempt.validation_state === "pending_provider_revalidation" && error?.code === "stage_locked") {
+        attempt.failure_history.push({ stage_id: stage.stage_id, code: "event_blocked_by_provider_revalidation", timestamp: event.timestamp });
+        attempt.updated_at = event.timestamp;
+        return;
+      }
+      throw error;
+    }
+    const responseKind = event.event_type === "save_or_rollback_submitted" ? "save_or_rollback_decision" : "student_response";
+    const result = evaluateStage(stage, response, this.#evaluationContext(attempt, definition, stage));
+    this.#applyStageResult(attempt, definition, stage, result, {
+      response_kind: responseKind,
+      response,
+      timestamp: event.timestamp
+    });
+    if (event.event_type === "confidence_submitted" && result.passed) {
+      attempt.confidence = {
+        value: response.confidence,
+        submitted_at: attempt.stage_states[stage.stage_id].passed_at
+      };
+      for (const dimension of asArray(stage.eligible_dimensions)) {
+        if (attempt.dimension_results[dimension]) {
+          attempt.dimension_results[dimension].score = 0;
+        }
+      }
+    }
+  }
+
+  #applyHintForReplay(attempt, definition, stage, timestamp) {
+    const policy = getModePolicy(definition, attempt.mode);
+    const state = this.#stageState(attempt, stage.stage_id);
+    if (attempt.status !== "active") throw safeError("event_replay_attempt_not_active", `hint after attempt inactive`);
+    if (!["available", "in_progress"].includes(state.status)) throw safeError("event_replay_hint_stage_unavailable", `hint stage ${state.status}`);
+    if (!policy.hints_allowed) throw safeError("event_replay_hint_not_allowed", "hint not allowed");
+    const alreadyUsed = asArray(attempt.hint_history).filter((hint) => hint.stage_id === stage.stage_id).length;
+    if (policy.hint_limit !== null && alreadyUsed >= policy.hint_limit) throw safeError("event_replay_hint_limit_reached", "hint limit reached");
+    const hints = asArray(stage.hints);
+    const hint = hints[Math.min(alreadyUsed, Math.max(hints.length - 1, 0))] || { text: "Review the stated objective and evidence requirements." };
+    const record = {
+      stage_id: stage.stage_id,
+      mode: attempt.mode,
+      timestamp,
+      sequence: alreadyUsed + 1,
+      text: hint.text
+    };
+    attempt.hint_history.push(record);
+    state.hint_count = (state.hint_count || 0) + 1;
+    for (const dimension of asArray(stage.eligible_dimensions)) {
+      if (attempt.dimension_results[dimension]) {
+        attempt.dimension_results[dimension].hint_penalty = Number((attempt.dimension_results[dimension].hint_penalty + Number(stage.hint_penalty ?? 0.1)).toFixed(4));
+      }
+    }
+    attempt.updated_at = timestamp;
+  }
+
+  #replayTrustedEvidence(attempt, definition, stage, event, replayEvidenceIds) {
+    const envelope = event.evidence_envelope;
+    if (!envelope) throw safeError("missing_event_evidence_envelope", `event ${event.event_id} requires evidence envelope`);
+    if (replayEvidenceIds.has(envelope.evidence_id)) throw safeError("duplicate_event_evidence", `duplicate evidence ${envelope.evidence_id}`);
+    replayEvidenceIds.add(envelope.evidence_id);
+    const context = {
+      attempt_id: attempt.attempt_id,
+      lesson_id: attempt.lesson_id,
+      vendor_id: attempt.vendor_id,
+      canonical_command_id: attempt.canonical_command_id,
+      stage_id: stage.stage_id,
+      checked_at: event.timestamp
+    };
+    const validation = validateTrustedEvidenceEnvelope(envelope, context, this.evidenceProvider);
+    const providerUnavailable = validation.errors.includes("missing_evidence_provider");
+    const originallyAccepted = event.provider_receipt?.accepted === true;
+    if (providerUnavailable) {
+      attempt.validation_state = "pending_provider_revalidation";
+      attempt.failure_history.push({ stage_id: stage.stage_id, code: "evidence_provider_unavailable", timestamp: event.timestamp, errors: validation.errors });
+      attempt.updated_at = event.timestamp;
+      return { providerUnavailable: true, providerRejected: false };
+    }
+    if (!validation.accepted) {
+      attempt.validation_state = "invalid";
+      attempt.failure_history.push({ stage_id: stage.stage_id, code: "trusted_evidence_revalidation_failed", timestamp: event.timestamp, errors: validation.errors });
+      if (originallyAccepted) this.#recordCriticalFailure(attempt, stage.stage_id, "mismatched_trusted_evidence", true, event.timestamp);
+      attempt.updated_at = event.timestamp;
+      return { providerUnavailable: false, providerRejected: true };
+    }
+    if (!originallyAccepted) {
+      attempt.failure_history.push({ stage_id: stage.stage_id, code: "trusted_evidence_rejected", timestamp: event.timestamp, errors: asArray(event.provider_receipt?.errors) });
+      attempt.updated_at = event.timestamp;
+      return { providerUnavailable: false, providerRejected: false };
+    }
+    const sanitizedEnvelope = validation.envelope;
+    attempt.submitted_evidence.push({
+      evidence_id: sanitizedEnvelope.evidence_id,
+      provider_id: sanitizedEnvelope.provider_id,
+      evidence_type: sanitizedEnvelope.evidence_type,
+      attempt_id: sanitizedEnvelope.attempt_id,
+      lesson_id: sanitizedEnvelope.lesson_id,
+      vendor_id: sanitizedEnvelope.vendor_id,
+      canonical_command_id: sanitizedEnvelope.canonical_command_id,
+      stage_id: sanitizedEnvelope.stage_id,
+      timestamp: sanitizedEnvelope.timestamp,
+      source_event_id: sanitizedEnvelope.source_event_id,
+      verification_policy_id: sanitizedEnvelope.verification_policy_id,
+      verification_record_id: sanitizedEnvelope.verification_record_id,
+      integrity_result: sanitizedEnvelope.integrity_result
+    });
+    const result = evaluateStage(stage, { trusted_evidence: sanitizedEnvelope }, this.#evaluationContext(attempt, definition, stage, { trustedEvidenceValidated: true }));
+    this.#applyStageResult(attempt, definition, stage, result, {
+      response_kind: "trusted_evidence",
+      response: { evidence_id: sanitizedEnvelope.evidence_id },
+      timestamp: event.timestamp
+    });
+    return { providerUnavailable: false, providerRejected: false };
+  }
+
+  #applyCriticalFailureResolutionForReplay(attempt, definition, event) {
+    const code = event.metadata?.failure_code;
+    const resolution = event.metadata?.resolution || {};
+    const stageId = event.stage_id;
+    const failure = asArray(attempt.critical_failures).find((candidate) => candidate.code === code && candidate.stage_id === stageId && !candidate.resolved);
+    if (!failure) throw safeError("event_replay_failure_not_found", `cannot resolve missing failure ${code}`);
+    const resolutionType = resolution.type || "stage_retry";
+    const resolutionStageId = resolution.stage_id || stageId;
+    const resolutionStage = stageById(definition, resolutionStageId);
+    const remediates = asArray(resolutionStage.remediates_critical_failures);
+    const stageCanRemediate = resolutionStageId === stageId || remediates.includes(code);
+    if (!stageCanRemediate) throw safeError("event_replay_resolution_not_allowed", "resolution stage does not remediate failure");
+    failure.resolved = true;
+    failure.resolved_at = event.timestamp;
+    failure.resolution_type = resolutionType;
+    failure.resolution_stage_id = resolutionStageId;
+    failure.resolution_evidence_ids = asArray(resolution.evidence_ids || (resolution.evidence_id ? [resolution.evidence_id] : []));
+    attempt.resolution_history = [...asArray(attempt.resolution_history), {
+      failure_code: code,
+      affected_stage_id: stageId,
+      resolved_at: event.timestamp,
+      resolution_type: resolutionType,
+      resolution_stage_id: resolutionStageId,
+      resolution_evidence_ids: failure.resolution_evidence_ids
+    }];
+    attempt.updated_at = event.timestamp;
+    attempt.completion_result = this.evaluateCompletion(attempt, definition);
   }
 
   #validateSubmittedEvidenceForRestore(attempt, definition) {
@@ -921,7 +1510,7 @@ export class LessonAttemptEngine {
   }
 
   #applyStageResult(attempt, definition, stage, result, metadata = {}) {
-    const timestamp = nowFrom(this.clock);
+    const timestamp = metadata.timestamp || nowFrom(this.clock);
     const state = this.#stageState(attempt, stage.stage_id);
     state.status = result.passed ? "passed" : "failed";
     state.attempt_count = (state.attempt_count || 0) + 1;
@@ -945,10 +1534,10 @@ export class LessonAttemptEngine {
     }
     if (stage.content_role === "assessed" && ASSESSED_OUTPUT_STAGES.has(stage.stage_type) && attempt.prediction_gate.required && !attempt.prediction_gate.prediction_submitted_at) {
       attempt.prediction_gate.violation = true;
-      this.#recordCriticalFailure(attempt, stage.stage_id, "answer_leakage_violation", true);
+      this.#recordCriticalFailure(attempt, stage.stage_id, "answer_leakage_violation", true, timestamp);
     }
     if (result.critical_failure) {
-      this.#recordCriticalFailure(attempt, stage.stage_id, result.critical_failure.code, result.critical_failure.remediation_possible);
+      this.#recordCriticalFailure(attempt, stage.stage_id, result.critical_failure.code, result.critical_failure.remediation_possible, timestamp);
     }
     if (!result.passed) {
       attempt.failure_history.push({
@@ -995,8 +1584,7 @@ export class LessonAttemptEngine {
     }
   }
 
-  #recordCriticalFailure(attempt, stageId, code, remediationPossible = true) {
-    const timestamp = nowFrom(this.clock);
+  #recordCriticalFailure(attempt, stageId, code, remediationPossible = true, timestamp = nowFrom(this.clock)) {
     attempt.critical_failures.push({
       code,
       stage_id: stageId,

@@ -40,6 +40,7 @@ Attempt states use schema version `lesson-attempt-state.v1` and serialize as JSO
 An attempt records:
 
 - identity and mode
+- append-only attempt event journal
 - controlled attempt status
 - controlled stage states
 - submitted trusted-evidence summaries
@@ -47,7 +48,41 @@ An attempt records:
 - critical failures
 - dimension result candidates
 - completion result
+- validation state
+- restore diagnostics
 - definition version
+
+The materialized state fields are a performance cache. They are not the source of credit during restore.
+
+## Event Journal And Replay Authority
+
+Attempt events use schema version `lesson-attempt-event.v1`. The controlled event types are:
+
+```text
+attempt_created
+stage_viewed
+stage_content_revealed
+student_response_submitted
+hint_requested
+trusted_evidence_ingested
+safety_decision_submitted
+save_or_rollback_submitted
+confidence_submitted
+critical_failure_recorded
+critical_failure_resolved
+attempt_finalized
+attempt_abandoned
+```
+
+The journal is append-only from the engine API perspective. Restore validates unique event IDs, contiguous sequence numbers, valid non-decreasing timestamps, attempt identity, controlled event type, and stage applicability for the restored mode. The first event must be `attempt_created`.
+
+When a matching lesson definition is supplied, `restoreAttempt()` rebuilds stage states, submitted evidence, hints, failures, critical failures, prediction gate, confidence, dimensions, completion, and mastery candidates from the event journal. Serialized copies of those fields are compared with the replayed snapshot, then replaced according to the controlled policy:
+
+```text
+replace_with_replayed_event_journal
+```
+
+This protects against materialized snapshot edits such as forged passed stages, synthetic evaluator results, removed hint penalties, deleted critical failures, inflated dimension scores, or completed mastery claims. The model remains an offline structural integrity model, not cryptographic protection against a user who rewrites both code and data.
 
 ## Engine API
 
@@ -55,7 +90,7 @@ The `LessonAttemptEngine` class exposes operations for:
 
 - `validateDefinition(definition)`
 - `createAttempt(definition, options)`
-- `restoreAttempt(serialized, definition)`
+- `restoreAttempt(serialized, definition = null)`
 - `serializeAttempt(attempt)`
 - `getPublicLessonView(definition, mode, options)`
 - `getPublicAttemptView(attempt)`
@@ -100,6 +135,8 @@ engine.recordSaveOrRollbackDecision(attempt, definition, "save_or_rollback", "ro
 const result = engine.finalizeAttempt(attempt, definition);
 ```
 
+`restoreAttempt(serialized, null)` is transport-only. It returns `validation_state: "unvalidated_transport_only"` and cannot finalize, emit mastery candidates, or claim completion credit until restored with the matching definition and catalog context.
+
 ## Stage State Machine
 
 Stages use controlled statuses:
@@ -134,6 +171,8 @@ Each mode has a separate attempt identity. Guided answers, hints, evidence, and 
 
 An empty `mode_availability` array means the stage applies to all supported learning modes. The same mode-availability helper is used by validation, stage initialization, required-stage calculation, public projection, answer visibility, and navigation.
 
+Active Independent submissions return only a safe acknowledgement with deferred feedback. They do not expose pass/fail, scores, feedback codes, affected dimensions, answer text, or answer-revealing blockers before finalization. Guided feedback remains immediate when the definition allows it; Assisted feedback follows its declared delayed-feedback policy.
+
 ## Prediction Gate
 
 Assessed output stages remain locked until the declared prediction stage is submitted when the active mode requires that stage. Mode-specific `not_required` exceptions remove the prediction stage from stage initialization, prediction-gate state, completion blockers, current-stage navigation, and public projection. Guided demonstration content must be represented separately from assessed output. A prediction-gate violation is recorded as a critical failure and blocks completion.
@@ -156,6 +195,8 @@ Guided demonstration content is visible only when the stage is marked `content_r
 
 The full attempt object may be serialized for trusted storage, but UI adapters should use public projections.
 
+Ticket notes and free-text responses may contain user-entered operational detail. The event journal stores sanitized JSON data needed for deterministic replay, but public projections must not expose stored answers, evaluator internals, or answer-revealing feedback while Independent mode is active.
+
 ## Evidence Provider Contract
 
 Trusted evidence uses schema version `trusted-lesson-evidence.v1`.
@@ -176,6 +217,10 @@ integrity_result
 The engine rejects a plain `verified: true` flag, mismatched attempt/vendor/command/stage identity, unverified envelopes, missing provider verification, and reused evidence IDs.
 
 Trusted execution and verification stages are ingest-only. `submitStudentResponse()` rejects `runtime_execution`, `runtime_verification`, and trusted-evidence evaluator stages with `trusted_evidence_ingest_required`, even when the payload looks like a complete trusted envelope. Only `ingestTrustedExternalEvidence()` can create trusted stage credit.
+
+Execution and verification evidence have different required metadata. Execution evidence may omit `verification_policy_id` and `verification_record_id`. Verification evidence must include both fields. Both evidence types require identity fields, `source_event_id`, `integrity_result: "passed"`, a valid timestamp, and provider acceptance.
+
+Trusted-evidence events retain the sanitized envelope plus a controlled provider receipt using schema version `trusted-provider-receipt.v1`. During restore, the engine validates the envelope, confirms identity, enforces evidence ID uniqueness, and calls the matching provider again. If the provider is unavailable, the attempt is preserved with `validation_state: "pending_provider_revalidation"` and trusted execution or verification credit is not awarded. If provider revalidation rejects previously accepted evidence, the attempt is restored as `validation_state: "invalid"` and full mastery is blocked.
 
 Stage 2 includes only the contract and fixture provider. The production runtime adapter belongs to Stage 4.
 
@@ -222,9 +267,20 @@ Critical failures cannot be cleared by code string alone. Resolution requires a 
 
 ## Restore Consistency
 
-`restoreAttempt(serialized, definition)` recomputes `attempt_key`, validates identity fields, rejects unknown or mismatched stage-state IDs when a definition is supplied, rejects malformed dimension-result identities, and refuses serialized completion claims that do not match `evaluateCompletion()`.
+`restoreAttempt(serialized, definition)` recomputes `attempt_key`, validates identity fields, rejects unknown future schemas, and replays the event journal as the authoritative state. Student-response events are rerun through `evaluateStage()` using the stored sanitized response; serialized `last_result`, stage status, and dimension scores cannot create credit.
 
-When a definition is supplied, restore also rebuilds the expected stage availability from the definition, target, mode, and attempt identity. Passed student stages must carry permitted student-response provenance, a valid result shape, and submission timestamps. Passed trusted runtime stages must reference matching submitted evidence records with provider, identity, timestamp, and integrity metadata. Dimension results and prediction-gate state are reconstructed from validated stage provenance instead of trusted from serialized scores.
+Trusted-evidence events are replayed through the provider contract. Stored `provider_id`, `integrity_result`, `source_event_id`, policy IDs, and submitted-evidence summaries are not enough by themselves. The provider must accept the stored replayable envelope, and `integrity_result` must remain `passed`.
+
+Restore validation states are:
+
+```text
+validated
+pending_provider_revalidation
+unvalidated_transport_only
+invalid
+```
+
+Only `validated` attempts can finalize or emit mastery candidates. Pending or invalid restored attempts remain readable but cannot grant full mastery.
 
 ## Catalog Compatibility
 
