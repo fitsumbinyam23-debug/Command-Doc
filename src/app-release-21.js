@@ -715,9 +715,21 @@ function syncRuntimeFromEngine(engine, commandId = "cli", enteredCommand = "") {
   persistSwitchRuntime();
 }
 
+function pendingChangeConfigSignature(change = {}) {
+  return JSON.stringify({ field: change.field || "", before: change.before, after: change.after });
+}
+
+function pendingChangeRecordsSince(shared, beforeChanges = []) {
+  const before = new Map(beforeChanges.map((change) => [change.change_id, pendingChangeConfigSignature(change)]));
+  return shared.changes().filter((change) => before.get(change.change_id) !== pendingChangeConfigSignature(change));
+}
+
 function pendingChangePathsSince(shared, beforeChanges = []) {
-  const before = new Map(beforeChanges.map((change) => [change.change_id, JSON.stringify(change)]));
-  return shared.changes().filter((change) => before.get(change.change_id) !== JSON.stringify(change)).map((change) => change.field);
+  return pendingChangeRecordsSince(shared, beforeChanges).map((change) => change.field);
+}
+
+function formatAuthoritativeConfigurationDiff(changes = []) {
+  return changes.map((change) => `${change.field}: ${change.before ?? "-"} -> ${change.after ?? "-"}`).join("\n");
 }
 
 function commandEventMetadata(resolution, command, modeBefore, modeAfter, changedFields = [], result = {}) {
@@ -2926,8 +2938,10 @@ function executeWorkbenchCommand(command, source = "workbench") {
   }
   if (result.ok) {
     syncRuntimeFromEngine(engine, resolution.command.command_id, command);
-    const changedFields = pendingChangePathsSince(runtime.state, changesBefore);
-    runtime.state.record({ ...commandEventMetadata(resolution, command, modeBefore, engine.mode || "exec", changedFields, result), success: true, state_before: before, state_after: JSON.parse(JSON.stringify(runtime.state.running)), safety_result: source, verification_result: result.verified ? "passed" : "not_run", save_result: result.kind === "save" ? "saved" : "" });
+    const changedRecords = pendingChangeRecordsSince(runtime.state, changesBefore);
+    const changedFields = changedRecords.map((change) => change.field);
+    const isPolicyVerification = Boolean(verificationTarget);
+    runtime.state.record({ ...commandEventMetadata(resolution, command, modeBefore, engine.mode || "exec", changedFields, result), success: true, state_before: before, state_after: JSON.parse(JSON.stringify(runtime.state.running)), safety_result: source, verification_result: isPolicyVerification ? (result.verified ? "passed" : "failed") : "not_run", save_result: result.kind === "save" ? "saved" : "" });
   }
   persistSwitchRuntime();
   return { ...result, resolution };
@@ -3022,9 +3036,13 @@ function renderSwitchWorkbench() {
     configurations.append(labCreate("strong", "", "Running configuration"), labCreate("pre", "lab-output", runtimeInterfaceConfiguration(runtime.state, port.name, "running", profile)), labCreate("strong", "", "Startup configuration"), labCreate("pre", "lab-output", runtimeInterfaceConfiguration(runtime.state, port.name, "startup", profile)), labCreate("strong", "", "Configuration difference"), labCreate("pre", "lab-output", runtimeConfigurationDifference(runtime.state, port.name)), labCreate("strong", "", `Verification: ${runtime.state.isVerificationCurrent(port.name) ? "Passed" : verification.verified ? "Stale - run again" : "Required"}`));
     configurations.append(labButton("Run verification", "secondary", () => {
       const engine = getLabEngine();
+      const modeBefore = engine.mode || "exec";
+      const resolution = runtime.registry.resolve(verificationCommand, { mode: modeBefore, privilege: "privileged" });
       const result = engine.execute(verificationCommand);
       const output = runtimeInterfaceConfiguration(runtime.state, port.name, "running", profile);
-      const passed = result.ok && runtime.state.verifyInterfaceDescription(port.name, verificationCommand, output);
+      const passed = result.ok && runtime.state.verifyInterfaceDescription(port.name, verificationCommand, output, { command_id: resolution?.command?.command_id, handler_id: resolution?.command?.handler_id, canonical_command: resolution?.command?.canonical_command });
+      const record = runtime.state.verification(port.name);
+      runtime.state.record({ ...commandEventMetadata(resolution, verificationCommand, modeBefore, engine.mode || "exec", [], { verification_policy_id: record.policy_id, verification_record_id: record.verification_id }), success: passed, safety_result: "workbench", verification_result: passed ? "passed" : "failed" });
       engine.transcript.push(`${consolePrompt()} ${verificationCommand}\n${output}`);
       runtime.state.storeTerminal(engine.transcript, engine.commands);
       persistSwitchRuntime();
@@ -4304,6 +4322,7 @@ function runLabConsoleCommand(input) {
   const changesBefore = state.lab.switchRuntime?.state
     ? JSON.parse(JSON.stringify(state.lab.switchRuntime.state.changes()))
     : [];
+  let authoritativeDiff = "";
   let result = engine ? engine.execute(command) : { output: simulateLabCommand(command), diff: "Simulator engine unavailable." };
   const runtime = state.lab.switchRuntime?.state;
   const verificationTarget = runtime?.verificationTargetForCommand(command);
@@ -4348,12 +4367,15 @@ function runLabConsoleCommand(input) {
         syncRuntimeFromEngine(engine, commandId, command);
       }
       if (result.kind !== "save" && result.kind !== "rollback" && !result.save_gate) {
-        const changedFields = result.ok ? pendingChangePathsSince(shared, changesBefore) : [];
-        shared.record({ ...commandEventMetadata(catalogResolution, command, prompt.includes("config-if") ? "interface" : prompt.includes("config") ? "config" : "exec", engine.mode || "exec", changedFields, result), success: Boolean(result.ok), failure_type: result.ok ? "" : (catalogResolution?.status || result.kind || "command_rejected"), state_before: runtimeBefore, state_after: result.ok ? JSON.parse(JSON.stringify(shared.running)) : runtimeBefore, safety_result: result.ok ? "accepted" : "rejected", verification_result: result.verified ? "passed" : "not_run", save_result: "" });
+        const changedRecords = result.ok ? pendingChangeRecordsSince(shared, changesBefore) : [];
+        const changedFields = changedRecords.map((change) => change.field);
+        authoritativeDiff = formatAuthoritativeConfigurationDiff(changedRecords);
+        const isPolicyVerification = Boolean(verificationTarget);
+        shared.record({ ...commandEventMetadata(catalogResolution, command, prompt.includes("config-if") ? "interface" : prompt.includes("config") ? "config" : "exec", engine.mode || "exec", changedFields, result), success: Boolean(result.ok), failure_type: result.ok ? "" : (catalogResolution?.status || result.kind || "command_rejected"), state_before: runtimeBefore, state_after: result.ok ? JSON.parse(JSON.stringify(shared.running)) : runtimeBefore, safety_result: result.ok ? "accepted" : "rejected", verification_result: isPolicyVerification ? (result.verified ? "passed" : "failed") : "not_run", save_result: "" });
       }
       persistSwitchRuntime();
     }
-    engine.transcript.push(`${prompt} ${command}\n${result.output}${result.kind === "config" && result.diff && !isModeNavigation ? `\n\nConfiguration diff\n${result.diff}` : ""}`);
+    engine.transcript.push(`${prompt} ${command}\n${result.output}${authoritativeDiff && !isModeNavigation ? `\n\nConfiguration diff\n${authoritativeDiff}` : ""}`);
     if (engine.transcript.length > 150) engine.transcript.splice(0, engine.transcript.length - 150);
     const mission = currentLabMission();
     if (labMissionComplete(mission, engine) && !state.lab.progress.simulatorMissions[mission.id]) {

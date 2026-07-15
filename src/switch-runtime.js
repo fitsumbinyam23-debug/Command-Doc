@@ -543,7 +543,6 @@
       this.running.session.verification ||= {};
       this.running.session.verification[name] = verification;
       this.compactVerificationRecords();
-      this.record({ command_id: verification.command_id, handler_id: verification.handler_id, canonical_command: verification.canonical_command, entered_text: command, success: passed, changed_fields: [], verification_policy_id: policy.policy_id, verification_record_id: verificationId, verification_result: passed ? "passed" : "failed" });
       this.persist();
       return passed;
     }

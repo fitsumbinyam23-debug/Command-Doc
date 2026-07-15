@@ -168,11 +168,127 @@ for (const candidateProfile of profiles) {
   assert(candidateState.eventLog.at(-1).entered_text === saveAliases[0], `save event retains actual entered text for ${candidateProfile.profile_id}`);
 }
 const activeAppSource = await read("src/app-release-21.js");
+const runtimeSource = await read("src/switch-runtime.js");
 assert(activeAppSource.includes("const isSaveRequest") && activeAppSource.includes("const saved = shared.save(commandId, commandEventMetadata"), "terminal save aliases invoke the shared authoritative save gate");
 assert(activeAppSource.includes("vendor_id: route.vendor") && activeAppSource.includes("const routeVendorId = route.vendor_id || route.vendor"), "route vendor IDs remain machine-readable through launch selection");
 assert(activeAppSource.includes("output: saved.message") && activeAppSource.includes("verificationTargetForCommand(command)"), "terminal save feedback and verification use authoritative shared-state results");
 assert(!activeAppSource.includes("internalSequenceCommand") && !activeAppSource.includes("runtime-workbench-comware"), "Workbench has no parser bypass or synthetic command identity");
 assert(activeAppSource.includes("pendingChangePathsSince") && activeAppSource.includes("syncRuntimeFromEngine(engine, commandId, command)"), "terminal event deltas use authoritative shared pending changes");
+assert(activeAppSource.includes("pendingChangeRecordsSince") && activeAppSource.includes("formatAuthoritativeConfigurationDiff(changedRecords)") && !activeAppSource.includes("result.diff && !isModeNavigation"), "visible terminal diffs come only from authoritative pending change records");
+assert(activeAppSource.includes("const isPolicyVerification = Boolean(verificationTarget)") && activeAppSource.includes("verification_result: isPolicyVerification ?"), "verification results are scoped to the command's explicit verification policy");
+const verificationImplementation = runtimeSource.slice(runtimeSource.indexOf("verifyInterfaceDescription"), runtimeSource.indexOf("canSave()", runtimeSource.indexOf("verifyInterfaceDescription")));
+assert(!verificationImplementation.includes("this.record("), "verification evidence update no longer self-records a duplicate command event");
+
+store.clear();
+sandbox.__currentAppProfiles = profiles;
+sandbox.__currentAppInventory = inventoryFile.commands;
+sandbox.document.readyState = "";
+const appContext = vm.createContext(sandbox);
+vm.runInContext(activeAppSource, appContext, { filename: "src/app-release-21.js" });
+const appTerminalMatrix = vm.runInContext(`
+(() => {
+  renderLab = () => {};
+  renderLibrary = () => {};
+  renderHome = () => {};
+  renderLearn = () => {};
+  saveLabProgress = () => {};
+  saveVendorProgress = () => {};
+  switchView = () => {};
+  showToast = (message) => { state.__lastToast = message; };
+  currentLabMission = () => ({ id: "__audit_matrix", title: "Audit matrix" });
+  labMissionComplete = () => false;
+
+  const check = (condition, message) => { if (!condition) throw new Error(message); };
+  const normalize = (value) => String(value || "").trim().toLowerCase().replace(/\\s+/g, " ");
+  const deviceFor = (profile) => profile.vendor === "hp_comware" ? "irf" : profile.vendor === "aruba_cx" ? "aruba" : "access";
+  const enterConfig = (profile) => profile.vendor === "hp_comware" ? "system-view" : "configure terminal";
+  const leaveConfig = (profile) => profile.vendor === "hp_comware" ? "return" : "end";
+  const verifyCommand = (profile, port) => profile.vendor === "hp_comware" ? "display current-configuration interface " + port : "show running-config interface " + port;
+  const vlanCommand = (profile) => profile.vendor === "hp_comware" ? "port access vlan 20" : profile.vendor === "aruba_cx" ? "vlan access 20" : "switchport access vlan 20";
+  const savePattern = /^(write memory|wr mem|write mem|copy running-config startup-config|save|save force)$/i;
+  const exactFields = (event, fields) => Array.isArray(event?.changed_fields) && event.changed_fields.length === fields.length && fields.every((field, index) => event.changed_fields[index] === field);
+  const forbiddenDiff = /(^|\\n)(hostname|vlan|shutdown|connected|mode|allowedVlans|allowed_vlans)\\s*:/i;
+  const saveAlias = (registry, profile) => {
+    const aliases = [...new Set(registry.catalog.flatMap((command) => [command.canonical_command, ...(command.aliases || [])]).filter((syntax) => savePattern.test(syntax)))];
+    const preferred = profile.vendor === "hp_comware" ? "save force" : "write memory";
+    return aliases.find((alias) => normalize(alias) === normalize(preferred)) || aliases[0] || preferred;
+  };
+  const run = (command) => {
+    const runtime = state.lab.switchRuntime.state;
+    const modeBefore = state.lab.console.engine?.mode || "exec";
+    const resolution = state.lab.switchRuntime.registry.resolve(command, { mode: modeBefore, privilege: "privileged" });
+    check(resolution.status === "matched", "command resolves through the active registry: " + command);
+    const beforeEvents = runtime.eventLog.length;
+    runLabConsoleCommand({ value: command });
+    const eventDelta = runtime.eventLog.length - beforeEvents;
+    const event = runtime.eventLog.at(-1);
+    check(event.command_id === resolution.command.command_id, "event command identity matches active handler for " + command);
+    check((event.handler_id || "") === (resolution.command.handler_id || resolution.command.handler_identity || ""), "event handler identity matches active handler for " + command);
+    check(event.canonical_command === resolution.command.canonical_command, "event canonical command matches active handler for " + command);
+    check((resolution.command.vendor_id || resolution.command.vendor) === activeSwitchProfile().vendor, "resolved handler stays on the active vendor for " + command);
+    return { eventDelta, event, transcript: state.lab.console.engine.transcript.at(-1) || "" };
+  };
+
+  const vendors = new Set();
+  let vlanProfiles = 0;
+  for (const profile of __currentAppProfiles) {
+    window.localStorage.removeItem(window.CommandDoctorSwitchRuntime.STORAGE_KEY);
+    state.curriculum.inventory = __currentAppInventory;
+    state.curriculum.metadata = { command_catalog_version: "test", profile_catalog_version: "test", active_build_version: "test" };
+    state.lab.switchProfiles = __currentAppProfiles;
+    state.lab.activeSwitchProfileId = profile.profile_id;
+    state.lab.progress = { simulatorMissions: {} };
+    state.lab.visualNetwork = createVisualNetwork();
+    initializeSwitchRuntime();
+    const runtime = state.lab.switchRuntime.state;
+    const port = Object.keys(runtime.running.interfaces)[0];
+    const engine = new window.CommandDoctorLabEngine.SimulatedDeviceEngine(deviceFor(profile));
+    engine.setTrainingProfile({ hostname: "TRAINING-SWITCH", interface: port, endpoint: "PC-1", currentVlan: "1", targetVlan: "20" });
+    state.lab.console.device = deviceFor(profile);
+    state.lab.console.engine = engine;
+    const descriptionPath = "interfaces." + port + ".description";
+    const vlanPath = "interfaces." + port + ".vlan";
+    const descriptionCommand = "description Audit event " + profile.profile_id;
+    const saveCommand = saveAlias(state.lab.switchRuntime.registry, profile);
+
+    const enter = run(enterConfig(profile));
+    check(enter.eventDelta === 1 && exactFields(enter.event, []), "configuration entry records one navigation event for " + profile.profile_id);
+    check(enter.event.verification_result !== "passed" && enter.event.verification_result !== "failed", "configuration entry is not verification for " + profile.profile_id);
+    const select = run("interface " + port);
+    check(select.eventDelta === 1 && exactFields(select.event, []), "interface selection records one navigation event for " + profile.profile_id);
+    const description = run(descriptionCommand);
+    check(description.eventDelta === 1 && exactFields(description.event, [descriptionPath]), "description command records exactly its field for " + profile.profile_id);
+    check(description.event.verification_result === "not_run", "description command is not mislabeled as verification for " + profile.profile_id);
+    check(description.transcript.includes("Configuration diff") && description.transcript.includes(descriptionPath), "visible transcript shows authoritative description diff for " + profile.profile_id);
+    check(!forbiddenDiff.test(description.transcript), "visible description diff excludes legacy default fields for " + profile.profile_id);
+    vendors.add(profile.vendor);
+    const leave = run(leaveConfig(profile));
+    check(leave.eventDelta === 1 && exactFields(leave.event, []), "mode exit records one navigation event for " + profile.profile_id);
+    check(leave.event.verification_result !== "passed" && leave.event.verification_result !== "failed", "mode exit is not verification for " + profile.profile_id);
+    const verify = run(verifyCommand(profile, port));
+    check(verify.eventDelta === 1 && exactFields(verify.event, []), "verification command records one read-only event for " + profile.profile_id);
+    check(verify.event.verification_result === "passed", "verification command owns the passed result for " + profile.profile_id);
+    check(Boolean(verify.event.verification_policy_id) && Boolean(verify.event.verification_record_id), "verification event has policy and record IDs for " + profile.profile_id);
+    check(runtime.eventLog.filter((event) => event.entered_text === verifyCommand(profile, port)).length === 1, "verification command creates exactly one event for " + profile.profile_id);
+    const saved = run(saveCommand);
+    check(saved.eventDelta === 1 && saved.event.entered_text === saveCommand && saved.event.save_result === "saved", "save event preserves entered alias and result for " + profile.profile_id);
+
+    run(enterConfig(profile));
+    run("interface " + port);
+    const vlan = run(vlanCommand(profile));
+    check(vlan.eventDelta === 1 && exactFields(vlan.event, [vlanPath]), "VLAN command records exactly its field for " + profile.profile_id);
+    check(vlan.event.verification_result === "not_run", "VLAN command is not labeled as verification for " + profile.profile_id);
+    vlanProfiles += 1;
+    run(leaveConfig(profile));
+    const blocked = run(saveCommand);
+    check(blocked.eventDelta === 1 && blocked.event.save_result === "rejected" && blocked.event.failure_type === "verification_required", "unverified VLAN save remains blocked for " + profile.profile_id);
+  }
+  return { profiles: __currentAppProfiles.length, vendors: vendors.size, vlanProfiles };
+})()
+`, appContext, { filename: "current-app-terminal-matrix.js" });
+assert(appTerminalMatrix.profiles === profiles.length, "real app terminal matrix covers every active switch profile");
+assert(appTerminalMatrix.vendors === new Set(profiles.map((candidateProfile) => candidateProfile.vendor)).size, "visible terminal matrix includes one representative per active vendor");
+assert(appTerminalMatrix.vlanProfiles === profiles.length, "VLAN save-gate matrix covers every active switch profile");
 
 const state = new Runtime.SharedSwitchState(profile, null, { command_catalog_version: "test", profile_catalog_version: "test", active_build_version: "test" });
 assert(state.running.session.verification_records && typeof state.running.session.verification_records === "object" && !Array.isArray(state.running.session.verification_records), "fresh runtime state initializes a usable verification record map");
@@ -184,7 +300,9 @@ assert(state.changes().length === 1 && state.startup.interfaces[port].descriptio
 const rejectedSave = state.save("test-save-rejected");
 assert(!rejectedSave.ok && state.changes().length === 1 && state.startup.interfaces[port].description === beforeStartup, "authoritative save gate rejects an unverified pending change without mutating startup");
 assert(state.eventLog.at(-1).save_result === "rejected" && state.eventLog.at(-1).failure_type === "verification_required", "rejected save records one compact authoritative event");
+const eventsBeforeVerification = state.eventLog.length;
 assert(state.verifyInterfaceDescription(port, `show running-config interface ${port}`, `interface ${port}\n description Current app smoke`), "field-scoped description verification succeeds");
+assert(state.eventLog.length === eventsBeforeVerification, "verification evidence update does not self-record a duplicate command event");
 assert(state.save("test-save").ok && state.changes().length === 0 && state.startup.interfaces[port].description === "Current app smoke", "fully verified save copies clean running state to startup");
 state.updateInterface(port, { description: "Unsaved" }, "test-unsaved");
 state.rollbackUnsaved();
