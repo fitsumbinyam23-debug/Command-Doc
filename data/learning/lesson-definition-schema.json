@@ -29,6 +29,7 @@
     "stage_requirement_statuses": ["required", "conditional", "optional", "unavailable", "unsupported"],
     "mode_stage_exception_statuses": ["not_required"],
     "stage_statuses": ["locked", "available", "in_progress", "submitted", "passed", "failed", "not_applicable", "not_supported", "blocked"],
+    "answer_visibility_policies": ["never", "demonstration_only", "after_submission", "after_submission_or_failure", "after_finalization"],
     "evaluator_types": [
       "exact_text",
       "normalized_command",
@@ -104,6 +105,8 @@
       "answer_visibility_policy"
     ],
     "dependency_rule": "Stage dependencies must form a deterministic directed acyclic graph. Self-cycles, two-stage cycles, and longer cycles invalidate the definition.",
+    "mode_availability_rule": "An empty mode_availability array means all supported learning modes. The same helper is used by validation, attempt initialization, required-stage calculation, public projection, and navigation.",
+    "answer_visibility_rule": "Assessed stages may use only the controlled answer_visibility_policies. before_submission is not a valid policy. demonstration_only is restricted to demonstration content, and Independent mode never reveals assessed answers before completion.",
     "unsupported_rule": "A required stage with unsupported support_status invalidates the definition. Optional or conditional unsupported stages remain visible as not_supported with a reason."
   },
   "security": {

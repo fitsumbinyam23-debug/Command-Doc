@@ -6,13 +6,13 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import LessonAttemptEngine from "../src/learning/lesson-attempt-engine.js";
-import { ATTEMPT_STATE_SCHEMA_VERSION, deepClone } from "../src/learning/lesson-definition.js";
+import { ATTEMPT_STATE_SCHEMA_VERSION, LEARNING_MODES, deepClone } from "../src/learning/lesson-definition.js";
 import { buildStage2CompatibilityAudit } from "../src/learning/catalog-compatibility-audit.js";
 import { buildFixtureDefinitions, fixtureEvidenceProvider, makeTrustedEvidence } from "./fixtures/learning/lesson-fixtures.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
-const gitExe = process.env.GIT || "C:\\Program Files\\Git\\cmd\\git.exe";
+const gitExe = process.env.GIT || "git";
 const stage2Base = "4789ac82a6b351d51ec9be7c33c0f70e502c7724";
 
 async function readJson(path) {
@@ -70,15 +70,44 @@ function ingestTrusted(engine, attempt, definition, stageId, overrides = {}) {
   return result;
 }
 
+function completeExplanationAttempt(engine, attempt, definition, commandText) {
+  passTicketPredictionCommand(engine, attempt, definition, commandText);
+  assert.equal(engine.submitTicketNote(attempt, definition, "ticket_note", "Lesson ticket completed by student.").passed, true);
+  return engine.finalizeAttempt(attempt, definition);
+}
+
+function completeConfigAttempt(engine, attempt, definition, commandText) {
+  passTicketPredictionCommand(engine, attempt, definition, commandText);
+  ingestTrusted(engine, attempt, definition, "runtime_execution");
+  ingestTrusted(engine, attempt, definition, "runtime_verification");
+  assert.equal(engine.recordSaveOrRollbackDecision(attempt, definition, "save_or_rollback", "rollback").passed, true);
+  assert.equal(engine.submitTicketNote(attempt, definition, "ticket_note", "Trusted execution and verification were recorded.").passed, true);
+  return engine.finalizeAttempt(attempt, definition);
+}
+
+function publicStage(view, stageId) {
+  return view.stages.find((stage) => stage.stage_id === stageId);
+}
+
 function assertThrowsCode(fn, code) {
   assert.throws(fn, (error) => error?.code === code);
 }
 
+function runGit(args) {
+  try {
+    return execFileSync(gitExe, args, {
+      cwd: repoRoot,
+      encoding: "utf8"
+    });
+  } catch (error) {
+    const stderr = error.stderr ? String(error.stderr).trim() : "";
+    const suffix = stderr ? ` ${stderr}` : "";
+    throw new Error(`Git scope assertion failed using ${gitExe}. Set GIT=/path/to/git or ensure git is on PATH.${suffix}`);
+  }
+}
+
 function changedFromBase(paths) {
-  return execFileSync(gitExe, ["diff", "--name-only", stage2Base, "--", ...paths], {
-    cwd: repoRoot,
-    encoding: "utf8"
-  }).trim().split(/\r?\n/).filter(Boolean);
+  return runGit(["diff", "--name-only", stage2Base, "--", ...paths]).trim().split(/\r?\n/).filter(Boolean);
 }
 
 const catalog = await readJson("data/generated/learning-command-catalog.json");
@@ -543,7 +572,8 @@ check("Fake execution and verification cannot complete an Independent attempt.",
   engine.submitTicketNote(attempt, fixtures.config, "ticket_note", "Student wrote a ticket note.");
   const completion = engine.finalizeAttempt(attempt, fixtures.config);
   assert.equal(completion.completed, false);
-  assert.equal(completion.eligible_for_mastery, false);
+  assert.equal(completion.eligible_for_limited_credit, false);
+  assert.equal(completion.eligible_for_full_mastery, false);
 });
 
 check("Fake evidence creates no practical or verification mastery candidate.", () => {
@@ -745,8 +775,252 @@ check("Tampered attempt_key is rejected on restore.", () => {
 
 check("Inconsistent serialized completion is rejected.", () => {
   const attempt = engine.createAttempt(fixtures.outputSimulation, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaOutput.canonical_command_id });
-  attempt.completion_result = { completed: true, eligible_for_mastery: true, blockers: [], finalized_at: "2026-07-15T08:00:00.000Z" };
+  attempt.completion_result = { completed: true, eligible_for_limited_credit: true, eligible_for_full_mastery: true, blockers: [], finalized_at: "2026-07-15T08:00:00.000Z" };
   assertThrowsCode(() => engine.restoreAttempt(attempt, fixtures.outputSimulation), "inconsistent_serialized_completion");
+});
+
+check("Independent public view rejects assessed before-finalization answer leakage.", () => {
+  const definition = deepClone(fixtures.explanationOnly);
+  const commandText = primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id);
+  const attempt = engine.createAttempt(definition, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  const view = engine.getPublicLessonView(definition, "INDEPENDENT", { attempt, canonical_command_id: attempt.canonical_command_id });
+  const chooseStage = publicStage(view, "choose_next_command");
+  assert.equal(chooseStage.answer_visible, false);
+  assert.equal(JSON.stringify(view).includes(commandText), false);
+  assert.equal(JSON.stringify(view).includes("accepted_commands"), false);
+});
+
+check("Hostile before_submission answer policy is rejected and redacted.", () => {
+  const definition = deepClone(fixtures.explanationOnly);
+  definition.stages.find((stage) => stage.stage_id === "choose_next_command").answer_visibility_policy = "before_submission";
+  const commandText = primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id);
+  const validation = engine.validateDefinition(definition);
+  assert.equal(validation.valid, false);
+  assert.equal(validation.errors.some((error) => error.includes("answer_visibility_policy")), true);
+  const view = engine.getPublicLessonView(definition, "INDEPENDENT", { canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  assert.equal(JSON.stringify(view).includes(commandText), false);
+});
+
+check("Assisted public view respects delayed solution reveal.", () => {
+  const assistedEngine = makeEngine(catalog, "assist-redact");
+  const attempt = assistedEngine.createAttempt(fixtures.explanationOnly, { mode: "ASSISTED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  const commandText = primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id);
+  assert.equal(assistedEngine.submitTicketNote(attempt, fixtures.explanationOnly, "technician_ticket", "Student-submitted ticket.").passed, true);
+  assert.equal(assistedEngine.submitStudentResponse(attempt, fixtures.explanationOnly, "prediction_before_output", "evidence present").passed, true);
+  const reveal = assistedEngine.revealStageContent(attempt, fixtures.explanationOnly, "choose_next_command");
+  assert.equal(reveal.answer_visible, false);
+  assert.equal(JSON.stringify(reveal).includes(commandText), false);
+});
+
+check("Guided demonstration remains visible without leaking assessed answers.", () => {
+  const definition = deepClone(fixtures.explanationOnly);
+  definition.stages.unshift({
+    ...deepClone(definition.stages.find((stage) => stage.stage_id === "choose_next_command")),
+    stage_id: "guided_worked_example",
+    stage_type: "worked_example",
+    requirement_status: "optional",
+    dependencies: [],
+    mode_availability: ["GUIDED"],
+    eligible_dimensions: [],
+    evidence_source: "lesson_content",
+    evaluator: { type: "non_empty_text" },
+    pass_criteria: { min_length: 1 },
+    content_role: "demonstration",
+    answer_visibility_policy: "demonstration_only",
+    public_answer: "demo-only-safe-example",
+    worked_example: "demo-only-safe-example"
+  });
+  const view = engine.getPublicLessonView(definition, "GUIDED", { canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  assert.equal(publicStage(view, "guided_worked_example").answer, "demo-only-safe-example");
+  assert.equal(publicStage(view, "choose_next_command").answer_visible, false);
+});
+
+check("Review projection reveals only explicitly permitted completion answers.", () => {
+  const reviewEngine = makeEngine(catalog, "review-redact");
+  const definition = deepClone(fixtures.explanationOnly);
+  definition.stages.find((stage) => stage.stage_id === "choose_next_command").answer_visibility_policy = "after_finalization";
+  const attempt = reviewEngine.createAttempt(definition, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  const commandText = primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id);
+  assert.equal(completeExplanationAttempt(reviewEngine, attempt, definition, commandText).completed, true);
+  const review = reviewEngine.getReviewProjection(attempt, definition);
+  assert.equal(review.available, true);
+  assert.equal(publicStage(review.lesson, "choose_next_command").answer, commandText);
+  assert.equal(publicStage(review.lesson, "ticket_note").answer_visible, false);
+});
+
+check("Empty mode_availability has consistent all-mode semantics.", () => {
+  const definition = deepClone(fixtures.explanationOnly);
+  definition.stages.find((stage) => stage.stage_id === "technician_ticket").mode_availability = [];
+  for (const mode of LEARNING_MODES) {
+    const modeEngine = makeEngine(catalog, `empty-mode-${mode.toLowerCase()}`);
+    const attempt = modeEngine.createAttempt(definition, { mode, canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+    const view = modeEngine.getPublicLessonView(definition, mode, { attempt, canonical_command_id: attempt.canonical_command_id });
+    const publicApplicable = view.stages.filter((stage) => stage.applicable).map((stage) => stage.stage_id).sort();
+    const stateApplicable = Object.values(attempt.stage_states).filter((state) => state.status !== "not_applicable").map((state) => state.stage_id).sort();
+    assert.deepEqual(publicApplicable, stateApplicable);
+    assert.equal(publicStage(view, "technician_ticket").applicable, true);
+  }
+});
+
+check("Mode-exempt prediction does not leave prediction_missing.", () => {
+  const definition = deepClone(fixtures.explanationOnly);
+  definition.stages.find((stage) => stage.stage_id === "prediction_before_output").mode_availability = ["GUIDED"];
+  definition.command_targets[0].mode_stage_exceptions = {
+    prediction_before_output: {
+      ASSISTED: { status: "not_required", reason: "assisted mode uses direct command selection in this fixture" },
+      INDEPENDENT: { status: "not_required", reason: "independent mode defers prediction to external review in this fixture" }
+    }
+  };
+  const commandText = primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id);
+
+  const guidedEngine = makeEngine(catalog, "prediction-guided");
+  const guided = guidedEngine.createAttempt(definition, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  assert.equal(guided.prediction_gate.required, true);
+  assert.equal(completeExplanationAttempt(guidedEngine, guided, definition, commandText).completed, true);
+
+  for (const mode of ["ASSISTED", "INDEPENDENT"]) {
+    const modeEngine = makeEngine(catalog, `prediction-${mode.toLowerCase()}`);
+    const attempt = modeEngine.createAttempt(definition, { mode, canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+    assert.equal(attempt.prediction_gate.required, false);
+    assert.equal(attempt.stage_states.prediction_before_output.status, "not_applicable");
+    assert.equal(modeEngine.submitTicketNote(attempt, definition, "technician_ticket", "Student-submitted ticket.").passed, true);
+    assert.equal(modeEngine.submitStudentResponse(attempt, definition, "choose_next_command", commandText).passed, true);
+    assert.equal(modeEngine.submitTicketNote(attempt, definition, "ticket_note", "Lesson ticket completed by student.").passed, true);
+    const completion = modeEngine.finalizeAttempt(attempt, definition);
+    assert.equal(completion.completed, true);
+    assert.equal(hasBlocker(completion, "prediction_missing"), false);
+  }
+});
+
+check("Required prediction still blocks assessed output.", () => {
+  const definition = deepClone(fixtures.outputSimulation);
+  definition.stages.find((stage) => stage.stage_id === "healthy_output").dependencies = ["technician_ticket"];
+  const predictionEngine = makeEngine(catalog, "prediction-required");
+  const attempt = predictionEngine.createAttempt(definition, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaOutput.canonical_command_id });
+  assert.equal(attempt.prediction_gate.required, true);
+  assert.equal(predictionEngine.submitTicketNote(attempt, definition, "technician_ticket", "Student-submitted ticket.").passed, true);
+  assert.equal(attempt.stage_states.healthy_output.status, "available");
+  assertThrowsCode(() => predictionEngine.revealStageContent(attempt, definition, "healthy_output"), "prediction_required_before_assessed_output");
+});
+
+check("Forged passed stage states cannot restore as complete.", () => {
+  const forged = engine.createAttempt(fixtures.explanationOnly, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  for (const stageId of fixtures.explanationOnly.command_targets[0].required_stage_ids) {
+    forged.stage_states[stageId].status = "passed";
+    forged.stage_states[stageId].passed_at = forged.updated_at;
+  }
+  forged.status = "completed";
+  forged.completion_result = { completed: true, eligible_for_limited_credit: true, eligible_for_full_mastery: true, blockers: [], finalized_at: forged.updated_at };
+  assertThrowsCode(() => engine.restoreAttempt(forged, fixtures.explanationOnly), "missing_stage_result");
+});
+
+check("Forged dimension scores are discarded on restore.", () => {
+  const attempt = engine.createAttempt(fixtures.explanationOnly, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  attempt.dimension_results.concept.score = 1;
+  attempt.dimension_results.syntax.score = 1;
+  attempt.dimension_results.command_selection.score = 1;
+  attempt.completion_result = engine.evaluateCompletion(attempt, fixtures.explanationOnly);
+  const restored = engine.restoreAttempt(attempt, fixtures.explanationOnly);
+  assert.equal(restored.dimension_results.concept.score, 0);
+  assert.equal(restored.dimension_results.syntax.score, 0);
+  assert.equal(restored.dimension_results.command_selection.score, 0);
+  assert.equal(restored.completion_result.completed, false);
+});
+
+check("Trusted passed stage without submitted evidence is rejected.", () => {
+  const attempt = engine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  const state = attempt.stage_states.runtime_execution;
+  state.status = "passed";
+  state.response_kind = "trusted_evidence";
+  state.submitted_at = attempt.updated_at;
+  state.passed_at = attempt.updated_at;
+  state.last_result = { passed: true, score: 1, feedback_code: "trusted_evidence_passed", evidence_ids: ["missing-evidence"], retry_allowed: false };
+  assertThrowsCode(() => engine.restoreAttempt(attempt, fixtures.config), "trusted_stage_missing_evidence");
+});
+
+check("Duplicate submitted evidence IDs are rejected.", () => {
+  const duplicateEngine = makeEngine(catalog, "duplicate-evidence");
+  const attempt = duplicateEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(duplicateEngine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  ingestTrusted(duplicateEngine, attempt, fixtures.config, "runtime_execution");
+  attempt.submitted_evidence.push(deepClone(attempt.submitted_evidence[0]));
+  assertThrowsCode(() => duplicateEngine.restoreAttempt(attempt, fixtures.config), "duplicate_submitted_evidence");
+});
+
+check("Legitimate completed attempt round-trips successfully.", () => {
+  const roundtripEngine = makeEngine(catalog, "roundtrip");
+  const attempt = roundtripEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  const commandText = primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id);
+  const completion = completeConfigAttempt(roundtripEngine, attempt, fixtures.config, commandText);
+  assert.equal(completion.completed, true);
+  const restored = roundtripEngine.restoreAttempt(roundtripEngine.serializeAttempt(attempt), fixtures.config);
+  assert.equal(restored.completion_result.completed, true);
+  assert.equal(restored.completion_result.eligible_for_full_mastery, true);
+  assert.deepEqual(restored.dimension_results, attempt.dimension_results);
+});
+
+check("Restored mastery candidates are reconstructed.", () => {
+  const restoreEngine = makeEngine(catalog, "restore-candidates");
+  const attempt = restoreEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  const commandText = primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id);
+  completeConfigAttempt(restoreEngine, attempt, fixtures.config, commandText);
+  attempt.dimension_results.syntax.score = 0;
+  const restored = restoreEngine.restoreAttempt(attempt, fixtures.config);
+  assert.equal(restored.dimension_results.syntax.score, 1);
+  assert.equal(restored.completion_result.mastery_candidates.syntax.score, 1);
+});
+
+check("Guided completion is not full-mastery eligible.", () => {
+  const guidedEngine = makeEngine(catalog, "guided-mastery");
+  const attempt = guidedEngine.createAttempt(fixtures.explanationOnly, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  const completion = completeExplanationAttempt(guidedEngine, attempt, fixtures.explanationOnly, primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id));
+  assert.equal(completion.completed, true);
+  assert.equal(completion.eligible_for_limited_credit, true);
+  assert.equal(completion.eligible_for_full_mastery, false);
+});
+
+check("Assisted completion is not full-mastery eligible.", () => {
+  const assistedEngine = makeEngine(catalog, "assisted-mastery");
+  const attempt = assistedEngine.createAttempt(fixtures.explanationOnly, { mode: "ASSISTED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  const completion = completeExplanationAttempt(assistedEngine, attempt, fixtures.explanationOnly, primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id));
+  assert.equal(completion.completed, true);
+  assert.equal(completion.eligible_for_limited_credit, true);
+  assert.equal(completion.eligible_for_full_mastery, false);
+});
+
+check("Independent completion is full-mastery eligible only when qualified.", () => {
+  const independentEngine = makeEngine(catalog, "independent-mastery");
+  const attempt = independentEngine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  const completion = completeConfigAttempt(independentEngine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  assert.equal(completion.completed, true);
+  assert.equal(completion.eligible_for_limited_credit, true);
+  assert.equal(completion.eligible_for_full_mastery, true);
+});
+
+check("Inactive and unavailable stages cannot be viewed or revealed.", () => {
+  const inactive = engine.createAttempt(fixtures.config, { mode: "GUIDED", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  assert.equal(engine.finalizeAttempt(inactive, fixtures.config).completed, false);
+  assertThrowsCode(() => engine.markStageViewed(inactive, fixtures.config, "runtime_execution"), "attempt_not_active");
+  assertThrowsCode(() => engine.revealStageContent(inactive, fixtures.config, "runtime_execution"), "attempt_not_active");
+
+  const definition = deepClone(fixtures.explanationOnly);
+  definition.stages.find((stage) => stage.stage_id === "ticket_note").mode_availability = ["GUIDED"];
+  definition.command_targets[0].mode_stage_exceptions = {
+    ticket_note: {
+      ASSISTED: { status: "not_required", reason: "assisted mode uses short-form documentation fixture" },
+      INDEPENDENT: { status: "not_required", reason: "independent mode uses external ticket review fixture" }
+    }
+  };
+  const active = engine.createAttempt(definition, { mode: "ASSISTED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  assertThrowsCode(() => engine.markStageViewed(active, definition, "ticket_note"), "stage_not_applicable");
+  assertThrowsCode(() => engine.revealStageContent(active, definition, "ticket_note"), "stage_not_applicable");
+  assertThrowsCode(() => engine.markStageViewed(active, definition, "optional_vendor_context"), "stage_not_supported");
+  assertThrowsCode(() => engine.revealStageContent(active, definition, "prediction_before_output"), "stage_locked");
+});
+
+check("Portable Git resolution works without a Windows-specific default.", () => {
+  assert.equal(gitExe, process.env.GIT || "git");
+  assert.equal(runGit(["rev-parse", "--is-inside-work-tree"]).trim(), "true");
 });
 
 check("Visible application hashes remain unchanged.", () => {

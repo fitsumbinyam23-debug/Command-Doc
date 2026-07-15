@@ -55,9 +55,9 @@ The `LessonAttemptEngine` class exposes operations for:
 
 - `validateDefinition(definition)`
 - `createAttempt(definition, options)`
-- `restoreAttempt(serialized)`
+- `restoreAttempt(serialized, definition)`
 - `serializeAttempt(attempt)`
-- `getPublicLessonView(definition, mode)`
+- `getPublicLessonView(definition, mode, options)`
 - `getPublicAttemptView(attempt)`
 - `getCurrentStage(attempt, definition)`
 - `markStageViewed(attempt, definition, stageId)`
@@ -132,9 +132,11 @@ If a target-required stage is unavailable in a supported mode, the target must d
 
 Each mode has a separate attempt identity. Guided answers, hints, evidence, and scores do not populate Assisted or Independent attempts.
 
+An empty `mode_availability` array means the stage applies to all supported learning modes. The same mode-availability helper is used by validation, stage initialization, required-stage calculation, public projection, answer visibility, and navigation.
+
 ## Prediction Gate
 
-Assessed output stages remain locked until the declared prediction stage is submitted. Guided demonstration content must be represented separately from assessed output. A prediction-gate violation is recorded as a critical failure and blocks completion.
+Assessed output stages remain locked until the declared prediction stage is submitted when the active mode requires that stage. Mode-specific `not_required` exceptions remove the prediction stage from stage initialization, prediction-gate state, completion blockers, current-stage navigation, and public projection. Guided demonstration content must be represented separately from assessed output. A prediction-gate violation is recorded as a critical failure and blocks completion.
 
 ## Answer Redaction
 
@@ -147,6 +149,10 @@ Public projections omit:
 - hidden evidence payloads
 - another mode's state
 - complete Independent-mode solutions before finalization
+
+Answer visibility uses the controlled values `never`, `demonstration_only`, `after_submission`, `after_submission_or_failure`, and `after_finalization`. `before_submission` is not valid for assessed content. A single visibility helper is shared by public lesson projection, direct stage reveal, and review projection, so lesson data cannot weaken the active mode policy.
+
+Guided demonstration content is visible only when the stage is marked `content_role: "demonstration"` and the mode policy permits worked examples. Demonstration content is not assessed evidence. Independent attempts never reveal assessed answers before successful completion, and failed Independent attempts do not automatically unlock every answer.
 
 The full attempt object may be serialized for trusted storage, but UI adapters should use public projections.
 
@@ -196,6 +202,16 @@ Support-level rules come from the normalized learning command record. Explanatio
 
 Output-simulation commands may award concept, syntax, prediction, output interpretation, command selection, and declared troubleshooting only. They do not award runtime verification, configuration safety, practical execution, Save, or rollback mastery.
 
+Completion results separate:
+
+```text
+completed
+eligible_for_limited_credit
+eligible_for_full_mastery
+```
+
+Guided and Assisted attempts may complete and emit limited candidates, but they do not produce full mastery eligibility. Independent attempts are full-mastery eligible only when completion succeeds, the mode policy allows full mastery, all required mastery dimensions are supported, trusted evidence requirements are satisfied, and no unresolved critical failure remains.
+
 ## Critical Failures
 
 Critical failures have stable codes, stage identity, remediation flags, and final-result visibility. Examples include wrong-vendor syntax, unsafe command choice, mismatched trusted evidence, reused evidence, Save before required verification, and answer leakage.
@@ -207,6 +223,8 @@ Critical failures cannot be cleared by code string alone. Resolution requires a 
 ## Restore Consistency
 
 `restoreAttempt(serialized, definition)` recomputes `attempt_key`, validates identity fields, rejects unknown or mismatched stage-state IDs when a definition is supplied, rejects malformed dimension-result identities, and refuses serialized completion claims that do not match `evaluateCompletion()`.
+
+When a definition is supplied, restore also rebuilds the expected stage availability from the definition, target, mode, and attempt identity. Passed student stages must carry permitted student-response provenance, a valid result shape, and submission timestamps. Passed trusted runtime stages must reference matching submitted evidence records with provider, identity, timestamp, and integrity metadata. Dimension results and prediction-gate state are reconstructed from validated stage provenance instead of trusted from serialized scores.
 
 ## Catalog Compatibility
 

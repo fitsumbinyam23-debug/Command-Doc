@@ -8,6 +8,13 @@ export const ATTEMPT_STATUSES = Object.freeze(["active", "completed", "failed", 
 export const STAGE_STATUSES = Object.freeze(["locked", "available", "in_progress", "submitted", "passed", "failed", "not_applicable", "not_supported", "blocked"]);
 export const STAGE_REQUIREMENT_STATUSES = Object.freeze(["required", "conditional", "optional", "unavailable", "unsupported"]);
 export const MODE_STAGE_EXCEPTION_STATUSES = Object.freeze(["not_required"]);
+export const ANSWER_VISIBILITY_POLICIES = Object.freeze([
+  "never",
+  "demonstration_only",
+  "after_submission",
+  "after_submission_or_failure",
+  "after_finalization"
+]);
 export const STAGE_TYPES = Object.freeze([
   "technician_ticket",
   "learning_objective",
@@ -159,6 +166,11 @@ export function targetByCommand(definition, commandId) {
   return asArray(definition?.command_targets).find((target) => target.canonical_command_id === commandId) || null;
 }
 
+export function stageAppliesToMode(stage, mode) {
+  const availability = asArray(stage?.mode_availability);
+  return availability.length === 0 || availability.includes(mode);
+}
+
 export function modeStageException(target, stageId, mode) {
   const exception = target?.mode_stage_exceptions?.[stageId]?.[mode] || null;
   return exception && typeof exception === "object" ? exception : null;
@@ -176,6 +188,30 @@ export function requiredStageIdsForMode(target, definition, mode) {
     const stage = stages.get(stageId);
     return stage && isStageRequiredForMode(target, stage, mode) && stage.requirement_status !== "unsupported" && stage.support_status !== "unsupported";
   });
+}
+
+export function canRevealStageAnswer(stage, mode, options = {}) {
+  const policy = options.modePolicy || DEFAULT_MODE_POLICIES[mode] || {};
+  const visibility = stage?.answer_visibility_policy || "after_submission";
+  const status = options.stageState?.status || "available";
+  const attemptStatus = options.attemptStatus || "active";
+  const isFinalized = attemptStatus === "completed";
+  const isSubmitted = ["submitted", "passed", "failed"].includes(status);
+  const isFailed = status === "failed";
+  const isDemonstration = stage?.content_role === "demonstration";
+
+  if (visibility === "never") return false;
+  if (visibility === "demonstration_only") {
+    return Boolean(isDemonstration && policy.worked_examples_visible);
+  }
+  if (options.review && visibility !== "after_finalization") return false;
+  if (isDemonstration) return false;
+  if (mode === "INDEPENDENT" && !isFinalized) return false;
+  if (visibility === "after_finalization") return isFinalized;
+  if (mode === "INDEPENDENT") return false;
+  if (visibility === "after_submission") return isSubmitted;
+  if (visibility === "after_submission_or_failure") return isSubmitted || isFailed;
+  return false;
 }
 
 function dependencyCycles(stages) {
@@ -253,8 +289,15 @@ export function validateLessonDefinition(definition, options = {}) {
     if (!STAGE_TYPES.includes(stage.stage_type)) errors.push(`stage ${stage.stage_id} has unknown stage_type ${stage.stage_type}`);
     if (!STAGE_REQUIREMENT_STATUSES.includes(stage.requirement_status)) errors.push(`stage ${stage.stage_id} has unknown requirement_status ${stage.requirement_status}`);
     if (!EVALUATOR_TYPES.includes(stage.evaluator?.type)) errors.push(`stage ${stage.stage_id} has unknown evaluator type ${stage.evaluator?.type}`);
+    if (!ANSWER_VISIBILITY_POLICIES.includes(stage.answer_visibility_policy)) errors.push(`stage ${stage.stage_id} has unknown answer_visibility_policy ${stage.answer_visibility_policy}`);
     for (const mode of asArray(stage.mode_availability)) {
       if (!LEARNING_MODES.includes(mode)) errors.push(`stage ${stage.stage_id} has unknown mode ${mode}`);
+    }
+    if (stage.content_role === "assessed" && stage.answer_visibility_policy === "before_submission") {
+      errors.push(`stage ${stage.stage_id} uses forbidden assessed answer visibility before_submission`);
+    }
+    if (stage.content_role === "assessed" && ["ASSISTED", "INDEPENDENT"].some((mode) => stageAppliesToMode(stage, mode)) && stage.answer_visibility_policy === "demonstration_only") {
+      errors.push(`stage ${stage.stage_id} cannot expose assessed content as demonstration_only`);
     }
     for (const dependency of asArray(stage.dependencies)) {
       if (!stageIds.has(dependency) && !asArray(definition.stages).some((candidate) => candidate.stage_id === dependency)) {
@@ -304,7 +347,7 @@ export function validateLessonDefinition(definition, options = {}) {
       if (stage?.requirement_status === "unsupported") errors.push(`target ${target.canonical_command_id} requires unsupported stage ${stageId}`);
       for (const mode of supportedModes) {
         if (!stage) continue;
-        const visible = asArray(stage.mode_availability).length === 0 || asArray(stage.mode_availability).includes(mode);
+        const visible = stageAppliesToMode(stage, mode);
         const exception = modeStageException(target, stageId, mode);
         if (!visible && !exception) {
           errors.push(`target ${target.canonical_command_id} required stage ${stageId} is unavailable in ${mode} without mode exception`);
@@ -339,12 +382,20 @@ export function validateLessonDefinition(definition, options = {}) {
   return { valid: errors.length === 0, errors, warnings };
 }
 
-export function publicLessonDefinition(definition, mode) {
+export function publicLessonDefinition(definition, mode, options = {}) {
   const policy = definition.mode_policies?.[mode] || DEFAULT_MODE_POLICIES[mode];
+  const target = options.target || (options.canonical_command_id ? targetByCommand(definition, options.canonical_command_id) : null) || asArray(definition.command_targets)[0] || null;
   const visibleStages = asArray(definition.stages)
-    .filter((stage) => asArray(stage.mode_availability).includes(mode))
+    .filter((stage) => stageAppliesToMode(stage, mode) || modeStageException(target, stage.stage_id, mode))
     .map((stage) => {
-      const showAnswers = stage.answer_visibility_policy === "before_submission" || (mode === "GUIDED" && stage.content_role === "demonstration");
+      const exception = modeStageException(target, stage.stage_id, mode);
+      const stageState = options.attempt?.stage_states?.[stage.stage_id] || (exception ? { status: "not_applicable", reason: exception.reason } : { status: "available" });
+      const showAnswers = canRevealStageAnswer(stage, mode, {
+        modePolicy: policy,
+        stageState,
+        attemptStatus: options.attempt?.status || "active",
+        review: Boolean(options.review)
+      });
       return {
         stage_id: stage.stage_id,
         stage_type: stage.stage_type,
@@ -352,9 +403,11 @@ export function publicLessonDefinition(definition, mode) {
         dependencies: asArray(stage.dependencies),
         evidence_source: stage.evidence_source,
         eligible_dimensions: asArray(stage.eligible_dimensions),
-        reason: stage.reason || null,
+        reason: stageState.reason || stage.reason || null,
+        applicable: stageState.status !== "not_applicable",
         prompt: stage.prompt || null,
         content_role: stage.content_role || "assessed",
+        answer_visibility_policy: stage.answer_visibility_policy,
         hints_available: Boolean(policy.hints_allowed && asArray(stage.hints).length),
         worked_example: policy.worked_examples_visible && stage.content_role === "demonstration" ? stage.worked_example || null : null,
         answer_visible: showAnswers,

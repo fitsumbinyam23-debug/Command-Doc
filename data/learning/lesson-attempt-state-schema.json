@@ -68,6 +68,30 @@
     "student_response_api_allowed": false,
     "ingest_api_required": true
   },
+  "submitted_evidence_summary": {
+    "required_fields": [
+      "evidence_id",
+      "provider_id",
+      "evidence_type",
+      "attempt_id",
+      "lesson_id",
+      "vendor_id",
+      "canonical_command_id",
+      "stage_id",
+      "timestamp",
+      "source_event_id",
+      "verification_policy_id",
+      "verification_record_id",
+      "integrity_result"
+    ],
+    "restore_rules": [
+      "evidence_id must be unique within the attempt",
+      "stage_id must exist in the supplied definition",
+      "stage_id must refer to a trusted runtime evidence stage",
+      "identity fields must match the restored attempt",
+      "integrity_result must be passed"
+    ]
+  },
   "critical_failure_resolution": {
     "arbitrary_code_clear_allowed": false,
     "allowed_resolution_types": ["stage_retry", "remediation_stage", "trusted_evidence"],
@@ -85,7 +109,29 @@
     "recompute_attempt_key": true,
     "validate_stage_state_ids_when_definition_supplied": true,
     "validate_dimension_result_identities": true,
+    "validate_initial_stage_availability_when_definition_supplied": true,
+    "validate_passed_student_stage_provenance": true,
+    "validate_passed_trusted_stage_evidence": true,
+    "reconstruct_dimension_results_from_stage_provenance": true,
+    "reconstruct_prediction_gate_from_stage_provenance": true,
+    "recompute_completion_result": true,
     "reject_inconsistent_completion_claims": true
+  },
+  "completion_result": {
+    "fields": [
+      "completed",
+      "eligible_for_limited_credit",
+      "eligible_for_full_mastery",
+      "blockers",
+      "finalized_at",
+      "critical_failures",
+      "resolution_history",
+      "mastery_candidates"
+    ],
+    "rules": [
+      "Guided and Assisted completion may emit limited candidates only",
+      "Independent full mastery requires completion, mode policy permission, supported required dimensions, trusted evidence where required, and no unresolved critical failures"
+    ]
   },
   "serialization": {
     "format": "JSON",
