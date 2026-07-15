@@ -4,10 +4,21 @@
 
 - Candidate branch: `repair/runtime-integrity-and-verification`
 - Application build: `2026.07-runtime-rc.2`
-- Application commit: https://github.com/fitsumbinyam23-debug/Command-Doc/commit/7becdc28471fe64df8dc773d563de94081a8fd65
+- Final source candidate: `ea4bf7ce2223dc1a22db3de18c9f48c1427b155c`
+- Application commit: https://github.com/fitsumbinyam23-debug/Command-Doc/commit/ea4bf7ce2223dc1a22db3de18c9f48c1427b155c
 - Build record: `BUILD-MANIFEST.json`
 
-This candidate is not merged or deployed. Use the independent review ZIP or the draft branch; do not treat the GitHub Pages URL as candidate evidence.
+This candidate was independently reviewed before merge. Before the release merge and GitHub Pages publication complete, use the independent review ZIP or the draft branch; do not treat the GitHub Pages URL as candidate evidence.
+
+## Verified RC evidence
+
+- Core tests: 30 passed.
+- Current application tests: 214 passed.
+- Startup test: 37 passed.
+- Independent Chromium review: all 9 profile terminal workflows passed.
+- Representative Cisco, HP, and Aruba Workbench workflows passed.
+- Exact terminal diffs, one audit event per entered command, Save gate, and field-scoped verification passed.
+- Mobile Chromium 390px overflow check passed.
 
 ## First-time reset
 
@@ -38,4 +49,6 @@ This candidate is not merged or deployed. Use the independent review ZIP or the 
 
 - Every workflow is an offline simulation; it never reaches a real switch, router, endpoint, SSH, Telnet, or API.
 - Browser data is per browser profile and is not shared between devices.
-- Public test reset presets, a public Playwright artifact bundle, Edge validation, and formal accessibility audit artifacts are not yet published. Treat them as unavailable rather than passed.
+- Microsoft Edge interaction remains blocked for this RC. Treat it as unavailable rather than passed.
+- True service-worker update/offline transition remains blocked for this RC. Treat it as unavailable rather than passed.
+- Public test reset presets, a public Playwright artifact bundle, and formal accessibility audit artifacts are not yet published. Treat them as unavailable rather than passed.
