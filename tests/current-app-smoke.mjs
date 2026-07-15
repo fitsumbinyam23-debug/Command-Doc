@@ -5,10 +5,13 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (relative) => fs.readFile(path.join(root, relative), "utf8");
+const ACTIVE_BUILD_VERSION = "2026.07-runtime-rc.3";
+const ACTIVE_CACHE_NAME = "command-doctor-2026-07-runtime-rc-3";
 const assert = (condition, message) => {
   if (!condition) throw new Error(`Current app smoke test failed: ${message}`);
 };
 const references = (html, expression) => [...html.matchAll(expression)].map((match) => match[1].split("?")[0]);
+const queryVersions = (source) => [...source.matchAll(/[?&]v=([^"'\s)]+)/g)].map((match) => match[1]);
 const substitute = (syntax, profile) => syntax.replace(/<([^>]+)>/g, (_, name) => {
   const value = name.toLowerCase();
   if (value.includes("interface") || value.includes("port")) return profile.interface_naming.replace("{port}", "1");
@@ -26,10 +29,12 @@ assert(indexHtml.includes('location.replace("lab.html")'), "root redirects to la
 const activeScripts = references(labHtml, /<script[^>]+\bsrc=["']([^"']+)["']/gi);
 const activeStyles = references(labHtml, /<link[^>]+\bhref=["']([^"']+)["']/gi);
 assert(activeScripts.length > 0, "lab.html has active scripts");
+assert(queryVersions(labHtml).every((version) => version === ACTIVE_BUILD_VERSION), "lab.html active assets use the current RC query version");
 for (const asset of [...activeScripts, ...activeStyles]) {
   await fs.access(path.join(root, asset));
 }
-assert(!serviceWorker.includes("lab-29") && serviceWorker.includes("command-doctor-2026-07-runtime-rc"), "service worker uses the current RC cache identity");
+assert(!serviceWorker.includes("lab-29") && serviceWorker.includes(`const CACHE_NAME = "${ACTIVE_CACHE_NAME}"`), "service worker uses the current RC cache identity");
+assert(queryVersions(serviceWorker).every((version) => version === ACTIVE_BUILD_VERSION), "service worker active offline assets use the current RC query version");
 for (const asset of ["src/lab-engine.js", "src/diagnostics-engine.js", "src/topology-workspace.js", "src/curriculum-services.js", "src/switch-runtime.js", "src/app-release-21.js", "data/platforms/switch-profiles.json", "data/generated/command-inventory.json", "data/generated/route-inventory.json"]) {
   assert(serviceWorker.includes(asset), `service worker includes current offline asset ${asset}`);
 }
@@ -126,7 +131,7 @@ for (const candidateProfile of profiles) {
   const exactInterface = augmentedRegistry.commands.filter((command) => command.vendor_id === candidateProfile.vendor && command.canonical_command === "interface <interface>" && command.available_modes.includes("config"));
   assert(exactInterface.length === 1, `normalized effective interface grammar is unique for ${candidateProfile.profile_id}`);
 }
-assert((await read("src/app-release-21.js")).includes('const ACTIVE_BUILD_VERSION = "2026.07-runtime-rc.2"'), "runtime reports the current RC build identity");
+assert((await read("src/app-release-21.js")).includes(`const ACTIVE_BUILD_VERSION = "${ACTIVE_BUILD_VERSION}"`), "runtime reports the current RC build identity");
 for (const route of routeFile.routes) {
   if (!["cisco_ios", "hp_comware", "aruba_cx"].includes(route.vendor)) continue;
   const compatible = profiles.filter((candidateProfile) => candidateProfile.vendor === route.vendor && (!route.supported_model_profiles?.length || route.supported_model_profiles.includes(candidateProfile.profile_id)));
@@ -170,7 +175,7 @@ for (const candidateProfile of profiles) {
 const activeAppSource = await read("src/app-release-21.js");
 const runtimeSource = await read("src/switch-runtime.js");
 assert(activeAppSource.includes("const isSaveRequest") && activeAppSource.includes("const saved = shared.save(commandId, commandEventMetadata"), "terminal save aliases invoke the shared authoritative save gate");
-assert(activeAppSource.includes("vendor_id: route.vendor") && activeAppSource.includes("const routeVendorId = route.vendor_id || route.vendor"), "route vendor IDs remain machine-readable through launch selection");
+assert(activeAppSource.includes("vendor_id: route.vendor") && activeAppSource.includes("const routeVendorKey = routeVendorId(route)"), "route vendor IDs remain machine-readable through launch selection");
 assert(activeAppSource.includes("output: saved.message") && activeAppSource.includes("verificationTargetForCommand(command)"), "terminal save feedback and verification use authoritative shared-state results");
 assert(!activeAppSource.includes("internalSequenceCommand") && !activeAppSource.includes("runtime-workbench-comware"), "Workbench has no parser bypass or synthetic command identity");
 assert(activeAppSource.includes("pendingChangePathsSince") && activeAppSource.includes("syncRuntimeFromEngine(engine, commandId, command)"), "terminal event deltas use authoritative shared pending changes");
@@ -182,9 +187,114 @@ assert(!verificationImplementation.includes("this.record("), "verification evide
 store.clear();
 sandbox.__currentAppProfiles = profiles;
 sandbox.__currentAppInventory = inventoryFile.commands;
+sandbox.__currentAppRoutes = routeFile.routes;
+sandbox.__currentVendorLabels = curriculumIndex.vendors;
 sandbox.document.readyState = "";
 const appContext = vm.createContext(sandbox);
 vm.runInContext(activeAppSource, appContext, { filename: "src/app-release-21.js" });
+const practiceLibraryMatrix = vm.runInContext(`
+(() => {
+  renderLibrary = () => {};
+  switchView = (view) => { state.__lastView = view; };
+  showToast = (message) => { state.__lastToast = message; };
+  saveVendorProgress = () => {};
+  hasActiveWorkbenchState = () => false;
+  startFreshTrainingSwitch = (route) => { state.__startedRoute = route; };
+  activateSwitchProfile = (profileId) => { state.__activatedProfileId = profileId; state.lab.activeSwitchProfileId = profileId; };
+  let checks = 0;
+  const check = (condition, message) => { checks += 1; if (!condition) throw new Error(message); };
+  const rawVendorIds = Object.keys(__currentVendorLabels);
+  const rawVendorIdPattern = new RegExp(rawVendorIds.join("|"));
+  state.curriculum.routes = __currentAppRoutes;
+  state.curriculum.inventory = __currentAppInventory;
+  state.curriculum.index = { ...(state.curriculum.index || {}), vendors: __currentVendorLabels };
+  state.lab.switchProfiles = __currentAppProfiles;
+  state.lab.libraryFilters = defaultPracticeLibraryFilters();
+  state.lab.vendorProgress = {};
+  const routes = normalizedPracticeRoutes();
+  const counts = Object.fromEntries(rawVendorIds.map((vendor) => [vendor, routes.filter((route) => routeVendorId(route) === vendor).length]));
+  const full = filteredPracticeRoutes(routes, state.lab.libraryFilters);
+  check(full.length === routes.length, "all visible filters clear returns complete route inventory");
+  for (const track of ["all", ...Object.values(__currentVendorLabels)]) {
+    state.lab.vendorTrack = track;
+    state.lab.libraryFilters = defaultPracticeLibraryFilters();
+    check(filteredPracticeRoutes(routes, state.lab.libraryFilters).length === routes.length, "active learning track cannot secretly reduce Practice Library results for " + track);
+  }
+  const vendorDefinition = practiceLibraryFilterDefinitions(routes).find((definition) => definition.key === "vendor");
+  check(vendorDefinition.allLabel === "All vendors", "vendor default label is grammatical");
+  check(rawVendorIds.every((vendor) => vendorDefinition.options.some((option) => option.value === vendor && option.label === __currentVendorLabels[vendor])), "vendor filter values use IDs and labels use readable names");
+  for (const key of ["operatingSystem", "platform", "modelFamily", "topic", "difficulty", "routeType", "support", "status"]) {
+    const definition = practiceLibraryFilterDefinitions(routes).find((item) => item.key === key);
+    state.lab.libraryFilters = defaultPracticeLibraryFilters();
+    check(filteredPracticeRoutes(routes, state.lab.libraryFilters).length === routes.length && definition.allLabel.startsWith("All "), "default " + key + " filter allows all routes");
+  }
+  const filterVendor = (vendor) => {
+    state.lab.libraryFilters = defaultPracticeLibraryFilters();
+    state.lab.libraryFilters.vendor = vendor;
+    return filteredPracticeRoutes(routes, state.lab.libraryFilters);
+  };
+  const ciscoRoutes = filterVendor("cisco_ios");
+  const hpRoutes = filterVendor("hp_comware");
+  const windowsRoutes = filterVendor("windows_cmd");
+  const arubaRoutes = filterVendor("aruba_cx");
+  const linuxRoutes = filterVendor("linux");
+  check(ciscoRoutes.length === counts.cisco_ios && ciscoRoutes.every((route) => routeVendorId(route) === "cisco_ios"), "Cisco vendor filter returns only Cisco routes");
+  check(hpRoutes.length === counts.hp_comware && hpRoutes.every((route) => routeVendorId(route) === "hp_comware"), "HP vendor filter returns only HP routes");
+  check(windowsRoutes.length === counts.windows_cmd && windowsRoutes.every((route) => routeVendorId(route) === "windows_cmd"), "Windows vendor filter returns only Windows routes");
+  check(arubaRoutes.length === counts.aruba_cx && practiceLibraryEmptyMessage({ ...defaultPracticeLibraryFilters(), vendor: "aruba_cx" }, routes).includes("ArubaOS-CX practice routes are authored yet"), "zero-route Aruba vendor receives an honest empty state");
+  check(linuxRoutes.length === counts.linux && practiceLibraryEmptyMessage({ ...defaultPracticeLibraryFilters(), vendor: "linux" }, routes).includes("Linux practice routes are authored yet"), "zero-route Linux vendor receives an honest empty state");
+  state.lab.libraryFilters = { ...defaultPracticeLibraryFilters(), vendor: "cisco_ios", search: "show" };
+  clearPracticeLibraryFilters();
+  check(state.lab.libraryFilters.vendor === "" && state.lab.libraryFilters.search === "" && filteredPracticeRoutes(routes, state.lab.libraryFilters).length === routes.length, "clear filters restores the full route set");
+  const ciscoRoute = routes.find((route) => routeVendorId(route) === "cisco_ios");
+  state.lab.vendorTrack = "HP Comware";
+  state.lab.libraryFilters = { ...defaultPracticeLibraryFilters(), search: ciscoRoute.label };
+  check(filteredPracticeRoutes(routes, state.lab.libraryFilters).some((route) => route.id === ciscoRoute.id), "search works independently of the active learning track");
+  check(routes.every((route) => !rawVendorIdPattern.test(practiceRouteVendorDisplay(route))), "route cards do not expose raw vendor IDs as display text");
+  const hpRoute = routes.find((route) => routeVendorId(route) === "hp_comware");
+  trackProgress("cisco_ios").practisedRoutes[ciscoRoute.id] = true;
+  trackProgress("hp_comware").reviewRoutes[hpRoute.id] = true;
+  state.lab.libraryFilters = { ...defaultPracticeLibraryFilters(), status: "Learned" };
+  check(filteredPracticeRoutes(routes, state.lab.libraryFilters).some((route) => route.id === ciscoRoute.id) && !filteredPracticeRoutes(routes, state.lab.libraryFilters).some((route) => route.id === hpRoute.id), "learning-status filtering uses route-vendor practised progress");
+  state.lab.libraryFilters = { ...defaultPracticeLibraryFilters(), status: "Needs review" };
+  check(filteredPracticeRoutes(routes, state.lab.libraryFilters).some((route) => route.id === hpRoute.id), "learning-status filtering uses route-vendor review progress");
+  state.lab.vendorTrack = "Cisco IOS";
+  state.lab.libraryFilters = defaultPracticeLibraryFilters();
+  openPracticeLibraryFromLearn();
+  check(state.lab.libraryFilters.vendor === "cisco_ios" && state.__lastView === "library", "Learn handoff applies Cisco as a visible vendor filter");
+  state.lab.vendorTrack = "all";
+  state.lab.libraryFilters.vendor = "hp_comware";
+  openPracticeLibraryFromLearn();
+  check(state.lab.libraryFilters.vendor === "", "All Tracks handoff leaves the visible vendor filter at All");
+  const ciscoProfile = __currentAppProfiles.find((profile) => profile.vendor === "cisco_ios");
+  const hpProfile = __currentAppProfiles.find((profile) => profile.vendor === "hp_comware");
+  const windowsRoute = routes.find((route) => routeVendorId(route) === "windows_cmd");
+  state.lab.switchProfiles = __currentAppProfiles;
+  state.lab.activeSwitchProfileId = hpProfile.profile_id;
+  state.__activatedProfileId = "";
+  startPracticeRoute(ciscoRoute.id, "replace");
+  check(state.__startedRoute.id === ciscoRoute.id && routeVendorId(state.__startedRoute) === "cisco_ios" && state.__activatedProfileId === ciscoProfile.profile_id, "starting a Cisco route activates a compatible Cisco profile");
+  state.__activatedProfileId = "";
+  startPracticeRoute(hpRoute.id, "replace");
+  check(state.__startedRoute.id === hpRoute.id && routeVendorId(state.__startedRoute) === "hp_comware" && state.__activatedProfileId === hpProfile.profile_id, "starting an HP route activates a compatible HP profile");
+  state.__activatedProfileId = "";
+  startPracticeRoute(windowsRoute.id, "replace");
+  check(state.__startedRoute.id === windowsRoute.id && routeVendorId(state.__startedRoute) === "windows_cmd" && state.__activatedProfileId === "", "starting a Windows route does not claim a switch profile");
+  return {
+    checks,
+    total: routes.length,
+    counts,
+    allFiltersCount: full.length,
+    ciscoCount: ciscoRoutes.length,
+    hpCount: hpRoutes.length,
+    windowsCount: windowsRoutes.length,
+    arubaCount: arubaRoutes.length,
+    linuxCount: linuxRoutes.length
+  };
+})()
+`, appContext, { filename: "current-app-practice-library-matrix.js" });
+assert(practiceLibraryMatrix.total === routeFile.routes.length, "Practice Library route count is derived from the authoritative route inventory");
+assert(practiceLibraryMatrix.allFiltersCount === routeFile.routes.length, "Practice Library all-filters-clear count matches the authoritative route inventory");
 const appTerminalMatrix = vm.runInContext(`
 (() => {
   renderLab = () => {};
@@ -536,5 +646,5 @@ console.log(JSON.stringify({
   active_styles: activeStyles.length,
   canonical_commands: inventoryFile.commands.length,
   routes: routeFile.routes.length,
-  passed: 73 + completionChecks + 2
+  passed: 73 + practiceLibraryMatrix.checks + completionChecks + 2
 }));

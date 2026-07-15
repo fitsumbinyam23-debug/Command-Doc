@@ -1,24 +1,34 @@
 # Command Doctor Independent Testing
 
-## Review candidate
+## Released hotfix
 
-- Candidate branch: `repair/runtime-integrity-and-verification`
-- Application build: `2026.07-runtime-rc.2`
-- Final source candidate: `ea4bf7ce2223dc1a22db3de18c9f48c1427b155c`
-- Application commit: https://github.com/fitsumbinyam23-debug/Command-Doc/commit/ea4bf7ce2223dc1a22db3de18c9f48c1427b155c
+- Release branch: `main`
+- Released build: `2026.07-runtime-rc.3`
+- Release tag: `v0.2.0-rc.2`
+- Functional source: `084b11789304fa326f7275e3279d6bf7c0847134`
+- Application commit: https://github.com/fitsumbinyam23-debug/Command-Doc/commit/084b11789304fa326f7275e3279d6bf7c0847134
+- Public release target: https://fitsumbinyam23-debug.github.io/Command-Doc/
 - Build record: `BUILD-MANIFEST.json`
 
-This candidate was independently reviewed before merge. Before the release merge and GitHub Pages publication complete, use the independent review ZIP or the draft branch; do not treat the GitHub Pages URL as candidate evidence.
+The functional Practice Library hotfix was independently reviewed before release preparation, merged to `main`, and prepared for GitHub Pages publication as the public release target.
 
 ## Verified RC evidence
 
 - Core tests: 30 passed.
-- Current application tests: 214 passed.
+- Current application tests: 246 passed, including the Practice Library visible-filter matrix.
 - Startup test: 37 passed.
-- Independent Chromium review: all 9 profile terminal workflows passed.
-- Representative Cisco, HP, and Aruba Workbench workflows passed.
+- Practice Library visible-filter regression fixed: all visible filters clear returns the complete current route inventory, dynamically derived as 127 routes.
+- Cisco, HP, and Windows Practice Library filtering works.
+- ArubaOS-CX and Linux currently have honest zero-route Practice Library states.
+- Route-vendor progress is isolated correctly.
+- Route launch vendor/profile alignment is preserved.
+- Runtime behaviour was not changed.
+- Route data was not changed.
+- Learning data was not changed.
+- Independent Chromium review: approved functional hotfix review covered Practice Library filters, route launch, mobile layout, and console checks.
 - Exact terminal diffs, one audit event per entered command, Save gate, and field-scoped verification passed.
 - Mobile Chromium 390px overflow check passed.
+- GitHub Pages publication is the release target for `2026.07-runtime-rc.3`.
 
 ## First-time reset
 
