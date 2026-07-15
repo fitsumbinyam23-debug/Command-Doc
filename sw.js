@@ -1,19 +1,19 @@
 "use strict";
 
-const CACHE_NAME = "command-doctor-2026-07-runtime-rc-2";
+const CACHE_NAME = "command-doctor-2026-07-runtime-rc-3";
 const OFFLINE_ASSETS = [
   "./",
   "./index.html",
   "./refresh.html",
   "./lab.html",
   "./sw-refresh.js",
-  "./styles.css?v=2026.07-runtime-rc.2",
-  "./src/lab-engine.js?v=2026.07-runtime-rc.2",
-  "./src/diagnostics-engine.js?v=2026.07-runtime-rc.2",
-  "./src/topology-workspace.js?v=2026.07-runtime-rc.2",
-  "./src/curriculum-services.js?v=2026.07-runtime-rc.2",
-  "./src/switch-runtime.js?v=2026.07-runtime-rc.2",
-  "./src/app-release-21.js?v=2026.07-runtime-rc.2",
+  "./styles.css?v=2026.07-runtime-rc.3",
+  "./src/lab-engine.js?v=2026.07-runtime-rc.3",
+  "./src/diagnostics-engine.js?v=2026.07-runtime-rc.3",
+  "./src/topology-workspace.js?v=2026.07-runtime-rc.3",
+  "./src/curriculum-services.js?v=2026.07-runtime-rc.3",
+  "./src/switch-runtime.js?v=2026.07-runtime-rc.3",
+  "./src/app-release-21.js?v=2026.07-runtime-rc.3",
   "./data/platforms/switch-profiles.json",
   "./data/generated/command-inventory.json",
   "./data/generated/route-inventory.json",
