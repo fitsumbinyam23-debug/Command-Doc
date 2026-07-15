@@ -1,6 +1,7 @@
 "use strict";
 
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
@@ -11,6 +12,8 @@ import { buildFixtureDefinitions, fixtureEvidenceProvider, makeTrustedEvidence }
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
+const gitExe = process.env.GIT || "C:\\Program Files\\Git\\cmd\\git.exe";
+const stage2Base = "4789ac82a6b351d51ec9be7c33c0f70e502c7724";
 
 async function readJson(path) {
   return JSON.parse(await readFile(resolve(repoRoot, path), "utf8"));
@@ -69,6 +72,13 @@ function ingestTrusted(engine, attempt, definition, stageId, overrides = {}) {
 
 function assertThrowsCode(fn, code) {
   assert.throws(fn, (error) => error?.code === code);
+}
+
+function changedFromBase(paths) {
+  return execFileSync(gitExe, ["diff", "--name-only", stage2Base, "--", ...paths], {
+    cwd: repoRoot,
+    encoding: "utf8"
+  }).trim().split(/\r?\n/).filter(Boolean);
 }
 
 const catalog = await readJson("data/generated/learning-command-catalog.json");
@@ -483,6 +493,280 @@ check("All fixture vendors create valid lesson definitions.", () => {
 
 check("Attempt schema version remains controlled.", () => {
   assert.equal(guidedAttempt.schema_version, ATTEMPT_STATE_SCHEMA_VERSION);
+});
+
+check("Direct student response cannot pass runtime_execution.", () => {
+  const attempt = engine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(engine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  assertThrowsCode(() => engine.submitStudentResponse(attempt, fixtures.config, "runtime_execution", { integrity_result: "passed", evidence_id: "fake-exec" }), "trusted_evidence_ingest_required");
+  assert.equal(attempt.stage_states.runtime_execution.status, "available");
+  assert.equal(attempt.submitted_evidence.length, 0);
+  assert.equal(attempt.dimension_results.practical_execution.score, 0);
+});
+
+check("Direct student response cannot pass runtime_verification.", () => {
+  const attempt = engine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(engine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  ingestTrusted(engine, attempt, fixtures.config, "runtime_execution");
+  assertThrowsCode(() => engine.submitStudentResponse(attempt, fixtures.config, "runtime_verification", { integrity_result: "passed", evidence_id: "fake-verification" }), "trusted_evidence_ingest_required");
+  assert.equal(attempt.stage_states.runtime_verification.status, "available");
+  assert.equal(attempt.dimension_results.verification.score, 0);
+});
+
+check("Complete-looking raw trusted envelope cannot pass through the student API.", () => {
+  const attempt = engine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(engine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  assertThrowsCode(() => engine.submitStudentResponse(attempt, fixtures.config, "runtime_execution", makeTrustedEvidence(attempt, "runtime_execution")), "trusted_evidence_ingest_required");
+});
+
+check("Only provider-validated ingestTrustedExternalEvidence can pass execution.", () => {
+  const attempt = engine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(engine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  ingestTrusted(engine, attempt, fixtures.config, "runtime_execution");
+  assert.equal(attempt.stage_states.runtime_execution.status, "passed");
+  assert.equal(attempt.dimension_results.practical_execution.score, 1);
+});
+
+check("Only provider-validated ingestTrustedExternalEvidence can pass verification.", () => {
+  const attempt = engine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(engine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  ingestTrusted(engine, attempt, fixtures.config, "runtime_execution");
+  ingestTrusted(engine, attempt, fixtures.config, "runtime_verification");
+  assert.equal(attempt.stage_states.runtime_verification.status, "passed");
+  assert.equal(attempt.dimension_results.verification.score, 1);
+});
+
+check("Fake execution and verification cannot complete an Independent attempt.", () => {
+  const attempt = engine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(engine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  assertThrowsCode(() => engine.submitStudentResponse(attempt, fixtures.config, "runtime_execution", { integrity_result: "passed", evidence_id: "fake-exec" }), "trusted_evidence_ingest_required");
+  engine.submitTicketNote(attempt, fixtures.config, "ticket_note", "Student wrote a ticket note.");
+  const completion = engine.finalizeAttempt(attempt, fixtures.config);
+  assert.equal(completion.completed, false);
+  assert.equal(completion.eligible_for_mastery, false);
+});
+
+check("Fake evidence creates no practical or verification mastery candidate.", () => {
+  const attempt = engine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  passTicketPredictionCommand(engine, attempt, fixtures.config, primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  assertThrowsCode(() => engine.submitStudentResponse(attempt, fixtures.config, "runtime_execution", { integrity_result: "passed", evidence_id: "fake-exec" }), "trusted_evidence_ingest_required");
+  const candidates = engine.produceMasteryCandidates(attempt, fixtures.config);
+  assert.equal(candidates.practical_execution.score, 0);
+  assert.equal(candidates.verification.score, 0);
+});
+
+check("Locked-stage hint is rejected without history or penalty.", () => {
+  const attempt = engine.createAttempt(fixtures.config, { mode: "GUIDED", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  const beforePenalty = attempt.dimension_results.practical_execution.hint_penalty;
+  const result = engine.requestHint(attempt, fixtures.config, "runtime_execution");
+  assert.equal(result.allowed, false);
+  assert.equal(result.reason, "hint_stage_locked");
+  assert.equal(attempt.hint_history.length, 0);
+  assert.equal(attempt.stage_states.runtime_execution.hint_count, 0);
+  assert.equal(attempt.dimension_results.practical_execution.hint_penalty, beforePenalty);
+});
+
+check("Passed-stage hint is rejected.", () => {
+  const attempt = engine.createAttempt(fixtures.explanationOnly, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  engine.submitTicketNote(attempt, fixtures.explanationOnly, "technician_ticket", "Student-submitted ticket.");
+  assert.equal(engine.requestHint(attempt, fixtures.explanationOnly, "technician_ticket").reason, "hint_stage_passed");
+});
+
+check("Completed-attempt hint is rejected.", () => {
+  const attempt = engine.createAttempt(fixtures.explanationOnly, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  passTicketPredictionCommand(engine, attempt, fixtures.explanationOnly, primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id));
+  engine.submitTicketNote(attempt, fixtures.explanationOnly, "ticket_note", "Lesson ticket completed by student.");
+  assert.equal(engine.finalizeAttempt(attempt, fixtures.explanationOnly).completed, true);
+  assert.equal(engine.requestHint(attempt, fixtures.explanationOnly, "choose_next_command").reason, "attempt_not_active");
+});
+
+check("Independent hint remains rejected.", () => {
+  const attempt = engine.createAttempt(fixtures.config, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  const result = engine.requestHint(attempt, fixtures.config, "technician_ticket");
+  assert.equal(result.allowed, false);
+  assert.equal(result.reason, "hint_not_allowed");
+  assert.equal(attempt.hint_history.length, 0);
+});
+
+check("Self dependency cycle is rejected.", () => {
+  const invalid = deepClone(fixtures.config);
+  invalid.stages.find((stage) => stage.stage_id === "technician_ticket").dependencies = ["technician_ticket"];
+  const validation = engine.validateDefinition(invalid);
+  assert.equal(validation.valid, false);
+  assert.equal(validation.errors.some((error) => error.includes("technician_ticket -> technician_ticket")), true);
+});
+
+check("Two-stage dependency cycle is rejected.", () => {
+  const invalid = deepClone(fixtures.config);
+  invalid.stages.find((stage) => stage.stage_id === "technician_ticket").dependencies = ["prediction_before_output"];
+  invalid.stages.find((stage) => stage.stage_id === "prediction_before_output").dependencies = ["technician_ticket"];
+  assert.equal(engine.validateDefinition(invalid).valid, false);
+});
+
+check("Longer dependency cycle is rejected.", () => {
+  const invalid = deepClone(fixtures.config);
+  invalid.stages.find((stage) => stage.stage_id === "technician_ticket").dependencies = ["choose_next_command"];
+  invalid.stages.find((stage) => stage.stage_id === "prediction_before_output").dependencies = ["technician_ticket"];
+  invalid.stages.find((stage) => stage.stage_id === "choose_next_command").dependencies = ["prediction_before_output"];
+  assert.equal(engine.validateDefinition(invalid).valid, false);
+});
+
+check("Valid branching dependency DAG is accepted.", () => {
+  assert.equal(engine.validateDefinition(fixtures.config).valid, true);
+});
+
+check("Valid converging dependency DAG is accepted.", () => {
+  const valid = deepClone(fixtures.config);
+  valid.stages.find((stage) => stage.stage_id === "evidence_identification").dependencies = ["healthy_output", "choose_next_command"];
+  const validation = engine.validateDefinition(valid);
+  assert.equal(validation.valid, true, validation.errors.join("; "));
+});
+
+check("Hidden required stage without mode exception invalidates the definition.", () => {
+  const invalid = deepClone(fixtures.explanationOnly);
+  invalid.stages.find((stage) => stage.stage_id === "ticket_note").mode_availability = ["GUIDED"];
+  const validation = engine.validateDefinition(invalid);
+  assert.equal(validation.valid, false);
+  assert.equal(validation.errors.some((error) => error.includes("without mode exception")), true);
+});
+
+check("Explicit mode exception records not_applicable with a reason.", () => {
+  const definition = deepClone(fixtures.explanationOnly);
+  definition.stages.find((stage) => stage.stage_id === "ticket_note").mode_availability = ["GUIDED"];
+  definition.command_targets[0].mode_stage_exceptions = {
+    ticket_note: {
+      ASSISTED: { status: "not_required", reason: "assisted mode uses short-form documentation fixture" },
+      INDEPENDENT: { status: "not_required", reason: "independent mode uses external ticket review fixture" }
+    }
+  };
+  assert.equal(engine.validateDefinition(definition).valid, true);
+  const assisted = engine.createAttempt(definition, { mode: "ASSISTED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  assert.equal(assisted.stage_states.ticket_note.status, "not_applicable");
+  assert.equal(assisted.stage_states.ticket_note.reason, "assisted mode uses short-form documentation fixture");
+});
+
+check("Completion uses required-stage sets separately for Guided, Assisted, and Independent.", () => {
+  const definition = deepClone(fixtures.explanationOnly);
+  definition.stages.find((stage) => stage.stage_id === "ticket_note").mode_availability = ["GUIDED"];
+  definition.command_targets[0].mode_stage_exceptions = {
+    ticket_note: {
+      ASSISTED: { status: "not_required", reason: "assisted mode uses short-form documentation fixture" },
+      INDEPENDENT: { status: "not_required", reason: "independent mode uses external ticket review fixture" }
+    }
+  };
+  const guided = engine.createAttempt(definition, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  passTicketPredictionCommand(engine, guided, definition, primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id));
+  assert.equal(engine.finalizeAttempt(guided, definition).completed, false);
+  const assisted = engine.createAttempt(definition, { mode: "ASSISTED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  passTicketPredictionCommand(engine, assisted, definition, primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id));
+  assert.equal(engine.finalizeAttempt(assisted, definition).completed, true);
+  const independent = engine.createAttempt(definition, { mode: "INDEPENDENT", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  passTicketPredictionCommand(engine, independent, definition, primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id));
+  assert.equal(engine.finalizeAttempt(independent, definition).completed, true);
+  assert.notEqual(guided.attempt_key, assisted.attempt_key);
+});
+
+check("Switching modes never reuses another mode's completed stage.", () => {
+  const guided = engine.createAttempt(fixtures.explanationOnly, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  passTicketPredictionCommand(engine, guided, fixtures.explanationOnly, primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id));
+  engine.submitTicketNote(guided, fixtures.explanationOnly, "ticket_note", "Lesson ticket completed by student.");
+  assert.equal(engine.finalizeAttempt(guided, fixtures.explanationOnly).completed, true);
+  const assisted = engine.createAttempt(fixtures.explanationOnly, { mode: "ASSISTED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  assert.notEqual(assisted.stage_states.choose_next_command.status, "passed");
+});
+
+check("Output simulation cannot produce verification mastery.", () => {
+  const attempt = engine.createAttempt(fixtures.outputVerification, { mode: "GUIDED", canonical_command_id: fixtures.records.ciscoOutputVerification.canonical_command_id });
+  const candidates = engine.produceMasteryCandidates(attempt, fixtures.outputVerification);
+  assert.equal(candidates.verification.status, "not_supported");
+  assert.equal(candidates.verification.score, 0);
+});
+
+check("Arbitrary critical-failure resolution is rejected.", () => {
+  const attempt = engine.createAttempt(fixtures.config, { mode: "GUIDED", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  engine.submitTicketNote(attempt, fixtures.config, "technician_ticket", "Student-submitted ticket.");
+  engine.submitStudentResponse(attempt, fixtures.config, "prediction_before_output", "evidence present");
+  engine.submitStudentResponse(attempt, fixtures.config, "choose_next_command", "display interface brief");
+  const result = engine.resolveCriticalFailure(attempt, "wrong_vendor_syntax", "choose_next_command");
+  assert.equal(result.resolved, false);
+  assert.equal(result.reason, "resolution_evidence_required");
+});
+
+check("Correct stage retry can resolve a remediable wrong-vendor failure.", () => {
+  const attempt = engine.createAttempt(fixtures.config, { mode: "GUIDED", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  engine.submitTicketNote(attempt, fixtures.config, "technician_ticket", "Student-submitted ticket.");
+  engine.submitStudentResponse(attempt, fixtures.config, "prediction_before_output", "evidence present");
+  engine.submitStudentResponse(attempt, fixtures.config, "choose_next_command", "display interface brief");
+  assert.equal(engine.submitStudentResponse(attempt, fixtures.config, "choose_next_command", primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id)).passed, true);
+  const resolution = engine.resolveCriticalFailure(attempt, fixtures.config, "wrong_vendor_syntax", "choose_next_command", { type: "stage_retry", stage_id: "choose_next_command" });
+  assert.equal(resolution.resolved, true);
+  assert.equal(resolution.resolution.resolution_type, "stage_retry");
+});
+
+check("Trusted remediation evidence must match the attempt.", () => {
+  const definition = deepClone(fixtures.config);
+  definition.stages.find((stage) => stage.stage_id === "runtime_execution").remediates_critical_failures = ["wrong_vendor_syntax"];
+  const attempt = engine.createAttempt(definition, { mode: "GUIDED", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  engine.submitTicketNote(attempt, definition, "technician_ticket", "Student-submitted ticket.");
+  engine.submitStudentResponse(attempt, definition, "prediction_before_output", "evidence present");
+  engine.submitStudentResponse(attempt, definition, "choose_next_command", "display interface brief");
+  engine.submitStudentResponse(attempt, definition, "choose_next_command", primaryCommand(fixtures, fixtures.records.ciscoConfig.canonical_command_id));
+  const otherAttempt = engine.createAttempt(definition, { mode: "GUIDED", canonical_command_id: fixtures.records.ciscoConfig.canonical_command_id });
+  const otherEvidenceId = makeTrustedEvidence(otherAttempt, "runtime_execution").evidence_id;
+  assert.equal(engine.resolveCriticalFailure(attempt, definition, "wrong_vendor_syntax", "choose_next_command", { type: "trusted_evidence", stage_id: "runtime_execution", evidence_id: otherEvidenceId }).resolved, false);
+  const evidence = makeTrustedEvidence(attempt, "runtime_execution", { evidence_id: `remediate-${attempt.attempt_id}` });
+  assert.equal(engine.ingestTrustedExternalEvidence(attempt, definition, "runtime_execution", evidence).accepted, true);
+  const resolution = engine.resolveCriticalFailure(attempt, definition, "wrong_vendor_syntax", "choose_next_command", { type: "trusted_evidence", stage_id: "runtime_execution", evidence_id: evidence.evidence_id });
+  assert.equal(resolution.resolved, true);
+  assert.deepEqual(resolution.resolution.resolution_evidence_ids, [evidence.evidence_id]);
+});
+
+check("Unresolved critical failures still block completion and resolution history appears in final result.", () => {
+  const attempt = engine.createAttempt(fixtures.explanationOnly, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaExplanation.canonical_command_id });
+  passTicketPredictionCommand(engine, attempt, fixtures.explanationOnly, primaryCommand(fixtures, fixtures.records.arubaExplanation.canonical_command_id));
+  engine.submitTicketNote(attempt, fixtures.explanationOnly, "ticket_note", "Lesson ticket completed by student.");
+  attempt.critical_failures.push({ code: "unsafe_command_choice", stage_id: "choose_next_command", remediation_possible: true, resolved: false, timestamp: "2026-07-15T08:00:00.000Z" });
+  let completion = engine.finalizeAttempt(attempt, fixtures.explanationOnly);
+  assert.equal(completion.completed, false);
+  assert.equal(hasBlocker(completion, "critical_failure:unsafe_command_choice"), true);
+  attempt.status = "active";
+  const resolution = engine.resolveCriticalFailure(attempt, fixtures.explanationOnly, "unsafe_command_choice", "choose_next_command", { type: "stage_retry", stage_id: "choose_next_command" });
+  assert.equal(resolution.resolved, true);
+  completion = engine.finalizeAttempt(attempt, fixtures.explanationOnly);
+  assert.equal(completion.resolution_history.length, 1);
+});
+
+check("Tampered attempt_key is rejected on restore.", () => {
+  const attempt = engine.createAttempt(fixtures.outputSimulation, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaOutput.canonical_command_id });
+  const serialized = deepClone(attempt);
+  serialized.attempt_key = "tampered";
+  assertThrowsCode(() => engine.restoreAttempt(serialized, fixtures.outputSimulation), "attempt_key_mismatch");
+});
+
+check("Inconsistent serialized completion is rejected.", () => {
+  const attempt = engine.createAttempt(fixtures.outputSimulation, { mode: "GUIDED", canonical_command_id: fixtures.records.arubaOutput.canonical_command_id });
+  attempt.completion_result = { completed: true, eligible_for_mastery: true, blockers: [], finalized_at: "2026-07-15T08:00:00.000Z" };
+  assertThrowsCode(() => engine.restoreAttempt(attempt, fixtures.outputSimulation), "inconsistent_serialized_completion");
+});
+
+check("Visible application hashes remain unchanged.", () => {
+  assert.deepEqual(changedFromBase([
+    "lab.html",
+    "styles.css",
+    "src/app-release-21.js",
+    "sw.js"
+  ]), []);
+});
+
+check("Runtime hashes remain unchanged.", () => {
+  assert.deepEqual(changedFromBase([
+    "src/switch-runtime.js",
+    "src/lab-engine.js",
+    "data/generated/command-inventory.json",
+    "data/generated/route-inventory.json",
+    "data/platforms/switch-profiles.json",
+    "data/generated/curriculum-index.json"
+  ]), []);
 });
 
 console.log(JSON.stringify({

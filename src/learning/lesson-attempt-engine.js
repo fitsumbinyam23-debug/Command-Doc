@@ -12,7 +12,9 @@ import {
   attemptKey,
   deepClone,
   findCatalogCommand,
+  modeStageException,
   publicLessonDefinition,
+  requiredStageIdsForMode,
   targetByCommand,
   validateLessonDefinition
 } from "./lesson-definition.js";
@@ -21,6 +23,7 @@ import { validateTrustedEvidenceEnvelope } from "./lesson-evidence.js";
 
 const ASSESSED_OUTPUT_STAGES = new Set(["healthy_output", "fault_output", "evidence_interpretation"]);
 const TRUSTED_STAGE_TYPES = new Set(["runtime_execution", "runtime_verification"]);
+const TRUSTED_EVALUATOR_TYPES = new Set(["trusted_external_evidence", "trusted_verification_evidence"]);
 
 function nowFrom(clock) {
   return clock ? clock() : new Date().toISOString();
@@ -58,6 +61,10 @@ function isStageVisibleInMode(stage, mode) {
   return availability.length === 0 || availability.includes(mode);
 }
 
+function isTrustedEvidenceStage(stage) {
+  return TRUSTED_STAGE_TYPES.has(stage?.stage_type) || TRUSTED_EVALUATOR_TYPES.has(stage?.evaluator?.type);
+}
+
 function defaultDimensionResult(dimension, attempt, supported) {
   return {
     dimension,
@@ -82,11 +89,7 @@ function targetSupportRecord(target, catalogRecord) {
 }
 
 function activeRequiredStageIds(target, definition, mode) {
-  const stages = stageMap(definition);
-  return asArray(target.required_stage_ids).filter((stageId) => {
-    const stage = stages.get(stageId);
-    return stage && isStageVisibleInMode(stage, mode) && stage.requirement_status !== "unsupported" && stage.support_status !== "unsupported";
-  });
+  return requiredStageIdsForMode(target, definition, mode);
 }
 
 function hasPassed(attempt, stageId) {
@@ -101,6 +104,14 @@ function safeError(code, message = code) {
   const error = new Error(message);
   error.code = code;
   return error;
+}
+
+function normalizedCompletionForComparison(completion) {
+  return {
+    completed: Boolean(completion?.completed),
+    eligible_for_mastery: Boolean(completion?.eligible_for_mastery),
+    blockers: asArray(completion?.blockers).sort()
+  };
 }
 
 export class LessonAttemptEngine {
@@ -176,21 +187,62 @@ export class LessonAttemptEngine {
       },
       administrative_unlocks: [],
       confidence: null,
+      resolution_history: [],
       definition_version: definition.definition_version || definition.schema_version
     };
     attempt.current_stage_id = this.#firstAvailableStageId(attempt, target);
     return attempt;
   }
 
-  restoreAttempt(serialized) {
+  restoreAttempt(serialized, definition = null) {
     const attempt = typeof serialized === "string" ? JSON.parse(serialized) : deepClone(serialized);
     if (attempt?.schema_version !== ATTEMPT_STATE_SCHEMA_VERSION) {
       throw safeError("unsupported_attempt_schema", `unsupported attempt schema_version ${attempt?.schema_version || "<missing>"}`);
     }
     requireControlled(attempt.status, ATTEMPT_STATUSES, "attempt status");
     requireControlled(attempt.mode, LEARNING_MODES, "mode");
-    for (const state of Object.values(attempt.stage_states || {})) {
+    const recomputedKey = attemptKey({
+      lesson_id: attempt.lesson_id,
+      vendor_id: attempt.vendor_id,
+      canonical_command_id: attempt.canonical_command_id,
+      mode: attempt.mode,
+      attempt_id: attempt.attempt_id
+    });
+    if (attempt.attempt_key !== recomputedKey) {
+      throw safeError("attempt_key_mismatch", "attempt_key does not match attempt identity fields");
+    }
+    const stageStateEntries = Object.entries(attempt.stage_states || {});
+    const stageIds = new Set();
+    const definitionStages = definition ? stageMap(definition) : null;
+    for (const [stageId, state] of stageStateEntries) {
+      if (stageIds.has(stageId)) throw safeError("duplicate_stage_state", `duplicate stage state ${stageId}`);
+      stageIds.add(stageId);
+      if (state.stage_id !== stageId) throw safeError("stage_state_identity_mismatch", `stage state key ${stageId} does not match ${state.stage_id}`);
+      if (definitionStages && !definitionStages.has(stageId)) throw safeError("unknown_stage_state", `attempt has unknown stage state ${stageId}`);
       requireControlled(state.status, STAGE_STATUSES, `stage ${state.stage_id} status`);
+    }
+    if (definitionStages) {
+      for (const stageId of definitionStages.keys()) {
+        if (!stageIds.has(stageId)) throw safeError("missing_stage_state", `attempt is missing stage state ${stageId}`);
+      }
+    }
+    const dimensionIds = new Set();
+    for (const [dimension, result] of Object.entries(attempt.dimension_results || {})) {
+      if (!MASTERY_DIMENSIONS.includes(dimension)) throw safeError("unknown_dimension_result", `unknown dimension result ${dimension}`);
+      if (dimensionIds.has(dimension)) throw safeError("duplicate_dimension_result", `duplicate dimension result ${dimension}`);
+      dimensionIds.add(dimension);
+      if (result?.dimension !== dimension) throw safeError("dimension_result_identity_mismatch", `dimension result key ${dimension} does not match ${result?.dimension}`);
+      if (result?.source_mode && result.source_mode !== attempt.mode) throw safeError("dimension_result_mode_mismatch", `dimension result ${dimension} has mode ${result.source_mode}`);
+    }
+    if (definition) {
+      if (definition.lesson_id !== attempt.lesson_id) throw safeError("lesson_identity_mismatch", "attempt lesson_id does not match definition");
+      const target = targetByCommand(definition, attempt.canonical_command_id);
+      if (!target) throw safeError("unknown_command_target", `lesson does not target ${attempt.canonical_command_id}`);
+      if (target.vendor_id !== attempt.vendor_id) throw safeError("vendor_identity_mismatch", "attempt vendor does not match definition target");
+      const actualCompletion = this.evaluateCompletion(attempt, definition);
+      if (JSON.stringify(normalizedCompletionForComparison(actualCompletion)) !== JSON.stringify(normalizedCompletionForComparison(attempt.completion_result))) {
+        throw safeError("inconsistent_serialized_completion", "serialized completion_result does not match evaluated completion");
+      }
     }
     for (const evidence of asArray(attempt.submitted_evidence)) {
       if (evidence.evidence_id) this.usedEvidenceIds.add(evidence.evidence_id);
@@ -258,8 +310,13 @@ export class LessonAttemptEngine {
         stage_id: failure.stage_id,
         remediation_possible: failure.remediation_possible,
         resolved: Boolean(failure.resolved),
+        resolved_at: failure.resolved_at || null,
+        resolution_type: failure.resolution_type || null,
+        resolution_stage_id: failure.resolution_stage_id || null,
+        resolution_evidence_ids: asArray(failure.resolution_evidence_ids),
         timestamp: failure.timestamp
       })),
+      resolution_history: deepClone(attempt.resolution_history || []),
       completion_result: deepClone(attempt.completion_result),
       confidence: attempt.confidence ? { value: attempt.confidence.value, submitted_at: attempt.confidence.submitted_at } : null,
       definition_version: attempt.definition_version
@@ -328,6 +385,9 @@ export class LessonAttemptEngine {
   submitStudentResponse(attempt, definition, stageId, response) {
     const stage = stageById(definition, stageId);
     this.#ensureStageCanSubmit(attempt, stage);
+    if (isTrustedEvidenceStage(stage)) {
+      throw safeError("trusted_evidence_ingest_required", `stage ${stageId} requires provider-validated trusted evidence ingest`);
+    }
     if (stage.content_role === "assessed" && ASSESSED_OUTPUT_STAGES.has(stage.stage_type) && attempt.prediction_gate.required && !attempt.prediction_gate.prediction_submitted_at) {
       throw safeError("prediction_required_before_assessed_output", `stage ${stageId} requires a prediction first`);
     }
@@ -343,17 +403,17 @@ export class LessonAttemptEngine {
     const policy = getModePolicy(definition, attempt.mode);
     const state = this.#stageState(attempt, stageId);
     const timestamp = nowFrom(this.clock);
+    if (attempt.status !== "active") {
+      return { allowed: false, reason: "attempt_not_active" };
+    }
+    if (!["available", "in_progress"].includes(state.status)) {
+      return { allowed: false, reason: `hint_stage_${state.status}` };
+    }
     if (!policy.hints_allowed) {
-      const failure = { stage_id: stageId, code: "hint_not_allowed", timestamp };
-      attempt.failure_history.push(failure);
-      attempt.updated_at = timestamp;
       return { allowed: false, reason: "hint_not_allowed" };
     }
     const alreadyUsed = asArray(attempt.hint_history).filter((hint) => hint.stage_id === stageId).length;
     if (policy.hint_limit !== null && alreadyUsed >= policy.hint_limit) {
-      const failure = { stage_id: stageId, code: "hint_limit_reached", timestamp };
-      attempt.failure_history.push(failure);
-      attempt.updated_at = timestamp;
       return { allowed: false, reason: "hint_limit_reached" };
     }
     const hints = asArray(stage.hints);
@@ -414,7 +474,7 @@ export class LessonAttemptEngine {
       verification_record_id: sanitizedEnvelope.verification_record_id,
       integrity_result: sanitizedEnvelope.integrity_result
     });
-    const result = evaluateStage(stage, { trusted_evidence: sanitizedEnvelope }, this.#evaluationContext(attempt, definition, stage));
+    const result = evaluateStage(stage, { trusted_evidence: sanitizedEnvelope }, this.#evaluationContext(attempt, definition, stage, { trustedEvidenceValidated: true }));
     const applied = this.#applyStageResult(attempt, definition, stage, result, {
       response_kind: "trusted_evidence",
       response: { evidence_id: sanitizedEnvelope.evidence_id }
@@ -459,7 +519,8 @@ export class LessonAttemptEngine {
     const target = targetByCommand(definition, attempt.canonical_command_id);
     if (!target) throw safeError("unknown_command_target", `lesson does not target ${attempt.canonical_command_id}`);
     const blockers = [];
-    for (const stageId of activeRequiredStageIds(target, definition, attempt.mode)) {
+    const requiredStageIds = activeRequiredStageIds(target, definition, attempt.mode);
+    for (const stageId of requiredStageIds) {
       if (!hasPassed(attempt, stageId)) blockers.push(`required_stage_not_passed:${stageId}`);
     }
     for (const failure of unresolvedCriticalFailures(attempt)) {
@@ -471,13 +532,13 @@ export class LessonAttemptEngine {
     if (attempt.prediction_gate.violation) {
       blockers.push("prediction_gate_violated");
     }
-    if (asArray(target.required_stage_ids).includes("ticket_note") && !hasPassed(attempt, "ticket_note")) {
+    if (requiredStageIds.includes("ticket_note") && !hasPassed(attempt, "ticket_note")) {
       blockers.push("ticket_note_missing");
     }
-    if (asArray(target.required_stage_ids).includes("runtime_verification") && !hasPassed(attempt, "runtime_verification")) {
+    if (requiredStageIds.includes("runtime_verification") && !hasPassed(attempt, "runtime_verification")) {
       blockers.push("verification_missing");
     }
-    if (asArray(target.required_stage_ids).includes("save_or_rollback") && !hasPassed(attempt, "save_or_rollback")) {
+    if (requiredStageIds.includes("save_or_rollback") && !hasPassed(attempt, "save_or_rollback")) {
       blockers.push("save_or_rollback_missing");
     }
     const candidates = this.produceMasteryCandidates(attempt, definition);
@@ -497,6 +558,8 @@ export class LessonAttemptEngine {
       eligible_for_mastery: blockers.length === 0,
       blockers,
       finalized_at: attempt.completion_result?.finalized_at || null,
+      critical_failures: deepClone(attempt.critical_failures || []),
+      resolution_history: deepClone(attempt.resolution_history || []),
       mastery_candidates: candidates
     };
   }
@@ -543,27 +606,80 @@ export class LessonAttemptEngine {
     return candidates;
   }
 
-  resolveCriticalFailure(attempt, code, stageId) {
-    const timestamp = nowFrom(this.clock);
-    let resolved = false;
-    for (const failure of attempt.critical_failures) {
-      if (failure.code === code && (!stageId || failure.stage_id === stageId) && failure.remediation_possible) {
-        failure.resolved = true;
-        failure.resolved_at = timestamp;
-        resolved = true;
-      }
+  resolveCriticalFailure(attempt, definition, code, stageId, resolution = {}) {
+    if (!definition || typeof definition === "string") {
+      return { resolved: false, reason: "resolution_evidence_required" };
     }
-    if (resolved) attempt.updated_at = timestamp;
-    return { resolved };
+    const failure = asArray(attempt.critical_failures).find((candidate) => (
+      candidate.code === code &&
+      candidate.stage_id === stageId &&
+      !candidate.resolved
+    ));
+    if (!failure) return { resolved: false, reason: "failure_not_found" };
+    if (!failure.remediation_possible) return { resolved: false, reason: "failure_not_remediable" };
+
+    const resolutionType = resolution.type || "stage_retry";
+    const resolutionStageId = resolution.stage_id || stageId;
+    const resolutionStage = stageById(definition, resolutionStageId);
+    const stageState = attempt.stage_states?.[resolutionStageId];
+    const remediates = asArray(resolutionStage.remediates_critical_failures);
+    const stageCanRemediate = resolutionStageId === stageId || remediates.includes(code);
+    const evidenceIds = asArray(resolution.evidence_ids || (resolution.evidence_id ? [resolution.evidence_id] : []));
+
+    if (!["stage_retry", "remediation_stage", "trusted_evidence"].includes(resolutionType)) {
+      return { resolved: false, reason: "unknown_resolution_type" };
+    }
+    if (!stageCanRemediate) {
+      return { resolved: false, reason: "stage_does_not_remediate_failure" };
+    }
+    if (["stage_retry", "remediation_stage"].includes(resolutionType) && stageState?.status !== "passed") {
+      return { resolved: false, reason: "resolution_stage_not_passed" };
+    }
+    if (resolutionType === "stage_retry" && resolutionStageId !== stageId) {
+      return { resolved: false, reason: "stage_retry_must_use_affected_stage" };
+    }
+    if (resolutionType === "trusted_evidence") {
+      if (!evidenceIds.length) return { resolved: false, reason: "resolution_evidence_required" };
+      const submitted = asArray(attempt.submitted_evidence);
+      const allEvidenceMatches = evidenceIds.every((evidenceId) => submitted.some((evidence) => (
+        evidence.evidence_id === evidenceId &&
+        evidence.stage_id === resolutionStageId &&
+        evidence.integrity_result === "passed"
+      )));
+      if (!allEvidenceMatches) return { resolved: false, reason: "resolution_evidence_not_matched_to_attempt" };
+    }
+
+    const timestamp = nowFrom(this.clock);
+    failure.resolved = true;
+    failure.resolved_at = timestamp;
+    failure.resolution_type = resolutionType;
+    failure.resolution_stage_id = resolutionStageId;
+    failure.resolution_evidence_ids = evidenceIds;
+    const record = {
+      failure_code: code,
+      affected_stage_id: stageId,
+      resolved_at: timestamp,
+      resolution_type: resolutionType,
+      resolution_stage_id: resolutionStageId,
+      resolution_evidence_ids: evidenceIds
+    };
+    attempt.resolution_history = [...asArray(attempt.resolution_history), record];
+    attempt.updated_at = timestamp;
+    attempt.completion_result = this.evaluateCompletion(attempt, definition);
+    return { resolved: true, resolution: deepClone(record) };
   }
 
   #initialStageStates(definition, target, mode, timestamp) {
     const states = {};
     for (const stage of asArray(definition.stages)) {
       const targetRequires = isStageRequiredForTarget(target, stage);
+      const modeException = modeStageException(target, stage.stage_id, mode);
       let status = "available";
       let reason = stage.reason || null;
-      if (!isStageVisibleInMode(stage, mode)) {
+      if (targetRequires && modeException?.status === "not_required") {
+        status = "not_applicable";
+        reason = modeException.reason;
+      } else if (!isStageVisibleInMode(stage, mode)) {
         status = "not_applicable";
         reason = "not_available_in_mode";
       } else if (stage.requirement_status === "unsupported" || stage.support_status === "unsupported") {
@@ -623,14 +739,15 @@ export class LessonAttemptEngine {
     return state;
   }
 
-  #evaluationContext(attempt, definition, stage) {
+  #evaluationContext(attempt, definition, stage, overrides = {}) {
     const target = targetByCommand(definition, attempt.canonical_command_id);
     return {
       attempt,
       target,
       verificationRequired: asArray(target?.required_stage_ids).includes("runtime_verification"),
       verificationSatisfied: hasPassed(attempt, "runtime_verification"),
-      stage_id: stage.stage_id
+      stage_id: stage.stage_id,
+      ...overrides
     };
   }
 

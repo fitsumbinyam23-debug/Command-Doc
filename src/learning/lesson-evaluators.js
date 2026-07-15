@@ -91,7 +91,7 @@ export function evaluateStage(stage, response, context = {}) {
     case "trusted_external_evidence":
     case "trusted_verification_evidence": {
       const envelope = response?.trusted_evidence || response;
-      if (envelope?.integrity_result === "passed" && envelope?.evidence_id) {
+      if (context.trustedEvidenceValidated === true && envelope?.integrity_result === "passed" && envelope?.evidence_id) {
         return markPassed({ evidence_ids: [envelope.evidence_id], score: 1 });
       }
       return markFailed("trusted_evidence_required", { retry_allowed: false });
@@ -126,4 +126,3 @@ export function evaluateStage(stage, response, context = {}) {
       return markFailed("unsupported_evaluator", { retry_allowed: false });
   }
 }
-

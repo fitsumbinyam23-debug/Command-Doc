@@ -118,6 +118,10 @@ blocked
 
 Dependencies unlock only after their prerequisite stages pass or are honestly classified as not applicable or not supported. Required unsupported stages invalidate a lesson definition. Optional unsupported stages remain represented as `not_supported` with a reason.
 
+Stage dependencies must be a directed acyclic graph. The validator rejects self-cycles, two-stage cycles, and longer cycles before an attempt can be created.
+
+If a target-required stage is unavailable in a supported mode, the target must declare a machine-readable `mode_stage_exceptions[stage_id][mode]` record with a controlled status and reason. Hidden required stages cannot disappear from completion by filtering.
+
 ## Learning Modes
 
 `GUIDED` allows worked examples, progressive hints, and immediate reasoning feedback. It still requires assessed stages and records hint penalties only against relevant dimensions.
@@ -165,6 +169,8 @@ integrity_result
 
 The engine rejects a plain `verified: true` flag, mismatched attempt/vendor/command/stage identity, unverified envelopes, missing provider verification, and reused evidence IDs.
 
+Trusted execution and verification stages are ingest-only. `submitStudentResponse()` rejects `runtime_execution`, `runtime_verification`, and trusted-evidence evaluator stages with `trusted_evidence_ingest_required`, even when the payload looks like a complete trusted envelope. Only `ingestTrustedExternalEvidence()` can create trusted stage credit.
+
 Stage 2 includes only the contract and fixture provider. The production runtime adapter belongs to Stage 4.
 
 ## Scoring Contract
@@ -188,11 +194,19 @@ documentation
 
 Support-level rules come from the normalized learning command record. Explanation-only and output-simulation commands cannot receive practical configuration mastery merely because a lesson says so. Confidence never increases a score. Administrative unlocks never create mastery evidence.
 
+Output-simulation commands may award concept, syntax, prediction, output interpretation, command selection, and declared troubleshooting only. They do not award runtime verification, configuration safety, practical execution, Save, or rollback mastery.
+
 ## Critical Failures
 
 Critical failures have stable codes, stage identity, remediation flags, and final-result visibility. Examples include wrong-vendor syntax, unsafe command choice, mismatched trusted evidence, reused evidence, Save before required verification, and answer leakage.
 
 Unresolved critical failures block completion.
+
+Critical failures cannot be cleared by code string alone. Resolution requires a passed affected-stage retry, a passed designated remediation stage, or matching provider-validated trusted evidence already submitted for the same attempt, vendor, command, and stage. Resolution history is included in final results.
+
+## Restore Consistency
+
+`restoreAttempt(serialized, definition)` recomputes `attempt_key`, validates identity fields, rejects unknown or mismatched stage-state IDs when a definition is supplied, rejects malformed dimension-result identities, and refuses serialized completion claims that do not match `evaluateCompletion()`.
 
 ## Catalog Compatibility
 
@@ -213,5 +227,7 @@ Stage 2 does not:
 Stage 3 should add visible pilot lessons using this engine.
 
 Stage 4 should add the trusted runtime evidence adapter.
+
+Stage 4 must also preserve the universal terminal/runtime adapter requirement: every canonical command and approved alias should eventually produce one accurate vendor/profile-aware terminal result. Known commands must not fall through to generic unknown-command output merely because a detailed handler is missing.
 
 Stage 5 should persist mastery and review records.

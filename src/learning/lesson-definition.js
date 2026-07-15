@@ -7,6 +7,7 @@ export const LEARNING_MODES = Object.freeze(["GUIDED", "ASSISTED", "INDEPENDENT"
 export const ATTEMPT_STATUSES = Object.freeze(["active", "completed", "failed", "abandoned", "invalid_definition"]);
 export const STAGE_STATUSES = Object.freeze(["locked", "available", "in_progress", "submitted", "passed", "failed", "not_applicable", "not_supported", "blocked"]);
 export const STAGE_REQUIREMENT_STATUSES = Object.freeze(["required", "conditional", "optional", "unavailable", "unsupported"]);
+export const MODE_STAGE_EXCEPTION_STATUSES = Object.freeze(["not_required"]);
 export const STAGE_TYPES = Object.freeze([
   "technician_ticket",
   "learning_objective",
@@ -143,7 +144,7 @@ export function allowedDimensionsForSupport(record) {
     return allow(["concept", "syntax", "command_selection"]);
   }
   if (support === "output_simulation") {
-    return allow(["concept", "syntax", "prediction", "output_interpretation", "command_selection", "troubleshooting", "verification"]);
+    return allow(["concept", "syntax", "prediction", "output_interpretation", "command_selection", "troubleshooting"]);
   }
   if (support === "simplified_state_simulation") {
     return allow(MASTERY_DIMENSIONS);
@@ -156,6 +157,55 @@ export function allowedDimensionsForSupport(record) {
 
 export function targetByCommand(definition, commandId) {
   return asArray(definition?.command_targets).find((target) => target.canonical_command_id === commandId) || null;
+}
+
+export function modeStageException(target, stageId, mode) {
+  const exception = target?.mode_stage_exceptions?.[stageId]?.[mode] || null;
+  return exception && typeof exception === "object" ? exception : null;
+}
+
+export function isStageRequiredForMode(target, stage, mode) {
+  if (!asArray(target?.required_stage_ids).includes(stage?.stage_id)) return false;
+  const exception = modeStageException(target, stage.stage_id, mode);
+  return exception?.status !== "not_required";
+}
+
+export function requiredStageIdsForMode(target, definition, mode) {
+  const stages = new Map(asArray(definition?.stages).map((stage) => [stage.stage_id, stage]));
+  return asArray(target?.required_stage_ids).filter((stageId) => {
+    const stage = stages.get(stageId);
+    return stage && isStageRequiredForMode(target, stage, mode) && stage.requirement_status !== "unsupported" && stage.support_status !== "unsupported";
+  });
+}
+
+function dependencyCycles(stages) {
+  const stageIds = new Set(stages.map((stage) => stage.stage_id));
+  const graph = new Map(stages.map((stage) => [
+    stage.stage_id,
+    asArray(stage.dependencies).filter((dependency) => stageIds.has(dependency)).sort()
+  ]));
+  const visiting = new Set();
+  const visited = new Set();
+  const stack = [];
+  const cycles = [];
+
+  const visit = (stageId) => {
+    if (visiting.has(stageId)) {
+      const start = stack.indexOf(stageId);
+      cycles.push([...stack.slice(start), stageId]);
+      return;
+    }
+    if (visited.has(stageId)) return;
+    visiting.add(stageId);
+    stack.push(stageId);
+    for (const dependency of graph.get(stageId) || []) visit(dependency);
+    stack.pop();
+    visiting.delete(stageId);
+    visited.add(stageId);
+  };
+
+  for (const stage of stages) visit(stage.stage_id);
+  return cycles;
 }
 
 export function validateLessonDefinition(definition, options = {}) {
@@ -194,6 +244,7 @@ export function validateLessonDefinition(definition, options = {}) {
 
   const stageIds = new Set();
   const stageById = new Map();
+  const stages = asArray(definition.stages);
   for (const stage of asArray(definition.stages)) {
     requireString("stage.stage_id", stage?.stage_id);
     if (stageIds.has(stage.stage_id)) errors.push(`duplicate stage_id ${stage.stage_id}`);
@@ -219,6 +270,9 @@ export function validateLessonDefinition(definition, options = {}) {
     if (["conditional", "unavailable", "unsupported"].includes(stage.requirement_status) && !stage.reason) {
       errors.push(`stage ${stage.stage_id} must explain ${stage.requirement_status} status`);
     }
+  }
+  for (const cycle of dependencyCycles(stages)) {
+    errors.push(`dependency cycle detected: ${cycle.join(" -> ")}`);
   }
 
   const targetIds = new Set();
@@ -248,6 +302,30 @@ export function validateLessonDefinition(definition, options = {}) {
       const stage = stageById.get(stageId);
       if (!stage) errors.push(`target ${target.canonical_command_id} requires unknown stage ${stageId}`);
       if (stage?.requirement_status === "unsupported") errors.push(`target ${target.canonical_command_id} requires unsupported stage ${stageId}`);
+      for (const mode of supportedModes) {
+        if (!stage) continue;
+        const visible = asArray(stage.mode_availability).length === 0 || asArray(stage.mode_availability).includes(mode);
+        const exception = modeStageException(target, stageId, mode);
+        if (!visible && !exception) {
+          errors.push(`target ${target.canonical_command_id} required stage ${stageId} is unavailable in ${mode} without mode exception`);
+        }
+        if (exception) {
+          if (!MODE_STAGE_EXCEPTION_STATUSES.includes(exception.status)) {
+            errors.push(`target ${target.canonical_command_id} stage ${stageId} mode ${mode} has unknown mode exception status ${exception.status}`);
+          }
+          if (typeof exception.reason !== "string" || !exception.reason.trim()) {
+            errors.push(`target ${target.canonical_command_id} stage ${stageId} mode ${mode} mode exception requires a reason`);
+          }
+        }
+      }
+    }
+    for (const [stageId, byMode] of Object.entries(target.mode_stage_exceptions || {})) {
+      if (!stageById.has(stageId)) errors.push(`target ${target.canonical_command_id} has mode exception for unknown stage ${stageId}`);
+      for (const [mode, exception] of Object.entries(byMode || {})) {
+        if (!LEARNING_MODES.includes(mode)) errors.push(`target ${target.canonical_command_id} stage ${stageId} has mode exception for unknown mode ${mode}`);
+        if (!MODE_STAGE_EXCEPTION_STATUSES.includes(exception?.status)) errors.push(`target ${target.canonical_command_id} stage ${stageId} mode ${mode} has unknown mode exception status ${exception?.status}`);
+        if (typeof exception?.reason !== "string" || !exception.reason.trim()) errors.push(`target ${target.canonical_command_id} stage ${stageId} mode ${mode} mode exception requires a reason`);
+      }
     }
     const allowed = new Set(allowedDimensionsForSupport(record));
     for (const dimension of asArray(target.mastery_dimensions)) {
@@ -310,4 +388,3 @@ export function publicLessonDefinition(definition, mode) {
     migration_status: definition.migration_status
   };
 }
-

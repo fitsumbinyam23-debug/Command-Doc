@@ -14,6 +14,9 @@
   "unknown_stage_names": [],
   "migration_statuses_changed": [],
   "review_coverage_changed": false,
+  "support_policy_effects": {
+    "output_simulation_verification_restricted_rows": 15
+  },
   "traceability_command_count": 163,
   "rows": [
     {
@@ -2177,8 +2180,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -2279,8 +2281,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -2785,8 +2786,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -2887,8 +2887,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -3195,8 +3194,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -4087,8 +4085,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -4594,8 +4591,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -4845,8 +4841,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -4947,8 +4942,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -5295,8 +5289,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -7213,8 +7206,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -7409,8 +7401,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -8008,8 +7999,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -8107,8 +8097,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],
@@ -8256,8 +8245,7 @@
         "syntax",
         "prediction",
         "output_interpretation",
-        "command_selection",
-        "verification"
+        "command_selection"
       ],
       "engine_representable": true,
       "unsupported_stages": [],

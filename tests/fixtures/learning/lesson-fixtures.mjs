@@ -227,6 +227,7 @@ export function buildFixtureDefinitions(catalog) {
     ciscoConfig: firstBy(catalog, (record) => record.canonical_command_id === "cisco_interface_config", "Cisco configuration command"),
     ciscoFullReadOnly: firstBy(catalog, (record) => record.canonical_command_id === "cisco_show_interface_status", "Cisco full-state read-only command"),
     ciscoAlias: firstBy(catalog, (record) => record.source_command?.aliases?.length && record.vendor_id === "cisco_ios", "Cisco alias command"),
+    ciscoOutputVerification: firstBy(catalog, (record) => record.runtime_support === "output_simulation" && record.mastery_dimensions?.includes("verification"), "output simulation command declaring verification"),
     hp: firstBy(catalog, (record) => record.vendor_id === "hp_comware", "HP Comware command"),
     arubaOutput: firstBy(catalog, (record) => record.runtime_support === "output_simulation" && record.vendor_id === "aruba_cx", "Aruba output simulation command"),
     arubaExplanation: firstBy(catalog, (record) => record.runtime_support === "explanation_only" && record.vendor_id === "aruba_cx", "Aruba explanation-only command"),
@@ -292,6 +293,9 @@ export function buildFixtureDefinitions(catalog) {
     }),
     outputSimulation: definitionFromRecord(records.arubaOutput, simulatedRequired, {
       lesson_id: "fixture-aruba-output-simulation"
+    }),
+    outputVerification: definitionFromRecord(records.ciscoOutputVerification, simulatedRequired, {
+      lesson_id: "fixture-output-simulation-verification-restricted"
     }),
     explanationOnly: definitionFromRecord(records.arubaExplanation, explanationRequired, {
       lesson_id: "fixture-aruba-explanation-only"

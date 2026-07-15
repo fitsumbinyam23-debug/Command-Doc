@@ -48,6 +48,10 @@ export function buildStage2CompatibilityAudit({ catalog, migrationReadiness, tra
   const vendors = [...new Set(rows.map((row) => row.vendor_id))].sort();
   const omitted = commands.filter((record) => !rows.some((row) => row.command_id === record.canonical_command_id));
   const unknownStageNames = [...new Set(rows.flatMap((row) => row.required_lesson_stages).filter((stage) => !STAGE_TYPES.includes(stage)))];
+  const outputSimulationVerificationRestrictedRows = commands.filter((record) => (
+    record.runtime_support === "output_simulation" &&
+    asArray(record.mastery_dimensions).includes("verification")
+  )).length;
   return {
     schema_version: "learning-integrity-stage-2.v1",
     generated_from: catalog?.schema_version || "learning-command-catalog.v1",
@@ -58,6 +62,9 @@ export function buildStage2CompatibilityAudit({ catalog, migrationReadiness, tra
     unknown_stage_names: unknownStageNames,
     migration_statuses_changed: [],
     review_coverage_changed: false,
+    support_policy_effects: {
+      output_simulation_verification_restricted_rows: outputSimulationVerificationRestrictedRows
+    },
     traceability_command_count: traceabilityMatrix?.counts?.canonical_commands ?? null,
     rows
   };
@@ -74,6 +81,7 @@ export function renderStage2CompatibilityMarkdown(audit) {
   lines.push(`- Commands omitted: ${audit.commands_omitted.length}`);
   lines.push(`- Migration statuses changed: ${audit.migration_statuses_changed.length}`);
   lines.push(`- Review coverage changed: ${audit.review_coverage_changed ? "yes" : "no"}`);
+  lines.push(`- Output-simulation rows with verification mastery restricted: ${audit.support_policy_effects?.output_simulation_verification_restricted_rows ?? 0}`);
   lines.push("");
   lines.push("Stage 2 reports engine representability only. It does not mark production lesson content complete, does not upgrade migration readiness, and does not fabricate practice or review coverage.");
   lines.push("");
@@ -97,4 +105,3 @@ export function renderStage2CompatibilityMarkdown(audit) {
   lines.push("");
   return lines.join("\n");
 }
-

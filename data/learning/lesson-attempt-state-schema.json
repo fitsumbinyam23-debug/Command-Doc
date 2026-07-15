@@ -64,7 +64,28 @@
       "integrity_result"
     ],
     "plain_verified_flag_allowed": false,
-    "provider_verification_required": true
+    "provider_verification_required": true,
+    "student_response_api_allowed": false,
+    "ingest_api_required": true
+  },
+  "critical_failure_resolution": {
+    "arbitrary_code_clear_allowed": false,
+    "allowed_resolution_types": ["stage_retry", "remediation_stage", "trusted_evidence"],
+    "required_resolution_record_fields": [
+      "failure_code",
+      "affected_stage_id",
+      "resolved_at",
+      "resolution_type",
+      "resolution_stage_id",
+      "resolution_evidence_ids"
+    ],
+    "non_remediable_failures": "remain permanently unresolved"
+  },
+  "restore_consistency": {
+    "recompute_attempt_key": true,
+    "validate_stage_state_ids_when_definition_supplied": true,
+    "validate_dimension_result_identities": true,
+    "reject_inconsistent_completion_claims": true
   },
   "serialization": {
     "format": "JSON",

@@ -27,6 +27,7 @@
   "controlled_values": {
     "modes": ["GUIDED", "ASSISTED", "INDEPENDENT"],
     "stage_requirement_statuses": ["required", "conditional", "optional", "unavailable", "unsupported"],
+    "mode_stage_exception_statuses": ["not_required"],
     "stage_statuses": ["locked", "available", "in_progress", "submitted", "passed", "failed", "not_applicable", "not_supported", "blocked"],
     "evaluator_types": [
       "exact_text",
@@ -82,6 +83,10 @@
       "completion_thresholds",
       "migration_status"
     ],
+    "mode_stage_exceptions": {
+      "shape": "mode_stage_exceptions[stage_id][mode] = { status: 'not_required', reason: string }",
+      "rule": "A target-required stage whose mode_availability excludes a supported mode must have an explicit machine-readable exception for that mode."
+    },
     "traceability": "Grouped lessons may share stages, but each target keeps its own objectives, evidence requirements, mastery dimensions, review eligibility, and migration status."
   },
   "stage": {
@@ -98,10 +103,13 @@
       "failure_behavior",
       "answer_visibility_policy"
     ],
+    "dependency_rule": "Stage dependencies must form a deterministic directed acyclic graph. Self-cycles, two-stage cycles, and longer cycles invalidate the definition.",
     "unsupported_rule": "A required stage with unsupported support_status invalidates the definition. Optional or conditional unsupported stages remain visible as not_supported with a reason."
   },
   "security": {
     "no_executable_lesson_code": true,
+    "trusted_evidence_student_submission_allowed": false,
+    "trusted_evidence_ingest_only": true,
     "forbidden_json_members": ["function", "eval", "dynamic_function"],
     "public_projection_must_redact": [
       "answer keys before permitted reveal",
