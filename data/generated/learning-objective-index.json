@@ -1,0 +1,4109 @@
+{
+  "schema_version": "learning-objective-index.v1",
+  "objective_count": 163,
+  "duplicate_objective_candidates": [],
+  "objectives": [
+    {
+      "objective_id": "obj_aruba_cx_aruba_configure_terminal",
+      "vendor_scope": "aruba_cx",
+      "concept": "Enters global configuration mode on ArubaOS-CX.",
+      "concept_family_id": "topic_cli_foundation",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'configure terminal' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_configure_terminal"
+      ],
+      "prerequisite_objective_ids": [],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_hostname",
+      "vendor_scope": "aruba_cx",
+      "concept": "Sets the ArubaOS-CX switch hostname.",
+      "concept_family_id": "device_identity",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'hostname <name>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_hostname"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_interface_config",
+      "vendor_scope": "aruba_cx",
+      "concept": "Enters ArubaOS-CX configuration mode for a specific interface.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'interface <interface>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_interface_config"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal",
+        "obj_aruba_cx_aruba_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_lacp_mode_active",
+      "vendor_scope": "aruba_cx",
+      "concept": "Enables active LACP negotiation on an ArubaOS-CX member interface.",
+      "concept_family_id": "link_aggregation_evidence",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'lacp mode active' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "aruba_lacp_mode_active"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_lacp_system_priority",
+      "vendor_scope": "aruba_cx",
+      "concept": "Sets ArubaOS-CX system priority used by LACP selection.",
+      "concept_family_id": "link_aggregation_evidence",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'lacp system-priority <priority>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "aruba_lacp_system_priority"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_no_shutdown",
+      "vendor_scope": "aruba_cx",
+      "concept": "Administratively enables the selected ArubaOS-CX interface.",
+      "concept_family_id": "interface_admin_state",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'no shutdown' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_no_shutdown"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal",
+        "obj_aruba_cx_aruba_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_reload",
+      "vendor_scope": "aruba_cx",
+      "concept": "Restarts the ArubaOS-CX device.",
+      "concept_family_id": "topic_device_lifecycle",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'reload' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "aruba_reload"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_events_reverse_count",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows a chosen number of recent ArubaOS-CX events with newest entries first.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show events -r -n <count>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_events_reverse_count"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_flash",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows ArubaOS-CX flash storage and software image information.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show flash' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_flash"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_interface",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows detailed interface state, counters, errors, speed, duplex, and media data.",
+      "concept_family_id": "interface_detail",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show interface' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_interface"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal",
+        "obj_aruba_cx_aruba_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_interface_brief",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows interface status, speed, duplex, and brief operational information.",
+      "concept_family_id": "interface_state_summary",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show interface brief' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_interface_brief"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal",
+        "obj_aruba_cx_aruba_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_interface_error_statistics",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows non-traffic interface error counters on ArubaOS-CX.",
+      "concept_family_id": "interface_detail",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show interface error-statistics' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_interface_error_statistics"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal",
+        "obj_aruba_cx_aruba_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_ip_interface_brief",
+      "vendor_scope": "aruba_cx",
+      "concept": "Summarizes ArubaOS-CX Layer 3 interfaces, IP addresses, and administrative and link states.",
+      "concept_family_id": "interface_state_summary",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show ip interface brief' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_ip_interface_brief"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal",
+        "obj_aruba_cx_aruba_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_ip_route",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows ArubaOS-CX IPv4 routes, their source, distance, metric, and next hop.",
+      "concept_family_id": "routing_table",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show ip route' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_ip_route"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_lacp_interfaces",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows ArubaOS-CX LACP interface state, aggregation membership, and partner information.",
+      "concept_family_id": "link_aggregation_evidence",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show lacp interfaces' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_lacp_interfaces"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_lldp_neighbor_info",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows LLDP neighbor details and local-to-remote interface mapping.",
+      "concept_family_id": "neighbor_discovery",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show lldp neighbor-info' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_lldp_neighbor_info"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_logging",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows recent ArubaOS-CX system log messages.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show logging' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_logging"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_mac_address_table",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows MAC addresses learned by the switch.",
+      "concept_family_id": "endpoint_mac_neighbor_evidence",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show mac-address-table' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_mac_address_table"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_power_over_ethernet",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows PoE status and budget on ArubaOS-CX switches that support PoE.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show power-over-ethernet' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_power_over_ethernet"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal",
+        "obj_aruba_cx_aruba_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_running_config",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows the active ArubaOS-CX configuration.",
+      "concept_family_id": "configuration_inspection",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show running-config' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "aruba_show_running_config"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal",
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_running_config_interface",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows running configuration applied to a specific interface.",
+      "concept_family_id": "configuration_inspection",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show running-config interface' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_running_config_interface"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal",
+        "obj_aruba_cx_aruba_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_spanning_tree",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows ArubaOS-CX spanning-tree instances, root information, port roles, and states.",
+      "concept_family_id": "spanning_tree_evidence",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show spanning-tree' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_spanning_tree"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_system",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows ArubaOS-CX system identity, platform state, uptime, and management information.",
+      "concept_family_id": "device_or_os_identity",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show system' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_system"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_system_resource_utilization",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows CPU, memory, storage, and process resource utilization.",
+      "concept_family_id": "device_or_os_identity",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show system resource-utilization' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_system_resource_utilization"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_version",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows ArubaOS-CX software version, platform, serial, and uptime information.",
+      "concept_family_id": "device_or_os_identity",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show version' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_version"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_show_vlan",
+      "vendor_scope": "aruba_cx",
+      "concept": "Shows VLAN IDs, names, status, and interface membership.",
+      "concept_family_id": "vlan_inventory",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'show vlan' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_show_vlan"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_shutdown",
+      "vendor_scope": "aruba_cx",
+      "concept": "Administratively disables the selected ArubaOS-CX interface.",
+      "concept_family_id": "interface_admin_state",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'shutdown' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_shutdown"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal",
+        "obj_aruba_cx_aruba_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_stp_priority",
+      "vendor_scope": "aruba_cx",
+      "concept": "Sets the ArubaOS-CX bridge priority for spanning-tree election.",
+      "concept_family_id": "spanning_tree_evidence",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'spanning-tree priority <priority>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "aruba_stp_priority"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_vlan",
+      "vendor_scope": "aruba_cx",
+      "concept": "Creates or enters an ArubaOS-CX VLAN context.",
+      "concept_family_id": "topic_vlans",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'vlan <vlan-id>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_vlan"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_vlan_access",
+      "vendor_scope": "aruba_cx",
+      "concept": "Sets the access VLAN for the selected ArubaOS-CX interface.",
+      "concept_family_id": "access_vlan_assignment",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'vlan access <vlan>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_vlan_access"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_vlan_trunk_allowed",
+      "vendor_scope": "aruba_cx",
+      "concept": "Defines allowed VLANs for an ArubaOS-CX trunk interface.",
+      "concept_family_id": "trunk_configuration",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'vlan trunk allowed <vlan-list>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_vlan_trunk_allowed"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief",
+        "obj_aruba_cx_aruba_show_vlan"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_vlan_trunk_native",
+      "vendor_scope": "aruba_cx",
+      "concept": "Sets the native VLAN for an ArubaOS-CX trunk interface.",
+      "concept_family_id": "trunk_configuration",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'vlan trunk native <vlan-id>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_vlan_trunk_native"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_show_interface_brief",
+        "obj_aruba_cx_aruba_show_vlan"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_aruba_cx_aruba_write_memory",
+      "vendor_scope": "aruba_cx",
+      "concept": "Saves the active ArubaOS-CX running configuration.",
+      "concept_family_id": "configuration_save",
+      "observable_student_behavior": "Given ArubaOS-CX context, explain when to use 'write memory' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "aruba_write_memory"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_aruba_cx_aruba_configure_terminal",
+        "obj_aruba_cx_aruba_show_interface_brief"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_configure_terminal",
+      "vendor_scope": "cisco_ios",
+      "concept": "Enters global configuration mode on a Cisco IOS device.",
+      "concept_family_id": "topic_cli_foundation",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'configure terminal' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_configure_terminal"
+      ],
+      "prerequisite_objective_ids": [],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_copy_running_startup",
+      "vendor_scope": "cisco_ios",
+      "concept": "Saves the active running configuration to startup configuration.",
+      "concept_family_id": "configuration_inspection",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'copy running-config startup-config' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_copy_running_startup"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_dir_flash",
+      "vendor_scope": "cisco_ios",
+      "concept": "Lists files and free space in the Cisco flash filesystem.",
+      "concept_family_id": "topic_file_system",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'dir flash:' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_dir_flash"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_hostname",
+      "vendor_scope": "cisco_ios",
+      "concept": "Sets the Cisco device hostname in global configuration mode.",
+      "concept_family_id": "device_identity",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'hostname <name>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_hostname"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_interface_config",
+      "vendor_scope": "cisco_ios",
+      "concept": "Enters configuration mode for a specific Cisco interface.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'interface <interface>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "practical_execution",
+        "troubleshooting",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_interface_config"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_interface_range",
+      "vendor_scope": "cisco_ios",
+      "concept": "Selects multiple Cisco interfaces for a shared configuration.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'interface range <interfaces>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_interface_range"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_no_shutdown",
+      "vendor_scope": "cisco_ios",
+      "concept": "Administratively enables the selected interface.",
+      "concept_family_id": "interface_admin_state",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'no shutdown' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_no_shutdown"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_reload",
+      "vendor_scope": "cisco_ios",
+      "concept": "Restarts the Cisco device.",
+      "concept_family_id": "topic_device_lifecycle",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'reload' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "cisco_reload"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_boot",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows Cisco boot variables and the image selected for the next boot.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show boot' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_boot"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_cdp_neighbors",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows Cisco Discovery Protocol neighbors visible from local interfaces.",
+      "concept_family_id": "neighbor_discovery",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show cdp neighbors' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_show_cdp_neighbors"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_diagnostic_result",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows available Cisco diagnostic test results and their pass, fail, or not-run state.",
+      "concept_family_id": "topic_diagnostics",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show diagnostic result' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_diagnostic_result"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_etherchannel_summary",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows port-channel groups, protocol, and member-port bundle state.",
+      "concept_family_id": "link_aggregation_evidence",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show etherchannel summary' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_show_etherchannel_summary"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_file_systems",
+      "vendor_scope": "cisco_ios",
+      "concept": "Lists Cisco filesystems, prefixes, sizes, and access capabilities.",
+      "concept_family_id": "device_or_os_identity",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show file systems' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_file_systems"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_interface_status",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows switch port status, VLAN, duplex, speed, and media type.",
+      "concept_family_id": "interface_state_summary",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show interface status' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "practical_execution",
+        "troubleshooting",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_show_interface_status"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_interfaces",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows detailed interface state, counters, errors, speed, duplex, and traffic.",
+      "concept_family_id": "interface_detail",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show interfaces' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_interfaces"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_interfaces_counters_errors",
+      "vendor_scope": "cisco_ios",
+      "concept": "Summarizes interface error counters on supported Catalyst platforms.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show interfaces counters errors' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_interfaces_counters_errors"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_inventory",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows installed Cisco chassis, modules, serial numbers, and hardware identifiers.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show inventory' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_inventory"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_ip_arp",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows IP-to-MAC address mappings learned by ARP.",
+      "concept_family_id": "endpoint_mac_neighbor_evidence",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show ip arp' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_ip_arp"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_ip_dhcp_binding",
+      "vendor_scope": "cisco_ios",
+      "concept": "Lists DHCP leases maintained by a Cisco IOS DHCP server.",
+      "concept_family_id": "topic_cli_foundation",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show ip dhcp binding' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_ip_dhcp_binding"
+      ],
+      "prerequisite_objective_ids": [],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_ip_interface_brief",
+      "vendor_scope": "cisco_ios",
+      "concept": "Summarizes interface IP addresses and their physical and protocol states.",
+      "concept_family_id": "interface_state_summary",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show ip interface brief' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_ip_interface_brief"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_ip_route",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows the IPv4 routing table and how each destination was learned.",
+      "concept_family_id": "routing_table",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show ip route' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_ip_route"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_lldp_neighbors",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows LLDP neighbors visible from local interfaces.",
+      "concept_family_id": "neighbor_discovery",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show lldp neighbors' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_show_lldp_neighbors"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_logging",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows Cisco logging configuration and buffered system messages.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show logging' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_logging"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_mac_address_table",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows MAC addresses learned by the switch and the interfaces where they were learned.",
+      "concept_family_id": "endpoint_mac_neighbor_evidence",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show mac address-table' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_show_mac_address_table"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_port_security_interface",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows port-security state, learned secure MACs, and violation information.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show port-security interface <interface>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "practical_execution",
+        "troubleshooting",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_show_port_security_interface"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_power_inline",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows Power over Ethernet status, power draw, and allocation on supported switches.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show power inline' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_power_inline"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_processes_cpu_sorted",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows CPU use by process, sorted by utilization.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show processes cpu sorted' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_processes_cpu_sorted"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_running_config",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows the active configuration currently running in memory.",
+      "concept_family_id": "configuration_inspection",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show running-config' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "cisco_show_running_config"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_running_config_interface",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows the active configuration applied to a specific interface.",
+      "concept_family_id": "configuration_inspection",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show running-config interface' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_show_running_config_interface"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_spanning_tree",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows spanning-tree state, root bridge information, and port roles.",
+      "concept_family_id": "spanning_tree_evidence",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show spanning-tree' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_show_spanning_tree"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_startup_config",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows the saved configuration that will be loaded at the next boot.",
+      "concept_family_id": "configuration_inspection",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show startup-config' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "cisco_show_startup_config"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_version",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows software version, uptime, model, serial details, image, and configuration register.",
+      "concept_family_id": "device_or_os_identity",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show version' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_show_version"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_show_vlan_brief",
+      "vendor_scope": "cisco_ios",
+      "concept": "Shows VLAN IDs, VLAN names, status, and access ports assigned to each VLAN.",
+      "concept_family_id": "vlan_inventory",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'show vlan brief' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "practical_execution",
+        "troubleshooting",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_show_vlan_brief"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_shutdown",
+      "vendor_scope": "cisco_ios",
+      "concept": "Administratively disables the selected interface.",
+      "concept_family_id": "interface_admin_state",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'shutdown' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_shutdown"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_stp_root_primary",
+      "vendor_scope": "cisco_ios",
+      "concept": "Adjusts Cisco STP bridge priority to make the switch preferred root for a VLAN.",
+      "concept_family_id": "spanning_tree_evidence",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'spanning-tree vlan <vlan-id> root primary' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_stp_root_primary"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_svi_ip_address",
+      "vendor_scope": "cisco_ios",
+      "concept": "Assigns an IPv4 address to a selected Layer 3 or SVI interface.",
+      "concept_family_id": "interface_state_summary",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'ip address <ip-address> <mask>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "cisco_svi_ip_address"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_configure_terminal",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_switch_priority",
+      "vendor_scope": "cisco_ios",
+      "concept": "Sets Cisco switch-stack member election priority.",
+      "concept_family_id": "topic_stacking",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'switch <member> priority <priority>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "cisco_switch_priority"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status",
+        "obj_cisco_ios_cisco_show_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_switchport_access_vlan",
+      "vendor_scope": "cisco_ios",
+      "concept": "Assigns the selected access port to a specific VLAN.",
+      "concept_family_id": "access_vlan_assignment",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'switchport access vlan <vlan>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "practical_execution",
+        "troubleshooting",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_switchport_access_vlan"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_switchport_mode_trunk",
+      "vendor_scope": "cisco_ios",
+      "concept": "Configures a Layer 2 interface to operate as a trunk.",
+      "concept_family_id": "trunk_configuration",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'switchport mode trunk' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "cisco_switchport_mode_trunk"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status",
+        "obj_cisco_ios_cisco_show_vlan_brief"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_switchport_trunk_allowed",
+      "vendor_scope": "cisco_ios",
+      "concept": "Restricts which VLANs may traverse a Cisco trunk.",
+      "concept_family_id": "trunk_configuration",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'switchport trunk allowed vlan <vlan-list>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_switchport_trunk_allowed"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status",
+        "obj_cisco_ios_cisco_show_vlan_brief"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_vlan_create",
+      "vendor_scope": "cisco_ios",
+      "concept": "Creates or enters a VLAN configuration context.",
+      "concept_family_id": "topic_vlans",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'vlan <vlan-id>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "practical_execution",
+        "verification"
+      ],
+      "related_command_ids": [
+        "cisco_vlan_create"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_vlan_name",
+      "vendor_scope": "cisco_ios",
+      "concept": "Assigns a name to the selected Cisco VLAN.",
+      "concept_family_id": "topic_vlans",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'name <vlan-name>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "cisco_vlan_name"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_cisco_ios_cisco_voice_vlan",
+      "vendor_scope": "cisco_ios",
+      "concept": "Assigns a Cisco voice VLAN to an access port for an IP phone.",
+      "concept_family_id": "topic_vlans",
+      "observable_student_behavior": "Given Cisco IOS context, explain when to use 'switchport voice vlan <vlan-id>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "cisco_voice_vlan"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_cisco_ios_cisco_show_interface_status"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_dir",
+      "vendor_scope": "hp_comware",
+      "concept": "Lists files in the current Comware filesystem location.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'dir' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_dir"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_arp",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows IPv4-to-MAC address mappings learned by the Comware device.",
+      "concept_family_id": "endpoint_mac_neighbor_evidence",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display arp' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_arp"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_cpu_usage",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows processor utilization on a Comware device.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display cpu-usage' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_cpu_usage"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_current_configuration",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows the active Comware configuration currently running on the device.",
+      "concept_family_id": "configuration_inspection",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display current-configuration' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_display_current_configuration"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_current_configuration_interface",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows current configuration applied to a specific interface.",
+      "concept_family_id": "configuration_inspection",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display current-configuration interface' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_current_configuration_interface"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_version",
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_device",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows device hardware, slots, members, board status, and operational state.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display device' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_device"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_diagnostic_information",
+      "vendor_scope": "hp_comware",
+      "concept": "Collects a broad Comware diagnostic snapshot including system, interface, configuration, and log context.",
+      "concept_family_id": "topic_diagnostics",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display diagnostic-information' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "hp_display_diagnostic_information"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_interface",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows detailed interface state, counters, errors, speed, duplex, and media information.",
+      "concept_family_id": "interface_detail",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display interface' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_interface"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_version",
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_interface_brief",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows interface physical state, protocol state, and brief status information.",
+      "concept_family_id": "interface_state_summary",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display interface brief' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "practical_execution",
+        "troubleshooting",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_display_interface_brief"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_version",
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_ip_interface_brief",
+      "vendor_scope": "hp_comware",
+      "concept": "Summarizes Comware interface IPv4 addresses and physical and protocol states.",
+      "concept_family_id": "interface_state_summary",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display ip interface brief' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_ip_interface_brief"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_version",
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_ip_routing_table",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows the Comware IPv4 routing table, protocols, preferences, metrics, and next hops.",
+      "concept_family_id": "routing_table",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display ip routing-table' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_ip_routing_table"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_irf",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows IRF member identity, role, priority, bridge MAC, and status.",
+      "concept_family_id": "topic_stacking",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display irf' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_irf"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief",
+        "obj_hp_comware_hp_display_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_irf_configuration",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows IRF configuration, member priorities, domains, and port bindings.",
+      "concept_family_id": "topic_stacking",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display irf configuration' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_irf_configuration"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief",
+        "obj_hp_comware_hp_display_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_irf_port",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows operational status of IRF ports and their physical member links.",
+      "concept_family_id": "topic_stacking",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display irf-port' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_display_irf_port"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief",
+        "obj_hp_comware_hp_display_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_irf_port_configuration",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows configured IRF port bindings and physical ports assigned to IRF links.",
+      "concept_family_id": "topic_stacking",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display irf-port configuration' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_irf_port_configuration"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief",
+        "obj_hp_comware_hp_display_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_irf_topology",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows IRF topology and IRF port connection state.",
+      "concept_family_id": "topic_stacking",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display irf topology' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_display_irf_topology"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief",
+        "obj_hp_comware_hp_display_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_link_aggregation_summary",
+      "vendor_scope": "hp_comware",
+      "concept": "Summarizes link-aggregation groups and member state.",
+      "concept_family_id": "link_aggregation_evidence",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display link-aggregation summary' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_link_aggregation_summary"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_link_aggregation_verbose",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows Comware aggregation groups, selected members, LACP state, and partner information.",
+      "concept_family_id": "link_aggregation_evidence",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display link-aggregation verbose' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_link_aggregation_verbose"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_lldp_neighbor",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows LLDP neighbor information and local-to-remote interface mapping.",
+      "concept_family_id": "neighbor_discovery",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display lldp neighbor-information' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_display_lldp_neighbor"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_logbuffer",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows recent system log messages.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display logbuffer' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_logbuffer"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_mac_address",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows MAC addresses learned by the switch.",
+      "concept_family_id": "endpoint_mac_neighbor_evidence",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display mac-address' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_display_mac_address"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_memory",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows memory utilization on supported Comware platforms.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display memory' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_memory"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_poe_interface",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows Power over Ethernet status for Comware interfaces.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display poe interface' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_poe_interface"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_version",
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_saved_configuration",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows the Comware configuration file selected for the next startup.",
+      "concept_family_id": "configuration_inspection",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display saved-configuration' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "hp_display_saved_configuration"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_stp",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows spanning-tree state and bridge role on a Comware switch.",
+      "concept_family_id": "spanning_tree_evidence",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display stp' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_stp"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_stp_brief",
+      "vendor_scope": "hp_comware",
+      "concept": "Summarizes spanning-tree roles and forwarding states for Comware ports.",
+      "concept_family_id": "spanning_tree_evidence",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display stp brief' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_stp_brief"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_version",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows Comware software version, uptime, boot image, and hardware information.",
+      "concept_family_id": "device_or_os_identity",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display version' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_display_version"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_display_vlan",
+      "vendor_scope": "hp_comware",
+      "concept": "Shows VLAN information, status, and member interfaces.",
+      "concept_family_id": "vlan_inventory",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'display vlan' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_display_vlan"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_interface_config",
+      "vendor_scope": "hp_comware",
+      "concept": "Enters Comware interface view for a selected interface.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'interface <interface>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "practical_execution",
+        "troubleshooting",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_interface_config"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_version",
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_irf_member_priority",
+      "vendor_scope": "hp_comware",
+      "concept": "Sets HP Comware IRF member election priority.",
+      "concept_family_id": "topic_stacking",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'irf member <member-id> priority <priority>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "hp_irf_member_priority"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief",
+        "obj_hp_comware_hp_display_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_irf_member_renumber",
+      "vendor_scope": "hp_comware",
+      "concept": "Changes the configured ID of an IRF member.",
+      "concept_family_id": "topic_stacking",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'irf member <member-id> renumber <new-member-id>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "hp_irf_member_renumber"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief",
+        "obj_hp_comware_hp_display_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_port_access_vlan",
+      "vendor_scope": "hp_comware",
+      "concept": "Assigns the selected Comware access port to a VLAN.",
+      "concept_family_id": "access_vlan_assignment",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'port access vlan <vlan>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_port_access_vlan"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_port_link_type_trunk",
+      "vendor_scope": "hp_comware",
+      "concept": "Sets a Comware Layer 2 port to trunk mode.",
+      "concept_family_id": "trunk_configuration",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'port link-type trunk' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "hp_port_link_type_trunk"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief",
+        "obj_hp_comware_hp_display_vlan"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_port_trunk_permit",
+      "vendor_scope": "hp_comware",
+      "concept": "Allows selected VLANs on a Comware trunk port.",
+      "concept_family_id": "trunk_configuration",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'port trunk permit vlan <vlan-list>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_port_trunk_permit"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief",
+        "obj_hp_comware_hp_display_vlan"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_reboot",
+      "vendor_scope": "hp_comware",
+      "concept": "Restarts the Comware device or member.",
+      "concept_family_id": "topic_device_lifecycle",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'reboot' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "hp_reboot"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_version"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_save",
+      "vendor_scope": "hp_comware",
+      "concept": "Saves the current Comware configuration so it persists after reboot.",
+      "concept_family_id": "configuration_save",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'save' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_save"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief",
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_save_force",
+      "vendor_scope": "hp_comware",
+      "concept": "Saves current Comware configuration without an interactive confirmation.",
+      "concept_family_id": "configuration_save",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'save force' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "hp_save_force"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief",
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_3"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_shutdown",
+      "vendor_scope": "hp_comware",
+      "concept": "Administratively disables the selected Comware interface.",
+      "concept_family_id": "interface_admin_state",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'shutdown' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_shutdown"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_version",
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_sysname",
+      "vendor_scope": "hp_comware",
+      "concept": "Sets the HP Comware device name in system view.",
+      "concept_family_id": "device_identity",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'sysname <name>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_sysname"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_system_view",
+      "vendor_scope": "hp_comware",
+      "concept": "Enters Comware system configuration view.",
+      "concept_family_id": "device_or_os_identity",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'system-view' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_system_view"
+      ],
+      "prerequisite_objective_ids": [],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_undo_shutdown",
+      "vendor_scope": "hp_comware",
+      "concept": "Administratively enables the selected Comware interface.",
+      "concept_family_id": "interface_admin_state",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'undo shutdown' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "hp_undo_shutdown"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_version",
+        "obj_hp_comware_hp_system_view"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_hp_comware_hp_vlan",
+      "vendor_scope": "hp_comware",
+      "concept": "Creates or enters an HP Comware VLAN view.",
+      "concept_family_id": "topic_vlans",
+      "observable_student_behavior": "Given HP Comware context, explain when to use 'vlan <vlan-id>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "hp_vlan"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_hp_comware_hp_display_interface_brief"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_linux_linux_arp_a",
+      "vendor_scope": "linux",
+      "concept": "Shows local ARP neighbor mappings.",
+      "concept_family_id": "endpoint_mac_neighbor_evidence",
+      "observable_student_behavior": "Given Linux context, explain when to use 'arp -a' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_arp_a"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_ip_addr"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_linux_linux_df_h",
+      "vendor_scope": "linux",
+      "concept": "Shows Linux mounted filesystem usage in human-readable units.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given Linux context, explain when to use 'df -h' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_df_h"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_dhclient_release",
+      "vendor_scope": "linux",
+      "concept": "Releases a DHCP lease on a Linux interface using dhclient.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Linux context, explain when to use 'sudo dhclient -r <interface>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "linux_dhclient_release"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_df_h",
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_dhclient_renew",
+      "vendor_scope": "linux",
+      "concept": "Requests a DHCP lease on a Linux interface using dhclient.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Linux context, explain when to use 'sudo dhclient <interface>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "linux_dhclient_renew"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_df_h",
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_dig",
+      "vendor_scope": "linux",
+      "concept": "Queries DNS records and displays resolver response details.",
+      "concept_family_id": "name_resolution",
+      "observable_student_behavior": "Given Linux context, explain when to use 'dig' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_dig"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_ip_addr"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_linux_linux_dmesg",
+      "vendor_scope": "linux",
+      "concept": "Shows Linux kernel messages, including hardware, driver, storage, and network events.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given Linux context, explain when to use 'dmesg' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_dmesg"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_ethtool_interface",
+      "vendor_scope": "linux",
+      "concept": "Shows Linux Ethernet link settings such as speed, duplex, autonegotiation, and detected link state.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Linux context, explain when to use 'ethtool <interface>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_ethtool_interface"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_df_h",
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_ip_addr",
+      "vendor_scope": "linux",
+      "concept": "Shows Linux network interfaces, link state, MAC addresses, and assigned IP addresses.",
+      "concept_family_id": "interface_state_summary",
+      "observable_student_behavior": "Given Linux context, explain when to use 'ip addr' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_ip_addr"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_df_h",
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_ip_link",
+      "vendor_scope": "linux",
+      "concept": "Shows Linux network interfaces, flags, operational state, MTU, and MAC addresses.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Linux context, explain when to use 'ip link' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_ip_link"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_df_h",
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_ip_link_down",
+      "vendor_scope": "linux",
+      "concept": "Administratively brings a Linux network interface down.",
+      "concept_family_id": "interface_admin_state",
+      "observable_student_behavior": "Given Linux context, explain when to use 'sudo ip link set <interface> down' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "linux_ip_link_down"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_df_h",
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_ip_link_up",
+      "vendor_scope": "linux",
+      "concept": "Administratively brings a Linux network interface up.",
+      "concept_family_id": "interface_admin_state",
+      "observable_student_behavior": "Given Linux context, explain when to use 'sudo ip link set <interface> up' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "linux_ip_link_up"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_df_h",
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_ip_neigh",
+      "vendor_scope": "linux",
+      "concept": "Shows the Linux IPv4 and IPv6 neighbor cache, including MAC addresses and reachability states.",
+      "concept_family_id": "endpoint_mac_neighbor_evidence",
+      "observable_student_behavior": "Given Linux context, explain when to use 'ip neigh' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_ip_neigh"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_ip_addr"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_linux_linux_ip_route",
+      "vendor_scope": "linux",
+      "concept": "Shows the Linux routing table, including default gateway and connected routes.",
+      "concept_family_id": "routing_table",
+      "observable_student_behavior": "Given Linux context, explain when to use 'ip route' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_ip_route"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_ip_addr"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_linux_linux_journalctl_errors",
+      "vendor_scope": "linux",
+      "concept": "Shows Linux systemd journal entries at error priority and above.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given Linux context, explain when to use 'journalctl -p err' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_journalctl_errors"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_journalctl_networkmanager",
+      "vendor_scope": "linux",
+      "concept": "Shows logs for the NetworkManager service on systems using it.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given Linux context, explain when to use 'journalctl -u NetworkManager' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_journalctl_networkmanager"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_lsblk",
+      "vendor_scope": "linux",
+      "concept": "Lists Linux block devices, partitions, sizes, types, and mount points.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given Linux context, explain when to use 'lsblk' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_lsblk"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_ping",
+      "vendor_scope": "linux",
+      "concept": "Tests reachability to an IP address or hostname using ICMP echo.",
+      "concept_family_id": "reachability_test",
+      "observable_student_behavior": "Given Linux context, explain when to use 'ping' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_ping"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_ip_addr"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_linux_linux_resolvectl_status",
+      "vendor_scope": "linux",
+      "concept": "Shows DNS resolver state, servers, and per-link DNS configuration on systemd-resolved systems.",
+      "concept_family_id": "name_resolution",
+      "observable_student_behavior": "Given Linux context, explain when to use 'resolvectl status' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_resolvectl_status"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_ip_addr"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_linux_linux_restart_networking",
+      "vendor_scope": "linux",
+      "concept": "Restarts the traditional Linux networking service on distributions that use it.",
+      "concept_family_id": "device_or_os_identity",
+      "observable_student_behavior": "Given Linux context, explain when to use 'sudo systemctl restart networking' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "linux_restart_networking"
+      ],
+      "prerequisite_objective_ids": [],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_restart_networkmanager",
+      "vendor_scope": "linux",
+      "concept": "Restarts the Linux NetworkManager service.",
+      "concept_family_id": "device_or_os_identity",
+      "observable_student_behavior": "Given Linux context, explain when to use 'sudo systemctl restart NetworkManager' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "linux_restart_networkmanager"
+      ],
+      "prerequisite_objective_ids": [],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_ss_listening",
+      "vendor_scope": "linux",
+      "concept": "Lists Linux TCP and UDP listening sockets with addresses, ports, and available process information.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Linux context, explain when to use 'ss -tulpn' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_ss_listening"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_df_h",
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_systemctl_status_networkmanager",
+      "vendor_scope": "linux",
+      "concept": "Shows whether the Linux NetworkManager service is loaded, active, failed, and its recent log messages.",
+      "concept_family_id": "device_or_os_identity",
+      "observable_student_behavior": "Given Linux context, explain when to use 'systemctl status NetworkManager' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_systemctl_status_networkmanager"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_restart_networkmanager"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_linux_linux_traceroute",
+      "vendor_scope": "linux",
+      "concept": "Shows hop-by-hop path toward a target.",
+      "concept_family_id": "reachability_test",
+      "observable_student_behavior": "Given Linux context, explain when to use 'traceroute' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "linux_traceroute"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_linux_linux_ip_addr"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_arp_a",
+      "vendor_scope": "windows_cmd",
+      "concept": "Shows the local ARP cache mapping IP addresses to MAC addresses.",
+      "concept_family_id": "endpoint_mac_neighbor_evidence",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'arp -a' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "windows_arp_a"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_interface_show_interface"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_dir",
+      "vendor_scope": "windows_cmd",
+      "concept": "Lists Windows files and directories in the current path.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'dir' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "windows_dir"
+      ],
+      "prerequisite_objective_ids": [],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_dism_scanhealth",
+      "vendor_scope": "windows_cmd",
+      "concept": "Scans the online Windows component store for corruption without repairing it.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'dism /online /cleanup-image /scanhealth' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "windows_dism_scanhealth"
+      ],
+      "prerequisite_objective_ids": [],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_getmac_verbose",
+      "vendor_scope": "windows_cmd",
+      "concept": "Lists Windows network adapters, connection names, MAC addresses, and transport names.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'getmac /v' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "windows_getmac_verbose"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_winsock_reset"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_ipconfig_all",
+      "vendor_scope": "windows_cmd",
+      "concept": "Shows Windows network adapter IP address, subnet mask, default gateway, DNS servers, DHCP, and MAC details.",
+      "concept_family_id": "topic_mac_neighbors",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'ipconfig /all' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "windows_ipconfig_all"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_interface_show_interface"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_ipconfig_release",
+      "vendor_scope": "windows_cmd",
+      "concept": "Releases the DHCP lease from Windows network adapters.",
+      "concept_family_id": "topic_networking",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'ipconfig /release' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "windows_ipconfig_release"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_interface_show_interface"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_ipconfig_renew",
+      "vendor_scope": "windows_cmd",
+      "concept": "Requests a new DHCP lease for Windows network adapters.",
+      "concept_family_id": "topic_networking",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'ipconfig /renew' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "windows_ipconfig_renew"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_interface_show_interface"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_netsh_interface_disable",
+      "vendor_scope": "windows_cmd",
+      "concept": "Disables a Windows network interface.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'netsh interface set interface <name> admin=disabled' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "windows_netsh_interface_disable"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_winsock_reset"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_netsh_interface_enable",
+      "vendor_scope": "windows_cmd",
+      "concept": "Enables a Windows network interface.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'netsh interface set interface <name> admin=enabled' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "windows_netsh_interface_enable"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_winsock_reset"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_netsh_interface_show_interface",
+      "vendor_scope": "windows_cmd",
+      "concept": "Shows Windows network interface administrative and connection state.",
+      "concept_family_id": "interface_state_summary",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'netsh interface show interface' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "windows_netsh_interface_show_interface"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_winsock_reset"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_netsh_ipv4_show_interfaces",
+      "vendor_scope": "windows_cmd",
+      "concept": "Shows Windows IPv4 interfaces, indexes, metrics, MTU values, and connection states.",
+      "concept_family_id": "interface_detail",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'netsh interface ipv4 show interfaces' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "windows_netsh_ipv4_show_interfaces"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_winsock_reset"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_netsh_lan_show_interfaces",
+      "vendor_scope": "windows_cmd",
+      "concept": "Shows wired LAN interface state and 802.1X-related information where available.",
+      "concept_family_id": "interface_detail",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'netsh lan show interfaces' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "windows_netsh_lan_show_interfaces"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_winsock_reset"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_netsh_set_static_ip",
+      "vendor_scope": "windows_cmd",
+      "concept": "Configures a static IPv4 address on a Windows interface.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'netsh interface ipv4 set address name=<name> static <ip> <mask> <gateway>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "windows_netsh_set_static_ip"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_winsock_reset"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_netsh_winsock_reset",
+      "vendor_scope": "windows_cmd",
+      "concept": "Resets the Windows Winsock catalog.",
+      "concept_family_id": "topic_device_information",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'netsh winsock reset' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "windows_netsh_winsock_reset"
+      ],
+      "prerequisite_objective_ids": [],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_netsh_wlan_show_interfaces",
+      "vendor_scope": "windows_cmd",
+      "concept": "Shows the current Windows Wi-Fi adapter, connection, SSID, radio, channel, rates, and signal level.",
+      "concept_family_id": "interface_detail",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'netsh wlan show interfaces' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "windows_netsh_wlan_show_interfaces"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_winsock_reset"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_netstat_ano",
+      "vendor_scope": "windows_cmd",
+      "concept": "Lists Windows TCP and UDP endpoints, connection states, listening ports, and owning process IDs.",
+      "concept_family_id": "topic_interfaces",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'netstat -ano' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "windows_netstat_ano"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_winsock_reset"
+      ],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_nslookup",
+      "vendor_scope": "windows_cmd",
+      "concept": "Queries DNS for hostname resolution and shows the DNS server used.",
+      "concept_family_id": "name_resolution",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'nslookup' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "windows_nslookup"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_interface_show_interface"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_pathping_host",
+      "vendor_scope": "windows_cmd",
+      "concept": "Traces a Windows network path and measures packet loss at each hop over time.",
+      "concept_family_id": "reachability_test",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'pathping <host>' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection"
+      ],
+      "related_command_ids": [
+        "windows_pathping_host"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_interface_show_interface"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_ping",
+      "vendor_scope": "windows_cmd",
+      "concept": "Tests basic reachability to an IP address or hostname using ICMP echo.",
+      "concept_family_id": "reachability_test",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'ping' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "windows_ping"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_interface_show_interface"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_route_print",
+      "vendor_scope": "windows_cmd",
+      "concept": "Shows the Windows routing table and interface route metrics.",
+      "concept_family_id": "routing_table",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'route print' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "windows_route_print"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_interface_show_interface"
+      ],
+      "learning_level": "level_2"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_systeminfo",
+      "vendor_scope": "windows_cmd",
+      "concept": "Shows Windows operating system, hardware, boot time, memory, domain, and hotfix summary information.",
+      "concept_family_id": "device_or_os_identity",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'systeminfo' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation"
+      ],
+      "related_command_ids": [
+        "windows_systeminfo"
+      ],
+      "prerequisite_objective_ids": [],
+      "learning_level": "level_1"
+    },
+    {
+      "objective_id": "obj_windows_cmd_windows_tracert",
+      "vendor_scope": "windows_cmd",
+      "concept": "Shows hop-by-hop path toward a target using TTL-limited probes.",
+      "concept_family_id": "reachability_test",
+      "observable_student_behavior": "Given Windows CMD context, explain when to use 'tracert' and identify the evidence or safe next action it supports.",
+      "evidence_required": [
+        "syntax_or_selection_answer",
+        "output_evidence_identification"
+      ],
+      "mastery_dimensions": [
+        "concept",
+        "syntax",
+        "command_selection",
+        "prediction",
+        "output_interpretation",
+        "verification"
+      ],
+      "related_command_ids": [
+        "windows_tracert"
+      ],
+      "prerequisite_objective_ids": [
+        "obj_windows_cmd_windows_netsh_interface_show_interface"
+      ],
+      "learning_level": "level_2"
+    }
+  ]
+}

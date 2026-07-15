@@ -1,0 +1,102 @@
+{
+  "schema_version": "learning-metadata-schema.v1",
+  "description": "Stage 1 machine-readable schema contract for normalized Command Doctor learning metadata.",
+  "command_learning_record": {
+    "required_fields": [
+      "canonical_command_id",
+      "vendor_id",
+      "operating_system_family_id",
+      "topic_id",
+      "module_id",
+      "learning_level",
+      "prerequisite_module_ids",
+      "prerequisite_command_ids",
+      "objective_ids",
+      "lesson_ids",
+      "lesson_status",
+      "practice_route_ids",
+      "practice_status",
+      "runtime_support",
+      "handler_status",
+      "verification_status",
+      "verification_command_ids",
+      "verification_policy_ids",
+      "rollback_status",
+      "rollback_command_ids",
+      "required_lesson_stages",
+      "mastery_dimensions",
+      "review_types",
+      "review_status",
+      "migration_status",
+      "blocking_reasons",
+      "support_notes",
+      "equivalent_concept_ids"
+    ],
+    "identity_rule": "vendor_id + canonical_command_id is the stable mastery identity; aliases must not create separate mastery identities."
+  },
+  "learning_objective": {
+    "required_fields": [
+      "objective_id",
+      "vendor_scope",
+      "concept",
+      "observable_student_behavior",
+      "evidence_required",
+      "mastery_dimensions",
+      "related_command_ids",
+      "prerequisite_objective_ids",
+      "learning_level"
+    ]
+  },
+  "module": {
+    "required_fields": [
+      "module_id",
+      "vendor_id",
+      "topic_id",
+      "current_level",
+      "target_level_id",
+      "prerequisite_module_ids",
+      "target_order"
+    ]
+  },
+  "practice_mapping": {
+    "required_fields": [
+      "command_id",
+      "practice_route_ids",
+      "eligible_practical_route_ids",
+      "blocked_practice_route_ids",
+      "practice_status",
+      "handler_status"
+    ]
+  },
+  "verification_mapping": {
+    "required_fields": [
+      "command_id",
+      "verification_status",
+      "verification_command_ids",
+      "verification_policy_ids",
+      "unresolved_guidance"
+    ]
+  },
+  "rollback_mapping": {
+    "required_fields": [
+      "command_id",
+      "rollback_status",
+      "rollback_command_ids",
+      "unresolved_guidance"
+    ]
+  },
+  "mastery_policy": {
+    "rule_summary": [
+      "explanation_only commands may award concept, syntax, and limited command selection only",
+      "output_simulation commands may award concept, syntax, prediction, output interpretation, and command selection when evidence exists",
+      "simplified_state_simulation commands may award practical, troubleshooting, and verification only when the route and handler are explicit",
+      "full_state_simulation commands may award practical execution and verification only when runtime evidence and policy prove the result",
+      "documentation requires a ticket note",
+      "safety requires a measurable safety decision"
+    ]
+  },
+  "review_policy": {
+    "current_review_coverage": 0,
+    "rule": "Stage 1 defines review eligibility only; it does not create student review records or change Home review counts."
+  }
+}
