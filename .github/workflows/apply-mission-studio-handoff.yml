@@ -3,7 +3,7 @@ name: Apply Mission Studio handoff
 on:
   push:
     branches:
-      - api/mission-studio-handoff-63faff93d2ed
+      - feature/mission-studio-ui
     paths:
       - .github/workflows/apply-mission-studio-handoff.yml
 
@@ -14,26 +14,24 @@ jobs:
   apply-and-validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out handoff branch
+      - name: Check out reviewed branch
         uses: actions/checkout@v4
         with:
-          ref: api/mission-studio-handoff-63faff93d2ed
+          ref: feature/mission-studio-ui
           fetch-depth: 0
 
-      - name: Verify and switch to reviewed target
+      - name: Verify controlled baseline
         shell: bash
         run: |
           set -euo pipefail
-          git fetch origin feature/mission-studio-ui
-          git switch --detach 262cc7f5a906441b87f525ce2e0cbff0bb65f6ac
-          test "$(git rev-parse HEAD)" = "262cc7f5a906441b87f525ce2e0cbff0bb65f6ac"
+          git merge-base --is-ancestor 262cc7f5a906441b87f525ce2e0cbff0bb65f6ac HEAD
+          test -f .handoff/mission-studio.patch.gz.b64
 
       - name: Reconstruct and apply reviewed patch
         shell: bash
         run: |
           set -euo pipefail
-          git show origin/api/mission-studio-handoff-63faff93d2ed:.handoff/mission-studio.patch.gz.b64 > /tmp/mission-studio.patch.gz.b64
-          base64 --decode /tmp/mission-studio.patch.gz.b64 > /tmp/mission-studio.patch.gz
+          base64 --decode .handoff/mission-studio.patch.gz.b64 > /tmp/mission-studio.patch.gz
           gzip --decompress --stdout /tmp/mission-studio.patch.gz > /tmp/mission-studio.patch
           git apply --check /tmp/mission-studio.patch
           git apply /tmp/mission-studio.patch
@@ -52,12 +50,13 @@ jobs:
           npm run test:startup
           git diff --check
 
-      - name: Commit reviewed source
+      - name: Commit reviewed source and remove handoff tooling
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -- .github/workflows/apply-mission-studio-handoff.yml .handoff/mission-studio.patch.gz.b64
           git add -- .gitignore lab.html mission-studio.css scripts/build.mjs src/app-release-21.js src/learning-experience/mission-studio-components.js src/learning-experience/mission-studio-icons.js src/learning-experience/mission-studio-shell.js src/learning-experience/mission-studio-state.js src/learning-experience/mission-studio-views.js tests/beginner-experience.mjs tests/mission-studio-design.mjs tools/browser-review/mission-studio-browser-review.mjs tools/review-isolated-build.mjs tools/review-isolated-startup.mjs
           git diff --cached --check
           git commit -m "feat: complete Mission Studio structural redesign"
