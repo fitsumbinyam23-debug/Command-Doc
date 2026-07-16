@@ -431,7 +431,10 @@ async function init() {
   await loadKnowledge();
   renderKnowledge();
   renderHistory();
-  if (!state.lab.diagnosticsMode) renderBeginnerNavigation();
+  if (!state.lab.diagnosticsMode) {
+    renderBeginnerNavigation();
+    setupMissionStudioShell();
+  }
   if (state.lab.diagnosticsMode) {
     els.navTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === "lab"));
     els.views.forEach((view) => view.classList.toggle("active", view.id === "labView"));
@@ -2734,9 +2737,37 @@ function missionStudioComponents() {
   return window.CommandDoctorMissionStudioComponents;
 }
 
+function missionStudioViews() {
+  return window.CommandDoctorMissionStudioViews;
+}
+
+function missionStudioState() {
+  return window.CommandDoctorMissionStudioState;
+}
+
+function missionStudioShell() {
+  return window.CommandDoctorMissionStudioShell;
+}
+
 function renderMissionStudio(description) {
   const api = missionStudioComponents();
   return api?.renderDescription ? api.renderDescription(document, description) : null;
+}
+
+function currentMissionPathLabel() {
+  const api = beginnerExperience();
+  return api?.pathLabel ? api.pathLabel(state.learning.path) : "Choose a path";
+}
+
+function setupMissionStudioShell() {
+  missionStudioShell()?.setupMissionStudioShell(document, { getPathLabel: currentMissionPathLabel });
+}
+
+function syncMissionStudioShell(viewName) {
+  missionStudioShell()?.syncMissionStudioShell(document, {
+    activeView: viewName,
+    pathLabel: currentMissionPathLabel()
+  });
 }
 
 function loadLearningState() {
@@ -4931,7 +4962,8 @@ function renderHome() {
   if (!els.homeRoot || !state.lab.progress) return;
   els.homeRoot.replaceChildren();
   const api = beginnerExperience();
-  const studio = missionStudioComponents();
+  const views = missionStudioViews();
+  const stateApi = missionStudioState();
   const track = activeTrack();
   const progress = trackProgress(track);
   const learned = Object.keys(progress.learnedCommands).length;
@@ -4939,87 +4971,67 @@ function renderHome() {
   const level0Progress = state.learning.level0Progress || api.createLevel0State();
   const currentLesson = level0CurrentLesson();
   const stepIndex = currentLevel0StepIndex();
+  const completion = stateApi?.level0Completion(level0Progress, level0Lessons(), api.STEP_IDS) || { percent: 0, completedLessons: 0, lessonCount: 8 };
   const homeState = api.homeStateForPath(state.learning.path, { lessonTitle: currentLesson?.title, lastTool: state.learning.recentTool || "diagnose" });
-  const hero = labCreate("section", "home-hero");
-  hero.append(labCreate("p", "eyebrow", state.learning.path ? "Mission Studio" : "Choose your mission"));
-  const title = labCreate("h2", "", state.learning.path ? `Welcome back to ${homeState.label}` : "Learn networks from zero, then practise safely.");
-  title.id = "homeTitle";
-  title.tabIndex = -1;
-  hero.append(title);
-  hero.append(labCreate("p", "", state.learning.path
-    ? "Continue your current path, review recent local activity, or open one technician shortcut. Nothing here reaches a real device."
-    : "Start with plain-language Level 0, open local practice, or use technician tools when you need the working app surface."));
-  const status = labCreate("div", "home-status-strip");
-  status.append(labCreate("span", "badge badge-green", "Works offline"), labCreate("span", "badge", `Path: ${homeState.label}`), labCreate("span", "badge", `Level 0 step: ${stepIndex + 1}/${api.STEPPER_STEPS.length}`), labCreate("span", "badge", `Commands learned: ${learned}`), labCreate("span", "badge", `Needs review: ${review}`));
-  hero.append(status);
-  const actions = labCreate("div", "home-primary-actions");
-  if (!state.learning.path) actions.append(labButton(homeState.primaryAction.label, "primary", () => applyHomePrimaryAction(homeState.primaryAction)));
-  actions.append(labButton("Open Course Map", "secondary", () => { state.learning.courseScreen = "map"; switchView("course"); }));
-  if (state.learning.path) actions.append(labButton("Change learning path", "secondary", () => { saveLearningPath(""); announcePathChoice("Choose a learning path."); renderHome(); renderProgress(); focusActiveViewHeading("home"); }));
-  hero.append(actions);
-  els.homeRoot.append(hero);
-
-  if (!state.learning.path) {
-    const firstRun = labCreate("section", "first-run-panel");
-    firstRun.append(labCreate("div", "lab-card-kicker", "Choose your starting path"));
-    firstRun.append(labCreate("h3", "", "What do you want Command Doctor to be today?"));
-    firstRun.append(labCreate("p", "", "This saves only your preference. Existing lab progress, vendor records, saved reports, and history are preserved."));
-    const pathGrid = labCreate("div", "learning-path-grid");
-    api.PATHS.forEach((path) => {
-      const card = labCreate("article", "learning-path-card");
-      card.append(labCreate("h4", "", path.label), labCreate("p", "", path.description), labButton(`Choose ${path.label}`, "primary", () => {
-        const choice = api.applyPathChoice(path.id);
-        saveLearningPath(choice.path);
-        if (choice.courseScreen) state.learning.courseScreen = choice.courseScreen;
-        announcePathChoice(choice.announcement);
-        showToast(choice.announcement);
-        renderProgress();
-        switchView(choice.view);
-      }));
-      pathGrid.append(card);
-    });
-    firstRun.append(pathGrid);
-    els.homeRoot.append(firstRun);
-    return;
-  }
-
-  const dashboard = labCreate("section", "mission-home-dashboard");
-  const missionCard = renderMissionStudio(studio?.continueMissionCard({
-    title: homeState.primaryAction.label,
-    lessonTitle: currentLesson?.title || "Welcome to Networking",
-    phaseLabel: "Phase 1: Absolute Beginner",
-    levelLabel: "Level 0",
-    progressLabel: level0Progress.level_complete ? "Orientation complete" : `Step ${stepIndex + 1} of ${api.STEPPER_STEPS.length}`,
-    actionLabel: homeState.primaryAction.label,
-    onAction: () => applyHomePrimaryAction(homeState.primaryAction)
-  }));
-  if (missionCard) dashboard.append(missionCard);
-  const recent = labCreate("article", "mission-recent-card");
-  recent.append(labCreate("div", "lab-card-kicker", "Recent activity"));
-  recent.append(labCreate("h3", "", currentLesson?.title || "No lesson started"));
-  const recentFacts = labCreate("div", "mission-card-facts");
-  [
-    `Current step: ${api.humanStatus(level0Progress.current_step_id)}`,
-    `Confidence: ${level0Progress.confidence_by_lesson?.[level0Progress.current_lesson_id] || "not rated"}`,
-    `Saved reports: ${state.history.length}`
-  ].forEach((fact) => recentFacts.append(labCreate("span", "badge", fact)));
-  recent.append(recentFacts);
-  dashboard.append(recent);
   const tool = api.toolDestination(state.learning.recentTool || "diagnose");
-  const toolCard = renderMissionStudio(studio?.technicianToolCard({ tool, onAction: () => openTechnicianTool(tool) }));
-  if (toolCard) dashboard.append(toolCard);
-  els.homeRoot.append(dashboard);
-  const details = renderMissionStudio(studio?.progressSummary({
-    facts: [
-      `Track: ${track === "all" ? "All Tracks" : track}`,
+  const model = {
+    path: state.learning.path,
+    pathLabel: homeState.label,
+    paths: api.PATHS.map((path) => ({
+      ...path,
+      symbol: path.id === "zero" ? "L0" : path.id === "practice" ? "PR" : "TL"
+    })),
+    onChoosePath: (pathId) => {
+      const choice = api.applyPathChoice(pathId);
+      saveLearningPath(choice.path);
+      if (choice.courseScreen) state.learning.courseScreen = choice.courseScreen;
+      announcePathChoice(choice.announcement);
+      showToast(choice.announcement);
+      renderProgress();
+      syncMissionStudioShell(choice.view);
+      switchView(choice.view);
+    },
+    continueMission: {
+      title: homeState.primaryAction.label,
+      lessonTitle: currentLesson?.title || "Welcome to Networking",
+      phaseLabel: "Phase 1: Foundation",
+      levelLabel: "Level 0",
+      progressLabel: level0Progress.level_complete ? "Orientation complete" : `${completion.percent}% complete`,
+      actionLabel: homeState.primaryAction.label,
+      onAction: () => applyHomePrimaryAction(homeState.primaryAction)
+    },
+    diagnosticShortcut: {
+      title: `Open ${tool.label}`,
+      body: tool.description,
+      actionLabel: "Open Tools",
+      onAction: () => switchView("tools")
+    },
+    progressTitle: "Level 0 orientation",
+    progressPercent: completion.percent,
+    progressFacts: [
+      `${completion.completedLessons}/${completion.lessonCount} lessons complete`,
+      `Step ${stepIndex + 1}/${api.STEPPER_STEPS.length}`,
       `Commands learned: ${learned}`,
-      `Needs review: ${review}`,
-      `Level 0 complete: ${level0Progress.level_complete ? "Yes" : "No"}`
+      `Needs review: ${review}`
     ],
-    actionLabel: "Open Progress",
-    onAction: () => switchView("progress")
-  }));
-  if (details) els.homeRoot.append(details);
+    recentActivity: stateApi?.recentActivity({
+      progress: level0Progress,
+      lesson: currentLesson,
+      historyCount: state.history.length,
+      vendorProgressCount: Object.keys(state.lab.vendorProgress || {}).length,
+      currentStepLabel: api.humanStatus(level0Progress.current_step_id)
+    }) || [],
+    recommendation: level0Progress.level_complete ? "Recommended next action: open local practice when you are ready." : "Recommended next action: continue the active Level 0 lesson.",
+    onChangePath: () => {
+      saveLearningPath("");
+      announcePathChoice("Choose a learning path.");
+      renderHome();
+      renderProgress();
+      syncMissionStudioShell("home");
+      focusActiveViewHeading("home");
+    }
+  };
+  els.homeRoot.append(views?.renderMissionStudioHomeView(document, model) || labCreate("section", "", "Mission Studio unavailable."));
 }
 
 const DEFAULT_VENDOR_LABELS = { cisco_ios: "Cisco IOS", hp_comware: "HP Comware", aruba_cx: "ArubaOS-CX", windows_cmd: "Windows CMD", linux: "Linux" };
@@ -5570,120 +5582,101 @@ function renderCourse() {
 function renderCourseMap() {
   const curriculum = state.curriculum.complete;
   const api = beginnerExperience();
-  const studio = missionStudioComponents();
-  const intro = labCreate("section", "learn-track-panel");
-  intro.append(labCreate("div", "lab-card-kicker", "Complete networking curriculum"));
-  intro.append(labCreate("h3", "", "40 levels across 10 phases"));
-  intro.append(labCreate("p", "", "Level 0 is fully authored for beginners. Levels 1-39 are planned outlines and remain locked until real lessons, practice, verification, rollback, and review evidence are authored."));
-  intro.append(labButton("Start Level 0", "primary", () => { state.learning.levelId = "level_00"; state.learning.courseScreen = "lesson"; renderCourse(); }));
-  els.courseRoot.append(intro);
+  const views = missionStudioViews();
+  const stateApi = missionStudioState();
+  const levelNameFor = (levelId) => {
+    const prereq = levelById(levelId);
+    if (!prereq) return "Requires prior level review";
+    const number = prereq.level_number === undefined ? "" : ` ${prereq.level_number}`;
+    return `Requires Level${number}: ${prereq.title || "prior level"}`;
+  };
   const currentPhaseId = levelById(state.learning.levelId || "level_00")?.phase_id || "phase_00";
-  const phaseRail = renderMissionStudio(studio?.coursePhaseRail({
-    phases: (curriculum?.phases || []).map((phase) => ({ ...phase, statusText: api.humanStatus(phase.status) })),
-    currentPhaseId
-  }));
-  if (phaseRail) els.courseRoot.append(phaseRail);
   const currentPhase = (curriculum?.phases || []).find((phase) => phase.phase_id === currentPhaseId) || curriculum?.phases?.[0];
-  const contextPanel = renderMissionStudio(studio?.phaseContextPanel({
-    phase: currentPhase,
-    facts: [
-      `${currentPhase?.level_ids?.length || 0} levels`,
-      `${currentPhase?.estimated_learning_hours || "Planned"} hours`,
-      api.humanStatus(currentPhase?.status)
-    ]
-  }));
-  if (contextPanel) els.courseRoot.append(contextPanel);
-  (curriculum?.phases || []).forEach((phase) => {
-    const details = document.createElement("details");
-    details.className = "course-phase";
-    details.open = phase.phase_id === currentPhaseId;
-    const summary = document.createElement("summary");
-    summary.append(labCreate("span", "course-phase-title", phase.title), labCreate("span", "badge", api.humanStatus(phase.status)));
-    details.append(summary);
-    const grid = labCreate("div", "course-level-grid");
-    phase.level_ids.forEach((id) => {
+  const selectedLevelId = state.learning.levelId || "level_00";
+  const model = {
+    currentPhaseId,
+    phases: (curriculum?.phases || []).map((phase) => ({
+      ...phase,
+      statusText: api.humanStatus(phase.status),
+      onSelect: () => {
+        state.learning.levelId = phase.level_ids?.[0] || selectedLevelId;
+        state.learning.courseScreen = "map";
+        renderCourse();
+      }
+    })),
+    levels: (currentPhase?.level_ids || []).map((id) => {
       const level = levelById(id);
-      if (!level) return;
+      if (!level) return null;
       const authored = level.content_status === "authored";
-      const card = renderMissionStudio(studio?.levelCard({
+      return {
         level,
-        current: authored,
+        current: level.level_id === selectedLevelId || authored,
         statusText: authored ? "Available now" : api.humanStatus(level.content_status),
         actionLabel: level.level_id === "level_00" ? "Open overview" : "Preview plan",
-        onAction: () => { state.learning.levelId = level.level_id; state.learning.courseScreen = "overview"; renderCourse(); }
-      }));
-      if (card) grid.append(card);
-    });
-    details.append(grid);
-    els.courseRoot.append(details);
-  });
+        facts: stateApi?.levelFacts(level, api.humanStatus, levelNameFor).slice(0, 4) || [],
+        onAction: () => {
+          state.learning.levelId = level.level_id;
+          state.learning.courseScreen = "overview";
+          renderCourse();
+        }
+      };
+    }).filter(Boolean),
+    phaseContext: {
+      phase: currentPhase,
+      facts: [
+        `${currentPhase?.level_ids?.length || 0} levels`,
+        currentPhase?.estimated_learning_hours ? `${currentPhase.estimated_learning_hours} hours` : "Planned duration",
+        api.humanStatus(currentPhase?.status)
+      ]
+    }
+  };
+  els.courseRoot.append(views?.renderCourseMapView(document, model) || labCreate("section", "", "Course unavailable."));
 }
 
 function renderLevelOverview() {
   const api = beginnerExperience();
-  const studio = missionStudioComponents();
+  const views = missionStudioViews();
+  const stateApi = missionStudioState();
   const level = levelById(state.learning.levelId || "level_00") || levelById("level_00");
+  const levelNameFor = (levelId) => {
+    const prereq = levelById(levelId);
+    if (!prereq) return "Requires prior level review";
+    const number = prereq.level_number === undefined ? "" : ` ${prereq.level_number}`;
+    return `Requires Level${number}: ${prereq.title || "prior level"}`;
+  };
   const isLevel0 = level?.level_id === "level_00";
-  const panel = labCreate("section", "learn-track-panel level-overview");
-  panel.append(labButton("Back to Course Map", "secondary", () => { state.learning.courseScreen = "map"; renderCourse(); }));
-  panel.append(labCreate("div", "lab-card-kicker", `Level ${level?.level_number ?? 0} | ${api.humanStatus(level?.content_status)}`));
-  panel.append(labCreate("h3", "", level?.title || "Welcome to Networking"));
-  panel.append(labCreate("p", "", level?.why_it_matters || "Preview the planned subject-specific outline before authored lessons are available."));
-  const facts = labCreate("div", "route-facts");
-  [
-    `${level?.estimated_learning_hours || "Planned"} hours`,
-    `${(level?.modules || []).length} modules`,
-    `${(level?.command_ids || []).length} commands`,
-    `${(level?.prerequisite_level_ids || []).length ? `Prerequisites: ${level.prerequisite_level_ids.join(", ")}` : "No prerequisites"}`,
-    api.humanStatus(level?.practice_status),
-    api.humanStatus(level?.review_status)
-  ].forEach((fact) => facts.append(labCreate("span", "badge", fact)));
-  panel.append(facts);
   const phase = (state.curriculum.complete?.phases || []).find((item) => item.phase_id === level?.phase_id);
-  const phaseContext = renderMissionStudio(studio?.phaseContextPanel({
-    phase,
-    title: "About this phase",
-    facts: [api.humanStatus(phase?.status), `${phase?.level_ids?.length || 0} levels`]
-  }));
-  if (phaseContext) panel.append(phaseContext);
-  const list = labCreate("div", "lesson-outline-list");
-  if (isLevel0) {
-    level0Lessons().forEach((lesson) => {
-      const item = labCreate("article", "lesson-outline-card");
-      item.append(labCreate("h4", "", lesson.title), labCreate("p", "", lesson.objective));
-      list.append(item);
-    });
-  } else {
-    (level?.modules || []).forEach((module) => {
-      const item = labCreate("article", "lesson-outline-card");
-      item.append(labCreate("h4", "", module.title), labCreate("p", "", module.purpose));
-      const objectives = document.createElement("ul");
-      (module.objectives || []).forEach((objective) => {
-        const li = document.createElement("li");
-        li.textContent = objective;
-        objectives.append(li);
-      });
-      item.append(objectives, labCreate("p", "", `${(module.command_ids || []).length} mapped commands | ${api.humanStatus(module.status)}`));
-      list.append(item);
-    });
-  }
-  panel.append(list);
-  if (!isLevel0) {
-    const previewPanel = labCreate("section", "switch-preview-panel");
-    previewPanel.append(labCreate("div", "lab-card-kicker", "What is a switch? preview"));
-    previewPanel.append(labCreate("h4", "", "Visual contract only"));
-    previewPanel.append(labCreate("p", "planned-note", "These generic switch previews define the visual standard for future beginner lessons. They do not make this planned level authored."));
-    const previewGrid = labCreate("div", "switch-preview-grid");
-    switchPreviewAssets().forEach((asset) => {
-      const visual = renderMissionStudio(studio?.visualLearningPanel(asset));
-      if (visual) previewGrid.append(visual);
-    });
-    previewPanel.append(previewGrid);
-    panel.append(previewPanel);
-  }
-  if (isLevel0) panel.append(labButton("Start Level 0 lesson", "primary", () => { state.learning.courseScreen = "lesson"; renderCourse(); }));
-  else panel.append(labCreate("p", "planned-note", "This planned level is preview-only until authored lessons, practice, verification, rollback, and review evidence are complete."));
-  els.courseRoot.append(panel);
+  const modules = level?.modules || [];
+  const model = {
+    phaseLabel: `Level ${level?.level_number ?? 0} | ${api.humanStatus(level?.content_status)}`,
+    title: level?.title || "Welcome to Networking",
+    purpose: level?.why_it_matters || level?.plain_language_summary || "Preview the planned subject-specific outline before authored lessons are available.",
+    facts: stateApi?.levelFacts(level, api.humanStatus, levelNameFor) || [],
+    outcomes: isLevel0
+      ? level0Lessons().slice(0, 4).map((lesson) => lesson.objective)
+      : modules.flatMap((module) => module.objectives || []).slice(0, 6),
+    sequenceKicker: isLevel0 ? "Eight lesson sequence" : "Module sequence",
+    sequenceTitle: isLevel0 ? "Level 0 connected beginner lessons" : "Planned modules",
+    sequence: isLevel0
+      ? level0Lessons().map((lesson) => ({ title: lesson.title, body: lesson.objective }))
+      : modules.map((module) => {
+        const commandCount = (module.command_ids || []).length;
+        return {
+          title: module.title,
+          body: `${module.purpose || "Planned module."} ${commandCount ? `Mapped commands planned: ${commandCount}.` : "Command lessons are planned."}`
+        };
+      }),
+    previewAssets: isLevel0 ? [] : switchPreviewAssets(),
+    plannedNotice: isLevel0 ? null : {
+      title: "Preview-only level",
+      body: "This planned level is not authored yet. It requires lesson, practice, verification, rollback, and review evidence before completion can be awarded."
+    },
+    primaryActionLabel: isLevel0 ? "Start Level 0 lesson" : "",
+    onPrimaryAction: () => { state.learning.courseScreen = "lesson"; renderCourse(); },
+    onBack: () => { state.learning.courseScreen = "map"; renderCourse(); }
+  };
+  if (phase) model.facts.unshift(phase.title);
+  els.courseRoot.append(views?.renderLevelOverviewView(document, model) || labCreate("section", "", "Level overview unavailable."));
 }
 
 function level0StepText(lesson, stepId) {
@@ -5735,122 +5728,163 @@ function renderLevel0LessonStepper() {
   const stepName = api.STEPPER_STEPS[stepIndex];
   const stepId = api.STEP_IDS[stepIndex];
   const lessonIndex = Math.max(0, level0Lessons().findIndex((item) => item.lesson_id === lesson?.lesson_id));
-  const studio = missionStudioComponents();
-  const panel = labCreate("section", "level-stepper");
-  panel.append(labButton("Back to Course Map", "secondary", () => { state.learning.courseScreen = "map"; renderCourse(); }));
-  panel.append(labCreate("div", "lab-card-kicker", "Level 0 | Beginner orientation"));
-  panel.append(labCreate("h3", "", `${lessonIndex + 1}. ${lesson?.title || "Level 0"}`));
-  const steps = renderMissionStudio(studio?.lessonTimeline({
-    stepNames: api.STEPPER_STEPS,
-    stepIds: api.STEP_IDS,
-    activeStepId: stepId,
-    activeIndex: stepIndex
-  })) || labCreate("ol", "stepper-steps");
-  panel.append(steps);
-  const body = labCreate("section", "stepper-body");
-  body.append(labCreate("div", "lab-card-kicker", stepName));
-  const stepHeading = labCreate("h4", "", stepName);
-  stepHeading.dataset.stepHeading = stepId;
-  stepHeading.tabIndex = -1;
-  body.append(stepHeading, labCreate("p", "", level0StepText(lesson, stepId)));
-  const visualPanel = renderLessonVisualPanel(lesson, stepId);
-  if (visualPanel) body.append(visualPanel);
-  if (stepName === "Key words") {
-    const words = labCreate("div", "route-facts");
-    (lesson?.key_words || []).forEach((word) => words.append(labCreate("span", "badge", word)));
-    body.append(words);
-  }
+  const views = missionStudioViews();
+  const visualAsset = visualAssetForLessonStep(lesson, stepId);
+  let interaction = null;
   if (stepId === "predict" || stepId === "try") {
-    const interaction = stepId === "predict" ? lesson?.predict : lesson?.tryInteraction;
+    const promptInteraction = stepId === "predict" ? lesson?.predict : lesson?.tryInteraction;
     const responseMap = stepId === "predict" ? progress.prediction_responses : progress.try_responses;
-    (interaction?.answer_choices || []).forEach((choice, index) => body.append(labButton(choice, `secondary ${responseMap?.[lesson.lesson_id]?.value === choice ? "is-selected" : ""}`, () => {
-      recordLevel0Interaction({ interaction: stepId === "predict" ? "prediction" : "try", value: choice }, index === interaction.correct_index ? interaction.explanation : "Saved for review. Try again or continue after reading the explanation.");
-    })));
-    if (responseMap?.[lesson.lesson_id]) body.append(labCreate("p", "planned-note", interaction?.explanation || "Response saved."));
+    interaction = {
+      kind: "choices",
+      prompt: promptInteraction?.question || promptInteraction?.prompt,
+      feedback: responseMap?.[lesson.lesson_id] ? promptInteraction?.explanation || "Response saved." : "",
+      choices: (promptInteraction?.answer_choices || []).map((choice, index) => ({
+        label: choice,
+        selected: responseMap?.[lesson.lesson_id]?.value === choice,
+        onChoose: () => recordLevel0Interaction(
+          { interaction: stepId === "predict" ? "prediction" : "try", value: choice },
+          index === promptInteraction.correct_index ? promptInteraction.explanation : "Saved for review. Try again or continue after reading the explanation."
+        )
+      }))
+    };
   }
   if (stepId === "explain") {
-    const textarea = document.createElement("textarea");
-    textarea.className = "level0-explain-input";
-    textarea.setAttribute("aria-label", "Level 0 explanation response");
-    textarea.value = progress.explanation_responses?.[lesson.lesson_id]?.value || "";
-    body.append(textarea, labButton("Save explanation", "secondary", () => recordLevel0Interaction({ interaction: "explanation", value: textarea.value }, "Explanation saved.")));
+    interaction = {
+      kind: "explain",
+      value: progress.explanation_responses?.[lesson.lesson_id]?.value || "",
+      onSave: (value) => recordLevel0Interaction({ interaction: "explanation", value }, "Explanation saved.")
+    };
   }
   if (stepId === "confidence") {
-    const select = document.createElement("select");
-    select.setAttribute("aria-label", "Level 0 confidence");
-    ["", "Low", "Medium", "High"].forEach((value) => select.append(new Option(value || "Rate confidence", value)));
-    select.value = progress.confidence_by_lesson?.[lesson.lesson_id] || "";
-    select.addEventListener("change", () => { if (select.value) recordLevel0Interaction({ interaction: "confidence", value: select.value }, "Confidence saved."); });
-    body.append(select);
+    interaction = {
+      kind: "confidence",
+      value: progress.confidence_by_lesson?.[lesson.lesson_id] || "",
+      onChange: (value) => recordLevel0Interaction({ interaction: "confidence", value }, "Confidence saved.")
+    };
   }
   if (stepId === "continue") {
-    body.append(labCreate("p", "planned-note", lesson?.continue || "Continue saves orientation progress only."));
     if ((lesson?.completion_requirements || []).includes("final_checkpoint")) {
-      const submitted = progress.final_checkpoint_result?.submitted;
-      body.append(submitted ? labCreate("p", "lab-success", "Checkpoint submitted. Continue to complete orientation.") : labButton("Submit Level 0 checkpoint", "secondary", () => recordLevel0Interaction({ interaction: "checkpoint", passed: true, score: 100 }, "Checkpoint submitted.")));
+      interaction = {
+        kind: "checkpoint",
+        body: `${lesson?.continue || "Continue saves orientation progress only."} Level 0 records orientation completion only. It does not award practical execution, verification, or command mastery.`,
+        submitted: progress.final_checkpoint_result?.submitted,
+        onSubmit: () => recordLevel0Interaction({ interaction: "checkpoint", passed: true, score: 100 }, "Checkpoint submitted.")
+      };
     }
-    body.append(labCreate("p", "planned-note", "Level 0 records orientation completion only. It does not award practical execution, verification, or command mastery."));
   }
-  panel.append(body);
-  const controls = labCreate("div", "stepper-controls");
-  controls.append(
-    labButton("Previous", "secondary", () => advanceLevel0Step("previous")),
-    labButton(stepName === "Continue" ? "Continue" : "Next", "primary", () => advanceLevel0Step("next"))
-  );
-  panel.append(controls);
-  els.courseRoot.append(panel);
+  const model = {
+    kicker: "Level 0 | Beginner orientation",
+    title: `${lessonIndex + 1}. ${lesson?.title || "Level 0"}`,
+    subtitle: "One active step is shown at a time. Visual evidence stays beside the work on desktop and in flow on mobile.",
+    stepRail: {
+      stepNames: api.STEPPER_STEPS,
+      stepIds: api.STEP_IDS,
+      activeStepId: stepId,
+      activeIndex: stepIndex
+    },
+    stage: {
+      kicker: stepName,
+      heading: stepName,
+      stepId,
+      body: level0StepText(lesson, stepId)
+    },
+    interaction,
+    visualAsset,
+    onPrevious: () => advanceLevel0Step("previous"),
+    onNext: () => advanceLevel0Step("next"),
+    nextLabel: stepName === "Continue" ? "Continue" : "Next"
+  };
+  els.courseRoot.append(views?.renderLessonView(document, model) || labCreate("section", "", "Lesson unavailable."));
   focusLessonStepHeading();
 }
 
 function renderPractice() {
   if (!els.practiceRoot) return;
   els.practiceRoot.replaceChildren();
-  const panel = labCreate("section", "learn-track-panel");
-  panel.append(labCreate("div", "lab-card-kicker", "Practise and specialize"));
-  panel.append(labCreate("h3", "", "Use authored practice routes, then follow planned specialization paths."));
-  panel.append(labCreate("p", "", "Practice routes stay local. Specialization paths are visible for planning, but they do not count as complete until real content and evidence exist."));
-  panel.append(labButton("Open Practice Library", "primary", () => { state.lab.libraryTab = "practice"; switchView("library"); }));
-  els.practiceRoot.append(panel);
-  const grid = labCreate("div", "library-grid");
-  (state.curriculum.specializations || []).forEach((path) => {
-    const card = labCreate("article", "library-card");
-    const levelCount = path.level_ids.length;
-    const commandCount = path.command_ids.length;
-    const mappingFacts = labCreate("div", "route-facts");
-    mappingFacts.append(labCreate("span", "badge", levelCount ? `Planned levels: ${levelCount}` : "Detailed path mapping is planned"));
-    mappingFacts.append(labCreate("span", "badge", commandCount ? `Mapped commands - planned: ${commandCount}` : "Command mapping is provisional"));
-    card.append(labCreate("div", "lab-card-kicker", path.status.replace(/_/g, " ")), labCreate("h3", "", path.title), mappingFacts);
-    card.append(labCreate("p", "", (path.blocking_reasons || []).join("; ")));
-    grid.append(card);
-  });
-  els.practiceRoot.append(grid);
+  const api = beginnerExperience();
+  const views = missionStudioViews();
+  const recommendedRoute = (state.curriculum.routes || []).find((route) => route.mapping_status === "fully_mapped") || state.curriculum.routes?.[0];
+  const model = {
+    recommendedRoute,
+    routeActionLabel: recommendedRoute ? "Start local route" : "Open Practice Library",
+    recommendedFacts: recommendedRoute ? [
+      recommendedRoute.vendor_label || recommendedRoute.vendor || "Local route",
+      recommendedRoute.operating_system || "Version-sensitive profile",
+      api.humanStatus(recommendedRoute.support_level),
+      `${state.curriculum.routes.length} local routes`
+    ] : [`${state.curriculum.routes.length} local routes`],
+    onOpenPractice: () => {
+      if (recommendedRoute?.route_id) startPracticeRoute(recommendedRoute.route_id);
+      else {
+        state.lab.libraryTab = "practice";
+        switchView("library");
+      }
+    },
+    specializations: (state.curriculum.specializations || []).map((path) => {
+      const levelCount = (path.level_ids || []).length;
+      const commandCount = (path.command_ids || []).length;
+      return {
+        title: path.title,
+        statusText: api.humanStatus(path.status),
+        facts: [
+          levelCount ? `Planned levels: ${levelCount}` : "Detailed path mapping is planned",
+          commandCount ? `Mapped commands planned: ${commandCount}` : "Command mapping is provisional",
+          "No fake mastery"
+        ],
+        body: (path.blocking_reasons || []).join("; ") || "Planned until authored practice and evidence are complete."
+      };
+    })
+  };
+  els.practiceRoot.append(views?.renderPracticeView(document, model) || labCreate("section", "", "Practice unavailable."));
 }
 
 function renderProgress() {
   if (!els.progressRoot) return;
   els.progressRoot.replaceChildren();
   const api = beginnerExperience();
+  const views = missionStudioViews();
+  const stateApi = missionStudioState();
   const progress = state.learning.level0Progress || api.createLevel0State();
-  const currentLesson = level0Lessons().find((lesson) => lesson.lesson_id === progress.current_lesson_id);
+  const lessons = level0Lessons();
+  const currentLesson = lessons.find((lesson) => lesson.lesson_id === progress.current_lesson_id);
   const confidence = progress.confidence_by_lesson?.[progress.current_lesson_id] || "not rated";
   const vendorProgressCount = Object.keys(state.lab.vendorProgress || {}).length;
-  const panel = labCreate("section", "learn-track-panel");
-  panel.append(labCreate("div", "lab-card-kicker", "Saved locally"));
-  panel.append(labCreate("h3", "", "Progress is preserved."));
-  panel.append(labCreate("p", "", "Changing the beginner path does not delete existing lab progress, vendor mastery records, practice route records, saved reports, or history."));
-  const facts = labCreate("div", "learn-summary");
-  [
-    `Path: ${state.learning.path ? api.pathLabel(state.learning.path) : "not chosen"}`,
-    `Level 0 lesson: ${currentLesson?.title || "not started"}`,
-    `Level 0 step: ${api.humanStatus(progress.current_step_id)}`,
-    `Confidence: ${confidence}`,
-    `Level 0 complete: ${progress.level_complete ? "Yes" : "No"}`,
-    `Vendor tracks with records: ${vendorProgressCount}`,
-    `Saved reports: ${state.history.length}`
-  ].forEach((fact) => facts.append(labCreate("span", "badge", fact)));
-  panel.append(facts);
-  panel.append(labButton("Resume Level 0", "primary", () => { state.learning.levelId = "level_00"; state.learning.courseScreen = "lesson"; switchView("course"); }), labButton("Change learning path", "secondary", () => { saveLearningPath(""); announcePathChoice("Choose a learning path."); switchView("home"); }));
-  els.progressRoot.append(panel);
+  const completion = stateApi?.level0Completion(progress, lessons, api.STEP_IDS) || { percent: 0, completedLessons: 0, lessonCount: lessons.length };
+  const reviewRecords = Object.values(state.lab.vendorProgress || {})
+    .flatMap((vendorProgress) => Object.values(vendorProgress.reviewRecords || {}));
+  const reviewsDue = reviewRecords.filter((record) => {
+    const dueTime = Date.parse(record.next_review_date || "");
+    return Number.isFinite(dueTime) && dueTime <= Date.now();
+  }).length;
+  const checkpointStatus = progress.final_checkpoint_result?.submitted ? "Submitted" : "Not submitted";
+  const routeCount = Object.values(state.lab.vendorProgress || {})
+    .reduce((total, vendorProgress) => total + Object.keys(vendorProgress.practisedRoutes || {}).length, 0);
+  const pathLabel = state.learning.path && api.pathLabel ? api.pathLabel(state.learning.path) : "Not chosen";
+  const model = {
+    progressPercent: completion.percent,
+    progressLabel: `${completion.percent}% complete - ${completion.completedLessons}/${completion.lessonCount} lessons`,
+    metrics: [
+      { label: "Learning path", value: pathLabel, detail: state.learning.path ? "Active local path" : "Choose a path from Home" },
+      { label: "Level 0", value: `${completion.percent}%`, detail: `${completion.completedLessons}/${completion.lessonCount} lessons complete` },
+      { label: "Current lesson", value: currentLesson?.title || "Not started", detail: api.humanStatus(progress.current_step_id) },
+      { label: "Checkpoint", value: checkpointStatus, detail: progress.level_complete ? "Orientation complete" : "Required before completion" },
+      { label: "Confidence", value: confidence, detail: "Local self-rating only" },
+      { label: "Reviews due", value: String(reviewsDue), detail: `${reviewRecords.length} review records tracked` },
+      { label: "Route activity", value: String(routeCount), detail: `${vendorProgressCount} vendor tracks preserved` },
+      { label: "Saved reports", value: String(state.history.length), detail: "Local saved diagnostic reports" }
+    ],
+    recentActivity: stateApi?.recentActivity({
+      progress,
+      lesson: currentLesson,
+      historyCount: state.history.length,
+      vendorProgressCount,
+      currentStepLabel: api.humanStatus(progress.current_step_id)
+    }) || [],
+    recommendation: progress.level_complete ? "Recommended next action: practise a local route." : "Recommended next action: resume the active Level 0 lesson.",
+    onResume: () => { state.learning.levelId = "level_00"; state.learning.courseScreen = "lesson"; switchView("course"); },
+    onChangePath: () => { saveLearningPath(""); announcePathChoice("Choose a learning path."); syncMissionStudioShell("home"); switchView("home"); }
+  };
+  els.progressRoot.append(views?.renderProgressDashboard(document, model) || labCreate("section", "", "Progress unavailable."));
 }
 
 function openTechnicianTool(tool) {
@@ -5870,18 +5904,12 @@ function openTechnicianTool(tool) {
 function renderTools() {
   if (!els.toolsRoot) return;
   els.toolsRoot.replaceChildren();
-  const studio = missionStudioComponents();
-  const panel = labCreate("section", "learn-track-panel");
-  panel.append(labCreate("div", "lab-card-kicker", "Technician Tools"));
-  panel.append(labCreate("h3", "", "Open the working app tools when you need them."));
-  panel.append(labCreate("p", "", "These are local diagnostic, terminal, reference, and report surfaces. Instructor Mode is not part of beginner navigation."));
-  els.toolsRoot.append(panel);
-  const grid = labCreate("div", "library-grid");
-  beginnerExperience().TECHNICIAN_TOOLS.forEach((tool) => {
-    const card = renderMissionStudio(studio?.technicianToolCard({ tool, onAction: () => openTechnicianTool(tool) }));
-    if (card) grid.append(card);
-  });
-  els.toolsRoot.append(grid);
+  const views = missionStudioViews();
+  const model = {
+    tools: beginnerExperience().TECHNICIAN_TOOLS,
+    onOpenTool: (tool) => openTechnicianTool(tool)
+  };
+  els.toolsRoot.append(views?.renderTechnicianToolsGrid(document, model) || labCreate("section", "", "Tools unavailable."));
 }
 
 function renderTechnicianReturn(viewName) {
@@ -5897,6 +5925,7 @@ function renderTechnicianReturn(viewName) {
 function switchView(viewName, options = {}) {
   els.navTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === viewName));
   els.views.forEach((view) => view.classList.toggle("active", view.id === `${viewName}View`));
+  syncMissionStudioShell(viewName);
   if (viewName === "lab") {
     if (options.resetLab) state.lab.screen = "dashboard";
     renderLab();

@@ -3,10 +3,10 @@
 (function exposeMissionStudioComponents(global) {
   const navItems = Object.freeze([
     { view: "home", label: "Home", icon: "home" },
-    { view: "course", label: "Course", icon: "map" },
-    { view: "practice", label: "Practice", icon: "terminal" },
-    { view: "progress", label: "Progress", icon: "chart" },
-    { view: "tools", label: "Tools", icon: "toolbox" }
+    { view: "course", label: "Course", icon: "course" },
+    { view: "practice", label: "Practice", icon: "practice" },
+    { view: "progress", label: "Progress", icon: "progress" },
+    { view: "tools", label: "Tools", icon: "tools" }
   ]);
 
   const lessonStepper = Object.freeze([
@@ -32,9 +32,9 @@
   ]);
 
   const pathCards = Object.freeze([
-    { id: "zero", label: "Continue Mission", description: "Resume guided beginner lessons with visual evidence." },
-    { id: "practice", label: "Open Practice", description: "Use local routes without changing real devices." },
-    { id: "tools", label: "Open Tools", description: "Jump into technician surfaces for focused work." }
+    { id: "zero", label: "Learn From Zero", description: "Start with the Level 0 mission sequence." },
+    { id: "practice", label: "Practise", description: "Open local practice routes and specialization previews." },
+    { id: "tools", label: "Technician", description: "Jump into diagnostic and reference tools." }
   ]);
 
   function freezeDescription(description) {
@@ -57,138 +57,257 @@
     });
   }
 
-  function actionButton(label, onAction, variant = "primary", ariaLabel = label) {
-    return node("button", { className: variant, type: "button", text: label, ariaLabel, onClick: onAction });
+  function ActionButton(label, onAction, variant = "primary", ariaLabel = label, extra = {}) {
+    const className = variant === "primary" ? "ms-button ms-button-primary" : `ms-button ms-button-${variant}`;
+    return node("button", {
+      className,
+      type: "button",
+      text: label,
+      ariaLabel,
+      onClick: onAction,
+      dataset: extra.dataset || {},
+      attrs: extra.attrs || {}
+    });
   }
 
-  function recommendedActionCard({ kicker = "Recommended", title, body, icon = "mission", actionLabel, onAction, variant = "primary" } = {}) {
-    return node("article", { className: "mission-action-card", dataset: { icon } }, [
-      node("div", { className: "mission-card-icon", ariaHidden: "true" }),
-      node("div", { className: "lab-card-kicker", text: kicker }),
+  function StatusPill(text, tone = "neutral") {
+    return node("span", { className: `ms-pill ms-pill-${tone}`, text });
+  }
+
+  function MissionStudioShell({ activeView = "home", pathLabel = "Choose a path" } = {}) {
+    return node("div", { className: "ms-shell", dataset: { activeView } }, [
+      DesktopSidebar({ activeView, pathLabel }),
+      node("main", { className: "ms-shell-main" }),
+      MobileProductHeader({ pathLabel }),
+      MobileBottomNavigation({ activeView })
+    ]);
+  }
+
+  function DesktopSidebar({ activeView = "home", pathLabel = "Choose a path" } = {}) {
+    return node("aside", { className: "ms-desktop-sidebar", ariaLabel: "Mission Studio navigation" }, [
+      node("div", { className: "ms-product-lockup" }, [
+        node("span", { className: "ms-product-mark", text: "CD", ariaHidden: "true" }),
+        node("span", { className: "ms-product-name", text: "Command Doctor" })
+      ]),
+      node("nav", { className: "ms-sidebar-nav", ariaLabel: "Primary learning views" }, navItems.map((item) => {
+        const active = item.view === activeView;
+        return node("button", {
+          className: active ? "ms-nav-item is-active" : "ms-nav-item",
+          type: "button",
+          text: item.label,
+          ariaCurrent: active ? "page" : "",
+          dataset: { view: item.view, navIcon: item.icon }
+        });
+      })),
+      node("section", { className: "ms-sidebar-summary", ariaLabel: "Learning path" }, [
+        node("strong", { text: "Your mission" }),
+        node("p", { text: pathLabel })
+      ])
+    ]);
+  }
+
+  function MobileProductHeader({ pathLabel = "Choose a path" } = {}) {
+    return node("header", { className: "ms-mobile-product-header", ariaLabel: "Command Doctor" }, [
+      node("span", { className: "ms-product-mark", text: "CD", ariaHidden: "true" }),
+      node("div", {}, [
+        node("strong", { text: "Command Doctor" }),
+        node("span", { text: pathLabel })
+      ])
+    ]);
+  }
+
+  function MobileBottomNavigation({ activeView = "home" } = {}) {
+    return node("nav", { className: "ms-mobile-bottom-navigation", ariaLabel: "Mobile learning views" }, navItems.map((item) => {
+      const active = item.view === activeView;
+      return node("button", {
+        className: active ? "ms-nav-item is-active" : "ms-nav-item",
+        type: "button",
+        text: item.label,
+        ariaCurrent: active ? "page" : "",
+        dataset: { view: item.view, navIcon: item.icon }
+      });
+    }));
+  }
+
+  function ContinueMissionCard({ title, lessonTitle, phaseLabel, levelLabel, progressLabel, actionLabel, onAction } = {}) {
+    return node("section", { className: "ms-card ms-continue-card", ariaLabel: "Continue mission" }, [
+      node("div", { className: "ms-kicker", text: "Continue learning" }),
+      node("h3", { text: title || "Continue Mission" }),
+      node("p", { text: lessonTitle || "Resume the current beginner lesson." }),
+      node("div", { className: "ms-fact-row" }, [
+        StatusPill(phaseLabel || "Phase 1"),
+        StatusPill(levelLabel || "Level 0"),
+        StatusPill(progressLabel || "In progress", "success")
+      ]),
+      ActionButton(actionLabel || "Continue Mission", onAction, "primary", actionLabel || "Continue Mission", { dataset: { dominantAction: "true" } })
+    ]);
+  }
+
+  function DiagnosticShortcutCard({ title = "Start a diagnostic", body = "Open the local tools when you need to investigate output.", actionLabel = "Open Tools", onAction } = {}) {
+    return node("article", { className: "ms-card ms-diagnostic-card" }, [
+      node("div", { className: "ms-kicker", text: "Technician tools" }),
       node("h3", { text: title }),
       node("p", { text: body }),
-      actionButton(actionLabel, onAction, variant)
+      ActionButton(actionLabel, onAction, "secondary")
     ]);
   }
 
-  function continueMissionCard({ title, lessonTitle, phaseLabel, levelLabel, progressLabel, actionLabel, onAction } = {}) {
-    return node("section", { className: "continue-mission-card", ariaLabel: "Continue mission" }, [
-      node("div", { className: "lab-card-kicker", text: "Continue learning" }),
-      node("h3", { text: title || "Continue Mission" }),
-      node("p", { text: lessonTitle || "Resume your current beginner lesson." }),
-      node("div", { className: "mission-card-facts" }, [
-        node("span", { className: "badge", text: phaseLabel || "Phase 1" }),
-        node("span", { className: "badge", text: levelLabel || "Level 0" }),
-        node("span", { className: "badge badge-green", text: progressLabel || "In progress" })
+  function RecentActivityStrip({ items = [] } = {}) {
+    return node("section", { className: "ms-recent-strip", ariaLabel: "Recent activity" }, [
+      node("div", { className: "ms-section-head" }, [
+        node("span", { className: "ms-kicker", text: "Recent activity" }),
+        node("strong", { text: "Saved locally" })
       ]),
-      actionButton(actionLabel || "Continue Mission", onAction, "primary")
+      node("div", { className: "ms-recent-list" }, items.map((item) => node("article", { className: "ms-recent-item" }, [
+        node("span", { className: "ms-tool-symbol", text: item.symbol || "MS", ariaHidden: "true" }),
+        node("strong", { text: item.title }),
+        node("span", { text: item.detail })
+      ])))
     ]);
   }
 
-  function coursePhaseRail({ phases = [], currentPhaseId = "" } = {}) {
-    return node("nav", { className: "course-phase-rail", ariaLabel: "Course phases" }, [
+  function CoursePhaseRail({ phases = [], currentPhaseId = "" } = {}) {
+    return node("nav", { className: "ms-phase-rail", ariaLabel: "Course phases" }, [
       node("ol", {}, phases.map((phase) => {
         const active = phase.phase_id === currentPhaseId;
-        return node("li", { className: active ? "is-current" : "", ariaCurrent: active ? "step" : "" }, [
-          node("span", { className: "phase-number", text: String(phase.phase_number || "") }),
-          node("strong", { text: phase.title }),
-          node("span", { text: phase.statusText || phase.status || "planned" })
+        return node("li", { className: active ? "is-current" : "" }, [
+          node("button", {
+            className: "ms-phase-button",
+            type: "button",
+            ariaCurrent: active ? "step" : "",
+            onClick: phase.onSelect,
+            dataset: { phaseId: phase.phase_id || "" }
+          }, [
+            node("span", { className: "ms-phase-number", text: String(phase.phase_number ?? phase.number ?? "") }),
+            node("strong", { text: phase.title || "Phase" }),
+            node("span", { text: phase.statusText || phase.status || "planned" })
+          ])
         ]);
       }))
     ]);
   }
 
-  function levelCard({ level, statusText, actionLabel, onAction, current = false } = {}) {
-    const className = `course-level-card ${current ? "is-current" : "is-locked"}`.trim();
-    return node("article", { className }, [
-      node("div", { className: "lab-card-kicker", text: `Level ${level?.level_number ?? 0}` }),
-      node("h3", { text: level?.title || "Planned level" }),
-      node("p", { text: level?.plain_language_summary || level?.why_it_matters || "Planned subject-specific outline." }),
-      node("div", { className: "route-facts" }, [
-        node("span", { className: "badge", text: statusText || "Planned preview" }),
-        node("span", { className: "badge", text: `${(level?.modules || []).length} modules` }),
-        node("span", { className: "badge", text: `${(level?.command_ids || []).length} commands` })
+  function CourseLevelTimeline({ levels = [] } = {}) {
+    return node("section", { className: "ms-level-timeline", ariaLabel: "Course levels" }, levels.map((level) => LevelOverviewHeader(level)));
+  }
+
+  function LevelOverviewHeader({ level, statusText, actionLabel, onAction, current = false, facts = [] } = {}) {
+    const item = level || {};
+    return node("article", { className: current ? "ms-level-row is-current" : "ms-level-row" }, [
+      node("span", { className: "ms-level-number", text: String(item.level_number ?? 0) }),
+      node("div", { className: "ms-level-main" }, [
+        node("span", { className: "ms-kicker", text: statusText || item.content_status || "planned" }),
+        node("h3", { text: item.title || "Planned level" }),
+        node("p", { text: item.plain_language_summary || item.why_it_matters || item.purpose || "Previewed until complete lesson evidence exists." }),
+        node("div", { className: "ms-fact-row" }, facts.map((fact) => StatusPill(fact)))
       ]),
-      actionButton(actionLabel || "Preview plan", onAction, "primary")
+      ActionButton(actionLabel || "Preview plan", onAction, current ? "primary" : "secondary")
     ]);
   }
 
-  function phaseContextPanel({ phase, title = "About this phase", body, facts = [] } = {}) {
-    return node("aside", { className: "phase-context-panel", ariaLabel: title }, [
-      node("div", { className: "lab-card-kicker", text: title }),
+  function PhaseContextPanel({ phase, title = "About this phase", body, facts = [] } = {}) {
+    return node("aside", { className: "ms-card ms-phase-context", ariaLabel: title }, [
+      node("div", { className: "ms-kicker", text: title }),
       node("h3", { text: phase?.title || "Phase context" }),
-      node("p", { text: body || phase?.purpose || "This phase is previewed honestly until authored lesson evidence exists." }),
-      node("div", { className: "route-facts" }, facts.map((fact) => node("span", { className: "badge", text: fact })))
+      node("p", { text: body || phase?.purpose || "This phase is visible for planning until every lesson is authored and verified." }),
+      node("div", { className: "ms-fact-row" }, facts.map((fact) => StatusPill(fact)))
     ]);
   }
 
-  function lessonTimeline({ stepNames = lessonStepper, stepIds = [], activeStepId = "", activeIndex = 0 } = {}) {
-    return node("ol", { className: "stepper-steps" }, stepNames.map((name, index) => {
-      const stepId = stepIds[index] || name.toLowerCase().replace(/\s+/g, "_");
-      const active = stepId === activeStepId || index === activeIndex;
-      const done = index < activeIndex;
-      return node("li", { className: active ? "is-active" : done ? "is-done" : "", ariaCurrent: active ? "step" : "" }, [
-        node("span", { text: name }),
-        node("span", { className: "step-status", text: done ? "Completed" : active ? "Current step" : "Locked until reached" })
-      ]);
-    }));
+  function LessonStepRail({ stepNames = lessonStepper, stepIds = [], activeStepId = "", activeIndex = 0 } = {}) {
+    return node("nav", { className: "ms-lesson-step-rail", ariaLabel: "Lesson steps" }, [
+      node("ol", {}, stepNames.map((name, index) => {
+        const stepId = stepIds[index] || name.toLowerCase().replace(/\s+/g, "_");
+        const active = stepId === activeStepId || index === activeIndex;
+        const complete = index < activeIndex;
+        return node("li", { className: active ? "is-active" : complete ? "is-complete" : "", ariaCurrent: active ? "step" : "" }, [
+          node("span", { className: "ms-step-number", text: String(index + 1) }),
+          node("span", { text: name, ariaCurrent: active ? "step" : "" }),
+          node("small", { text: complete ? "Complete" : active ? "Current" : "Upcoming" })
+        ]);
+      }))
+    ]);
   }
 
-  function lessonStepPanel({ kicker, heading, body, stepId, children = [] } = {}) {
-    return node("section", { className: "stepper-body" }, [
-      node("div", { className: "lab-card-kicker", text: kicker }),
-      node("h4", { text: heading, tabIndex: -1, dataset: { stepHeading: stepId } }),
+  function LessonContentStage({ kicker, heading, body, stepId, children = [] } = {}) {
+    return node("section", { className: "ms-card ms-lesson-stage" }, [
+      node("div", { className: "ms-kicker", text: kicker }),
+      node("h3", { text: heading, tabIndex: -1, dataset: { stepHeading: stepId } }),
       node("p", { text: body }),
       ...children
     ]);
   }
 
-  function visualLearningPanel(asset = {}) {
-    return node("section", { className: "mission-visual-panel" }, [
-      node("div", { className: "lab-card-kicker", text: "Visual evidence" }),
-      node("div", { className: "mission-visual-layout" }, [
-        node("figure", { className: "mission-visual-figure" }, [
-          node("img", { src: asset.local_asset_path, alt: asset.alt_text, loading: "lazy", decoding: "async" }),
-          node("figcaption", { text: asset.caption || asset.title })
+  function VisualLearningPanel(asset = {}) {
+    return node("section", { className: "ms-card ms-visual-panel mission-visual-panel", ariaLabel: "Visual learning panel" }, [
+      node("div", { className: "ms-kicker", text: "Visual evidence" }),
+      node("div", { className: "ms-visual-layout" }, [
+        node("figure", { className: "ms-visual-figure" }, [
+          node("img", { src: asset.local_asset_path, alt: asset.alt_text || asset.title || "Lesson visual", loading: "lazy", decoding: "async" }),
+          node("figcaption", { text: asset.caption || asset.title || "Command Doctor visual" })
         ]),
-        node("div", { className: "mission-visual-copy" }, [
-          node("h5", { text: "What to notice" }),
-          node("p", { text: asset.text_alternative }),
-          node("ul", { className: "mission-visual-evidence" }, (asset.evidence_requirements || []).map((requirement) => node("li", { text: requirement }))),
-          node("div", { className: "route-facts" }, (asset.visual_components || []).map((component) => node("span", { className: "badge", text: component.replace(/_/g, " ") })))
+        node("div", { className: "ms-visual-copy" }, [
+          node("h4", { text: "What to notice" }),
+          node("p", { text: asset.text_alternative || "A local visual explains the current learning step." }),
+          node("ul", {}, (asset.evidence_requirements || []).map((requirement) => node("li", { text: requirement }))),
+          node("div", { className: "ms-fact-row" }, (asset.visual_components || []).map((component) => StatusPill(component.replace(/_/g, " "))))
         ])
       ])
     ]);
   }
 
-  function technicianToolCard({ tool, onAction } = {}) {
-    return recommendedActionCard({
-      kicker: "Technician tool",
-      title: tool?.label || "Tool",
-      body: tool?.description || "Open a local Command Doctor tool.",
-      icon: tool?.id || "tool",
-      actionLabel: `Open ${tool?.label || "Tool"}`,
-      onAction
-    });
-  }
-
-  function progressSummary({ facts = [], actionLabel, onAction } = {}) {
-    return node("section", { className: "progress-summary-panel" }, [
-      node("div", { className: "lab-card-kicker", text: "Local progress" }),
-      node("h3", { text: "Progress is preserved" }),
-      node("div", { className: "learn-summary" }, facts.map((fact) => node("span", { className: "badge", text: fact }))),
-      actionLabel ? actionButton(actionLabel, onAction, "primary") : null
+  function ProgressDashboard({ facts = [], actionLabel, onAction, percent = 0, progressLabel = "" } = {}) {
+    const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
+    const label = progressLabel || `${safePercent}% complete`;
+    return node("section", { className: "ms-progress-dashboard" }, [
+      node("div", { className: "ms-section-head" }, [
+        node("span", { className: "ms-kicker", text: "Local progress" }),
+        node("h3", { text: "Beginner progress" })
+      ]),
+      node("div", {
+        className: "ms-progress-bar",
+        role: "progressbar",
+        ariaLabel: label,
+        attrs: {
+          "aria-valuemin": "0",
+          "aria-valuemax": "100",
+          "aria-valuenow": String(safePercent)
+        }
+      }, [
+        node("span", { style: { width: `${safePercent}%` } })
+      ]),
+      node("p", { className: "ms-planned-text", text: label }),
+      node("div", { className: "ms-progress-facts" }, facts.map((fact) => node("article", { className: "ms-metric" }, [
+        node("span", { text: fact.label }),
+        node("strong", { text: fact.value }),
+        node("small", { text: fact.detail || "" })
+      ]))),
+      actionLabel ? ActionButton(actionLabel, onAction, "primary") : null
     ]);
   }
 
-  function plannedContentNotice({ title = "Planned content", body = "Detailed mapping is planned. Command mapping is provisional." } = {}) {
-    return node("section", { className: "planned-content-notice" }, [
+  function TechnicianToolCard({ tool, symbol, onAction } = {}) {
+    return node("article", { className: "ms-tool-card", dataset: { toolId: tool?.id || "" } }, [
+      node("span", { className: "ms-tool-symbol", text: symbol || tool?.symbol || "TL", ariaHidden: "true" }),
+      node("div", { className: "ms-kicker", text: "Tool" }),
+      node("h3", { text: tool?.label || "Tool" }),
+      node("p", { text: tool?.description || "Open a local Command Doctor tool." }),
+      ActionButton(`Open ${tool?.label || "Tool"}`, onAction, "secondary")
+    ]);
+  }
+
+  function TechnicianToolsGrid({ tools = [] } = {}) {
+    return node("section", { className: "ms-tools-grid", ariaLabel: "Technician tools" }, tools.map((tool) => TechnicianToolCard(tool)));
+  }
+
+  function PlannedContentNotice({ title = "Planned content", body = "This item is visible for planning. It does not count as complete until authored lesson, practice, verification, rollback, and review evidence exist." } = {}) {
+    return node("section", { className: "ms-planned-notice" }, [
       node("strong", { text: title }),
       node("p", { text: body })
     ]);
   }
 
-  function accessibleStatusMessage(message, politeness = "polite") {
+  function AccessibleStatusMessage(message, politeness = "polite") {
     return node("div", { className: "sr-only", role: "status", ariaLive: politeness, text: message });
   }
 
@@ -210,8 +329,11 @@
     if (props.alt !== undefined) element.alt = props.alt;
     if (props.loading) element.loading = props.loading;
     if (props.decoding) element.decoding = props.decoding;
+    if (props.style) Object.assign(element.style, props.style);
     if (props.dataset) Object.entries(props.dataset).forEach(([key, value]) => { element.dataset[key] = value; });
-    if (props.attrs) Object.entries(props.attrs).forEach(([key, value]) => { if (value !== "") element.setAttribute(key, value); });
+    if (props.attrs) Object.entries(props.attrs).forEach(([key, value]) => {
+      if (value !== "" && value !== undefined && value !== null) element.setAttribute(key, value);
+    });
     if (typeof props.onClick === "function") element.addEventListener("click", props.onClick);
     (description.children || []).forEach((child) => element.append(renderDescription(documentRef, child)));
     return element;
@@ -223,19 +345,39 @@
     visualComponents,
     pathCards,
     appShellState,
-    recommendedActionCard,
-    continueMissionCard,
-    coursePhaseRail,
-    levelCard,
-    phaseContextPanel,
-    lessonTimeline,
-    lessonStepPanel,
-    visualLearningPanel,
-    technicianToolCard,
-    progressSummary,
-    plannedContentNotice,
-    accessibleStatusMessage,
-    renderDescription
+    MissionStudioShell,
+    DesktopSidebar,
+    MobileProductHeader,
+    MobileBottomNavigation,
+    ContinueMissionCard,
+    DiagnosticShortcutCard,
+    RecentActivityStrip,
+    CoursePhaseRail,
+    CourseLevelTimeline,
+    PhaseContextPanel,
+    LevelOverviewHeader,
+    LessonStepRail,
+    LessonContentStage,
+    VisualLearningPanel,
+    ProgressDashboard,
+    TechnicianToolsGrid,
+    TechnicianToolCard,
+    PlannedContentNotice,
+    AccessibleStatusMessage,
+    renderDescription,
+    actionButton: ActionButton,
+    recommendedActionCard: DiagnosticShortcutCard,
+    continueMissionCard: ContinueMissionCard,
+    coursePhaseRail: CoursePhaseRail,
+    levelCard: LevelOverviewHeader,
+    phaseContextPanel: PhaseContextPanel,
+    lessonTimeline: LessonStepRail,
+    lessonStepPanel: LessonContentStage,
+    visualLearningPanel: VisualLearningPanel,
+    technicianToolCard: TechnicianToolCard,
+    progressSummary: ProgressDashboard,
+    plannedContentNotice: PlannedContentNotice,
+    accessibleStatusMessage: AccessibleStatusMessage
   });
 
   global.CommandDoctorMissionStudioComponents = api;

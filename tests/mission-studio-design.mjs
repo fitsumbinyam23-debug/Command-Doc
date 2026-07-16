@@ -51,6 +51,11 @@ function createFakeDocument() {
   };
 }
 
+function flattenRendered(node) {
+  if (!node || typeof node !== "object") return [];
+  return [node, ...(node.children || []).flatMap(flattenRendered)];
+}
+
 function gitDiffNames(gitExecutable) {
   try {
     return execFileSync(gitExecutable, ["diff", "--name-only"], { cwd: root, encoding: "utf8" })
@@ -64,40 +69,72 @@ function gitDiffNames(gitExecutable) {
 
 const [
   labHtml,
-  css,
+  baseCss,
+  missionCss,
   appSource,
   modelSource,
   tokensSource,
+  iconsSource,
+  missionStateSource,
   componentsSource,
+  shellSource,
+  viewsSource,
   registry,
   schema,
   designDoc,
   packageJson,
+  buildSource,
+  gitignoreSource,
+  isolatedBuildSource,
+  isolatedStartupSource,
   browserReviewSource,
   protectedHashSource
 ] = await Promise.all([
   read("lab.html"),
   read("styles.css"),
+  read("mission-studio.css"),
   read("src/app-release-21.js"),
   read("src/learning-experience/beginner-experience.js"),
   read("src/learning-experience/mission-studio-tokens.js"),
+  read("src/learning-experience/mission-studio-icons.js"),
+  read("src/learning-experience/mission-studio-state.js"),
   read("src/learning-experience/mission-studio-components.js"),
+  read("src/learning-experience/mission-studio-shell.js"),
+  read("src/learning-experience/mission-studio-views.js"),
   readJson("data/curriculum/lesson-visual-assets.json"),
   readJson("data/curriculum/lesson-visual-assets.schema.json"),
   read("docs/COMMAND-DOCTOR-MISSION-STUDIO-DESIGN.md"),
   readJson("package.json"),
+  read("scripts/build.mjs"),
+  read(".gitignore"),
+  read("tools/review-isolated-build.mjs"),
+  read("tools/review-isolated-startup.mjs"),
   read("tools/browser-review/mission-studio-browser-review.mjs"),
   read("tools/protected-hash-report.mjs")
 ]);
 
+const css = `${baseCss}\n${missionCss}`;
 const model = loadBrowserModule(modelSource, "src/learning-experience/beginner-experience.js");
 const tokens = loadBrowserModule(tokensSource, "src/learning-experience/mission-studio-tokens.js");
+const icons = loadBrowserModule(iconsSource, "src/learning-experience/mission-studio-icons.js");
+const missionState = loadBrowserModule(missionStateSource, "src/learning-experience/mission-studio-state.js");
 const components = loadBrowserModule(componentsSource, "src/learning-experience/mission-studio-components.js");
+const shell = loadBrowserModule(shellSource, "src/learning-experience/mission-studio-shell.js");
+const views = loadBrowserModule(viewsSource, "src/learning-experience/mission-studio-views.js");
 
 check(packageJson.scripts?.["test:mission-studio"] === "node tests/mission-studio-design.mjs && node tests/mission-studio-review-regressions.mjs", "Mission Studio test script runs design and review regression guards");
 check(packageJson.scripts?.["review:mission-studio"] === "node tools/browser-review/mission-studio-browser-review.mjs --repeat 2", "Mission Studio browser review script is registered");
+check(buildSource.includes("export async function buildCommandDoctor") && buildSource.includes("--out-dir"), "build tool supports an optional isolated output directory");
+check(gitignoreSource.includes(".review-build/"), "review build output is ignored by Git");
+check(isolatedBuildSource.includes("buildCommandDoctor") && isolatedBuildSource.includes("verified_source_copies"), "isolated build runner reuses the build implementation and verifies copied source");
+check(isolatedStartupSource.includes("isolated startup") && isolatedStartupSource.includes("--client"), "isolated startup runner supports an explicit client directory");
 check(labHtml.includes("src/learning-experience/mission-studio-tokens.js"), "Mission Studio tokens are loaded");
+check(labHtml.includes("mission-studio.css"), "Mission Studio scoped stylesheet is loaded");
+check(labHtml.includes("src/learning-experience/mission-studio-icons.js"), "Mission Studio icons are loaded");
+check(labHtml.includes("src/learning-experience/mission-studio-state.js"), "Mission Studio state helpers are loaded");
 check(labHtml.includes("src/learning-experience/mission-studio-components.js"), "Mission Studio components are loaded");
+check(labHtml.includes("src/learning-experience/mission-studio-shell.js"), "Mission Studio shell is loaded");
+check(labHtml.includes("src/learning-experience/mission-studio-views.js"), "Mission Studio views are loaded");
 check((labHtml.match(/class="nav-tabs"/g) || []).length === 1, "navigation is reused instead of duplicated");
 check(!/<(?:script|link)[^>]+(?:src|href)=["']https?:/i.test(labHtml), "lab.html has no remote script or stylesheet dependency");
 
@@ -106,8 +143,45 @@ check(tokens.navigation?.mobileHeight === "72px", "mobile navigation token is pr
 check(tokens.colors?.action === "#1769e0", "action color token is present");
 check(components.navItems?.map((item) => item.label).join("|") === "Home|Course|Practice|Progress|Tools", "component navigation labels are approved");
 check(components.visualComponents?.includes("annotated_device_view"), "visual component contract includes annotated device view");
+check(icons.toolSymbol("diagnose") !== icons.toolSymbol("command-lookup"), "tool symbols are unique per tool");
+check(typeof missionState.level0Completion === "function", "Mission Studio state helper exposes level0Completion");
+check(typeof shell.setupMissionStudioShell === "function", "Mission Studio shell exposes setup");
+check(typeof views.renderMissionStudioHomeView === "function", "Mission Studio views expose Home renderer");
+const plannedLevelFacts = missionState.levelFacts({
+  estimated_learning_hours: 0,
+  modules: [],
+  command_ids: [],
+  prerequisite_level_ids: ["level_00"],
+  practice_status: "planned",
+  review_status: "planned"
+}, (value) => value || "planned", (id) => id === "level_00" ? "Requires Level 0: Welcome to Networking" : "Requires prior level review");
+check(plannedLevelFacts.includes("Command lessons are planned"), "planned level facts use honest command-planning copy");
+check(!plannedLevelFacts.join(" ").includes("0 mapped commands"), "planned level facts suppress zero mapped-command copy");
+check(!plannedLevelFacts.join(" ").includes("level_00"), "planned level facts suppress raw prerequisite ids");
+const progressDescription = components.ProgressDashboard({ facts: [], percent: 42, progressLabel: "42% complete" });
+check(JSON.stringify(progressDescription).includes("\"role\":\"progressbar\""), "ProgressDashboard exposes an accessible progress bar");
+check(JSON.stringify(progressDescription).includes("\"aria-valuenow\":\"42\""), "ProgressDashboard binds progress value");
 
 [
+  "MissionStudioShell",
+  "DesktopSidebar",
+  "MobileProductHeader",
+  "MobileBottomNavigation",
+  "ContinueMissionCard",
+  "DiagnosticShortcutCard",
+  "RecentActivityStrip",
+  "CoursePhaseRail",
+  "CourseLevelTimeline",
+  "PhaseContextPanel",
+  "LevelOverviewHeader",
+  "LessonStepRail",
+  "LessonContentStage",
+  "VisualLearningPanel",
+  "ProgressDashboard",
+  "TechnicianToolsGrid",
+  "TechnicianToolCard",
+  "PlannedContentNotice",
+  "AccessibleStatusMessage",
   "appShellState",
   "recommendedActionCard",
   "continueMissionCard",
@@ -144,20 +218,24 @@ const renderedTimeline = components.renderDescription(fakeDocument, components.l
   activeStepId: "see",
   activeIndex: 2
 }));
-check(renderedTimeline.children.filter((item) => item.attributes["aria-current"] === "step").length === 1, "LessonTimeline exposes one aria-current step");
+check(flattenRendered(renderedTimeline).filter((item) => item.attributes?.["aria-current"] === "step").length >= 1, "LessonTimeline exposes one aria-current step");
 
 for (const marker of [
   "--mission-sidebar-width",
+  "--ms-sidebar-width",
   ".nav-tab[data-nav-icon",
   "@media (max-width: 720px)",
-  ".mission-home-dashboard",
-  ".continue-mission-card",
-  ".course-phase-rail",
-  ".phase-context-panel",
+  ".ms-home-grid",
+  ".ms-continue-card",
+  ".ms-course-layout",
+  ".ms-phase-rail",
+  ".ms-level-timeline",
+  ".ms-phase-context",
   ".mission-visual-panel",
-  ".mission-visual-layout",
-  ".stepper-steps li.is-active",
-  ".tools-root .library-grid"
+  ".ms-visual-layout",
+  ".ms-lesson-layout",
+  ".ms-lesson-step-rail li.is-active",
+  ".ms-tools-grid"
 ]) {
   check(css.includes(marker), `CSS includes ${marker}`);
 }
@@ -192,10 +270,17 @@ check(appSource.includes("renderLessonVisualPanel"), "app renders lesson visual 
 check(appSource.includes("visualAssetForLessonStep"), "app resolves visuals by lesson and step");
 check(appSource.includes("switchPreviewAssets"), "app exposes preview contract visuals without authoring Level 1");
 check(appSource.includes("missionStudioComponents"), "app consumes the reusable Mission Studio component layer");
-check(componentsSource.includes("aria-current") && appSource.includes("lessonTimeline"), "lesson stepper exposes aria-current");
+check(appSource.includes("missionStudioViews"), "app delegates primary Mission Studio screens to view renderers");
+check(appSource.includes("setupMissionStudioShell") && appSource.includes("syncMissionStudioShell"), "app initializes and syncs the Mission Studio shell");
+check(componentsSource.includes("aria-current") && viewsSource.includes("LessonStepRail"), "lesson stepper exposes aria-current");
+check(!/function renderHome\(\)[\s\S]*?home-hero[\s\S]*?function/.test(appSource), "Home primary renderer does not use old home-hero");
+check(!/function renderCourseMap\(\)[\s\S]*?document\.createElement\(\"details\"\)[\s\S]*?function/.test(appSource), "Course primary renderer does not use details accordion");
+check(!/function renderTools\(\)[\s\S]*?library-grid[\s\S]*?function/.test(appSource), "Tools primary renderer does not use old library grid");
 check(appSource.includes("focusLessonStepHeading"), "lesson step navigation moves focus");
 check(!/"0 levels/.test(appSource), "Practice UI suppresses meaningless zero-level counts");
 check(!/"0 command mappings/.test(appSource), "Practice UI suppresses meaningless zero-command counts");
+check(!/0 mapped commands/.test(missionStateSource), "Course UI suppresses meaningless zero mapped-command counts");
+check(!missionStateSource.includes("Prerequisite: ${prerequisites.join"), "Course UI avoids raw prerequisite ids");
 check(appSource.includes("Detailed path mapping is planned"), "Practice UI uses honest planned-state language");
 check(appSource.includes("Command mapping is provisional"), "Practice UI labels provisional command mapping");
 
@@ -291,6 +376,8 @@ for (const marker of [
   "horizontal_overflow",
   "focused_element",
   "console_errors",
+  "contrast_results",
+  "computed contrast",
   "content_width_ratio",
   "desktop-onboarding",
   "desktop-home",
@@ -306,6 +393,8 @@ for (const marker of [
   "mobile-home",
   "mobile-course",
   "mobile-lesson-visual",
+  "mobile-practice",
+  "mobile-progress",
   "mobile-tools"
 ]) {
   check(browserReviewSource.includes(marker), `browser review runner includes ${marker}`);
@@ -325,6 +414,7 @@ check(browserReviewSource.includes("0.88") && browserReviewSource.includes("0.8"
 check(browserReviewSource.includes("duplicate fixed nav in full-page capture"), "browser review runner checks duplicate fixed mobile nav risk");
 check(browserReviewSource.includes("Initial render stability failed"), "browser review runner checks initial render stability");
 check(browserReviewSource.includes("visible_navigation_count"), "browser review runner checks one visible desktop and mobile navigation");
+check(browserReviewSource.includes("--base-url") || browserReviewSource.includes("externalBaseUrl"), "browser review runner can reuse an existing app URL");
 
 check(protectedHashSource.includes('normalizationPolicy = "raw-byte-sha256"'), "protected hash report documents raw-byte SHA-256 policy");
 check(protectedHashSource.includes("process.env.GIT || \"git\""), "protected hash report uses portable Git resolution");

@@ -16,6 +16,9 @@ const args = parseArgs(process.argv.slice(2));
 const outDir = path.resolve(args.out || path.join(os.tmpdir(), `command-doctor-mission-studio-review-${Date.now()}`));
 const repeat = Number(args.repeat || 1);
 const clientRoot = path.resolve(args.client || defaultClient);
+const externalBaseUrl = typeof args["base-url"] === "string"
+  ? args["base-url"].replace(/\/lab\.html.*$/i, "").replace(/\/$/, "")
+  : "";
 const cssViewportDesktop = { width: 1280, height: 900, mobile: false };
 const cssViewportMobile = { width: 390, height: 844, mobile: true };
 const reviewFailureGuards = [
@@ -46,18 +49,20 @@ const scenarios = [
   { id: "desktop-onboarding", viewport: cssViewportDesktop, seed: { path: "" }, steps: [] },
   { id: "desktop-home", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Home" }] },
   { id: "desktop-course-map", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Course" }] },
-  { id: "desktop-level-overview", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Course" }, { click: "Preview plan" }] },
+  { id: "desktop-level-overview", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Course" }, { click: "Open overview" }] },
   { id: "desktop-switch-preview-visuals", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Course" }, { click: "Preview plan" }], scrollSelector: ".switch-preview-panel" },
-  { id: "desktop-lesson-mission", viewport: cssViewportDesktop, seed: { path: "zero", step: "mission" }, steps: [{ click: "Course" }, { click: "Start Level 0" }] },
-  { id: "desktop-lesson-see", viewport: cssViewportDesktop, seed: { path: "zero", step: "see" }, steps: [{ click: "Course" }, { click: "Start Level 0" }] },
-  { id: "desktop-lesson-predict", viewport: cssViewportDesktop, seed: { path: "zero", step: "predict" }, steps: [{ click: "Course" }, { click: "Start Level 0" }] },
+  { id: "desktop-lesson-mission", viewport: cssViewportDesktop, seed: { path: "zero", step: "mission" }, steps: [{ click: "Course" }, { click: "Open overview" }, { click: "Start Level 0 lesson" }] },
+  { id: "desktop-lesson-see", viewport: cssViewportDesktop, seed: { path: "zero", step: "see" }, steps: [{ click: "Course" }, { click: "Open overview" }, { click: "Start Level 0 lesson" }] },
+  { id: "desktop-lesson-predict", viewport: cssViewportDesktop, seed: { path: "zero", step: "predict" }, steps: [{ click: "Course" }, { click: "Open overview" }, { click: "Start Level 0 lesson" }] },
   { id: "desktop-practice", viewport: cssViewportDesktop, seed: { path: "practice" }, steps: [{ click: "Practice" }] },
   { id: "desktop-progress", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Progress" }] },
   { id: "desktop-tools", viewport: cssViewportDesktop, seed: { path: "tools" }, steps: [{ click: "Tools" }] },
   { id: "mobile-onboarding", viewport: cssViewportMobile, seed: { path: "" }, steps: [] },
   { id: "mobile-home", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Home" }] },
   { id: "mobile-course", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Course" }] },
-  { id: "mobile-lesson-visual", viewport: cssViewportMobile, seed: { path: "zero", step: "see" }, steps: [{ click: "Course" }, { click: "Start Level 0" }] },
+  { id: "mobile-lesson-visual", viewport: cssViewportMobile, seed: { path: "zero", step: "see" }, steps: [{ click: "Course" }, { click: "Open overview" }, { click: "Start Level 0 lesson" }] },
+  { id: "mobile-practice", viewport: cssViewportMobile, seed: { path: "practice" }, steps: [{ click: "Practice" }] },
+  { id: "mobile-progress", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Progress" }] },
   { id: "mobile-tools", viewport: cssViewportMobile, seed: { path: "tools" }, steps: [{ click: "Tools" }] }
 ];
 
@@ -466,7 +471,7 @@ async function waitForReadyState(client) {
   throw new Error("Timed out waiting for DOM content.");
 }
 
-async function waitForAppReady(client, scenario) {
+async function waitForAppReady(client, scenario, { requireLessonVisual = false } = {}) {
   await waitForReadyState(client);
   for (let attempt = 0; attempt < 160; attempt += 1) {
     const ready = await evaluate(client, `(() => {
@@ -486,8 +491,21 @@ async function waitForAppReady(client, scenario) {
     return true;
   })()`, true);
   await waitForStableGeometry(client);
-  if (/lesson/.test(scenario.id)) {
-    const visualReady = await evaluate(client, `(() => [...document.querySelectorAll(".mission-visual-panel img")].every((img) => img.complete && img.naturalWidth > 0))()`);
+  if (requireLessonVisual && /^(?:desktop|mobile)-lesson/.test(scenario.id)) {
+    let visualReady = false;
+    for (let attempt = 0; attempt < 80; attempt += 1) {
+      visualReady = await evaluate(client, `(() => {
+        const images = [...document.querySelectorAll(".mission-visual-panel img")].filter((img) => img.getBoundingClientRect().width > 0);
+        images.forEach((img) => img.scrollIntoView({ block: "center", inline: "nearest" }));
+        return images.length > 0 && images.every((img) => {
+          const rect = img.getBoundingClientRect();
+          const renderedSvg = /\.svg(?:$|\?)/i.test(img.currentSrc || img.src || "") && rect.width > 0 && rect.height > 0;
+          return img.complete && (img.naturalWidth > 0 || renderedSvg);
+        });
+      })()`);
+      if (visualReady) break;
+      await delay(100);
+    }
     if (!visualReady) throw new Error(`${scenario.id} visual loading and image decode failed.`);
   }
 }
@@ -547,6 +565,42 @@ async function collectGeometry(client) {
     const fixedBottomNavCount = [...document.querySelectorAll(".sidebar")].filter((item) => getComputedStyle(item).position === "fixed").length;
     const duplicateRootContent = [...document.querySelectorAll(".view.active [id$='Root']")].filter((item) => item.children.length > 0).length > 1;
     const focused = document.activeElement;
+    const colorParts = (value) => {
+      const match = String(value || "").match(/rgba?\\(([^)]+)\\)/);
+      if (!match) return null;
+      const parts = match[1].split(",").map((part) => Number.parseFloat(part.trim()));
+      return { r: parts[0], g: parts[1], b: parts[2], a: parts[3] ?? 1 };
+    };
+    const backgroundFor = (node) => {
+      let cursor = node;
+      while (cursor) {
+        const bg = colorParts(getComputedStyle(cursor).backgroundColor);
+        if (bg && bg.a !== 0) return bg;
+        cursor = cursor.parentElement;
+      }
+      return { r: 255, g: 255, b: 255, a: 1 };
+    };
+    const channel = (value) => {
+      const normalized = value / 255;
+      return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    };
+    const luminance = (color) => (0.2126 * channel(color.r)) + (0.7152 * channel(color.g)) + (0.0722 * channel(color.b));
+    const contrastRatio = (fg, bg) => {
+      const first = luminance(fg);
+      const second = luminance(bg);
+      return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+    };
+    const contrastResults = [".ms-screen-header h2", ".ms-card p", ".ms-button-primary", ".ms-button-secondary", ".nav-tab.active", ".ms-kicker"].map((selector) => {
+      const node = active?.querySelector(selector) || document.querySelector(selector);
+      if (!node) return null;
+      const style = getComputedStyle(node);
+      const fg = colorParts(style.color);
+      const bg = backgroundFor(node);
+      const weight = Number.parseInt(style.fontWeight, 10) || 400;
+      const size = Number.parseFloat(style.fontSize) || 16;
+      const large = size >= 24 || (size >= 18.66 && weight >= 700);
+      return fg && bg ? { selector, ratio: Number(contrastRatio(fg, bg).toFixed(2)), minimum: large ? 3 : 4.5 } : null;
+    }).filter(Boolean);
     const viewportWidth = document.documentElement.clientWidth;
     const viewportHeight = window.innerHeight;
     const scrollWidth = document.documentElement.scrollWidth;
@@ -568,6 +622,7 @@ async function collectGeometry(client) {
       fixedBottomNavCount,
       activeViewCount,
       duplicateRootContent,
+      contrastResults,
       contentWidthRatio: rootRect.width / availableMainWidth
     };
   })()`);
@@ -578,7 +633,7 @@ async function captureScenario(client, scenario, runDir, consoleErrors) {
   if (scenario.scrollSelector) {
     await evaluate(client, `document.querySelector(${JSON.stringify(scenario.scrollSelector)})?.scrollIntoView({ block: "start" })`);
   }
-  await waitForAppReady(client, scenario);
+  await waitForAppReady(client, scenario, { requireLessonVisual: true });
   const geometry = await collectGeometry(client);
   const screenshot = await client.send("Page.captureScreenshot", { format: "png", captureBeyondViewport: false, fromSurface: true });
   const buffer = Buffer.from(screenshot.data, "base64");
@@ -606,6 +661,7 @@ async function captureScenario(client, scenario, runDir, consoleErrors) {
     fixed_bottom_navigation_count: geometry.fixedBottomNavCount,
     active_view_count: geometry.activeViewCount,
     duplicate_root_content: geometry.duplicateRootContent,
+    contrast_results: geometry.contrastResults,
     pixel_content_bounds: pixelContentBounds
   };
   validateRecord(record, scenario);
@@ -625,6 +681,11 @@ function validateRecord(record, scenario) {
   if (record.fixed_bottom_navigation_count > 1) throw new Error(`${scenario.id} duplicate fixed nav in full-page capture risk.`);
   if (record.active_view_count !== 1 || record.duplicate_root_content) throw new Error(`${scenario.id} duplicated root content detected.`);
   if (record.console_errors.length) throw new Error(`${scenario.id} console errors: ${record.console_errors.join("; ")}`);
+  if (!record.contrast_results?.length) throw new Error(`${scenario.id} computed contrast audit did not run.`);
+  const contrastFailures = record.contrast_results.filter((item) => item.ratio < item.minimum);
+  if (contrastFailures.length) {
+    throw new Error(`${scenario.id} computed contrast failed: ${contrastFailures.map((item) => `${item.selector} ${item.ratio}:${item.minimum}`).join(", ")}`);
+  }
   const pixelWidth = record.pixel_content_bounds.right - record.pixel_content_bounds.left + 1;
   const geometryWidth = Math.max(1, record.active_root_rectangle.width);
   if (pixelWidth < Math.min(geometryWidth * 0.55, scenario.viewport.width * 0.5)) {
@@ -650,7 +711,7 @@ async function navigateAndSeedPage(page, baseUrl, scenario) {
   await waitForAppReadyPage(page, scenario);
 }
 
-async function waitForAppReadyPage(page, scenario) {
+async function waitForAppReadyPage(page, scenario, { requireLessonVisual = false } = {}) {
   await page.waitForFunction(() => {
     const nav = [...document.querySelectorAll(".nav-tab")].map((item) => item.textContent.trim()).join("|");
     const active = document.querySelector(".view.active");
@@ -663,8 +724,16 @@ async function waitForAppReadyPage(page, scenario) {
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
   await waitForStableGeometryPage(page);
-  if (/lesson/.test(scenario.id)) {
-    const visualReady = await page.evaluate(() => [...document.querySelectorAll(".mission-visual-panel img")].every((img) => img.complete && img.naturalWidth > 0));
+  if (requireLessonVisual && /^(?:desktop|mobile)-lesson/.test(scenario.id)) {
+    await page.locator(".mission-visual-panel img").first().scrollIntoViewIfNeeded({ timeout: 10000 });
+    const visualReady = await page.waitForFunction(() => {
+      const images = [...document.querySelectorAll(".mission-visual-panel img")].filter((img) => img.getBoundingClientRect().width > 0);
+      return images.length > 0 && images.every((img) => {
+        const rect = img.getBoundingClientRect();
+        const renderedSvg = /\.svg(?:$|\?)/i.test(img.currentSrc || img.src || "") && rect.width > 0 && rect.height > 0;
+        return img.complete && (img.naturalWidth > 0 || renderedSvg);
+      });
+    }, null, { timeout: 15000 }).then(() => true).catch(() => false);
     if (!visualReady) throw new Error(`${scenario.id} visual loading and image decode failed.`);
   }
 }
@@ -713,6 +782,42 @@ async function collectGeometryPage(page) {
     const fixedBottomNavCount = [...document.querySelectorAll(".sidebar")].filter((item) => getComputedStyle(item).position === "fixed").length;
     const duplicateRootContent = [...document.querySelectorAll(".view.active [id$='Root']")].filter((item) => item.children.length > 0).length > 1;
     const focused = document.activeElement;
+    const colorParts = (value) => {
+      const match = String(value || "").match(/rgba?\(([^)]+)\)/);
+      if (!match) return null;
+      const parts = match[1].split(",").map((part) => Number.parseFloat(part.trim()));
+      return { r: parts[0], g: parts[1], b: parts[2], a: parts[3] ?? 1 };
+    };
+    const backgroundFor = (node) => {
+      let cursor = node;
+      while (cursor) {
+        const bg = colorParts(getComputedStyle(cursor).backgroundColor);
+        if (bg && bg.a !== 0) return bg;
+        cursor = cursor.parentElement;
+      }
+      return { r: 255, g: 255, b: 255, a: 1 };
+    };
+    const channel = (value) => {
+      const normalized = value / 255;
+      return normalized <= 0.03928 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    };
+    const luminance = (color) => (0.2126 * channel(color.r)) + (0.7152 * channel(color.g)) + (0.0722 * channel(color.b));
+    const contrastRatio = (fg, bg) => {
+      const first = luminance(fg);
+      const second = luminance(bg);
+      return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+    };
+    const contrastResults = [".ms-screen-header h2", ".ms-card p", ".ms-button-primary", ".ms-button-secondary", ".nav-tab.active", ".ms-kicker"].map((selector) => {
+      const node = active?.querySelector(selector) || document.querySelector(selector);
+      if (!node) return null;
+      const style = getComputedStyle(node);
+      const fg = colorParts(style.color);
+      const bg = backgroundFor(node);
+      const weight = Number.parseInt(style.fontWeight, 10) || 400;
+      const size = Number.parseFloat(style.fontSize) || 16;
+      const large = size >= 24 || (size >= 18.66 && weight >= 700);
+      return fg && bg ? { selector, ratio: Number(contrastRatio(fg, bg).toFixed(2)), minimum: large ? 3 : 4.5 } : null;
+    }).filter(Boolean);
     const viewportWidth = document.documentElement.clientWidth;
     const scrollWidth = document.documentElement.scrollWidth;
     const rootRect = rect(activeRoot);
@@ -733,6 +838,7 @@ async function collectGeometryPage(page) {
       fixedBottomNavCount,
       activeViewCount,
       duplicateRootContent,
+      contrastResults,
       contentWidthRatio: rootRect.width / availableMainWidth
     };
   });
@@ -743,7 +849,7 @@ async function captureScenarioPage(page, scenario, runDir, consoleErrors) {
   if (scenario.scrollSelector) {
     await page.locator(scenario.scrollSelector).scrollIntoViewIfNeeded({ timeout: 10000 });
   }
-  await waitForAppReadyPage(page, scenario);
+  await waitForAppReadyPage(page, scenario, { requireLessonVisual: true });
   const geometry = await collectGeometryPage(page);
   const screenshotPath = path.join(runDir, "screenshots", `${scenario.id}.png`);
   const buffer = await page.screenshot({ path: screenshotPath, fullPage: false, animations: "disabled" });
@@ -769,6 +875,7 @@ async function captureScenarioPage(page, scenario, runDir, consoleErrors) {
     fixed_bottom_navigation_count: geometry.fixedBottomNavCount,
     active_view_count: geometry.activeViewCount,
     duplicate_root_content: geometry.duplicateRootContent,
+    contrast_results: geometry.contrastResults,
     pixel_content_bounds: pixelContentBounds
   };
   validateRecord(record, scenario);
@@ -959,7 +1066,7 @@ function compareRuns(runs) {
   return { equivalent: errors.length === 0, comparisons, errors };
 }
 
-const serverInfo = await startStaticServer(clientRoot);
+const serverInfo = externalBaseUrl ? { server: null, baseUrl: externalBaseUrl } : await startStaticServer(clientRoot);
 try {
   await fs.mkdir(outDir, { recursive: true });
   const browserPath = await findBrowser();
@@ -974,6 +1081,7 @@ try {
   const manifest = {
     status: comparison.equivalent ? "passed" : "failed",
     client_root: clientRoot,
+    external_base_url: externalBaseUrl || "",
     browser_path: browserPath,
     automation_stack: playwright ? "playwright" : "chrome-devtools-protocol",
     output_dir: outDir,
@@ -989,5 +1097,5 @@ try {
   if (!comparison.equivalent) throw new Error(comparison.errors.join("; "));
   console.log(JSON.stringify(manifest, null, 2));
 } finally {
-  serverInfo.server.close();
+  if (serverInfo.server) serverInfo.server.close();
 }
