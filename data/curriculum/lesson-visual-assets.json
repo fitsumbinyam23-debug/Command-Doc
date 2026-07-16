@@ -1,0 +1,121 @@
+{
+  "schema_version": "lesson-visual-assets.v1",
+  "source": "Command Doctor Mission Studio Level 0 visual registry",
+  "rules": {
+    "local_asset_required": true,
+    "remote_dependencies_allowed": false,
+    "text_alternative_required": true
+  },
+  "assets": [
+    {
+      "asset_id": "level0_network_shared_service",
+      "level_id": "level_00",
+      "lesson_id": "level00_what_is_a_network",
+      "title": "Devices sharing a service",
+      "status": "authored",
+      "visual_components": ["topology", "sequence", "text_alternative"],
+      "step_ids": ["mission", "learn", "see", "predict", "try"],
+      "local_asset_path": "data/curriculum/level0-network-shared-service.svg",
+      "alt_text": "Laptop and tablet connected through a switch and gateway to a booking service.",
+      "text_alternative": "A network is shown as end devices connected to a switch, then a gateway, then a service. The important evidence is that devices exchange useful information through links.",
+      "evidence_requirements": [
+        "Identify at least two connected devices.",
+        "Identify the shared service the devices are trying to reach.",
+        "Explain that the links carry requests and responses."
+      ],
+      "mastery_scope": "orientation_only_no_command_mastery",
+      "review_scope": "concept_review",
+      "remote_dependencies": []
+    },
+    {
+      "asset_id": "level0_device_request_response",
+      "level_id": "level_00",
+      "lesson_id": "level00_why_devices_communicate",
+      "title": "Request and response path",
+      "status": "authored",
+      "visual_components": ["sequence", "cli_to_visual_evidence", "text_alternative"],
+      "step_ids": ["mission", "learn", "see", "predict", "try"],
+      "local_asset_path": "data/curriculum/level0-device-request-response.svg",
+      "alt_text": "Point of sale terminal sending a request to a payment service and receiving an approval response.",
+      "text_alternative": "The terminal asks for a service, the network carries the request, the server answers, and the terminal can continue. Communication has a purpose and a direction.",
+      "evidence_requirements": [
+        "Identify the requesting device.",
+        "Identify the responding service.",
+        "Explain why the response matters to the user."
+      ],
+      "mastery_scope": "orientation_only_no_command_mastery",
+      "review_scope": "concept_review",
+      "remote_dependencies": []
+    },
+    {
+      "asset_id": "level0_lan_wan_internet_scope",
+      "level_id": "level_00",
+      "lesson_id": "level00_lan_wan_and_the_internet",
+      "title": "LAN, WAN, and internet scope",
+      "status": "authored",
+      "visual_components": ["topology", "healthy_fault_comparison", "text_alternative"],
+      "step_ids": ["mission", "learn", "see", "predict", "try"],
+      "local_asset_path": "data/curriculum/level0-lan-wan-internet-scope.svg",
+      "alt_text": "Local office LAN connected through a WAN or ISP path to an internet service.",
+      "text_alternative": "The LAN is the local room or site, the WAN links sites or providers, and the internet reaches public services. The same symptom can have different scope.",
+      "evidence_requirements": [
+        "Separate a local printer or room issue from an internet issue.",
+        "Identify the boundary between local network and provider path.",
+        "Explain why scope changes the next evidence to collect."
+      ],
+      "mastery_scope": "orientation_only_no_command_mastery",
+      "review_scope": "concept_review",
+      "remote_dependencies": []
+    },
+    {
+      "asset_id": "level0_simulation_production_boundary",
+      "level_id": "level_00",
+      "lesson_id": "level00_real_devices_versus_command_doctor_simulation",
+      "title": "Simulation versus production boundary",
+      "status": "authored",
+      "visual_components": ["realistic_device", "annotated_device_view", "healthy_fault_comparison", "text_alternative"],
+      "step_ids": ["mission", "learn", "see", "predict", "try", "continue"],
+      "local_asset_path": "data/curriculum/level0-simulation-production-boundary.svg",
+      "alt_text": "Local simulated switch separated from a production network by a clear safety boundary.",
+      "text_alternative": "The local simulator is safe practice space. A production switch affects real guests, staff, and services, so the learner must keep that boundary clear.",
+      "evidence_requirements": [
+        "Identify which side is local simulation.",
+        "Identify which side is production impact.",
+        "Explain why a first attempt belongs in simulation."
+      ],
+      "mastery_scope": "orientation_only_no_command_mastery",
+      "review_scope": "safety_boundary_review",
+      "remote_dependencies": []
+    }
+  ],
+  "future_visual_contracts": [
+    {
+      "lesson_key": "what_is_a_switch",
+      "status": "contract_only",
+      "expected_components": ["realistic_device", "annotated_device_view", "topology", "text_alternative"],
+      "required_evidence": ["port role labels", "connected endpoint labels", "local switching explanation"],
+      "text_alternative_required": true
+    },
+    {
+      "lesson_key": "switch_ports_and_leds",
+      "status": "contract_only",
+      "expected_components": ["realistic_device", "annotated_device_view", "healthy_fault_comparison", "text_alternative"],
+      "required_evidence": ["link state", "speed or duplex signal", "safe observation before change"],
+      "text_alternative_required": true
+    },
+    {
+      "lesson_key": "what_is_a_router",
+      "status": "contract_only",
+      "expected_components": ["topology", "sequence", "cli_to_visual_evidence", "text_alternative"],
+      "required_evidence": ["local network", "remote network", "gateway decision point"],
+      "text_alternative_required": true
+    },
+    {
+      "lesson_key": "vlan_and_trunk_foundations",
+      "status": "contract_only",
+      "expected_components": ["topology", "annotated_device_view", "cli_to_visual_evidence", "healthy_fault_comparison", "text_alternative"],
+      "required_evidence": ["access VLAN", "trunk allowed VLANs", "native VLAN label", "verification output"],
+      "text_alternative_required": true
+    }
+  ]
+}

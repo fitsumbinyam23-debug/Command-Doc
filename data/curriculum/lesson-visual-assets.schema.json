@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "command-doctor.lesson-visual-assets.v1",
+  "title": "Command Doctor Lesson Visual Assets",
+  "type": "object",
+  "required": ["schema_version", "assets", "future_visual_contracts"],
+  "properties": {
+    "schema_version": { "const": "lesson-visual-assets.v1" },
+    "source": { "type": "string" },
+    "rules": {
+      "type": "object",
+      "required": ["local_asset_required", "remote_dependencies_allowed", "text_alternative_required"],
+      "properties": {
+        "local_asset_required": { "const": true },
+        "remote_dependencies_allowed": { "const": false },
+        "text_alternative_required": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "assets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/asset" },
+      "minItems": 1
+    },
+    "future_visual_contracts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/futureContract" },
+      "minItems": 1
+    }
+  },
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "required": [
+        "asset_id",
+        "level_id",
+        "lesson_id",
+        "title",
+        "status",
+        "visual_components",
+        "step_ids",
+        "local_asset_path",
+        "alt_text",
+        "text_alternative",
+        "evidence_requirements",
+        "mastery_scope",
+        "review_scope",
+        "remote_dependencies"
+      ],
+      "properties": {
+        "asset_id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+        "level_id": { "type": "string" },
+        "lesson_id": { "type": "string" },
+        "title": { "type": "string" },
+        "status": { "enum": ["authored", "contract_only", "planned"] },
+        "visual_components": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "realistic_device",
+              "annotated_device_view",
+              "topology",
+              "sequence",
+              "healthy_fault_comparison",
+              "cli_to_visual_evidence",
+              "text_alternative"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "step_ids": {
+          "type": "array",
+          "items": { "enum": ["mission", "learn", "see", "key_words", "predict", "try", "explain", "confidence", "continue"] },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "local_asset_path": { "type": "string", "pattern": "^data/curriculum/.+\\.svg$" },
+        "alt_text": { "type": "string", "minLength": 20 },
+        "text_alternative": { "type": "string", "minLength": 40 },
+        "evidence_requirements": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 8 },
+          "minItems": 1
+        },
+        "mastery_scope": { "type": "string" },
+        "review_scope": { "type": "string" },
+        "remote_dependencies": {
+          "type": "array",
+          "maxItems": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "futureContract": {
+      "type": "object",
+      "required": ["lesson_key", "status", "expected_components", "required_evidence", "text_alternative_required"],
+      "properties": {
+        "lesson_key": { "type": "string" },
+        "status": { "const": "contract_only" },
+        "expected_components": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "required_evidence": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        },
+        "text_alternative_required": { "const": true }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

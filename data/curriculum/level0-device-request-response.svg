@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 900 520">
+  <title id="title">Request and response between devices</title>
+  <desc id="desc">A terminal sends a payment request through a network and receives an approval response.</desc>
+  <rect width="900" height="520" rx="24" fill="#f4f8fb"/>
+  <rect x="72" y="150" width="170" height="210" rx="22" fill="#ffffff" stroke="#c9d7e3" stroke-width="3"/>
+  <rect x="102" y="182" width="110" height="86" rx="10" fill="#071633"/>
+  <path d="M126 228h62" stroke="#23c08a" stroke-width="8" stroke-linecap="round"/>
+  <rect x="112" y="292" width="90" height="18" rx="9" fill="#d7e0e7"/>
+  <text x="157" y="406" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="#17212b">POS terminal</text>
+  <rect x="356" y="205" width="188" height="110" rx="18" fill="#071633"/>
+  <rect x="384" y="238" width="28" height="28" rx="5" fill="#1769e0"/>
+  <rect x="426" y="238" width="28" height="28" rx="5" fill="#23c08a"/>
+  <rect x="468" y="238" width="28" height="28" rx="5" fill="#23c08a"/>
+  <text x="450" y="356" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="#17212b">Network path</text>
+  <rect x="676" y="150" width="150" height="210" rx="22" fill="#ffffff" stroke="#1769e0" stroke-width="4"/>
+  <rect x="708" y="185" width="86" height="22" rx="11" fill="#1769e0"/>
+  <rect x="708" y="226" width="86" height="22" rx="11" fill="#d7e0e7"/>
+  <rect x="708" y="267" width="86" height="22" rx="11" fill="#23c08a"/>
+  <text x="751" y="406" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" fill="#17212b">Payment service</text>
+  <path d="M244 226h100" fill="none" stroke="#1769e0" stroke-width="9" stroke-linecap="round"/>
+  <path d="M556 226h110" fill="none" stroke="#1769e0" stroke-width="9" stroke-linecap="round"/>
+  <path d="M666 294H556" fill="none" stroke="#0f7a75" stroke-width="9" stroke-linecap="round"/>
+  <path d="M344 294H244" fill="none" stroke="#0f7a75" stroke-width="9" stroke-linecap="round"/>
+  <path d="M333 207l28 19-28 19z" fill="#1769e0"/>
+  <path d="M653 207l28 19-28 19z" fill="#1769e0"/>
+  <path d="M567 275l-28 19 28 19z" fill="#0f7a75"/>
+  <path d="M257 275l-28 19 28 19z" fill="#0f7a75"/>
+  <text x="450" y="75" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" fill="#0f5553">Devices communicate for a reason</text>
+  <text x="450" y="118" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" fill="#5c6b7a">Request goes out. Response comes back.</text>
+  <text x="450" y="470" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" fill="#5c6b7a">The evidence is purpose, direction, and result.</text>
+</svg>

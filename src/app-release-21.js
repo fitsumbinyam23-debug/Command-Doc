@@ -39,7 +39,8 @@ const GENERATED_CURRICULUM_FILES = {
 const COMPLETE_CURRICULUM_FILES = {
   curriculum: "data/curriculum/complete-networking-curriculum.json",
   commandMap: "data/curriculum/curriculum-command-map.json",
-  specializations: "data/curriculum/curriculum-specializations.json"
+  specializations: "data/curriculum/curriculum-specializations.json",
+  visualAssets: "data/curriculum/lesson-visual-assets.json"
 };
 
 const LAB_PROGRESS_KEY = "commandDoctorLabProgress";
@@ -364,7 +365,7 @@ const state = {
   flows: [],
   safety: { commands: [], warning_message: "" },
   sources: null,
-  curriculum: { inventory: [], audit: null, routes: [], index: null, health: null },
+  curriculum: { inventory: [], audit: null, routes: [], index: null, health: null, visualAssets: null },
   learning: { path: "", courseScreen: "map", levelId: "level_00", level0Progress: null, recentTool: "diagnose" },
   history: [],
   currentReport: null,
@@ -617,6 +618,7 @@ async function loadKnowledge() {
     complete: complete.curriculum || null,
     commandMap: complete.commandMap?.commands || [],
     specializations: complete.specializations?.specializations || [],
+    visualAssets: complete.visualAssets || null,
     metadata: {
       command_catalog_version: `command-inventory@${generated.inventory?.schema_version || "unknown"}:${generated.audit?.generated_at || "local"}`,
       profile_catalog_version: "local",
@@ -2768,16 +2770,20 @@ function currentLevel0StepIndex() {
 
 function renderBeginnerNavigation() {
   const navigation = beginnerExperience().BEGINNER_NAVIGATION;
+  const studioNavigation = window.CommandDoctorMissionStudioComponents?.navItems || [];
   els.navTabs.forEach((tab, index) => {
     const item = navigation[index];
     if (!item) {
       tab.hidden = true;
       return;
     }
+    const studioItem = studioNavigation.find((candidate) => candidate.view === item.view);
     tab.hidden = false;
     tab.dataset.view = item.view;
+    tab.dataset.navIcon = studioItem?.icon || item.view;
     tab.textContent = item.label;
     tab.classList.toggle("active", item.view === "home");
+    tab.setAttribute("aria-label", item.label);
   });
 }
 
@@ -4875,6 +4881,54 @@ function focusLessonStepHeading() {
   focusElement(api.focusTargetForStep(state.learning.level0Progress?.current_step_id || "mission"));
 }
 
+function visualAssetsForLessons() {
+  return Array.isArray(state.curriculum.visualAssets?.assets) ? state.curriculum.visualAssets.assets : [];
+}
+
+function visualAssetForLessonStep(lesson, stepId) {
+  if (!lesson) return null;
+  const assetId = lesson.visual_asset_id;
+  return visualAssetsForLessons().find((asset) => {
+    const matchesLesson = asset.asset_id === assetId || asset.lesson_id === lesson.lesson_id;
+    const matchesStep = !stepId || (asset.step_ids || []).includes(stepId);
+    return matchesLesson && matchesStep && asset.status === "authored";
+  }) || null;
+}
+
+function renderLessonVisualPanel(lesson, stepId) {
+  const asset = visualAssetForLessonStep(lesson, stepId);
+  if (!asset) return null;
+  const panel = labCreate("section", "mission-visual-panel");
+  panel.append(labCreate("div", "lab-card-kicker", "Visual evidence"));
+  const layout = labCreate("div", "mission-visual-layout");
+  const figure = document.createElement("figure");
+  figure.className = "mission-visual-figure";
+  const image = document.createElement("img");
+  image.src = asset.local_asset_path;
+  image.alt = asset.alt_text;
+  image.loading = "lazy";
+  image.decoding = "async";
+  const caption = document.createElement("figcaption");
+  caption.textContent = asset.title;
+  figure.append(image, caption);
+  const copy = labCreate("div", "mission-visual-copy");
+  copy.append(labCreate("h5", "", "What to notice"), labCreate("p", "", asset.text_alternative));
+  const evidence = document.createElement("ul");
+  evidence.className = "mission-visual-evidence";
+  (asset.evidence_requirements || []).forEach((requirement) => {
+    const item = document.createElement("li");
+    item.textContent = requirement;
+    evidence.append(item);
+  });
+  copy.append(evidence);
+  const components = labCreate("div", "route-facts");
+  (asset.visual_components || []).forEach((component) => components.append(labCreate("span", "badge", component.replace(/_/g, " "))));
+  copy.append(components);
+  layout.append(figure, copy);
+  panel.append(layout);
+  return panel;
+}
+
 function applyHomePrimaryAction(action) {
   if (!action) return;
   if (action.libraryTab) state.lab.libraryTab = action.libraryTab;
@@ -5670,6 +5724,8 @@ function renderLevel0LessonStepper() {
   stepHeading.dataset.stepHeading = stepId;
   stepHeading.tabIndex = -1;
   body.append(stepHeading, labCreate("p", "", level0StepText(lesson, stepId)));
+  const visualPanel = renderLessonVisualPanel(lesson, stepId);
+  if (visualPanel) body.append(visualPanel);
   if (stepName === "Key words") {
     const words = labCreate("div", "route-facts");
     (lesson?.key_words || []).forEach((word) => words.append(labCreate("span", "badge", word)));
