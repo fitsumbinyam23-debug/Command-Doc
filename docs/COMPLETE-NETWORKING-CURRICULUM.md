@@ -1,26 +1,16 @@
 # Complete Networking Curriculum
 
-Command Doctor now defines a complete 40-level networking curriculum across 10 phases. Every canonical command in `data/generated/learning-command-catalog.json` is mapped into a stable learning record.
+The approved curriculum contains 10 immutable phases and 40 levels.
 
-## Phases
+- 1. ABSOLUTE BEGINNER: level_00, level_01, level_02, level_03, level_04
+- 2. SWITCHING FOUNDATIONS: level_05, level_06, level_07, level_08, level_09
+- 3. ROUTING AND NETWORK SERVICES: level_10, level_11, level_12, level_13
+- 4. WIRELESS AND VOICE: level_14, level_15
+- 5. SECURITY: level_16, level_17, level_18
+- 6. RESILIENCE AND ENTERPRISE SWITCHING: level_19, level_20, level_21
+- 7. MONITORING AND TROUBLESHOOTING: level_22, level_23, level_24, level_25, level_26
+- 8. REAL OPERATIONAL WORK: level_27, level_28, level_29, level_30
+- 9. HOSPITALITY AND BUSINESS SCENARIOS: level_31, level_32, level_33
+- 10. ADVANCED NETWORKING: level_34, level_35, level_36, level_37, level_38, level_39
 
-- Orientation And Network Thinking: levels 0-3
-- Local Networking Foundations: levels 4-7
-- Switching Core: levels 8-11
-- Routing And Services: levels 12-15
-- Security And Change Control: levels 16-19
-- Multi-Vendor Operations: levels 20-23
-- Troubleshooting Practice: levels 24-27
-- Production Readiness: levels 28-31
-- Automation And Documentation: levels 32-35
-- Specialization And Field Readiness: levels 36-39
-
-## Authorship Status
-
-- Fully authored: level_00
-- Planned outlines: 39 levels
-- Authoritative commands: 163
-- Commands mapped: 163
-- Commands omitted: 0
-
-Level 0 is production-authored for beginners. Levels 1-39 are honest planned outlines and cannot award practical mastery until real lessons, practice routes, verification evidence, rollback policy, and review records are completed.
+Level 0 is fully authored. Levels 1-39 are planned subject-specific outlines.

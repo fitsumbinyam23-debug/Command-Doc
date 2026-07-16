@@ -1,9 +1,12 @@
 {
-  "schema_version": "curriculum-command-coverage.v1",
+  "schema_version": "curriculum-command-coverage.v2",
   "authoritative_catalog": "data/generated/learning-command-catalog.json",
+  "placement_file": "data/curriculum/curriculum-command-placement.json",
   "authoritative_command_count": 163,
+  "placement_records": 163,
   "commands_mapped": 163,
   "commands_omitted": [],
+  "placement_omitted": [],
   "extra_learning_records": [],
   "vendors_represented": [
     "aruba_cx",
@@ -59,16 +62,16 @@
     "level_39"
   ],
   "specialization_paths": [
-    "access-switching-technician",
-    "campus-network-support",
-    "multi-vendor-switching",
-    "windows-linux-network-diagnostics",
-    "wireless-and-edge-support",
-    "security-and-change-control",
-    "datacenter-operations",
-    "automation-and-documentation"
+    "Switching and Campus Networks",
+    "Routing and WAN",
+    "Wireless",
+    "Network Security",
+    "Hospitality Networking",
+    "Windows and Linux Network Diagnostics",
+    "Monitoring and Operations",
+    "Network Automation"
   ],
-  "alias_policy": "Aliases and abbreviations share the same canonical learning identity.",
-  "honest_coverage_policy": "No planned level is marked complete, verified, or practically mastered without evidence.",
+  "command_placement_method": "curated curriculum-command-placement.json reviewed by domain",
+  "semantic_placement_errors": [],
   "passed": true
 }

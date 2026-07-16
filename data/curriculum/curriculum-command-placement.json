@@ -1,0 +1,3309 @@
+{
+  "schema_version": "curriculum-command-placement.v1",
+  "source_catalog": "data/generated/learning-command-catalog.json",
+  "command_count": 163,
+  "placements": [
+    {
+      "canonical_command_id": "aruba_configure_terminal",
+      "primary_level_id": "level_27",
+      "primary_module_id": "level_27_change_requests",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "configure terminal is placed in level_27 because its primary technician use is change requests; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "aruba_hostname",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "hostname <name> is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "aruba_interface_config",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "interface <interface> is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "aruba_lacp_mode_active",
+      "primary_level_id": "level_09",
+      "primary_module_id": "level_09_etherchannel_and_aggregation",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "lacp mode active is placed in level_09 because its primary technician use is EtherChannel and aggregation; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "missing"
+    },
+    {
+      "canonical_command_id": "aruba_lacp_system_priority",
+      "primary_level_id": "level_09",
+      "primary_module_id": "level_09_etherchannel_and_aggregation",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "lacp system-priority <priority> is placed in level_09 because its primary technician use is EtherChannel and aggregation; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "missing",
+      "rollback_or_safety_status": "missing"
+    },
+    {
+      "canonical_command_id": "aruba_no_shutdown",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "no shutdown is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "aruba_reload",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "reload is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "missing"
+    },
+    {
+      "canonical_command_id": "aruba_show_events_reverse_count",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show events -r -n <count> is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_flash",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show flash is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_interface",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show interface is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_interface_brief",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show interface brief is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_interface_error_statistics",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show interface error-statistics is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_ip_interface_brief",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show ip interface brief is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_ip_route",
+      "primary_level_id": "level_26",
+      "primary_module_id": "level_26_wrong_ip",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show ip route is placed in level_26 because its primary technician use is wrong IP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_lacp_interfaces",
+      "primary_level_id": "level_09",
+      "primary_module_id": "level_09_etherchannel_and_aggregation",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show lacp interfaces is placed in level_09 because its primary technician use is EtherChannel and aggregation; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_lldp_neighbor_info",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show lldp neighbor-info is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_logging",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show logging is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_mac_address_table",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show mac-address-table is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_power_over_ethernet",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show power-over-ethernet is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_running_config",
+      "primary_level_id": "level_23",
+      "primary_module_id": "level_23_define_the_problem",
+      "related_level_ids": [],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show running-config is placed in level_23 because its primary technician use is define the problem; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_running_config_interface",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show running-config interface is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_spanning_tree",
+      "primary_level_id": "level_08",
+      "primary_module_id": "level_08_switching_loops",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show spanning-tree is placed in level_08 because its primary technician use is switching loops; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_system",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show system is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_system_resource_utilization",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show system resource-utilization is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_version",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show version is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_show_vlan",
+      "primary_level_id": "level_06",
+      "primary_module_id": "level_06_why_vlans_exist",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show vlan is placed in level_06 because its primary technician use is why VLANs exist; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "aruba_shutdown",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "shutdown is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "aruba_stp_priority",
+      "primary_level_id": "level_08",
+      "primary_module_id": "level_08_switching_loops",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "spanning-tree priority <priority> is placed in level_08 because its primary technician use is switching loops; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "missing"
+    },
+    {
+      "canonical_command_id": "aruba_vlan",
+      "primary_level_id": "level_06",
+      "primary_module_id": "level_06_why_vlans_exist",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "vlan <vlan-id> is placed in level_06 because its primary technician use is why VLANs exist; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "aruba_vlan_access",
+      "primary_level_id": "level_06",
+      "primary_module_id": "level_06_why_vlans_exist",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "vlan access <vlan> is placed in level_06 because its primary technician use is why VLANs exist; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "aruba_vlan_trunk_allowed",
+      "primary_level_id": "level_07",
+      "primary_module_id": "level_07_802_1q",
+      "related_level_ids": [
+        "level_06",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "vlan trunk allowed <vlan-list> is placed in level_07 because its primary technician use is 802.1Q; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "aruba_vlan_trunk_native",
+      "primary_level_id": "level_07",
+      "primary_module_id": "level_07_802_1q",
+      "related_level_ids": [
+        "level_06",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "vlan trunk native <vlan-id> is placed in level_07 because its primary technician use is 802.1Q; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "missing",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "aruba_write_memory",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "write memory is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "ArubaOS-CX networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_configure_terminal",
+      "primary_level_id": "level_27",
+      "primary_module_id": "level_27_change_requests",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "configure terminal is placed in level_27 because its primary technician use is change requests; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "route_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_copy_running_startup",
+      "primary_level_id": "level_29",
+      "primary_module_id": "level_29_software_versions",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "copy running-config startup-config is placed in level_29 because its primary technician use is software versions; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "route_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_dir_flash",
+      "primary_level_id": "level_29",
+      "primary_module_id": "level_29_software_versions",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "dir flash: is placed in level_29 because its primary technician use is software versions; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_hostname",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "hostname <name> is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "route_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_interface_config",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "interface <interface> is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "grouped_route",
+      "verification_status": "runtime_policy",
+      "rollback_or_safety_status": "route_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_interface_range",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "interface range <interfaces> is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_no_shutdown",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "no shutdown is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "route_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_reload",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "reload is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "missing"
+    },
+    {
+      "canonical_command_id": "cisco_show_boot",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show boot is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_cdp_neighbors",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show cdp neighbors is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_diagnostic_result",
+      "primary_level_id": "level_23",
+      "primary_module_id": "level_23_define_the_problem",
+      "related_level_ids": [],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show diagnostic result is placed in level_23 because its primary technician use is define the problem; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_etherchannel_summary",
+      "primary_level_id": "level_09",
+      "primary_module_id": "level_09_etherchannel_and_aggregation",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show etherchannel summary is placed in level_09 because its primary technician use is EtherChannel and aggregation; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_file_systems",
+      "primary_level_id": "level_29",
+      "primary_module_id": "level_29_software_versions",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show file systems is placed in level_29 because its primary technician use is software versions; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_interface_status",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show interface status is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "grouped_route",
+      "verification_status": "runtime_policy",
+      "rollback_or_safety_status": "route_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_show_interfaces",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show interfaces is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_interfaces_counters_errors",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show interfaces counters errors is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_inventory",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show inventory is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_ip_arp",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show ip arp is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_ip_dhcp_binding",
+      "primary_level_id": "level_13",
+      "primary_module_id": "level_13_dhcp",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show ip dhcp binding is placed in level_13 because its primary technician use is DHCP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_ip_interface_brief",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show ip interface brief is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_ip_route",
+      "primary_level_id": "level_26",
+      "primary_module_id": "level_26_wrong_ip",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show ip route is placed in level_26 because its primary technician use is wrong IP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_lldp_neighbors",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show lldp neighbors is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_logging",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show logging is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_mac_address_table",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show mac address-table is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_port_security_interface",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show port-security interface <interface> is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "grouped_route",
+      "verification_status": "runtime_policy",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_power_inline",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show power inline is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_processes_cpu_sorted",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show processes cpu sorted is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_running_config",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show running-config is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_running_config_interface",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show running-config interface is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "route_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_show_spanning_tree",
+      "primary_level_id": "level_08",
+      "primary_module_id": "level_08_switching_loops",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show spanning-tree is placed in level_08 because its primary technician use is switching loops; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_startup_config",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show startup-config is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_version",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "show version is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_show_vlan_brief",
+      "primary_level_id": "level_06",
+      "primary_module_id": "level_06_why_vlans_exist",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "show vlan brief is placed in level_06 because its primary technician use is why VLANs exist; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "grouped_route",
+      "verification_status": "runtime_policy",
+      "rollback_or_safety_status": "route_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_shutdown",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "shutdown is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_stp_root_primary",
+      "primary_level_id": "level_08",
+      "primary_module_id": "level_08_switching_loops",
+      "related_level_ids": [
+        "level_06",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "spanning-tree vlan <vlan-id> root primary is placed in level_08 because its primary technician use is switching loops; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "missing"
+    },
+    {
+      "canonical_command_id": "cisco_svi_ip_address",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "ip address <ip-address> <mask> is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "missing"
+    },
+    {
+      "canonical_command_id": "cisco_switch_priority",
+      "primary_level_id": "level_23",
+      "primary_module_id": "level_23_define_the_problem",
+      "related_level_ids": [],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "switch <member> priority <priority> is placed in level_23 because its primary technician use is define the problem; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "cisco_switchport_access_vlan",
+      "primary_level_id": "level_06",
+      "primary_module_id": "level_06_why_vlans_exist",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "switchport access vlan <vlan> is placed in level_06 because its primary technician use is why VLANs exist; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "grouped_route",
+      "verification_status": "runtime_policy",
+      "rollback_or_safety_status": "route_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_switchport_mode_trunk",
+      "primary_level_id": "level_07",
+      "primary_module_id": "level_07_802_1q",
+      "related_level_ids": [
+        "level_06",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "switchport mode trunk is placed in level_07 because its primary technician use is 802.1Q; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_switchport_trunk_allowed",
+      "primary_level_id": "level_07",
+      "primary_module_id": "level_07_802_1q",
+      "related_level_ids": [
+        "level_06",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "switchport trunk allowed vlan <vlan-list> is placed in level_07 because its primary technician use is 802.1Q; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_vlan_create",
+      "primary_level_id": "level_06",
+      "primary_module_id": "level_06_why_vlans_exist",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "vlan <vlan-id> is placed in level_06 because its primary technician use is why VLANs exist; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "grouped_route",
+      "verification_status": "runtime_policy",
+      "rollback_or_safety_status": "route_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_vlan_name",
+      "primary_level_id": "level_06",
+      "primary_module_id": "level_06_why_vlans_exist",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "name <vlan-name> is placed in level_06 because its primary technician use is why VLANs exist; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "route_guidance"
+    },
+    {
+      "canonical_command_id": "cisco_voice_vlan",
+      "primary_level_id": "level_06",
+      "primary_module_id": "level_06_why_vlans_exist",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "switchport voice vlan <vlan-id> is placed in level_06 because its primary technician use is why VLANs exist; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Cisco IOS networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "hp_dir",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "dir is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_arp",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display arp is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_cpu_usage",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "display cpu-usage is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_current_configuration",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "display current-configuration is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_current_configuration_interface",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display current-configuration interface is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_device",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "display device is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_diagnostic_information",
+      "primary_level_id": "level_23",
+      "primary_module_id": "level_23_define_the_problem",
+      "related_level_ids": [],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "display diagnostic-information is placed in level_23 because its primary technician use is define the problem; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_interface",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display interface is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_interface_brief",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display interface brief is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "grouped_route",
+      "verification_status": "runtime_policy",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_ip_interface_brief",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display ip interface brief is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_ip_routing_table",
+      "primary_level_id": "level_23",
+      "primary_module_id": "level_23_define_the_problem",
+      "related_level_ids": [],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "display ip routing-table is placed in level_23 because its primary technician use is define the problem; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_irf",
+      "primary_level_id": "level_20",
+      "primary_module_id": "level_20_hp_comware_irf",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display irf is placed in level_20 because its primary technician use is HP Comware IRF inspection; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_irf_configuration",
+      "primary_level_id": "level_20",
+      "primary_module_id": "level_20_hp_comware_irf",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display irf configuration is placed in level_20 because its primary technician use is HP Comware IRF configuration inspection; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_irf_port",
+      "primary_level_id": "level_20",
+      "primary_module_id": "level_20_hp_comware_irf",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display irf-port is placed in level_20 because its primary technician use is HP Comware IRF port inspection; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_irf_port_configuration",
+      "primary_level_id": "level_20",
+      "primary_module_id": "level_20_hp_comware_irf",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display irf-port configuration is placed in level_20 because its primary technician use is HP Comware IRF port configuration inspection; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_irf_topology",
+      "primary_level_id": "level_20",
+      "primary_module_id": "level_20_hp_comware_irf",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display irf topology is placed in level_20 because its primary technician use is HP Comware IRF topology inspection; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_link_aggregation_summary",
+      "primary_level_id": "level_09",
+      "primary_module_id": "level_09_etherchannel_and_aggregation",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display link-aggregation summary is placed in level_09 because its primary technician use is EtherChannel and aggregation; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_link_aggregation_verbose",
+      "primary_level_id": "level_09",
+      "primary_module_id": "level_09_etherchannel_and_aggregation",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display link-aggregation verbose is placed in level_09 because its primary technician use is EtherChannel and aggregation; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_lldp_neighbor",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display lldp neighbor-information is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_logbuffer",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "display logbuffer is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_mac_address",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display mac-address is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_memory",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "display memory is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_poe_interface",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display poe interface is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_saved_configuration",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "display saved-configuration is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_stp",
+      "primary_level_id": "level_08",
+      "primary_module_id": "level_08_switching_loops",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display stp is placed in level_08 because its primary technician use is switching loops; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_stp_brief",
+      "primary_level_id": "level_08",
+      "primary_module_id": "level_08_switching_loops",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display stp brief is placed in level_08 because its primary technician use is switching loops; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_version",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "display version is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_display_vlan",
+      "primary_level_id": "level_06",
+      "primary_module_id": "level_06_why_vlans_exist",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "display vlan is placed in level_06 because its primary technician use is why VLANs exist; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "hp_interface_config",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "interface <interface> is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "grouped_route",
+      "verification_status": "runtime_policy",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "hp_irf_member_priority",
+      "primary_level_id": "level_20",
+      "primary_module_id": "level_20_hp_comware_irf",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "irf member <member-id> priority <priority> is placed in level_20 because its primary technician use is HP Comware IRF member priority control; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "missing"
+    },
+    {
+      "canonical_command_id": "hp_irf_member_renumber",
+      "primary_level_id": "level_20",
+      "primary_module_id": "level_20_hp_comware_irf",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "irf member <member-id> renumber <new-member-id> is placed in level_20 because its primary technician use is HP Comware IRF member numbering; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "missing",
+      "rollback_or_safety_status": "missing"
+    },
+    {
+      "canonical_command_id": "hp_port_access_vlan",
+      "primary_level_id": "level_06",
+      "primary_module_id": "level_06_why_vlans_exist",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "port access vlan <vlan> is placed in level_06 because its primary technician use is why VLANs exist; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "hp_port_link_type_trunk",
+      "primary_level_id": "level_07",
+      "primary_module_id": "level_07_802_1q",
+      "related_level_ids": [
+        "level_06",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "port link-type trunk is placed in level_07 because its primary technician use is 802.1Q; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "hp_port_trunk_permit",
+      "primary_level_id": "level_07",
+      "primary_module_id": "level_07_802_1q",
+      "related_level_ids": [
+        "level_06",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "port trunk permit vlan <vlan-list> is placed in level_07 because its primary technician use is 802.1Q; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "hp_reboot",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "reboot is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "missing"
+    },
+    {
+      "canonical_command_id": "hp_save",
+      "primary_level_id": "level_29",
+      "primary_module_id": "level_29_software_versions",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "save is placed in level_29 because its primary technician use is software versions; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "hp_save_force",
+      "primary_level_id": "level_29",
+      "primary_module_id": "level_29_software_versions",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "save force is placed in level_29 because its primary technician use is software versions; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "hp_shutdown",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "shutdown is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "hp_sysname",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "sysname <name> is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "hp_system_view",
+      "primary_level_id": "level_27",
+      "primary_module_id": "level_27_change_requests",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "monitoring-and-operations"
+      ],
+      "placement_rationale": "system-view is placed in level_27 because its primary technician use is change requests; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "hp_undo_shutdown",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "undo shutdown is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "hp_vlan",
+      "primary_level_id": "level_06",
+      "primary_module_id": "level_06_why_vlans_exist",
+      "related_level_ids": [
+        "level_23"
+      ],
+      "specialization_ids": [
+        "switching-and-campus-networks"
+      ],
+      "placement_rationale": "vlan <vlan-id> is placed in level_06 because its primary technician use is why VLANs exist; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "HP Comware networking SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "linux_arp_a",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "arp -a is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_df_h",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "df -h is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_dhclient_release",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "sudo dhclient -r <interface> is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_dhclient_renew",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "sudo dhclient <interface> is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_dig",
+      "primary_level_id": "level_13",
+      "primary_module_id": "level_13_dhcp",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "dig is placed in level_13 because its primary technician use is DHCP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_dmesg",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "dmesg is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_ethtool_interface",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "ethtool <interface> is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_ip_addr",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "ip addr is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_ip_link",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "ip link is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_ip_link_down",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "sudo ip link set <interface> down is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_ip_link_up",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "sudo ip link set <interface> up is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_ip_neigh",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "ip neigh is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_ip_route",
+      "primary_level_id": "level_26",
+      "primary_module_id": "level_26_wrong_ip",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "ip route is placed in level_26 because its primary technician use is wrong IP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_journalctl_errors",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "journalctl -p err is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_journalctl_networkmanager",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "journalctl -u NetworkManager is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_lsblk",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "lsblk is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_ping",
+      "primary_level_id": "level_26",
+      "primary_module_id": "level_26_wrong_ip",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "ping is placed in level_26 because its primary technician use is wrong IP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_resolvectl_status",
+      "primary_level_id": "level_13",
+      "primary_module_id": "level_13_dhcp",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "resolvectl status is placed in level_13 because its primary technician use is DHCP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_restart_networking",
+      "primary_level_id": "level_27",
+      "primary_module_id": "level_27_change_requests",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "sudo systemctl restart networking is placed in level_27 because its primary technician use is change requests; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_restart_networkmanager",
+      "primary_level_id": "level_27",
+      "primary_module_id": "level_27_change_requests",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "sudo systemctl restart NetworkManager is placed in level_27 because its primary technician use is change requests; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_ss_listening",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "ss -tulpn is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_systemctl_status_networkmanager",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "systemctl status NetworkManager is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "linux_traceroute",
+      "primary_level_id": "level_26",
+      "primary_module_id": "level_26_wrong_ip",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "traceroute is placed in level_26 because its primary technician use is wrong IP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Linux network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_arp_a",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "arp -a is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_dir",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "dir is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_dism_scanhealth",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "dism /online /cleanup-image /scanhealth is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_getmac_verbose",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "getmac /v is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_ipconfig_all",
+      "primary_level_id": "level_05",
+      "primary_module_id": "level_05_switch_forwarding",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "ipconfig /all is placed in level_05 because its primary technician use is switch forwarding; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_ipconfig_release",
+      "primary_level_id": "level_26",
+      "primary_module_id": "level_26_wrong_ip",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "ipconfig /release is placed in level_26 because its primary technician use is wrong IP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_ipconfig_renew",
+      "primary_level_id": "level_26",
+      "primary_module_id": "level_26_wrong_ip",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "ipconfig /renew is placed in level_26 because its primary technician use is wrong IP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_netsh_interface_disable",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "netsh interface set interface <name> admin=disabled is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "windows_netsh_interface_enable",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "netsh interface set interface <name> admin=enabled is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "windows_netsh_interface_show_interface",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "netsh interface show interface is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_netsh_ipv4_show_interfaces",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "netsh interface ipv4 show interfaces is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_netsh_lan_show_interfaces",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "netsh lan show interfaces is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_netsh_set_static_ip",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "netsh interface ipv4 set address name=<name> static <ip> <mask> <gateway> is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "runtime_free_practice",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "windows_netsh_winsock_reset",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "netsh winsock reset is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "command_guidance"
+    },
+    {
+      "canonical_command_id": "windows_netsh_wlan_show_interfaces",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "netsh wlan show interfaces is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_netstat_ano",
+      "primary_level_id": "level_24",
+      "primary_module_id": "level_24_cable_types",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "netstat -ano is placed in level_24 because its primary technician use is cable types; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_nslookup",
+      "primary_level_id": "level_13",
+      "primary_module_id": "level_13_dhcp",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "nslookup is placed in level_13 because its primary technician use is DHCP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_pathping_host",
+      "primary_level_id": "level_26",
+      "primary_module_id": "level_26_wrong_ip",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "pathping <host> is placed in level_26 because its primary technician use is wrong IP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "explanation_only",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_ping",
+      "primary_level_id": "level_26",
+      "primary_module_id": "level_26_wrong_ip",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "ping is placed in level_26 because its primary technician use is wrong IP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_route_print",
+      "primary_level_id": "level_26",
+      "primary_module_id": "level_26_wrong_ip",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "route print is placed in level_26 because its primary technician use is wrong IP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_systeminfo",
+      "primary_level_id": "level_22",
+      "primary_module_id": "level_22_utilization",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "systeminfo is placed in level_22 because its primary technician use is utilization; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "planned",
+      "verification_status": "command_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    },
+    {
+      "canonical_command_id": "windows_tracert",
+      "primary_level_id": "level_26",
+      "primary_module_id": "level_26_wrong_ip",
+      "related_level_ids": [
+        "level_03",
+        "level_23"
+      ],
+      "specialization_ids": [
+        "windows-and-linux-network-diagnostics"
+      ],
+      "placement_rationale": "tracert is placed in level_26 because its primary technician use is wrong IP; related troubleshooting links remain separate when needed.",
+      "reviewed_by_domain": [
+        "Windows network-diagnostics SME",
+        "Learning data/schema engineer"
+      ],
+      "content_status": "planned",
+      "practice_status": "blocked_by_missing_handler",
+      "verification_status": "route_guidance",
+      "rollback_or_safety_status": "not_applicable"
+    }
+  ]
+}
