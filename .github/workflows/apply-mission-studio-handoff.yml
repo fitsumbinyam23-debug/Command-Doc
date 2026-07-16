@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - feature/mission-studio-ui
-    paths:
-      - .github/workflows/apply-mission-studio-handoff.yml
 
 permissions:
   contents: write
@@ -56,8 +54,9 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm -f .handoff-trigger
           git rm -- .github/workflows/apply-mission-studio-handoff.yml .handoff/mission-studio.patch.gz.b64
-          git add -- .gitignore lab.html mission-studio.css scripts/build.mjs src/app-release-21.js src/learning-experience/mission-studio-components.js src/learning-experience/mission-studio-icons.js src/learning-experience/mission-studio-shell.js src/learning-experience/mission-studio-state.js src/learning-experience/mission-studio-views.js tests/beginner-experience.mjs tests/mission-studio-design.mjs tools/browser-review/mission-studio-browser-review.mjs tools/review-isolated-build.mjs tools/review-isolated-startup.mjs
+          git add -- .handoff-trigger .gitignore lab.html mission-studio.css scripts/build.mjs src/app-release-21.js src/learning-experience/mission-studio-components.js src/learning-experience/mission-studio-icons.js src/learning-experience/mission-studio-shell.js src/learning-experience/mission-studio-state.js src/learning-experience/mission-studio-views.js tests/beginner-experience.mjs tests/mission-studio-design.mjs tools/browser-review/mission-studio-browser-review.mjs tools/review-isolated-build.mjs tools/review-isolated-startup.mjs
           git diff --cached --check
           git commit -m "feat: complete Mission Studio structural redesign"
           git push origin HEAD:feature/mission-studio-ui
