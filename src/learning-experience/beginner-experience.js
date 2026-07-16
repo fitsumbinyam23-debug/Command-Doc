@@ -35,6 +35,12 @@
 
   const STEPPER_STEPS = Object.freeze(["Mission", "Learn", "See", "Key words", "Predict", "Try", "Explain", "Confidence", "Continue"]);
   const STEP_IDS = Object.freeze(["mission", "learn", "see", "key_words", "predict", "try", "explain", "confidence", "continue"]);
+  const LEVEL0_VISUAL_ASSETS = Object.freeze({
+    level00_what_is_a_network: "level0_network_shared_service",
+    level00_why_devices_communicate: "level0_device_request_response",
+    level00_lan_wan_and_the_internet: "level0_lan_wan_internet_scope",
+    level00_real_devices_versus_command_doctor_simulation: "level0_simulation_production_boundary"
+  });
 
   const level0Lessons = Object.freeze([
     lesson("what_is_a_network", "What is a network?", ["network", "device", "connection", "service"], "A guest laptop reaches a booking page because several devices pass information along.", "Two or more devices connected so they can exchange useful information.", "Guest laptop -> wall port -> switch -> gateway -> booking service.", "Which phrase best describes a network?", ["Devices connected to communicate", "One unplugged cable", "A password list"], 0, "The important idea is communication between connected devices.", "Choose the picture that shows devices sharing a service.", "You can explain what a network is in one sentence.", "Continue to why devices communicate."),
@@ -69,7 +75,12 @@
   }
 
   function createLevel0Lessons() {
-    return level0Lessons.map((item) => ({ ...item, key_words: [...item.key_words], stepper_steps: [...STEPPER_STEPS] }));
+    return level0Lessons.map((item) => ({
+      ...item,
+      key_words: [...item.key_words],
+      stepper_steps: [...STEPPER_STEPS],
+      visual_asset_id: LEVEL0_VISUAL_ASSETS[item.lesson_id] || ""
+    }));
   }
 
   function createLevel0State(lessons = createLevel0Lessons()) {
@@ -226,6 +237,7 @@
     TECHNICIAN_TOOLS,
     STEPPER_STEPS,
     STEP_IDS,
+    LEVEL0_VISUAL_ASSETS,
     defaultLevel0Progress: createLevel0State,
     createLevel0State,
     createLevel0Lessons,

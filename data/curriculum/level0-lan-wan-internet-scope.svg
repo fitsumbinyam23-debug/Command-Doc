@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 900 520">
+  <title id="title">LAN WAN and internet scope</title>
+  <desc id="desc">A local site LAN connects through a provider or WAN path to an internet service.</desc>
+  <rect width="900" height="520" rx="24" fill="#f4f8fb"/>
+  <rect x="50" y="118" width="270" height="266" rx="24" fill="#ffffff" stroke="#0f7a75" stroke-width="4"/>
+  <text x="185" y="164" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="800" fill="#0f5553">LAN</text>
+  <text x="185" y="196" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#5c6b7a">local room or site</text>
+  <rect x="92" y="236" width="70" height="50" rx="9" fill="#dceeff" stroke="#c9d7e3" stroke-width="3"/>
+  <rect x="206" y="236" width="70" height="50" rx="9" fill="#dff7ec" stroke="#c9d7e3" stroke-width="3"/>
+  <rect x="134" y="316" width="102" height="42" rx="10" fill="#071633"/>
+  <path d="M162 286l22 30m57-30l-28 30" stroke="#0f7a75" stroke-width="6" stroke-linecap="round"/>
+  <rect x="394" y="176" width="150" height="150" rx="75" fill="#ffffff" stroke="#1769e0" stroke-width="4"/>
+  <text x="469" y="245" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="25" font-weight="800" fill="#1769e0">WAN</text>
+  <text x="469" y="276" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#5c6b7a">provider path</text>
+  <rect x="626" y="118" width="224" height="266" rx="24" fill="#ffffff" stroke="#1769e0" stroke-width="4"/>
+  <text x="738" y="164" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="26" font-weight="800" fill="#1769e0">Internet</text>
+  <text x="738" y="196" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" fill="#5c6b7a">public services</text>
+  <rect x="690" y="240" width="96" height="70" rx="14" fill="#eaf2ff" stroke="#c9d7e3" stroke-width="3"/>
+  <path d="M708 262h60m-60 22h44" stroke="#1769e0" stroke-width="7" stroke-linecap="round"/>
+  <path d="M320 252h74" fill="none" stroke="#0f7a75" stroke-width="9" stroke-linecap="round"/>
+  <path d="M544 252h82" fill="none" stroke="#1769e0" stroke-width="9" stroke-linecap="round"/>
+  <path d="M382 232l30 20-30 20z" fill="#0f7a75"/>
+  <path d="M614 232l30 20-30 20z" fill="#1769e0"/>
+  <rect x="98" y="418" width="222" height="48" rx="12" fill="#e9f7f3"/>
+  <text x="209" y="449" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#0f5553">local issue?</text>
+  <rect x="590" y="418" width="220" height="48" rx="12" fill="#eaf2ff"/>
+  <text x="700" y="449" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="700" fill="#1769e0">external issue?</text>
+  <text x="450" y="72" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" fill="#0f5553">Scope changes the evidence you collect</text>
+</svg>

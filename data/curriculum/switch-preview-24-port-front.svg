@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 960 420">
+  <title id="title">Generic 24-port Ethernet switch front view</title>
+  <desc id="desc">A generic 24-port Ethernet switch with grouped access ports and an uplink area.</desc>
+  <rect width="960" height="420" rx="28" fill="#f5f8fb"/>
+  <rect x="88" y="112" width="784" height="170" rx="24" fill="#071633"/>
+  <rect x="118" y="144" width="64" height="34" rx="8" fill="#111f3d" stroke="#9eb8d8" stroke-width="3"/>
+  <circle cx="214" cy="162" r="9" fill="#23c08a"/>
+  <circle cx="242" cy="162" r="9" fill="#23c08a"/>
+  <g fill="#101f3a" stroke="#c7d6e7" stroke-width="3">
+    <rect x="286" y="142" width="38" height="32" rx="6"/>
+    <rect x="332" y="142" width="38" height="32" rx="6"/>
+    <rect x="378" y="142" width="38" height="32" rx="6"/>
+    <rect x="424" y="142" width="38" height="32" rx="6"/>
+    <rect x="470" y="142" width="38" height="32" rx="6"/>
+    <rect x="516" y="142" width="38" height="32" rx="6"/>
+    <rect x="562" y="142" width="38" height="32" rx="6"/>
+    <rect x="608" y="142" width="38" height="32" rx="6"/>
+    <rect x="286" y="194" width="38" height="32" rx="6"/>
+    <rect x="332" y="194" width="38" height="32" rx="6"/>
+    <rect x="378" y="194" width="38" height="32" rx="6"/>
+    <rect x="424" y="194" width="38" height="32" rx="6"/>
+    <rect x="470" y="194" width="38" height="32" rx="6"/>
+    <rect x="516" y="194" width="38" height="32" rx="6"/>
+    <rect x="562" y="194" width="38" height="32" rx="6"/>
+    <rect x="608" y="194" width="38" height="32" rx="6"/>
+    <rect x="654" y="142" width="38" height="32" rx="6"/>
+    <rect x="700" y="142" width="38" height="32" rx="6"/>
+    <rect x="746" y="142" width="38" height="32" rx="6"/>
+    <rect x="792" y="142" width="38" height="32" rx="6"/>
+    <rect x="654" y="194" width="38" height="32" rx="6"/>
+    <rect x="700" y="194" width="38" height="32" rx="6"/>
+    <rect x="746" y="194" width="38" height="32" rx="6"/>
+    <rect x="792" y="194" width="38" height="32" rx="6"/>
+  </g>
+  <g fill="#23c08a">
+    <circle cx="305" cy="132" r="5"/><circle cx="351" cy="132" r="5"/><circle cx="397" cy="132" r="5"/><circle cx="443" cy="132" r="5"/>
+    <circle cx="489" cy="132" r="5"/><circle cx="535" cy="132" r="5"/><circle cx="581" cy="132" r="5"/><circle cx="627" cy="132" r="5"/>
+    <circle cx="673" cy="132" r="5"/><circle cx="719" cy="132" r="5"/><circle cx="765" cy="132" r="5"/><circle cx="811" cy="132" r="5"/>
+  </g>
+  <rect x="684" y="242" width="146" height="28" rx="8" fill="#1769e0"/>
+  <text x="480" y="66" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" fill="#0f5553">Generic 24-port switch preview</text>
+  <text x="480" y="338" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="20" fill="#5c6b7a">Original local SVG. Generic hardware preview only, not a vendor model.</text>
+</svg>

@@ -2479,3 +2479,675 @@ input {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Mission Studio learning interface */
+:root {
+  --mission-canvas: #eef3f7;
+  --mission-surface: #ffffff;
+  --mission-surface-soft: #f7fafc;
+  --mission-ink: #17212b;
+  --mission-muted: #5c6b7a;
+  --mission-line: #d7e0e7;
+  --mission-accent: #0f7a75;
+  --mission-accent-dark: #095b58;
+  --mission-action: #1769e0;
+  --mission-navy: #071633;
+  --mission-sidebar-width: 244px;
+  --mission-mobile-nav: 72px;
+}
+
+body {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.34)),
+    var(--mission-canvas);
+}
+
+.app-shell {
+  grid-template-columns: var(--mission-sidebar-width) minmax(0, 1fr);
+}
+
+.sidebar {
+  padding: 20px 16px;
+  border-right: 1px solid var(--mission-line);
+  background: var(--mission-surface);
+  color: var(--mission-ink);
+  box-shadow: 12px 0 34px rgba(35, 49, 64, 0.06);
+}
+
+.brand {
+  align-items: center;
+  padding: 14px;
+  border-radius: 8px;
+  background: var(--mission-navy);
+  color: #ffffff;
+}
+
+.brand-mark {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: #ffffff;
+  color: var(--mission-action);
+}
+
+.brand p {
+  color: #b9c9dc;
+}
+
+.nav-tabs {
+  gap: 6px;
+}
+
+.nav-tab {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  border: 1px solid transparent;
+  color: var(--mission-muted);
+  font-weight: 800;
+}
+
+.nav-tab::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-radius: 5px;
+}
+
+.nav-tab[data-nav-icon="home"]::before {
+  border-radius: 50% 50% 4px 4px;
+}
+
+.nav-tab[data-nav-icon="terminal"]::before {
+  border-radius: 4px;
+  box-shadow: inset 6px 0 0 currentColor;
+}
+
+.nav-tab[data-nav-icon="chart"]::before {
+  border-radius: 50%;
+  box-shadow: inset 0 -6px 0 currentColor;
+}
+
+.nav-tab[data-nav-icon="toolbox"]::before {
+  border-radius: 4px;
+  box-shadow: inset 0 5px 0 currentColor;
+}
+
+.nav-tab.active,
+.nav-tab:hover {
+  border-color: #cfe0ff;
+  background: #edf4ff;
+  color: var(--mission-action);
+}
+
+.main-panel {
+  min-width: 0;
+  padding: 28px min(4vw, 42px);
+}
+
+.home-root,
+.course-root,
+.practice-root,
+.progress-root,
+.tools-root,
+.learn-root,
+.library-root {
+  width: min(100%, 1180px);
+  max-width: none;
+}
+
+.home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+  padding: 0 0 22px;
+}
+
+.home-hero > * {
+  grid-column: 1;
+}
+
+.home-hero h2 {
+  color: var(--mission-ink);
+  font-size: 3rem;
+  line-height: 1.02;
+}
+
+.home-hero p:not(.eyebrow) {
+  max-width: 760px;
+}
+
+.home-status-strip,
+.learn-summary {
+  gap: 8px;
+}
+
+.badge {
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.mission-home-dashboard {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.35fr) repeat(2, minmax(220px, 0.82fr));
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+
+.continue-mission-card,
+.mission-action-card,
+.mission-recent-card,
+.progress-summary-panel,
+.phase-context-panel,
+.planned-content-notice {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--mission-line);
+  border-radius: 8px;
+  background: var(--mission-surface);
+  box-shadow: 0 10px 24px rgba(35, 49, 64, 0.05);
+}
+
+.continue-mission-card {
+  min-height: 260px;
+  border-color: #12396e;
+  background:
+    linear-gradient(135deg, rgba(23, 105, 224, 0.12), rgba(15, 122, 117, 0.08)),
+    var(--mission-navy);
+  color: #ffffff;
+}
+
+.continue-mission-card h3,
+.continue-mission-card p {
+  margin: 0;
+  color: #ffffff;
+}
+
+.continue-mission-card .badge {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.continue-mission-card .primary {
+  align-self: end;
+  background: #ffffff;
+  color: var(--mission-action);
+}
+
+.mission-action-card,
+.mission-recent-card {
+  min-height: 260px;
+}
+
+.mission-action-card h3,
+.mission-action-card p,
+.mission-recent-card h3,
+.mission-recent-card p,
+.progress-summary-panel h3,
+.progress-summary-panel p,
+.phase-context-panel h3,
+.phase-context-panel p,
+.planned-content-notice p {
+  margin: 0;
+}
+
+.mission-action-card p,
+.mission-recent-card p,
+.progress-summary-panel p,
+.phase-context-panel p,
+.planned-content-notice p {
+  color: var(--mission-muted);
+  line-height: 1.55;
+}
+
+.mission-card-icon {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #cfe0ff;
+  border-radius: 8px;
+  background: #edf4ff;
+  color: var(--mission-action);
+}
+
+.mission-card-icon::before {
+  content: "";
+  display: block;
+  width: 18px;
+  height: 18px;
+  margin: 11px auto;
+  border: 2px solid currentColor;
+  border-radius: 4px;
+}
+
+.mission-action-card[data-icon*="diagnose"] .mission-card-icon::before,
+.mission-action-card[data-icon*="command"] .mission-card-icon::before {
+  border-radius: 50%;
+  box-shadow: 10px 10px 0 -7px currentColor;
+}
+
+.mission-action-card[data-icon*="terminal"] .mission-card-icon::before {
+  border-radius: 4px;
+  box-shadow: inset 7px 0 0 currentColor;
+}
+
+.mission-action-card[data-icon*="workbench"] .mission-card-icon::before,
+.mission-action-card[data-icon*="playground"] .mission-card-icon::before {
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+.mission-action-card[data-icon*="library"] .mission-card-icon::before,
+.mission-action-card[data-icon*="knowledge"] .mission-card-icon::before,
+.mission-action-card[data-icon*="reports"] .mission-card-icon::before {
+  border-radius: 2px;
+  box-shadow: 5px -5px 0 -2px #edf4ff, 5px -5px 0 0 currentColor;
+}
+
+.mission-card-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mission-action-card button {
+  width: 100%;
+  margin-top: auto;
+}
+
+.progress-summary-panel {
+  margin-bottom: 18px;
+}
+
+.progress-summary-panel .primary {
+  justify-self: start;
+}
+
+.course-phase-rail {
+  margin-bottom: 18px;
+  overflow-x: auto;
+}
+
+.course-phase-rail ol {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(150px, 1fr));
+  gap: 10px;
+  min-width: min(100%, 1120px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.course-phase-rail li {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid var(--mission-line);
+  border-radius: 8px;
+  background: var(--mission-surface);
+  color: var(--mission-muted);
+}
+
+.course-phase-rail li.is-current {
+  border-color: #cfe0ff;
+  background: #edf4ff;
+  color: var(--mission-action);
+  box-shadow: inset 0 -3px 0 var(--mission-action);
+}
+
+.course-phase-rail strong {
+  color: var(--mission-ink);
+  font-size: 0.86rem;
+  line-height: 1.25;
+}
+
+.phase-number {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-weight: 900;
+}
+
+.phase-context-panel {
+  grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.8fr);
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.phase-context-panel > .lab-card-kicker,
+.phase-context-panel > h3 {
+  grid-column: 1 / -1;
+}
+
+.phase-context-panel .route-facts {
+  align-self: start;
+}
+
+.switch-preview-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid var(--mission-line);
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.switch-preview-panel h4,
+.switch-preview-panel p {
+  margin: 0;
+}
+
+.switch-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.planned-content-notice {
+  border-left: 4px solid #cfe0ff;
+}
+
+.home-primary-actions .primary,
+.stepper-controls .primary,
+.learn-track-panel > .primary,
+.library-card .primary,
+.course-level-card .primary,
+.practice-route-card .primary {
+  background: var(--mission-action);
+}
+
+.first-run-panel,
+.course-phase,
+.level-stepper,
+.learn-track-panel,
+.library-intro,
+.lab-workspace-intro {
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(35, 49, 64, 0.06);
+}
+
+.learning-path-card,
+.course-level-card,
+.lesson-outline-card,
+.library-card,
+.learn-track-card,
+.lab-workspace-card,
+.practice-route-card {
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(35, 49, 64, 0.05);
+}
+
+.course-phase {
+  padding: 0;
+  overflow: hidden;
+}
+
+.course-phase summary {
+  padding: 18px 20px;
+  background: #ffffff;
+}
+
+.course-level-grid {
+  padding: 0 20px 20px;
+}
+
+.course-level-card {
+  min-height: 260px;
+}
+
+.course-level-card.is-current {
+  border-color: var(--mission-accent);
+  background: #effaf7;
+}
+
+.course-level-card.is-locked {
+  border-color: #dce5ed;
+  background: #fafcfe;
+}
+
+.level-stepper {
+  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+  align-items: start;
+}
+
+.level-stepper > button,
+.level-stepper > .lab-card-kicker,
+.level-stepper > h3,
+.level-stepper > .stepper-controls {
+  grid-column: 1 / -1;
+}
+
+.stepper-steps {
+  grid-template-columns: 1fr;
+  position: sticky;
+  top: 18px;
+}
+
+.stepper-steps li {
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  text-align: left;
+}
+
+.stepper-steps li::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.stepper-steps li.is-active {
+  background: #edf4ff;
+  color: var(--mission-action);
+}
+
+.stepper-steps li.is-done {
+  background: #eaf8f2;
+  color: var(--mission-accent-dark);
+}
+
+.stepper-body {
+  min-width: 0;
+  border-radius: 8px;
+}
+
+.stepper-body h4 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.mission-visual-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #cfe0ff;
+  border-radius: 8px;
+  background: #f7fbff;
+}
+
+.mission-visual-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(220px, 0.75fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.mission-visual-figure {
+  min-width: 0;
+  margin: 0;
+}
+
+.mission-visual-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--mission-line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.mission-visual-figure figcaption {
+  margin-top: 8px;
+  color: var(--mission-muted);
+  font-weight: 800;
+}
+
+.mission-visual-copy {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mission-visual-copy h5,
+.mission-visual-copy p,
+.mission-visual-evidence {
+  margin: 0;
+}
+
+.mission-visual-evidence {
+  padding-left: 20px;
+  color: var(--mission-ink);
+}
+
+.mission-visual-evidence li + li {
+  margin-top: 6px;
+}
+
+.tools-root .library-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 980px) {
+  .mission-home-dashboard,
+  .phase-context-panel,
+  .switch-preview-grid,
+  .tools-root .library-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-hero,
+  .level-stepper,
+  .mission-visual-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .stepper-steps {
+    position: static;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .stepper-steps li {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .stepper-steps li::before {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 720px) {
+  .app-shell {
+    display: block;
+    padding-bottom: var(--mission-mobile-nav);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 40;
+    display: block;
+    height: var(--mission-mobile-nav);
+    padding: 7px 8px;
+    border-top: 1px solid var(--mission-line);
+    border-right: 0;
+    box-shadow: 0 -12px 30px rgba(35, 49, 64, 0.12);
+  }
+
+  .sidebar .brand,
+  .sidebar .status-stack {
+    display: none;
+  }
+
+  .nav-tabs {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    height: 100%;
+    gap: 4px;
+  }
+
+  .nav-tab {
+    grid-template-columns: 1fr;
+    align-content: center;
+    justify-items: center;
+    min-width: 0;
+    min-height: 0;
+    padding: 6px 2px;
+    font-size: 0.72rem;
+    line-height: 1.1;
+    text-align: center;
+  }
+
+  .nav-tab::before {
+    width: 16px;
+    height: 16px;
+  }
+
+  .main-panel {
+    padding: 16px 14px 96px;
+  }
+
+  .page-heading {
+    gap: 12px;
+  }
+
+  .home-hero h2 {
+    font-size: 2.05rem;
+  }
+
+  .stepper-steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .stepper-steps li {
+    padding: 8px 4px;
+    font-size: 0.72rem;
+  }
+
+  .mission-visual-panel,
+  .stepper-body,
+  .first-run-panel,
+  .course-phase,
+  .level-stepper,
+  .learn-track-panel,
+  .library-intro,
+  .lab-workspace-intro {
+    padding: 14px;
+  }
+
+  .course-phase {
+    padding: 0;
+  }
+
+  .course-phase summary {
+    padding: 14px;
+  }
+
+  .course-level-grid {
+    padding: 0 14px 14px;
+  }
+}
