@@ -1,0 +1,64 @@
+name: Apply Mission Studio handoff
+
+on:
+  push:
+    branches:
+      - api/mission-studio-handoff-63faff93d2ed
+    paths:
+      - .github/workflows/apply-mission-studio-handoff.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out handoff branch
+        uses: actions/checkout@v4
+        with:
+          ref: api/mission-studio-handoff-63faff93d2ed
+          fetch-depth: 0
+
+      - name: Verify and switch to reviewed target
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin feature/mission-studio-ui
+          git switch --detach 262cc7f5a906441b87f525ce2e0cbff0bb65f6ac
+          test "$(git rev-parse HEAD)" = "262cc7f5a906441b87f525ce2e0cbff0bb65f6ac"
+
+      - name: Reconstruct and apply reviewed patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git show origin/api/mission-studio-handoff-63faff93d2ed:.handoff/mission-studio.patch.gz.b64 > /tmp/mission-studio.patch.gz.b64
+          base64 --decode /tmp/mission-studio.patch.gz.b64 > /tmp/mission-studio.patch.gz
+          gzip --decompress --stdout /tmp/mission-studio.patch.gz > /tmp/mission-studio.patch
+          git apply --check /tmp/mission-studio.patch
+          git apply /tmp/mission-studio.patch
+
+      - name: Validate structural redesign
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run test:core
+          npm run test:current
+          npm run test:curriculum
+          npm run test:beginner-experience
+          npm run test:mission-studio
+          npm run test:mission-studio
+          npm run build
+          npm run test:startup
+          git diff --check
+
+      - name: Commit reviewed source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- .gitignore lab.html mission-studio.css scripts/build.mjs src/app-release-21.js src/learning-experience/mission-studio-components.js src/learning-experience/mission-studio-icons.js src/learning-experience/mission-studio-shell.js src/learning-experience/mission-studio-state.js src/learning-experience/mission-studio-views.js tests/beginner-experience.mjs tests/mission-studio-design.mjs tools/browser-review/mission-studio-browser-review.mjs tools/review-isolated-build.mjs tools/review-isolated-startup.mjs
+          git diff --cached --check
+          git commit -m "feat: complete Mission Studio structural redesign"
+          git push origin HEAD:feature/mission-studio-ui
