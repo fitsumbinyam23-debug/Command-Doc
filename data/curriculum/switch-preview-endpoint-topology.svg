@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc" viewBox="0 0 960 520">
+  <title id="title">Generic switch endpoint topology preview</title>
+  <desc id="desc">Two endpoints connect to a generic switch that forwards toward a gateway.</desc>
+  <rect width="960" height="520" rx="28" fill="#f5f8fb"/>
+  <rect x="72" y="124" width="170" height="100" rx="18" fill="#ffffff" stroke="#c9d7e3" stroke-width="3"/>
+  <rect x="104" y="150" width="106" height="44" rx="8" fill="#dceeff"/>
+  <text x="157" y="258" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#17212b">Endpoint A</text>
+  <rect x="72" y="316" width="170" height="100" rx="18" fill="#ffffff" stroke="#c9d7e3" stroke-width="3"/>
+  <rect x="104" y="342" width="106" height="44" rx="8" fill="#dff7ec"/>
+  <text x="157" y="450" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#17212b">Endpoint B</text>
+  <rect x="348" y="222" width="240" height="116" rx="22" fill="#071633"/>
+  <g fill="#101f3a" stroke="#c7d6e7" stroke-width="3">
+    <rect x="384" y="254" width="36" height="30" rx="6"/><rect x="430" y="254" width="36" height="30" rx="6"/><rect x="476" y="254" width="36" height="30" rx="6"/><rect x="522" y="254" width="36" height="30" rx="6"/>
+  </g>
+  <text x="468" y="380" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="800" fill="#17212b">Generic switch</text>
+  <rect x="704" y="222" width="126" height="116" rx="22" fill="#ffffff" stroke="#1769e0" stroke-width="4"/>
+  <path d="M746 280h42m-21-21v42" stroke="#1769e0" stroke-width="8" stroke-linecap="round"/>
+  <text x="767" y="380" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="800" fill="#17212b">Gateway</text>
+  <path d="M242 174C300 174 296 264 348 264" fill="none" stroke="#1769e0" stroke-width="8" stroke-linecap="round"/>
+  <path d="M242 366C300 366 296 300 348 300" fill="none" stroke="#0f7a75" stroke-width="8" stroke-linecap="round"/>
+  <path d="M588 280h116" fill="none" stroke="#1769e0" stroke-width="8" stroke-linecap="round"/>
+  <text x="480" y="64" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="800" fill="#0f5553">Switch as the local connection point</text>
+  <text x="480" y="486" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="20" fill="#5c6b7a">Preview contract only: future lesson still needs authored explanation, practice, and evidence.</text>
+</svg>

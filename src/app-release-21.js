@@ -2730,6 +2730,15 @@ function beginnerExperience() {
   return window.CommandDoctorBeginnerExperience;
 }
 
+function missionStudioComponents() {
+  return window.CommandDoctorMissionStudioComponents;
+}
+
+function renderMissionStudio(description) {
+  const api = missionStudioComponents();
+  return api?.renderDescription ? api.renderDescription(document, description) : null;
+}
+
 function loadLearningState() {
   const api = beginnerExperience();
   const lessons = api.createLevel0Lessons();
@@ -4895,38 +4904,14 @@ function visualAssetForLessonStep(lesson, stepId) {
   }) || null;
 }
 
+function switchPreviewAssets() {
+  return visualAssetsForLessons().filter((asset) => asset.status === "preview_contract" && asset.lesson_id?.startsWith("planned_"));
+}
+
 function renderLessonVisualPanel(lesson, stepId) {
   const asset = visualAssetForLessonStep(lesson, stepId);
   if (!asset) return null;
-  const panel = labCreate("section", "mission-visual-panel");
-  panel.append(labCreate("div", "lab-card-kicker", "Visual evidence"));
-  const layout = labCreate("div", "mission-visual-layout");
-  const figure = document.createElement("figure");
-  figure.className = "mission-visual-figure";
-  const image = document.createElement("img");
-  image.src = asset.local_asset_path;
-  image.alt = asset.alt_text;
-  image.loading = "lazy";
-  image.decoding = "async";
-  const caption = document.createElement("figcaption");
-  caption.textContent = asset.title;
-  figure.append(image, caption);
-  const copy = labCreate("div", "mission-visual-copy");
-  copy.append(labCreate("h5", "", "What to notice"), labCreate("p", "", asset.text_alternative));
-  const evidence = document.createElement("ul");
-  evidence.className = "mission-visual-evidence";
-  (asset.evidence_requirements || []).forEach((requirement) => {
-    const item = document.createElement("li");
-    item.textContent = requirement;
-    evidence.append(item);
-  });
-  copy.append(evidence);
-  const components = labCreate("div", "route-facts");
-  (asset.visual_components || []).forEach((component) => components.append(labCreate("span", "badge", component.replace(/_/g, " "))));
-  copy.append(components);
-  layout.append(figure, copy);
-  panel.append(layout);
-  return panel;
+  return renderMissionStudio(missionStudioComponents()?.visualLearningPanel(asset));
 }
 
 function applyHomePrimaryAction(action) {
@@ -4946,6 +4931,7 @@ function renderHome() {
   if (!els.homeRoot || !state.lab.progress) return;
   els.homeRoot.replaceChildren();
   const api = beginnerExperience();
+  const studio = missionStudioComponents();
   const track = activeTrack();
   const progress = trackProgress(track);
   const learned = Object.keys(progress.learnedCommands).length;
@@ -4955,20 +4941,20 @@ function renderHome() {
   const stepIndex = currentLevel0StepIndex();
   const homeState = api.homeStateForPath(state.learning.path, { lessonTitle: currentLesson?.title, lastTool: state.learning.recentTool || "diagnose" });
   const hero = labCreate("section", "home-hero");
-  hero.append(labCreate("p", "eyebrow", "Beginner-first offline networking"));
-  const title = labCreate("h2", "", "Learn networks from zero, then practise safely.");
+  hero.append(labCreate("p", "eyebrow", state.learning.path ? "Mission Studio" : "Choose your mission"));
+  const title = labCreate("h2", "", state.learning.path ? `Welcome back to ${homeState.label}` : "Learn networks from zero, then practise safely.");
   title.id = "homeTitle";
   title.tabIndex = -1;
   hero.append(title);
-  hero.append(labCreate("p", "", "Start with plain-language Level 0, move into the full 40-level course map, or open technician tools when you need the local app surface. Nothing here reaches a real device."));
+  hero.append(labCreate("p", "", state.learning.path
+    ? "Continue your current path, review recent local activity, or open one technician shortcut. Nothing here reaches a real device."
+    : "Start with plain-language Level 0, open local practice, or use technician tools when you need the working app surface."));
   const status = labCreate("div", "home-status-strip");
   status.append(labCreate("span", "badge badge-green", "Works offline"), labCreate("span", "badge", `Path: ${homeState.label}`), labCreate("span", "badge", `Level 0 step: ${stepIndex + 1}/${api.STEPPER_STEPS.length}`), labCreate("span", "badge", `Commands learned: ${learned}`), labCreate("span", "badge", `Needs review: ${review}`));
   hero.append(status);
   const actions = labCreate("div", "home-primary-actions");
-  actions.append(
-    labButton(homeState.primaryAction.label, "primary", () => applyHomePrimaryAction(homeState.primaryAction)),
-    labButton("Open Course Map", "secondary", () => { state.learning.courseScreen = "map"; switchView("course"); })
-  );
+  if (!state.learning.path) actions.append(labButton(homeState.primaryAction.label, "primary", () => applyHomePrimaryAction(homeState.primaryAction)));
+  actions.append(labButton("Open Course Map", "secondary", () => { state.learning.courseScreen = "map"; switchView("course"); }));
   if (state.learning.path) actions.append(labButton("Change learning path", "secondary", () => { saveLearningPath(""); announcePathChoice("Choose a learning path."); renderHome(); renderProgress(); focusActiveViewHeading("home"); }));
   hero.append(actions);
   els.homeRoot.append(hero);
@@ -4997,26 +4983,43 @@ function renderHome() {
     return;
   }
 
-  const summary = labCreate("section", "home-action-card home-path-summary");
-  summary.append(labCreate("div", "lab-card-kicker", homeState.label));
-  if (state.learning.path === "zero") {
-    summary.append(labCreate("h3", "", currentLesson?.title || "Welcome to Networking"));
-    summary.append(labCreate("p", "", "Your Home action resumes the beginner orientation with required prediction, practice, explanation, confidence, and checkpoint gates."));
-  } else if (state.learning.path === "practice") {
-    summary.append(labCreate("h3", "", "Practice Library"));
-    summary.append(labCreate("p", "", "Your Home action opens authored local routes and planned specialization paths without marking planned content complete."));
-  } else {
-    const tool = api.toolDestination(state.learning.recentTool || "diagnose");
-    summary.append(labCreate("h3", "", tool.label));
-    summary.append(labCreate("p", "", tool.description));
-  }
-  els.homeRoot.append(summary);
-  const details = labCreate("section", "home-status-strip");
-  details.append(
-    labCreate("span", "badge", `Level 0 resume: ${currentLesson?.title || "Not started"}`),
-    labCreate("span", "badge", `Track: ${track === "all" ? "All Tracks" : track}`)
-  );
-  els.homeRoot.append(details);
+  const dashboard = labCreate("section", "mission-home-dashboard");
+  const missionCard = renderMissionStudio(studio?.continueMissionCard({
+    title: homeState.primaryAction.label,
+    lessonTitle: currentLesson?.title || "Welcome to Networking",
+    phaseLabel: "Phase 1: Absolute Beginner",
+    levelLabel: "Level 0",
+    progressLabel: level0Progress.level_complete ? "Orientation complete" : `Step ${stepIndex + 1} of ${api.STEPPER_STEPS.length}`,
+    actionLabel: homeState.primaryAction.label,
+    onAction: () => applyHomePrimaryAction(homeState.primaryAction)
+  }));
+  if (missionCard) dashboard.append(missionCard);
+  const recent = labCreate("article", "mission-recent-card");
+  recent.append(labCreate("div", "lab-card-kicker", "Recent activity"));
+  recent.append(labCreate("h3", "", currentLesson?.title || "No lesson started"));
+  const recentFacts = labCreate("div", "mission-card-facts");
+  [
+    `Current step: ${api.humanStatus(level0Progress.current_step_id)}`,
+    `Confidence: ${level0Progress.confidence_by_lesson?.[level0Progress.current_lesson_id] || "not rated"}`,
+    `Saved reports: ${state.history.length}`
+  ].forEach((fact) => recentFacts.append(labCreate("span", "badge", fact)));
+  recent.append(recentFacts);
+  dashboard.append(recent);
+  const tool = api.toolDestination(state.learning.recentTool || "diagnose");
+  const toolCard = renderMissionStudio(studio?.technicianToolCard({ tool, onAction: () => openTechnicianTool(tool) }));
+  if (toolCard) dashboard.append(toolCard);
+  els.homeRoot.append(dashboard);
+  const details = renderMissionStudio(studio?.progressSummary({
+    facts: [
+      `Track: ${track === "all" ? "All Tracks" : track}`,
+      `Commands learned: ${learned}`,
+      `Needs review: ${review}`,
+      `Level 0 complete: ${level0Progress.level_complete ? "Yes" : "No"}`
+    ],
+    actionLabel: "Open Progress",
+    onAction: () => switchView("progress")
+  }));
+  if (details) els.homeRoot.append(details);
 }
 
 const DEFAULT_VENDOR_LABELS = { cisco_ios: "Cisco IOS", hp_comware: "HP Comware", aruba_cx: "ArubaOS-CX", windows_cmd: "Windows CMD", linux: "Linux" };
@@ -5567,6 +5570,7 @@ function renderCourse() {
 function renderCourseMap() {
   const curriculum = state.curriculum.complete;
   const api = beginnerExperience();
+  const studio = missionStudioComponents();
   const intro = labCreate("section", "learn-track-panel");
   intro.append(labCreate("div", "lab-card-kicker", "Complete networking curriculum"));
   intro.append(labCreate("h3", "", "40 levels across 10 phases"));
@@ -5574,6 +5578,21 @@ function renderCourseMap() {
   intro.append(labButton("Start Level 0", "primary", () => { state.learning.levelId = "level_00"; state.learning.courseScreen = "lesson"; renderCourse(); }));
   els.courseRoot.append(intro);
   const currentPhaseId = levelById(state.learning.levelId || "level_00")?.phase_id || "phase_00";
+  const phaseRail = renderMissionStudio(studio?.coursePhaseRail({
+    phases: (curriculum?.phases || []).map((phase) => ({ ...phase, statusText: api.humanStatus(phase.status) })),
+    currentPhaseId
+  }));
+  if (phaseRail) els.courseRoot.append(phaseRail);
+  const currentPhase = (curriculum?.phases || []).find((phase) => phase.phase_id === currentPhaseId) || curriculum?.phases?.[0];
+  const contextPanel = renderMissionStudio(studio?.phaseContextPanel({
+    phase: currentPhase,
+    facts: [
+      `${currentPhase?.level_ids?.length || 0} levels`,
+      `${currentPhase?.estimated_learning_hours || "Planned"} hours`,
+      api.humanStatus(currentPhase?.status)
+    ]
+  }));
+  if (contextPanel) els.courseRoot.append(contextPanel);
   (curriculum?.phases || []).forEach((phase) => {
     const details = document.createElement("details");
     details.className = "course-phase";
@@ -5586,25 +5605,14 @@ function renderCourseMap() {
       const level = levelById(id);
       if (!level) return;
       const authored = level.content_status === "authored";
-      const card = labCreate("article", `course-level-card ${authored ? "is-current" : "is-locked"}`);
-      card.append(labCreate("div", "lab-card-kicker", `Level ${level.level_number}`), labCreate("h3", "", level.title));
-      card.append(labCreate("p", "", level.plain_language_summary || "Planned subject-specific outline."));
-      const facts = labCreate("div", "route-facts");
-      [
-        api.humanStatus(level.content_status),
-        `${level.estimated_learning_hours || "Planned"} hours`,
-        `${(level.prerequisite_level_ids || []).length ? `Prerequisites: ${level.prerequisite_level_ids.join(", ")}` : "No prerequisites"}`,
-        `${(level.modules || []).length} modules`,
-        `${(level.command_ids || []).length} commands`,
-        authored ? "Available now" : ((level.blocking_reasons || ["Planned outline; authored lessons, practice, verification, rollback, and review evidence are not complete yet."]).join("; "))
-      ].forEach((fact) => facts.append(labCreate("span", "badge", fact)));
-      card.append(facts);
-      if (level.level_id === "level_00") {
-        card.append(labButton("Open overview", "primary", () => { state.learning.levelId = level.level_id; state.learning.courseScreen = "overview"; renderCourse(); }));
-      } else {
-        card.append(labButton("Preview plan", "primary", () => { state.learning.levelId = level.level_id; state.learning.courseScreen = "overview"; renderCourse(); }));
-      }
-      grid.append(card);
+      const card = renderMissionStudio(studio?.levelCard({
+        level,
+        current: authored,
+        statusText: authored ? "Available now" : api.humanStatus(level.content_status),
+        actionLabel: level.level_id === "level_00" ? "Open overview" : "Preview plan",
+        onAction: () => { state.learning.levelId = level.level_id; state.learning.courseScreen = "overview"; renderCourse(); }
+      }));
+      if (card) grid.append(card);
     });
     details.append(grid);
     els.courseRoot.append(details);
@@ -5613,6 +5621,7 @@ function renderCourseMap() {
 
 function renderLevelOverview() {
   const api = beginnerExperience();
+  const studio = missionStudioComponents();
   const level = levelById(state.learning.levelId || "level_00") || levelById("level_00");
   const isLevel0 = level?.level_id === "level_00";
   const panel = labCreate("section", "learn-track-panel level-overview");
@@ -5630,6 +5639,13 @@ function renderLevelOverview() {
     api.humanStatus(level?.review_status)
   ].forEach((fact) => facts.append(labCreate("span", "badge", fact)));
   panel.append(facts);
+  const phase = (state.curriculum.complete?.phases || []).find((item) => item.phase_id === level?.phase_id);
+  const phaseContext = renderMissionStudio(studio?.phaseContextPanel({
+    phase,
+    title: "About this phase",
+    facts: [api.humanStatus(phase?.status), `${phase?.level_ids?.length || 0} levels`]
+  }));
+  if (phaseContext) panel.append(phaseContext);
   const list = labCreate("div", "lesson-outline-list");
   if (isLevel0) {
     level0Lessons().forEach((lesson) => {
@@ -5652,6 +5668,19 @@ function renderLevelOverview() {
     });
   }
   panel.append(list);
+  if (!isLevel0) {
+    const previewPanel = labCreate("section", "switch-preview-panel");
+    previewPanel.append(labCreate("div", "lab-card-kicker", "What is a switch? preview"));
+    previewPanel.append(labCreate("h4", "", "Visual contract only"));
+    previewPanel.append(labCreate("p", "planned-note", "These generic switch previews define the visual standard for future beginner lessons. They do not make this planned level authored."));
+    const previewGrid = labCreate("div", "switch-preview-grid");
+    switchPreviewAssets().forEach((asset) => {
+      const visual = renderMissionStudio(studio?.visualLearningPanel(asset));
+      if (visual) previewGrid.append(visual);
+    });
+    previewPanel.append(previewGrid);
+    panel.append(previewPanel);
+  }
   if (isLevel0) panel.append(labButton("Start Level 0 lesson", "primary", () => { state.learning.courseScreen = "lesson"; renderCourse(); }));
   else panel.append(labCreate("p", "planned-note", "This planned level is preview-only until authored lessons, practice, verification, rollback, and review evidence are complete."));
   els.courseRoot.append(panel);
@@ -5706,17 +5735,17 @@ function renderLevel0LessonStepper() {
   const stepName = api.STEPPER_STEPS[stepIndex];
   const stepId = api.STEP_IDS[stepIndex];
   const lessonIndex = Math.max(0, level0Lessons().findIndex((item) => item.lesson_id === lesson?.lesson_id));
+  const studio = missionStudioComponents();
   const panel = labCreate("section", "level-stepper");
   panel.append(labButton("Back to Course Map", "secondary", () => { state.learning.courseScreen = "map"; renderCourse(); }));
   panel.append(labCreate("div", "lab-card-kicker", "Level 0 | Beginner orientation"));
   panel.append(labCreate("h3", "", `${lessonIndex + 1}. ${lesson?.title || "Level 0"}`));
-  const steps = labCreate("ol", "stepper-steps");
-  api.STEPPER_STEPS.forEach((name, index) => {
-    const item = labCreate("li", index === stepIndex ? "is-active" : index < stepIndex ? "is-done" : "");
-    if (index === stepIndex) item.setAttribute("aria-current", "step");
-    item.append(labCreate("span", "", name), labCreate("span", "step-status", index < stepIndex ? "Completed" : index === stepIndex ? "Current step" : "Locked until reached"));
-    steps.append(item);
-  });
+  const steps = renderMissionStudio(studio?.lessonTimeline({
+    stepNames: api.STEPPER_STEPS,
+    stepIds: api.STEP_IDS,
+    activeStepId: stepId,
+    activeIndex: stepIndex
+  })) || labCreate("ol", "stepper-steps");
   panel.append(steps);
   const body = labCreate("section", "stepper-body");
   body.append(labCreate("div", "lab-card-kicker", stepName));
@@ -5785,7 +5814,12 @@ function renderPractice() {
   const grid = labCreate("div", "library-grid");
   (state.curriculum.specializations || []).forEach((path) => {
     const card = labCreate("article", "library-card");
-    card.append(labCreate("div", "lab-card-kicker", path.status.replace(/_/g, " ")), labCreate("h3", "", path.title), labCreate("p", "", `${path.level_ids.length} levels, ${path.command_ids.length} command mappings.`));
+    const levelCount = path.level_ids.length;
+    const commandCount = path.command_ids.length;
+    const mappingFacts = labCreate("div", "route-facts");
+    mappingFacts.append(labCreate("span", "badge", levelCount ? `Planned levels: ${levelCount}` : "Detailed path mapping is planned"));
+    mappingFacts.append(labCreate("span", "badge", commandCount ? `Mapped commands - planned: ${commandCount}` : "Command mapping is provisional"));
+    card.append(labCreate("div", "lab-card-kicker", path.status.replace(/_/g, " ")), labCreate("h3", "", path.title), mappingFacts);
     card.append(labCreate("p", "", (path.blocking_reasons || []).join("; ")));
     grid.append(card);
   });
@@ -5836,6 +5870,7 @@ function openTechnicianTool(tool) {
 function renderTools() {
   if (!els.toolsRoot) return;
   els.toolsRoot.replaceChildren();
+  const studio = missionStudioComponents();
   const panel = labCreate("section", "learn-track-panel");
   panel.append(labCreate("div", "lab-card-kicker", "Technician Tools"));
   panel.append(labCreate("h3", "", "Open the working app tools when you need them."));
@@ -5843,10 +5878,8 @@ function renderTools() {
   els.toolsRoot.append(panel);
   const grid = labCreate("div", "library-grid");
   beginnerExperience().TECHNICIAN_TOOLS.forEach((tool) => {
-    const card = labCreate("article", "library-card");
-    card.append(labCreate("h3", "", tool.label), labCreate("p", "", tool.description));
-    card.append(labButton(`Open ${tool.label}`, "primary", () => openTechnicianTool(tool)));
-    grid.append(card);
+    const card = renderMissionStudio(studio?.technicianToolCard({ tool, onAction: () => openTechnicianTool(tool) }));
+    if (card) grid.append(card);
   });
   els.toolsRoot.append(grid);
 }

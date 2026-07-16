@@ -13,6 +13,7 @@
     "curriculum:generate": "node tools/generate-complete-curriculum.mjs",
     "test:curriculum": "node tools/generate-complete-curriculum.mjs --check && node tests/curriculum-coverage.mjs",
     "test:beginner-experience": "node tests/beginner-experience.mjs",
-    "test:mission-studio": "node tests/mission-studio-design.mjs"
+    "test:mission-studio": "node tests/mission-studio-design.mjs && node tests/mission-studio-review-regressions.mjs",
+    "review:mission-studio": "node tools/browser-review/mission-studio-browser-review.mjs --repeat 2"
   }
 }

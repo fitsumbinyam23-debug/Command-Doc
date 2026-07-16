@@ -11,9 +11,10 @@ const check = (condition, message) => {
   if (!condition) errors.push(message);
 };
 
-const [modelSource, appSource, labHtml, css, curriculum, readiness] = await Promise.all([
+const [modelSource, appSource, componentsSource, labHtml, css, curriculum, readiness] = await Promise.all([
   read("src/learning-experience/beginner-experience.js"),
   read("src/app-release-21.js"),
+  read("src/learning-experience/mission-studio-components.js"),
   read("lab.html"),
   read("styles.css"),
   readJson("data/curriculum/complete-networking-curriculum.json"),
@@ -117,7 +118,7 @@ for (const id of ["courseView", "practiceView", "progressView", "toolsView"]) ch
 check(labHtml.includes("src/learning-experience/beginner-experience.js?v=2026.07-runtime-rc.3"), "learning experience model is loaded with current query version");
 check(appSource.includes("focusActiveViewHeading"), "app moves focus to active view heading after navigation");
 check(appSource.includes("focusLessonStepHeading"), "app moves focus to active lesson-step heading");
-check(appSource.includes("aria-current"), "active lesson step exposes aria-current");
+check(componentsSource.includes("aria-current") && appSource.includes("lessonTimeline"), "active lesson step exposes aria-current");
 check(appSource.includes("pathStatusAnnouncer"), "path-choice result is announced");
 check(!appSource.includes("command-doctor.lesson-attempt-engine"), "Stage 2 lesson engine is not integrated");
 
