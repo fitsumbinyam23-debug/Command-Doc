@@ -36,6 +36,12 @@ const GENERATED_CURRICULUM_FILES = {
   health: "data/generated/curriculum-health.json"
 };
 
+const COMPLETE_CURRICULUM_FILES = {
+  curriculum: "data/curriculum/complete-networking-curriculum.json",
+  commandMap: "data/curriculum/curriculum-command-map.json",
+  specializations: "data/curriculum/curriculum-specializations.json"
+};
+
 const LAB_PROGRESS_KEY = "commandDoctorLabProgress";
 const VENDOR_PROGRESS_KEY = "commandDoctorVendorProgress";
 const VISUAL_NETWORK_STORAGE_KEY = "command-doctor.visual-network";
@@ -359,6 +365,7 @@ const state = {
   safety: { commands: [], warning_message: "" },
   sources: null,
   curriculum: { inventory: [], audit: null, routes: [], index: null, health: null },
+  learning: { path: "", courseScreen: "map", levelId: "level_00", level0Progress: null },
   history: [],
   currentReport: null,
   lookupSource: "search",
@@ -418,10 +425,12 @@ async function init() {
   cacheElements();
   bindEvents();
   loadHistory();
+  loadLearningState();
+  state.lab.diagnosticsMode = new URLSearchParams(window.location.search).get("advanced") === "diagnostics";
   await loadKnowledge();
   renderKnowledge();
   renderHistory();
-  state.lab.diagnosticsMode = new URLSearchParams(window.location.search).get("advanced") === "diagnostics";
+  if (!state.lab.diagnosticsMode) renderBeginnerNavigation();
   if (state.lab.diagnosticsMode) {
     els.navTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === "lab"));
     els.views.forEach((view) => view.classList.toggle("active", view.id === "labView"));
@@ -429,6 +438,10 @@ async function init() {
   renderLab();
   renderHome();
   renderLearn();
+  renderCourse();
+  renderPractice();
+  renderProgress();
+  renderTools();
   renderLibrary();
   if (state.lab.diagnosticsMode) {
     window.setTimeout(() => {
@@ -480,6 +493,10 @@ function cacheElements() {
     "labRoot",
     "homeRoot",
     "learnRoot",
+    "courseRoot",
+    "practiceRoot",
+    "progressRoot",
+    "toolsRoot",
     "libraryRoot",
     "toast"
   ]) {
@@ -585,12 +602,20 @@ async function loadKnowledge() {
     key,
     generatedResults[index]?.status === "fulfilled" ? generatedResults[index].value : null
   ]));
+  const completeResults = await Promise.allSettled(Object.values(COMPLETE_CURRICULUM_FILES).map(loadJson));
+  const complete = Object.fromEntries(Object.keys(COMPLETE_CURRICULUM_FILES).map((key, index) => [
+    key,
+    completeResults[index]?.status === "fulfilled" ? completeResults[index].value : null
+  ]));
   state.curriculum = {
     inventory: generated.inventory?.commands || [],
     audit: generated.audit || null,
     routes: generated.routes?.routes || [],
     index: generated.index || null,
     health: generated.health || null,
+    complete: complete.curriculum || null,
+    commandMap: complete.commandMap?.commands || [],
+    specializations: complete.specializations?.specializations || [],
     metadata: {
       command_catalog_version: `command-inventory@${generated.inventory?.schema_version || "unknown"}:${generated.audit?.generated_at || "local"}`,
       profile_catalog_version: "local",
@@ -2698,6 +2723,87 @@ function recordTrackActivity(track, patch) {
   saveVendorProgress();
 }
 
+function beginnerExperience() {
+  return window.CommandDoctorBeginnerExperience || {
+    STORAGE_KEYS: { path: "command-doctor.learning-path", level0: "command-doctor.level-0-progress" },
+    PATHS: [
+      { id: "zero", label: "Learn From Zero", description: "Start with plain-language networking concepts before command syntax." },
+      { id: "practice", label: "Practise and Specialize", description: "Open practice routes and planned specialization paths." },
+      { id: "tools", label: "Technician Tools", description: "Go straight to local diagnostic and reference tools." }
+    ],
+    BEGINNER_NAVIGATION: [
+      { view: "home", label: "Home" },
+      { view: "course", label: "Course" },
+      { view: "practice", label: "Practice" },
+      { view: "progress", label: "Progress" },
+      { view: "tools", label: "Tools" }
+    ],
+    TECHNICIAN_TOOLS: [
+      { id: "diagnose", label: "Diagnose", view: "diagnose" },
+      { id: "command-lookup", label: "Command Lookup", view: "diagnose" },
+      { id: "focused-terminal", label: "Focused Terminal", view: "lab", labScreen: "cli" },
+      { id: "guided-cli", label: "Guided CLI", view: "lab", labScreen: "guided-cli" },
+      { id: "switch-workbench", label: "Switch Workbench", view: "lab", labScreen: "profiles" },
+      { id: "visual-playground", label: "Visual Playground", view: "lab", labScreen: "visual" },
+      { id: "practice-library", label: "Practice Library", view: "library", libraryTab: "practice" },
+      { id: "knowledge-base", label: "Knowledge Base", view: "knowledge" },
+      { id: "saved-reports", label: "Saved Reports", view: "history" }
+    ],
+    STEPPER_STEPS: ["Mission", "Learn", "See", "Key words", "Predict", "Try", "Explain", "Confidence", "Continue"],
+    defaultLevel0Progress: () => ({ level_id: "level_00", lesson_id: "level00_mission_network_technician", step_index: 0, confidence: "", checkpoints: {}, updated_at: "" }),
+    safeParse: (value, fallback) => { try { return JSON.parse(value || "") || fallback; } catch { return fallback; } }
+  };
+}
+
+function loadLearningState() {
+  const api = beginnerExperience();
+  state.learning.path = localStorage.getItem(api.STORAGE_KEYS.path) || "";
+  state.learning.level0Progress = {
+    ...api.defaultLevel0Progress(),
+    ...api.safeParse(localStorage.getItem(api.STORAGE_KEYS.level0), api.defaultLevel0Progress())
+  };
+}
+
+function saveLearningPath(path) {
+  const api = beginnerExperience();
+  state.learning.path = path;
+  localStorage.setItem(api.STORAGE_KEYS.path, path);
+}
+
+function saveLevel0Progress() {
+  const api = beginnerExperience();
+  state.learning.level0Progress.updated_at = new Date().toISOString();
+  localStorage.setItem(api.STORAGE_KEYS.level0, JSON.stringify(state.learning.level0Progress));
+}
+
+function levelById(levelId) {
+  return state.curriculum.complete?.levels?.find((level) => level.level_id === levelId) || null;
+}
+
+function level0Lessons() {
+  return levelById("level_00")?.modules?.flatMap((module) => module.lessons || []) || [];
+}
+
+function level0CurrentLesson() {
+  const lessons = level0Lessons();
+  return lessons.find((lesson) => lesson.lesson_id === state.learning.level0Progress?.lesson_id) || lessons[0] || null;
+}
+
+function renderBeginnerNavigation() {
+  const navigation = beginnerExperience().BEGINNER_NAVIGATION;
+  els.navTabs.forEach((tab, index) => {
+    const item = navigation[index];
+    if (!item) {
+      tab.hidden = true;
+      return;
+    }
+    tab.hidden = false;
+    tab.dataset.view = item.view;
+    tab.textContent = item.label;
+    tab.classList.toggle("active", item.view === "home");
+  });
+}
+
 function labFoundationLessons() {
   return state.lab.lessons.filter((lesson) => !isConfigurationLesson(lesson));
 }
@@ -4774,26 +4880,48 @@ function renderHome() {
   const progress = trackProgress(track);
   const learned = Object.keys(progress.learnedCommands).length;
   const review = Object.keys(progress.reviewRoutes).length;
-  const lastLesson = state.lab.lessons.find((lesson) => lesson.id === progress.lastLessonId || lesson.id === state.lab.progress.lastLessonId);
-  const lastRoute = runtimeTrainingRoutes().find((route) => route.id === progress.lastLabRouteId);
+  const level0Progress = state.learning.level0Progress || beginnerExperience().defaultLevel0Progress();
+  const currentLesson = level0CurrentLesson();
   const hero = labCreate("section", "home-hero");
-  hero.append(labCreate("p", "eyebrow", "Offline technician training"));
-  hero.append(labCreate("h2", "", "Command Doctor"));
-  hero.append(labCreate("p", "", "Choose one clear task: diagnose output, learn commands, or practise on an imaginary switch. Nothing here reaches a real device."));
+  hero.append(labCreate("p", "eyebrow", "Beginner-first offline networking"));
+  hero.append(labCreate("h2", "", "Learn networks from zero, then practise safely."));
+  hero.append(labCreate("p", "", "Start with plain-language Level 0, move into the full 40-level course map, or open technician tools when you need the local app surface. Nothing here reaches a real device."));
   const status = labCreate("div", "home-status-strip");
-  status.append(labCreate("span", "badge badge-green", "Works offline"), labCreate("span", "badge", `Track: ${track === "all" ? "All Tracks" : track}`), labCreate("span", "badge", `Course progress: ${learned} commands learned`), labCreate("span", "badge", `Needs review: ${review}`));
+  status.append(labCreate("span", "badge badge-green", "Works offline"), labCreate("span", "badge", `Path: ${state.learning.path || "Choose first"}`), labCreate("span", "badge", `Level 0 step: ${level0Progress.step_index + 1}/9`), labCreate("span", "badge", `Commands learned: ${learned}`), labCreate("span", "badge", `Needs review: ${review}`));
   hero.append(status);
+  const actions = labCreate("div", "home-primary-actions");
+  actions.append(
+    labButton("Start Level 0", "primary", () => { state.learning.courseScreen = "lesson"; switchView("course"); }),
+    labButton("Open Course Map", "secondary", () => { state.learning.courseScreen = "map"; switchView("course"); }),
+    labButton("Technician Tools", "secondary", () => switchView("tools"))
+  );
+  hero.append(actions);
   els.homeRoot.append(hero);
 
+  if (!state.learning.path) {
+    const firstRun = labCreate("section", "first-run-panel");
+    firstRun.append(labCreate("div", "lab-card-kicker", "Choose your starting path"));
+    firstRun.append(labCreate("h3", "", "What do you want Command Doctor to be today?"));
+    firstRun.append(labCreate("p", "", "This saves only your preference. Existing lab progress, vendor records, saved reports, and history are preserved."));
+    const pathGrid = labCreate("div", "learning-path-grid");
+    beginnerExperience().PATHS.forEach((path) => {
+      const card = labCreate("article", "learning-path-card");
+      card.append(labCreate("h4", "", path.label), labCreate("p", "", path.description), labButton(`Choose ${path.label}`, "primary", () => { saveLearningPath(path.id); renderHome(); renderProgress(); showToast(`${path.label} saved locally.`); }));
+      pathGrid.append(card);
+    });
+    firstRun.append(pathGrid);
+    els.homeRoot.append(firstRun);
+  }
+
   const choices = [
-    ["Diagnose Output", "Paste command output to identify the command, see evidence, understand the result, and build a ticket-ready summary.", "Open Diagnose", () => switchView("diagnose")],
-    ["Learn Commands", "Choose a vendor track, continue the course, inspect command coverage, and learn supported syntax safely.", "Open Learn", () => switchView("learn")],
-    ["Practise on a Switch", "Use Guided CLI, Focused Terminal, or Visual Playground on a local simulated switch.", "Open Switch Lab", () => switchView("lab", { resetLab: true })]
+    ["Learn From Zero", `Resume ${currentLesson?.title || "Level 0"} with mission, prediction, practice, explanation, confidence, and continue steps.`, "Continue Level 0", () => { state.learning.courseScreen = "lesson"; switchView("course"); }],
+    ["Practise and Specialize", "Open local practice routes and see planned specialization paths without pretending planned content is mastered.", "Open Practice", () => switchView("practice")],
+    ["Technician Tools", "Use Diagnose, Command Lookup, terminals, Workbench, Visual Playground, Knowledge Base, and Saved Reports.", "Open Tools", () => switchView("tools")]
   ];
   const grid = labCreate("div", "home-action-grid");
   choices.forEach(([title, description, label, action]) => {
     const card = labCreate("article", "home-action-card");
-    card.append(labCreate("div", "lab-card-kicker", "Command Doctor"));
+    card.append(labCreate("div", "lab-card-kicker", "Beginner journey"));
     card.append(labCreate("h3", "", title));
     card.append(labCreate("p", "", description));
     card.append(labButton(label, "primary", action));
@@ -4801,7 +4929,11 @@ function renderHome() {
   });
   els.homeRoot.append(grid);
   const details = labCreate("section", "home-status-strip");
-  details.append(labCreate("span", "badge", `Last lesson: ${lastLesson?.title || "Not started"}`), labCreate("span", "badge", `Last lab used: ${lastRoute?.label || "Not started"}`));
+  details.append(
+    labCreate("span", "badge", `Level 0 resume: ${currentLesson?.title || "Not started"}`),
+    labCreate("span", "badge", `Track: ${track === "all" ? "All Tracks" : track}`),
+    labButton("Change learning path", "secondary", () => { saveLearningPath(""); renderHome(); renderProgress(); })
+  );
   els.homeRoot.append(details);
 }
 
@@ -5334,6 +5466,230 @@ function renderPracticeLibrary(parent) {
   parent.append(grid);
 }
 
+function renderCourse() {
+  if (!els.courseRoot) return;
+  els.courseRoot.replaceChildren();
+  if (state.learning.courseScreen === "overview") {
+    renderLevelOverview();
+    return;
+  }
+  if (state.learning.courseScreen === "lesson") {
+    renderLevel0LessonStepper();
+    return;
+  }
+  renderCourseMap();
+}
+
+function renderCourseMap() {
+  const curriculum = state.curriculum.complete;
+  const intro = labCreate("section", "learn-track-panel");
+  intro.append(labCreate("div", "lab-card-kicker", "Complete networking curriculum"));
+  intro.append(labCreate("h3", "", "40 levels across 10 phases"));
+  intro.append(labCreate("p", "", "Level 0 is fully authored for beginners. Levels 1-39 are planned outlines and remain locked until real lessons, practice, verification, rollback, and review evidence are authored."));
+  intro.append(labButton("Start Level 0", "primary", () => { state.learning.courseScreen = "lesson"; renderCourse(); }));
+  els.courseRoot.append(intro);
+  const currentPhaseId = levelById(state.learning.levelId || "level_00")?.phase_id || "phase_00";
+  (curriculum?.phases || []).forEach((phase) => {
+    const details = document.createElement("details");
+    details.className = "course-phase";
+    details.open = phase.phase_id === currentPhaseId;
+    const summary = document.createElement("summary");
+    summary.append(labCreate("span", "course-phase-title", phase.title), labCreate("span", "badge", phase.status.replace(/_/g, " ")));
+    details.append(summary);
+    const grid = labCreate("div", "course-level-grid");
+    phase.level_ids.forEach((id) => {
+      const level = levelById(id);
+      if (!level) return;
+      const card = labCreate("article", `course-level-card ${level.status === "authored" ? "is-current" : "is-locked"}`);
+      card.append(labCreate("div", "lab-card-kicker", `Level ${level.level_number}`), labCreate("h3", "", level.title));
+      card.append(labCreate("p", "", level.status === "authored" ? "Fully authored beginner orientation." : `Locked: ${level.blocking_reasons.join("; ")}.`));
+      const facts = labCreate("div", "route-facts");
+      [level.lesson_status, level.practice_status, level.verification_status, level.rollback_status].forEach((fact) => facts.append(labCreate("span", "badge", fact.replace(/_/g, " "))));
+      card.append(facts);
+      if (level.level_id === "level_00") {
+        card.append(labButton("Level overview", "secondary", () => { state.learning.courseScreen = "overview"; renderCourse(); }));
+        card.append(labButton("Start Level 0", "primary", () => { state.learning.courseScreen = "lesson"; renderCourse(); }));
+      }
+      grid.append(card);
+    });
+    details.append(grid);
+    els.courseRoot.append(details);
+  });
+}
+
+function renderLevelOverview() {
+  const level = levelById("level_00");
+  const panel = labCreate("section", "learn-track-panel level-overview");
+  panel.append(labButton("Back to Course Map", "secondary", () => { state.learning.courseScreen = "map"; renderCourse(); }));
+  panel.append(labCreate("div", "lab-card-kicker", "Level 0 | Fully authored"));
+  panel.append(labCreate("h3", "", level?.title || "What a Network Technician Does"));
+  panel.append(labCreate("p", "", "Level 0 teaches the beginner mindset: what a technician protects, how to read a simple path, why prediction matters, and how to explain evidence without touching a real device."));
+  const list = labCreate("div", "lesson-outline-list");
+  level0Lessons().forEach((lesson) => {
+    const item = labCreate("article", "lesson-outline-card");
+    item.append(labCreate("h4", "", lesson.title), labCreate("p", "", lesson.objective));
+    list.append(item);
+  });
+  panel.append(list, labButton("Start Level 0 lesson", "primary", () => { state.learning.courseScreen = "lesson"; renderCourse(); }));
+  els.courseRoot.append(panel);
+}
+
+function level0StepText(lesson, stepName) {
+  if (!lesson) return "";
+  const key = stepName.toLowerCase().replace(/\s+/g, "_");
+  if (key === "key_words") return (lesson.key_words || []).join(", ");
+  if (key === "try") return lesson.try_prompt || "Choose the safest local practice answer.";
+  return lesson[key] || lesson.objective || "This planned step is waiting for authored content.";
+}
+
+function advanceLevel0Step(delta) {
+  const api = beginnerExperience();
+  const lessons = level0Lessons();
+  const progress = state.learning.level0Progress;
+  const lessonIndex = Math.max(0, lessons.findIndex((lesson) => lesson.lesson_id === progress.lesson_id));
+  const maxStep = api.STEPPER_STEPS.length - 1;
+  const nextStep = progress.step_index + delta;
+  if (nextStep > maxStep) {
+    const nextLesson = lessons[lessonIndex + 1];
+    if (nextLesson) {
+      progress.lesson_id = nextLesson.lesson_id;
+      progress.step_index = 0;
+    } else {
+      progress.step_index = maxStep;
+      progress.checkpoints.level0_complete = true;
+      showToast("Level 0 orientation complete. No command mastery was awarded.");
+    }
+  } else {
+    progress.step_index = Math.max(0, nextStep);
+  }
+  saveLevel0Progress();
+  renderCourse();
+  renderHome();
+  renderProgress();
+}
+
+function renderLevel0LessonStepper() {
+  const api = beginnerExperience();
+  const lesson = level0CurrentLesson();
+  const progress = state.learning.level0Progress;
+  const stepName = api.STEPPER_STEPS[Math.min(progress.step_index, api.STEPPER_STEPS.length - 1)];
+  const panel = labCreate("section", "level-stepper");
+  panel.append(labButton("Back to Course Map", "secondary", () => { state.learning.courseScreen = "map"; renderCourse(); }));
+  panel.append(labCreate("div", "lab-card-kicker", "Level 0 | Beginner orientation"));
+  panel.append(labCreate("h3", "", lesson?.title || "Level 0"));
+  const steps = labCreate("ol", "stepper-steps");
+  api.STEPPER_STEPS.forEach((name, index) => {
+    const item = labCreate("li", index === progress.step_index ? "is-active" : index < progress.step_index ? "is-done" : "", name);
+    steps.append(item);
+  });
+  panel.append(steps);
+  const body = labCreate("section", "stepper-body");
+  body.append(labCreate("div", "lab-card-kicker", stepName), labCreate("p", "", level0StepText(lesson, stepName)));
+  if (stepName === "Key words") {
+    const words = labCreate("div", "route-facts");
+    (lesson?.key_words || []).forEach((word) => words.append(labCreate("span", "badge", word)));
+    body.append(words);
+  }
+  if (stepName === "Predict" || stepName === "Try") {
+    const choices = stepName === "Predict"
+      ? ["Read evidence first", "Change the configuration first", "Reload the device first"]
+      : ["Use local simulation", "Connect to production", "Skip verification"];
+    choices.forEach((choice, index) => body.append(labButton(choice, "secondary", () => {
+      progress.checkpoints[`${lesson?.lesson_id || "level0"}_${stepName}`] = choice;
+      saveLevel0Progress();
+      showToast(index === 0 ? "Good evidence habit saved." : "Saved for review. The safest answer stays evidence-first and local.");
+      renderCourse();
+    })));
+  }
+  if (stepName === "Confidence") {
+    const select = document.createElement("select");
+    select.setAttribute("aria-label", "Level 0 confidence");
+    ["", "Low", "Medium", "High"].forEach((value) => select.append(new Option(value || "Rate confidence", value)));
+    select.value = progress.confidence || "";
+    select.addEventListener("change", () => { progress.confidence = select.value; saveLevel0Progress(); renderProgress(); });
+    body.append(select);
+  }
+  if (stepName === "Continue") body.append(labCreate("p", "planned-note", "Continue saves orientation progress only. Command mastery starts later when authored command lessons, practice, verification, rollback, and review evidence exist."));
+  panel.append(body);
+  const controls = labCreate("div", "stepper-controls");
+  controls.append(
+    labButton("Previous", "secondary", () => advanceLevel0Step(-1)),
+    labButton(stepName === "Continue" ? "Continue" : "Next", "primary", () => advanceLevel0Step(1))
+  );
+  panel.append(controls);
+  els.courseRoot.append(panel);
+}
+
+function renderPractice() {
+  if (!els.practiceRoot) return;
+  els.practiceRoot.replaceChildren();
+  const panel = labCreate("section", "learn-track-panel");
+  panel.append(labCreate("div", "lab-card-kicker", "Practise and specialize"));
+  panel.append(labCreate("h3", "", "Use authored practice routes, then follow planned specialization paths."));
+  panel.append(labCreate("p", "", "Practice routes stay local. Specialization paths are visible for planning, but they do not count as complete until real content and evidence exist."));
+  panel.append(labButton("Open Practice Library", "primary", () => { state.lab.libraryTab = "practice"; switchView("library"); }));
+  els.practiceRoot.append(panel);
+  const grid = labCreate("div", "library-grid");
+  (state.curriculum.specializations || []).forEach((path) => {
+    const card = labCreate("article", "library-card");
+    card.append(labCreate("div", "lab-card-kicker", path.status.replace(/_/g, " ")), labCreate("h3", "", path.title), labCreate("p", "", `${path.level_ids.length} levels, ${path.command_ids.length} command mappings.`));
+    card.append(labCreate("p", "", (path.blocking_reasons || []).join("; ")));
+    grid.append(card);
+  });
+  els.practiceRoot.append(grid);
+}
+
+function renderProgress() {
+  if (!els.progressRoot) return;
+  els.progressRoot.replaceChildren();
+  const progress = state.learning.level0Progress || beginnerExperience().defaultLevel0Progress();
+  const vendorProgressCount = Object.keys(state.lab.vendorProgress || {}).length;
+  const panel = labCreate("section", "learn-track-panel");
+  panel.append(labCreate("div", "lab-card-kicker", "Saved locally"));
+  panel.append(labCreate("h3", "", "Progress is preserved."));
+  panel.append(labCreate("p", "", "Changing the beginner path does not delete existing lab progress, vendor mastery records, practice route records, saved reports, or history."));
+  const facts = labCreate("div", "learn-summary");
+  [
+    `Path: ${state.learning.path || "not chosen"}`,
+    `Level 0 lesson: ${progress.lesson_id}`,
+    `Level 0 step: ${progress.step_index + 1}/9`,
+    `Confidence: ${progress.confidence || "not rated"}`,
+    `Vendor tracks with records: ${vendorProgressCount}`,
+    `Saved reports: ${state.history.length}`
+  ].forEach((fact) => facts.append(labCreate("span", "badge", fact)));
+  panel.append(facts);
+  panel.append(labButton("Resume Level 0", "primary", () => { state.learning.courseScreen = "lesson"; switchView("course"); }), labButton("Change learning path", "secondary", () => { saveLearningPath(""); switchView("home"); }));
+  els.progressRoot.append(panel);
+}
+
+function openTechnicianTool(tool) {
+  if (tool.libraryTab) state.lab.libraryTab = tool.libraryTab;
+  if (tool.labScreen) state.lab.screen = tool.labScreen;
+  switchView(tool.view);
+  if (tool.id === "command-lookup") {
+    state.lookupSource = "search";
+    window.setTimeout(() => els.commandSearch?.focus(), 0);
+  }
+}
+
+function renderTools() {
+  if (!els.toolsRoot) return;
+  els.toolsRoot.replaceChildren();
+  const panel = labCreate("section", "learn-track-panel");
+  panel.append(labCreate("div", "lab-card-kicker", "Technician Tools"));
+  panel.append(labCreate("h3", "", "Open the working app tools when you need them."));
+  panel.append(labCreate("p", "", "These are local diagnostic, terminal, reference, and report surfaces. Instructor Mode is not part of beginner navigation."));
+  els.toolsRoot.append(panel);
+  const grid = labCreate("div", "library-grid");
+  beginnerExperience().TECHNICIAN_TOOLS.forEach((tool) => {
+    const card = labCreate("article", "library-card");
+    card.append(labCreate("h3", "", tool.label), labCreate("p", "", "Open this local tool without changing your beginner progress."));
+    card.append(labButton(`Open ${tool.label}`, "primary", () => openTechnicianTool(tool)));
+    grid.append(card);
+  });
+  els.toolsRoot.append(grid);
+}
+
 function switchView(viewName, options = {}) {
   els.navTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === viewName));
   els.views.forEach((view) => view.classList.toggle("active", view.id === `${viewName}View`));
@@ -5342,6 +5698,10 @@ function switchView(viewName, options = {}) {
     renderLab();
   }
   if (viewName === "home") renderHome();
+  if (viewName === "course") renderCourse();
+  if (viewName === "practice") renderPractice();
+  if (viewName === "progress") renderProgress();
+  if (viewName === "tools") renderTools();
   if (viewName === "learn") renderLearn();
   if (viewName === "library") renderLibrary();
   if (viewName === "admin") renderAdmin();

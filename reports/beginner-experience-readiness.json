@@ -1,0 +1,44 @@
+{
+  "schema_version": "beginner-experience-readiness.v1",
+  "first_run_choice": "implemented",
+  "beginner_navigation": [
+    "Home",
+    "Course",
+    "Practice",
+    "Progress",
+    "Tools"
+  ],
+  "instructor_mode_in_beginner_navigation": false,
+  "home_primary_action": "Start Level 0",
+  "course_map": "current phase first, future phases collapsed, locked levels explain prerequisites",
+  "level0_lesson_stepper": [
+    "Mission",
+    "Learn",
+    "See",
+    "Key words",
+    "Predict",
+    "Try",
+    "Explain",
+    "Confidence",
+    "Continue"
+  ],
+  "level0_status": "authored",
+  "progress_preservation": "dedicated localStorage keys do not delete lab or vendor progress",
+  "planned_content_honesty": "Levels 1-39 are planned outlines and cannot award practical mastery.",
+  "technician_tools": [
+    "Diagnose",
+    "Command Lookup",
+    "Focused Terminal",
+    "Guided CLI",
+    "Switch Workbench",
+    "Visual Playground",
+    "Practice Library",
+    "Knowledge Base",
+    "Saved Reports"
+  ],
+  "responsive_targets": [
+    "desktop",
+    "390px"
+  ],
+  "passed": true
+}

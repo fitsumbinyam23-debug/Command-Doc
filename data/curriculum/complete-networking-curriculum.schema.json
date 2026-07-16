@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Command Doctor Complete Networking Curriculum",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source_catalog",
+    "phases",
+    "levels",
+    "prerequisite_graph"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "complete-networking-curriculum.v1"
+    },
+    "phases": {
+      "type": "array",
+      "minItems": 10,
+      "maxItems": 10
+    },
+    "levels": {
+      "type": "array",
+      "minItems": 40,
+      "maxItems": 40
+    },
+    "prerequisite_graph": {
+      "type": "object"
+    }
+  }
+}
