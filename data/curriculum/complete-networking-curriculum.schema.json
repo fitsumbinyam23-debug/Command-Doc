@@ -1,0 +1,424 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Command Doctor Complete Networking Curriculum",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_catalog",
+    "phases",
+    "levels",
+    "beginner_level_id",
+    "fully_authored_level_ids",
+    "planned_level_ids",
+    "prerequisite_graph",
+    "command_map_file",
+    "specialization_file"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "complete-networking-curriculum.v2"
+    },
+    "source_catalog": {
+      "type": "object"
+    },
+    "principles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/phase"
+      }
+    },
+    "levels": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/level"
+      }
+    },
+    "beginner_level_id": {
+      "type": "string"
+    },
+    "fully_authored_level_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "planned_level_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "prerequisite_graph": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "command_map_file": {
+      "type": "string"
+    },
+    "specialization_file": {
+      "type": "string"
+    }
+  },
+  "$defs": {
+    "phase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "phase_id",
+        "phase_number",
+        "title",
+        "purpose",
+        "target_student",
+        "prerequisite_phase_ids",
+        "level_ids",
+        "estimated_learning_hours",
+        "completion_rule",
+        "status"
+      ],
+      "properties": {
+        "phase_id": {
+          "type": "string"
+        },
+        "phase_number": {
+          "type": "integer"
+        },
+        "title": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "target_student": {
+          "type": "string"
+        },
+        "prerequisite_phase_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "level_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "estimated_learning_hours": {
+          "type": "number"
+        },
+        "completion_rule": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "authored",
+            "planned_outline",
+            "partially_authored"
+          ]
+        }
+      }
+    },
+    "level": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "level_id",
+        "level_number",
+        "phase_id",
+        "title",
+        "plain_language_summary",
+        "why_it_matters",
+        "target_student",
+        "learning_outcomes",
+        "prerequisite_level_ids",
+        "prerequisite_concepts",
+        "modules",
+        "vendor_scope",
+        "command_ids",
+        "related_command_ids",
+        "practice_types",
+        "scenario_types",
+        "required_evidence_types",
+        "mastery_dimensions",
+        "estimated_learning_hours",
+        "difficulty",
+        "content_status",
+        "practice_status",
+        "review_status",
+        "specialization_links"
+      ],
+      "properties": {
+        "level_id": {
+          "type": "string"
+        },
+        "level_number": {
+          "type": "integer"
+        },
+        "phase_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "plain_language_summary": {
+          "type": "string"
+        },
+        "why_it_matters": {
+          "type": "string"
+        },
+        "target_student": {
+          "type": "string"
+        },
+        "learning_outcomes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prerequisite_level_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prerequisite_concepts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "modules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/module"
+          }
+        },
+        "vendor_scope": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "command_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "related_command_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "practice_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scenario_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_evidence_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mastery_dimensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "estimated_learning_hours": {
+          "type": "number"
+        },
+        "difficulty": {
+          "enum": [
+            "absolute_beginner",
+            "beginner",
+            "foundation",
+            "intermediate",
+            "advanced"
+          ]
+        },
+        "content_status": {
+          "enum": [
+            "authored",
+            "planned_outline",
+            "planned_command_mapping",
+            "complete",
+            "planned"
+          ]
+        },
+        "practice_status": {
+          "enum": [
+            "concept_checkpoint_only",
+            "planned",
+            "blocked_until_practice_authored",
+            "runtime_free_practice",
+            "runtime_route",
+            "blocked"
+          ]
+        },
+        "review_status": {
+          "enum": [
+            "concept_review",
+            "planned",
+            "eligible",
+            "blocked"
+          ]
+        },
+        "specialization_links": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "module": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "module_id",
+        "title",
+        "purpose",
+        "objectives",
+        "concept_ids",
+        "command_ids",
+        "lesson_ids",
+        "prerequisite_module_ids",
+        "practice_adapter",
+        "scenario_ids",
+        "estimated_minutes",
+        "status"
+      ],
+      "properties": {
+        "module_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "objectives": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "concept_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "command_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lesson_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prerequisite_module_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "practice_adapter": {
+          "type": "string"
+        },
+        "scenario_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "estimated_minutes": {
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "authored",
+            "planned_outline",
+            "planned_command_mapping"
+          ]
+        },
+        "lessons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/lesson"
+          }
+        }
+      }
+    },
+    "lesson": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "lesson_id",
+        "title",
+        "content_status",
+        "objective",
+        "stepper_steps",
+        "completion_requirements"
+      ],
+      "properties": {
+        "lesson_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "content_status": {
+          "enum": [
+            "authored",
+            "planned",
+            "planned_command_lesson"
+          ]
+        },
+        "objective": {
+          "type": "string"
+        },
+        "stepper_steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "completion_requirements": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,292 @@
+{
+  "schema_version": "curriculum-specializations.v2",
+  "specialization_count": 8,
+  "specializations": [
+    {
+      "specialization_id": "switching-and-campus-networks",
+      "specialization_number": 1,
+      "title": "Switching and Campus Networks",
+      "status": "planned_path",
+      "level_ids": [],
+      "command_ids": [
+        "aruba_interface_config",
+        "aruba_lacp_mode_active",
+        "aruba_lacp_system_priority",
+        "aruba_no_shutdown",
+        "aruba_show_interface",
+        "aruba_show_interface_brief",
+        "aruba_show_interface_error_statistics",
+        "aruba_show_ip_interface_brief",
+        "aruba_show_lacp_interfaces",
+        "aruba_show_lldp_neighbor_info",
+        "aruba_show_mac_address_table",
+        "aruba_show_power_over_ethernet",
+        "aruba_show_running_config_interface",
+        "aruba_show_spanning_tree",
+        "aruba_show_vlan",
+        "aruba_shutdown",
+        "aruba_stp_priority",
+        "aruba_vlan",
+        "aruba_vlan_access",
+        "aruba_vlan_trunk_allowed",
+        "aruba_vlan_trunk_native",
+        "cisco_interface_config",
+        "cisco_interface_range",
+        "cisco_no_shutdown",
+        "cisco_show_cdp_neighbors",
+        "cisco_show_etherchannel_summary",
+        "cisco_show_interface_status",
+        "cisco_show_interfaces",
+        "cisco_show_interfaces_counters_errors",
+        "cisco_show_ip_arp",
+        "cisco_show_ip_interface_brief",
+        "cisco_show_lldp_neighbors",
+        "cisco_show_mac_address_table",
+        "cisco_show_port_security_interface",
+        "cisco_show_power_inline",
+        "cisco_show_running_config_interface",
+        "cisco_show_spanning_tree",
+        "cisco_show_vlan_brief",
+        "cisco_shutdown",
+        "cisco_stp_root_primary",
+        "cisco_svi_ip_address",
+        "cisco_switchport_access_vlan",
+        "cisco_switchport_mode_trunk",
+        "cisco_switchport_trunk_allowed",
+        "cisco_vlan_create",
+        "cisco_vlan_name",
+        "cisco_voice_vlan",
+        "hp_display_arp",
+        "hp_display_current_configuration_interface",
+        "hp_display_interface",
+        "hp_display_interface_brief",
+        "hp_display_ip_interface_brief",
+        "hp_display_irf",
+        "hp_display_irf_configuration",
+        "hp_display_irf_port",
+        "hp_display_irf_port_configuration",
+        "hp_display_irf_topology",
+        "hp_display_link_aggregation_summary",
+        "hp_display_link_aggregation_verbose",
+        "hp_display_lldp_neighbor",
+        "hp_display_mac_address",
+        "hp_display_poe_interface",
+        "hp_display_stp",
+        "hp_display_stp_brief",
+        "hp_display_vlan",
+        "hp_interface_config",
+        "hp_irf_member_priority",
+        "hp_irf_member_renumber",
+        "hp_port_access_vlan",
+        "hp_port_link_type_trunk",
+        "hp_port_trunk_permit",
+        "hp_shutdown",
+        "hp_undo_shutdown",
+        "hp_vlan"
+      ],
+      "objectives": [
+        "Apply approved curriculum foundations to Switching and Campus Networks.",
+        "Keep command evidence vendor-scoped and traceable."
+      ],
+      "blocking_reasons": [
+        "specialization content remains planned until real lessons and evidence are authored"
+      ]
+    },
+    {
+      "specialization_id": "routing-and-wan",
+      "specialization_number": 2,
+      "title": "Routing and WAN",
+      "status": "planned_path",
+      "level_ids": [],
+      "command_ids": [],
+      "objectives": [
+        "Apply approved curriculum foundations to Routing and WAN.",
+        "Keep command evidence vendor-scoped and traceable."
+      ],
+      "blocking_reasons": [
+        "specialization content remains planned until real lessons and evidence are authored"
+      ]
+    },
+    {
+      "specialization_id": "wireless",
+      "specialization_number": 3,
+      "title": "Wireless",
+      "status": "planned_path",
+      "level_ids": [],
+      "command_ids": [],
+      "objectives": [
+        "Apply approved curriculum foundations to Wireless.",
+        "Keep command evidence vendor-scoped and traceable."
+      ],
+      "blocking_reasons": [
+        "specialization content remains planned until real lessons and evidence are authored"
+      ]
+    },
+    {
+      "specialization_id": "network-security",
+      "specialization_number": 4,
+      "title": "Network Security",
+      "status": "planned_path",
+      "level_ids": [],
+      "command_ids": [],
+      "objectives": [
+        "Apply approved curriculum foundations to Network Security.",
+        "Keep command evidence vendor-scoped and traceable."
+      ],
+      "blocking_reasons": [
+        "specialization content remains planned until real lessons and evidence are authored"
+      ]
+    },
+    {
+      "specialization_id": "hospitality-networking",
+      "specialization_number": 5,
+      "title": "Hospitality Networking",
+      "status": "planned_path",
+      "level_ids": [],
+      "command_ids": [],
+      "objectives": [
+        "Apply approved curriculum foundations to Hospitality Networking.",
+        "Keep command evidence vendor-scoped and traceable."
+      ],
+      "blocking_reasons": [
+        "specialization content remains planned until real lessons and evidence are authored"
+      ]
+    },
+    {
+      "specialization_id": "windows-and-linux-network-diagnostics",
+      "specialization_number": 6,
+      "title": "Windows and Linux Network Diagnostics",
+      "status": "planned_path",
+      "level_ids": [],
+      "command_ids": [
+        "linux_arp_a",
+        "linux_df_h",
+        "linux_dhclient_release",
+        "linux_dhclient_renew",
+        "linux_dig",
+        "linux_dmesg",
+        "linux_ethtool_interface",
+        "linux_ip_addr",
+        "linux_ip_link",
+        "linux_ip_link_down",
+        "linux_ip_link_up",
+        "linux_ip_neigh",
+        "linux_ip_route",
+        "linux_journalctl_errors",
+        "linux_journalctl_networkmanager",
+        "linux_lsblk",
+        "linux_ping",
+        "linux_resolvectl_status",
+        "linux_restart_networking",
+        "linux_restart_networkmanager",
+        "linux_ss_listening",
+        "linux_systemctl_status_networkmanager",
+        "linux_traceroute",
+        "windows_arp_a",
+        "windows_dir",
+        "windows_dism_scanhealth",
+        "windows_getmac_verbose",
+        "windows_ipconfig_all",
+        "windows_ipconfig_release",
+        "windows_ipconfig_renew",
+        "windows_netsh_interface_disable",
+        "windows_netsh_interface_enable",
+        "windows_netsh_interface_show_interface",
+        "windows_netsh_ipv4_show_interfaces",
+        "windows_netsh_lan_show_interfaces",
+        "windows_netsh_set_static_ip",
+        "windows_netsh_winsock_reset",
+        "windows_netsh_wlan_show_interfaces",
+        "windows_netstat_ano",
+        "windows_nslookup",
+        "windows_pathping_host",
+        "windows_ping",
+        "windows_route_print",
+        "windows_systeminfo",
+        "windows_tracert"
+      ],
+      "objectives": [
+        "Apply approved curriculum foundations to Windows and Linux Network Diagnostics.",
+        "Keep command evidence vendor-scoped and traceable."
+      ],
+      "blocking_reasons": [
+        "specialization content remains planned until real lessons and evidence are authored"
+      ]
+    },
+    {
+      "specialization_id": "monitoring-and-operations",
+      "specialization_number": 7,
+      "title": "Monitoring and Operations",
+      "status": "planned_path",
+      "level_ids": [],
+      "command_ids": [
+        "aruba_configure_terminal",
+        "aruba_hostname",
+        "aruba_reload",
+        "aruba_show_events_reverse_count",
+        "aruba_show_flash",
+        "aruba_show_ip_route",
+        "aruba_show_logging",
+        "aruba_show_running_config",
+        "aruba_show_system",
+        "aruba_show_system_resource_utilization",
+        "aruba_show_version",
+        "aruba_write_memory",
+        "cisco_configure_terminal",
+        "cisco_copy_running_startup",
+        "cisco_dir_flash",
+        "cisco_hostname",
+        "cisco_reload",
+        "cisco_show_boot",
+        "cisco_show_diagnostic_result",
+        "cisco_show_file_systems",
+        "cisco_show_inventory",
+        "cisco_show_ip_dhcp_binding",
+        "cisco_show_ip_route",
+        "cisco_show_logging",
+        "cisco_show_processes_cpu_sorted",
+        "cisco_show_running_config",
+        "cisco_show_startup_config",
+        "cisco_show_version",
+        "cisco_switch_priority",
+        "hp_dir",
+        "hp_display_cpu_usage",
+        "hp_display_current_configuration",
+        "hp_display_device",
+        "hp_display_diagnostic_information",
+        "hp_display_ip_routing_table",
+        "hp_display_logbuffer",
+        "hp_display_memory",
+        "hp_display_saved_configuration",
+        "hp_display_version",
+        "hp_reboot",
+        "hp_save",
+        "hp_save_force",
+        "hp_sysname",
+        "hp_system_view"
+      ],
+      "objectives": [
+        "Apply approved curriculum foundations to Monitoring and Operations.",
+        "Keep command evidence vendor-scoped and traceable."
+      ],
+      "blocking_reasons": [
+        "specialization content remains planned until real lessons and evidence are authored"
+      ]
+    },
+    {
+      "specialization_id": "network-automation",
+      "specialization_number": 8,
+      "title": "Network Automation",
+      "status": "planned_path",
+      "level_ids": [],
+      "command_ids": [],
+      "objectives": [
+        "Apply approved curriculum foundations to Network Automation.",
+        "Keep command evidence vendor-scoped and traceable."
+      ],
+      "blocking_reasons": [
+        "specialization content remains planned until real lessons and evidence are authored"
+      ]
+    }
+  ]
+}
