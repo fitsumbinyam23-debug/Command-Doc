@@ -5636,56 +5636,192 @@ function renderCourse() {
   focusActiveViewHeading("course");
 }
 
+function friendlyDuration(hours) {
+  const value = Number(hours || 0);
+  if (!value) return "Planned duration";
+  return value === 1 ? "1 hour" : `${value} hours`;
+}
+
+function friendlyLevelNameFor(levelId) {
+  const level = levelById(levelId);
+  if (!level) return "Requires prior level review";
+  const number = level.level_number === undefined ? "" : ` ${level.level_number}`;
+  return `Requires Level${number} - ${level.title || "prior level"}`;
+}
+
+function coursePhaseIcon(phase = {}) {
+  const title = String(phase.title || "").toLowerCase();
+  if (/switch/.test(title)) return "switch";
+  if (/routing/.test(title)) return "network";
+  if (/wireless/.test(title)) return "signal";
+  if (/security/.test(title)) return "shield";
+  if (/hospitality|business/.test(title)) return "briefcase";
+  if (/monitoring|troubleshooting/.test(title)) return "pulse";
+  if (/advanced|automation/.test(title)) return "code";
+  return "course";
+}
+
+function phaseStateFor(phase = {}, currentPhaseId = "") {
+  if (phase.phase_id === currentPhaseId) return "current";
+  if (phase.status === "complete") return "completed";
+  if (phase.status === "partially_authored") return "available";
+  if (phase.status === "planned_outline") return "planned";
+  return "locked";
+}
+
+function phaseCapabilities(phase = {}, levels = []) {
+  const title = String(phase.title || "").toLowerCase();
+  const capability = [];
+  if (/beginner/.test(title)) capability.push("Core network language and safe learning boundaries");
+  if (/switch/.test(title)) capability.push("How switches, VLANs, trunks, and loops fit together");
+  if (/routing/.test(title)) capability.push("How networks reach each other through routes and services");
+  if (/wireless/.test(title)) capability.push("How clients, access points, and real-time traffic behave");
+  if (/security/.test(title)) capability.push("How access boundaries and secure management reduce risk");
+  if (/resilience/.test(title)) capability.push("How redundant switching designs stay available");
+  if (/monitoring|troubleshooting/.test(title)) capability.push("How evidence narrows symptoms to likely causes");
+  if (/operational/.test(title)) capability.push("How controlled changes, rollback, and documentation work");
+  if (/hospitality|business/.test(title)) capability.push("How guest, staff, and service networks differ");
+  if (/advanced/.test(title)) capability.push("How advanced network topics connect to daily operations");
+  levels.slice(0, 3).forEach((level) => capability.push(level.title));
+  return [...new Set(capability)].slice(0, 4);
+}
+
+function levelFactsForCourse(level = {}) {
+  const modules = level.modules || [];
+  const prerequisites = level.prerequisite_level_ids || [];
+  const facts = [
+    { label: "Duration", value: friendlyDuration(level.estimated_learning_hours) },
+    { label: "Prerequisite", value: prerequisites.length ? prerequisites.map(friendlyLevelNameFor).join(", ") : "No prerequisites" }
+  ];
+  if (modules.length) facts.push({ label: "Structure", value: level.level_id === "level_00" ? `${modules.length} authored lessons` : `${modules.length} planned modules` });
+  if ((level.command_ids || []).length) facts.push({ label: "Commands", value: "Mapped commands - planned" });
+  else if (level.level_id !== "level_00") facts.push({ label: "Commands", value: "Command lessons are planned" });
+  return facts;
+}
+
+function levelStateForCourse(level = {}, selectedLevelId = "level_00", completion = {}) {
+  if (level.level_id === "level_00") {
+    if (completion.percent >= 100 || state.learning.level0Progress?.level_complete) return "completed";
+    return "available";
+  }
+  const phase = (state.curriculum.complete?.phases || []).find((item) => item.phase_id === level.phase_id);
+  const firstSubjectLevelId = (phase?.level_ids || []).find((levelId) => levelId !== "level_00");
+  const firstPlannedInPhase = firstSubjectLevelId === level.level_id;
+  if (level.level_id === selectedLevelId || firstPlannedInPhase) return "planned";
+  if ((level.prerequisite_level_ids || []).length) return "locked";
+  return "planned";
+}
+
+function levelStatusTextForCourse(level = {}, stateKind = "planned", current = false) {
+  if (level.level_id === "level_00") {
+    if (stateKind === "completed") return "Completed orientation";
+    return current ? "Current authored level" : "Available authored level";
+  }
+  if (stateKind === "locked") return "Prerequisite first";
+  return current ? "Current planned preview" : "Planned preview";
+}
+
 function renderCourseMap() {
   const curriculum = state.curriculum.complete;
   const api = beginnerExperience();
   const views = missionStudioViews();
   const stateApi = missionStudioState();
-  const levelNameFor = (levelId) => {
-    const prereq = levelById(levelId);
-    if (!prereq) return "Requires prior level review";
-    const number = prereq.level_number === undefined ? "" : ` ${prereq.level_number}`;
-    return `Requires Level${number}: ${prereq.title || "prior level"}`;
-  };
+  const lessons = level0Lessons();
+  const completion = stateApi?.level0Completion(state.learning.level0Progress, lessons, api.STEP_IDS) || { percent: 0, completedLessons: 0, lessonCount: 8 };
   const currentPhaseId = levelById(state.learning.levelId || "level_00")?.phase_id || "phase_00";
   const currentPhase = (curriculum?.phases || []).find((phase) => phase.phase_id === currentPhaseId) || curriculum?.phases?.[0];
   const selectedLevelId = state.learning.levelId || "level_00";
+  const currentPhaseLevels = (currentPhase?.level_ids || []).map(levelById).filter(Boolean);
+  const selectPhase = (phaseId) => {
+    const phase = (curriculum?.phases || []).find((item) => item.phase_id === phaseId);
+    if (!phase) return;
+    state.learning.levelId = phase.level_ids?.[0] || selectedLevelId;
+    state.learning.courseScreen = "map";
+    renderCourse();
+  };
   const model = {
     currentPhaseId,
-    phases: (curriculum?.phases || []).map((phase) => ({
-      ...phase,
-      statusText: api.humanStatus(phase.status),
-      onSelect: () => {
-        state.learning.levelId = phase.level_ids?.[0] || selectedLevelId;
-        state.learning.courseScreen = "map";
+    onSelectPhaseId: selectPhase,
+    header: {
+      phase: { ...currentPhase, state: phaseStateFor(currentPhase, currentPhaseId) },
+      phaseLabel: `Phase ${currentPhase?.phase_number ?? ""}`,
+      title: currentPhase?.title || "Course phase",
+      purpose: currentPhase?.purpose || "Move through the selected phase with planned content clearly separated from authored lessons.",
+      statusText: currentPhase?.status ? api.humanStatus(currentPhase.status) : "Planned outline",
+      progressLabel: currentPhase?.phase_id === "phase_01"
+        ? `${completion.completedLessons}/${completion.lessonCount} Level 0 lessons complete`
+        : "Planned outline preview",
+      actionLabel: currentPhase?.phase_id === "phase_01" ? "Open current level" : "Preview phase",
+      onAction: () => {
+        state.learning.courseScreen = "overview";
         renderCourse();
       }
+    },
+    phases: (curriculum?.phases || []).map((phase) => ({
+      ...phase,
+      state: phaseStateFor(phase, currentPhaseId),
+      icon: coursePhaseIcon(phase),
+      statusText: api.humanStatus(phase.status),
+      onSelect: () => selectPhase(phase.phase_id)
     })),
-    levels: (currentPhase?.level_ids || []).map((id) => {
-      const level = levelById(id);
-      if (!level) return null;
-      const authored = level.content_status === "authored";
+    levels: currentPhaseLevels.map((level) => {
+      const current = level.level_id === selectedLevelId;
+      const levelState = levelStateForCourse(level, selectedLevelId, completion);
+      const lockReason = levelState === "locked" ? friendlyLevelNameFor(level.prerequisite_level_ids?.[0]) : "";
+      const actionLabel = level.level_id === "level_00"
+        ? "Continue"
+        : levelState === "locked"
+          ? "Review prerequisite"
+          : "Preview";
       return {
         level,
-        current: level.level_id === selectedLevelId || authored,
-        statusText: authored ? "Available now" : api.humanStatus(level.content_status),
-        actionLabel: level.level_id === "level_00" ? "Open overview" : "Preview plan",
-        facts: stateApi?.levelFacts(level, api.humanStatus, levelNameFor).slice(0, 4) || [],
+        current,
+        state: levelState,
+        title: level.title,
+        purpose: level.plain_language_summary || level.why_it_matters || "Planned level preview.",
+        statusText: levelStatusTextForCourse(level, levelState, current),
+        actionLabel,
+        lockReason,
+        facts: levelFactsForCourse(level),
         onAction: () => {
-          state.learning.levelId = level.level_id;
+          const targetLevel = levelState === "locked" && level.prerequisite_level_ids?.[0]
+            ? level.prerequisite_level_ids[0]
+            : level.level_id;
+          state.learning.levelId = targetLevel;
           state.learning.courseScreen = "overview";
           renderCourse();
         }
       };
-    }).filter(Boolean),
+    }),
+    timelineSummary: `${currentPhase?.title || "Selected phase"} progression`,
     phaseContext: {
       phase: currentPhase,
+      title: `Phase ${currentPhase?.phase_number ?? ""} context`,
+      body: currentPhase?.purpose,
+      capabilities: phaseCapabilities(currentPhase, currentPhaseLevels),
       facts: [
-        `${currentPhase?.level_ids?.length || 0} levels`,
-        currentPhase?.estimated_learning_hours ? `${currentPhase.estimated_learning_hours} hours` : "Planned duration",
-        api.humanStatus(currentPhase?.status)
+        { value: `${currentPhaseLevels.length} levels` },
+        { value: friendlyDuration(currentPhase?.estimated_learning_hours) },
+        { value: currentPhase?.phase_id === "phase_01" ? `${completion.percent}% Level 0 progress` : "Detailed command mapping will be reviewed before authoring" }
+      ],
+      suggestedAction: currentPhase?.phase_id === "phase_01"
+        ? "Suggested next action: continue the authored Level 0 orientation."
+        : "Suggested next action: preview the planned first level without starting unauthored content.",
+      visual: {
+        src: "src/learning-experience/assets/mission-studio-phase-context.svg",
+        alt: `Original Command Doctor phase visual for ${currentPhase?.title || "the selected phase"}.`,
+        text: "The diagram shows endpoints, a switch, gateway, and service path so the selected phase stays grounded in a real network shape."
+      }
+    },
+    legend: {
+      items: [
+        { label: "Current", state: "current", description: "Selected learning position" },
+        { label: "Available", state: "available", description: "Authored and safe to open" },
+        { label: "Locked", state: "locked", description: "Review prerequisite first" },
+        { label: "Planned", state: "planned", description: "Preview only, not mastery eligible" }
       ]
-    }
+    },
+    accessibleStatus: `Course map loaded for Phase ${currentPhase?.phase_number ?? ""}, ${currentPhase?.title || "selected phase"}.`
   };
   els.courseRoot.append(views?.renderCourseMapView(document, model) || labCreate("section", "", "Course unavailable."));
 }
@@ -5695,44 +5831,102 @@ function renderLevelOverview() {
   const views = missionStudioViews();
   const stateApi = missionStudioState();
   const level = levelById(state.learning.levelId || "level_00") || levelById("level_00");
-  const levelNameFor = (levelId) => {
-    const prereq = levelById(levelId);
-    if (!prereq) return "Requires prior level review";
-    const number = prereq.level_number === undefined ? "" : ` ${prereq.level_number}`;
-    return `Requires Level${number}: ${prereq.title || "prior level"}`;
-  };
   const isLevel0 = level?.level_id === "level_00";
   const phase = (state.curriculum.complete?.phases || []).find((item) => item.phase_id === level?.phase_id);
   const modules = level?.modules || [];
+  const lessons = level0Lessons();
+  const progress = state.learning.level0Progress || api.createLevel0State(lessons);
+  const completion = stateApi?.level0Completion(progress, lessons, api.STEP_IDS) || { percent: 0, completedLessons: 0, lessonCount: 8 };
+  const currentLesson = stateApi?.currentLesson(progress, lessons) || lessons[0];
+  const currentStepLabel = api.STEPPER_STEPS[Math.max(0, api.STEP_IDS.indexOf(progress.current_step_id || "mission"))] || "Mission";
+  const authoredAssets = lessons.map((lesson) => visualAssetForLessonStep(lesson, "see")).filter(Boolean);
+  const plannedAssets = switchPreviewAssets();
+  const primaryVisual = isLevel0
+    ? (visualAssetForLessonStep(currentLesson, "see") || authoredAssets[0])
+    : (plannedAssets[0] || {
+      local_asset_path: "src/learning-experience/assets/mission-studio-phase-context.svg",
+      title: "Planned level visual preview",
+      alt_text: "Original Command Doctor planned-level visual preview.",
+      text_alternative: "The visual previews future network-training content without claiming authored lessons."
+    });
+  const plannedOutcomes = modules.flatMap((module) => module.objectives || []).slice(0, 5);
   const model = {
-    phaseLabel: `Level ${level?.level_number ?? 0} | ${api.humanStatus(level?.content_status)}`,
-    title: level?.title || "Welcome to Networking",
-    purpose: level?.why_it_matters || level?.plain_language_summary || "Preview the planned subject-specific outline before authored lessons are available.",
-    facts: stateApi?.levelFacts(level, api.humanStatus, levelNameFor) || [],
-    outcomes: isLevel0
-      ? level0Lessons().slice(0, 4).map((lesson) => lesson.objective)
-      : modules.flatMap((module) => module.objectives || []).slice(0, 6),
-    sequenceKicker: isLevel0 ? "Eight lesson sequence" : "Module sequence",
-    sequenceTitle: isLevel0 ? "Level 0 connected beginner lessons" : "Planned modules",
-    sequence: isLevel0
-      ? level0Lessons().map((lesson) => ({ title: lesson.title, body: lesson.objective }))
-      : modules.map((module) => {
-        const commandCount = (module.command_ids || []).length;
-        return {
-          title: module.title,
-          body: `${module.purpose || "Planned module."} ${commandCount ? `Mapped commands planned: ${commandCount}.` : "Command lessons are planned."}`
-        };
-      }),
-    previewAssets: isLevel0 ? [] : switchPreviewAssets(),
-    plannedNotice: isLevel0 ? null : {
-      title: "Preview-only level",
-      body: "This planned level is not authored yet. It requires lesson, practice, verification, rollback, and review evidence before completion can be awarded."
+    isLevel0,
+    hero: {
+      phaseLabel: `Phase ${phase?.phase_number ?? ""} - ${phase?.title || "Course phase"}`,
+      levelLabel: `Level ${level?.level_number ?? 0}`,
+      title: level?.title || "Level overview",
+      purpose: level?.why_it_matters || level?.plain_language_summary || "Preview the planned outline before authored lessons are available.",
+      duration: friendlyDuration(level?.estimated_learning_hours),
+      percent: isLevel0 ? completion.percent : null,
+      progressLabel: isLevel0 ? `${completion.completedLessons}/${completion.lessonCount} lessons complete` : "Planned preview",
+      actionLabel: isLevel0 ? (completion.completedLessons || progress.current_step_id !== "mission" ? "Continue Level 0" : "Start Level 0") : "",
+      onAction: () => { state.learning.courseScreen = "lesson"; renderCourse(); },
+      secondaryActionLabel: "Back to Course",
+      onSecondaryAction: () => { state.learning.courseScreen = "map"; renderCourse(); },
+      planned: !isLevel0,
+      visual: {
+        src: primaryVisual?.local_asset_path || "src/learning-experience/assets/mission-studio-phase-context.svg",
+        alt: primaryVisual?.alt_text || `Original Command Doctor visual for ${level?.title || "this level"}.`,
+        text: primaryVisual?.text_alternative || "A local visual supports this learning mission without remote dependencies."
+      }
     },
-    primaryActionLabel: isLevel0 ? "Start Level 0 lesson" : "",
-    onPrimaryAction: () => { state.learning.courseScreen = "lesson"; renderCourse(); },
-    onBack: () => { state.learning.courseScreen = "map"; renderCourse(); }
+    outcomes: isLevel0
+      ? (level?.learning_outcomes?.length ? level.learning_outcomes : lessons.map((lesson) => lesson.objective)).slice(0, 5)
+      : (plannedOutcomes.length ? plannedOutcomes : [
+        `Explain ${level?.title || "this planned level"} in beginner language.`,
+        "Connect the subject to safe local practice before command mastery.",
+        "Review detailed command placement before authored lessons are created."
+      ]),
+    sequence: {
+      kicker: isLevel0 ? "Eight lesson sequence" : "Expected module structure",
+      title: isLevel0 ? "Level 0 connected beginner lessons" : "Planned modules",
+      currentLessonId: isLevel0 ? currentLesson?.lesson_id : "",
+      actionLabel: isLevel0 ? "Continue" : "",
+      onAction: isLevel0 ? (() => { state.learning.courseScreen = "lesson"; renderCourse(); }) : null,
+      lessons: isLevel0
+        ? lessons.map((lesson) => ({
+          id: lesson.lesson_id,
+          title: lesson.title,
+          body: lesson.objective,
+          current: lesson.lesson_id === currentLesson?.lesson_id,
+          state: progress.completed_lesson_ids?.includes(lesson.lesson_id) ? "complete" : lesson.lesson_id === currentLesson?.lesson_id ? "current" : "upcoming",
+          statusText: lesson.lesson_id === currentLesson?.lesson_id ? `Current step: ${currentStepLabel}` : progress.completed_lesson_ids?.includes(lesson.lesson_id) ? "Complete" : "Upcoming"
+        }))
+        : modules.map((module) => ({
+          id: module.module_id,
+          title: module.title,
+          body: `${module.purpose || "Planned module."} Command lessons are planned.`,
+          state: "planned",
+          statusText: "Planned"
+        }))
+    },
+    readiness: {
+      prerequisite: (level?.prerequisite_level_ids || []).length ? level.prerequisite_level_ids.map(friendlyLevelNameFor).join(", ") : "No prerequisites",
+      checkpoint: isLevel0
+        ? (progress.final_checkpoint_result?.submitted ? "Level 0 checkpoint submitted" : "Checkpoint appears in the final Level 0 lesson")
+        : "Checkpoint design is planned with the lesson authoring pass",
+      confidence: isLevel0
+        ? (progress.confidence_by_lesson?.[currentLesson?.lesson_id] || "Not rated yet")
+        : "Not yet available for mastery",
+      mastery: isLevel0
+        ? "Level 0 records concept orientation only. It does not award command mastery."
+        : "Not yet available for mastery. Detailed command mapping will be reviewed before authoring."
+    },
+    visuals: {
+      featured: primaryVisual,
+      previews: isLevel0 ? authoredAssets.filter((asset) => asset !== primaryVisual).slice(0, 3) : plannedAssets.slice(1, 4)
+    },
+    plannedNotice: isLevel0 ? null : {
+      title: "Planned level - preview only",
+      body: "Detailed command placement will be reviewed before authoring. This level cannot start authored content, award completion, or grant command mastery yet.",
+      actionLabel: "Back to Course",
+      onAction: () => { state.learning.courseScreen = "map"; renderCourse(); }
+    },
+    accessibleStatus: isLevel0
+      ? `Level 0 overview loaded. Current lesson ${currentLesson?.title || "lesson"} at ${currentStepLabel}.`
+      : `Planned overview loaded for Level ${level?.level_number ?? ""}. Preview only.`
   };
-  if (phase) model.facts.unshift(phase.title);
   els.courseRoot.append(views?.renderLevelOverviewView(document, model) || labCreate("section", "", "Level overview unavailable."));
 }
 

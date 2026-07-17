@@ -29,7 +29,10 @@ const reviewFailureGuards = [
   "desktop mission hero missing visual",
   "mobile home partial viewport",
   "mobile bottom navigation overlap",
-  "screenshot metric mismatch"
+  "screenshot metric mismatch",
+  "course phase title mismatch",
+  "planned level false start",
+  "stage 1 home regression"
 ];
 
 const level0State = (stepId = "mission") => ({
@@ -55,10 +58,25 @@ const scenarios = [
   { id: "desktop-home-empty-activity", viewport: cssViewportDesktop, seed: { path: "zero", step: "mission" }, steps: [{ click: "Home" }] },
   { id: "desktop-navigation-focus", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ focus: "Practice" }] },
   { id: "desktop-1280-home-zero", viewport: cssViewportDesktopCompact, seed: { path: "zero" }, steps: [{ click: "Home" }] },
+  { id: "desktop-course-phase-1", viewport: cssViewportDesktop, seed: { path: "zero" }, expectedPhaseTitle: "ABSOLUTE BEGINNER", steps: [{ click: "Course" }, { phaseId: "phase_01" }] },
+  { id: "desktop-course-phase-5", viewport: cssViewportDesktop, seed: { path: "zero" }, expectedPhaseTitle: "SECURITY", steps: [{ click: "Course" }, { phaseId: "phase_05" }] },
+  { id: "desktop-course-phase-10", viewport: cssViewportDesktop, seed: { path: "zero" }, expectedPhaseTitle: "ADVANCED NETWORKING", steps: [{ click: "Course" }, { phaseId: "phase_10" }] },
+  { id: "desktop-level-0-overview", viewport: cssViewportDesktop, seed: { path: "zero" }, expectedLevelTitle: "Welcome to Networking", steps: [{ click: "Course" }, { phaseId: "phase_01" }, { openLevelNumber: "0" }] },
+  { id: "desktop-level-1-planned-overview", viewport: cssViewportDesktop, seed: { path: "zero" }, expectedLevelTitle: "Network Devices and Connections", steps: [{ click: "Course" }, { phaseId: "phase_01" }, { openLevelNumber: "1" }] },
+  { id: "desktop-current-level-focus", viewport: cssViewportDesktop, seed: { path: "zero" }, expectedPhaseTitle: "ABSOLUTE BEGINNER", steps: [{ click: "Course" }, { focusSelector: ".ms-course-level-card.is-current .ms-button" }] },
+  { id: "desktop-locked-planned-state-comparison", viewport: cssViewportDesktop, seed: { path: "zero" }, expectedPhaseTitle: "ABSOLUTE BEGINNER", steps: [{ click: "Course" }, { phaseId: "phase_01" }] },
+  { id: "desktop-1280-course-phase-1", viewport: cssViewportDesktopCompact, seed: { path: "zero" }, expectedPhaseTitle: "ABSOLUTE BEGINNER", steps: [{ click: "Course" }, { phaseId: "phase_01" }] },
+  { id: "desktop-1280-level-0-overview", viewport: cssViewportDesktopCompact, seed: { path: "zero" }, expectedLevelTitle: "Welcome to Networking", steps: [{ click: "Course" }, { phaseId: "phase_01" }, { openLevelNumber: "0" }] },
   { id: "mobile-onboarding", viewport: cssViewportMobile, seed: { path: "" }, steps: [] },
   { id: "mobile-home-zero", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Home" }] },
   { id: "mobile-home-bottom-scroll", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Home" }], scrollSelector: ".ms-recommendation-row" },
-  { id: "mobile-navigation-focus", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ focus: "Tools" }] }
+  { id: "mobile-navigation-focus", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ focus: "Tools" }] },
+  { id: "mobile-course-phase-1", viewport: cssViewportMobile, seed: { path: "zero" }, expectedPhaseTitle: "ABSOLUTE BEGINNER", steps: [{ click: "Course" }, { phaseId: "phase_01" }] },
+  { id: "mobile-course-phase-5", viewport: cssViewportMobile, seed: { path: "zero" }, expectedPhaseTitle: "SECURITY", steps: [{ click: "Course" }, { phaseId: "phase_05" }] },
+  { id: "mobile-course-phase-10", viewport: cssViewportMobile, seed: { path: "zero" }, expectedPhaseTitle: "ADVANCED NETWORKING", steps: [{ click: "Course" }, { phaseId: "phase_10" }] },
+  { id: "mobile-level-0-overview", viewport: cssViewportMobile, seed: { path: "zero" }, expectedLevelTitle: "Welcome to Networking", steps: [{ click: "Course" }, { phaseId: "phase_01" }, { openLevelNumber: "0" }] },
+  { id: "mobile-level-1-planned-overview", viewport: cssViewportMobile, seed: { path: "zero" }, expectedLevelTitle: "Network Devices and Connections", steps: [{ click: "Course" }, { phaseId: "phase_01" }, { openLevelNumber: "1" }] },
+  { id: "mobile-bottom-action-visibility", viewport: cssViewportMobile, seed: { path: "zero" }, expectedLevelTitle: "Welcome to Networking", steps: [{ click: "Course" }, { phaseId: "phase_01" }, { openLevelNumber: "0" }], scrollSelector: ".ms-level-hero" }
 ];
 
 function parseArgs(argv) {
@@ -150,6 +168,7 @@ async function findBrowser() {
 
 const exists = (target) => fs.access(target).then(() => true).catch(() => false);
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const ignorableBrowserLog = (text = "") => /favicon|net::ERR_NETWORK_CHANGED/i.test(String(text));
 
 async function waitForExit(process, timeoutMs = 3000) {
   if (process.exitCode !== null || process.signalCode !== null) return;
@@ -418,10 +437,11 @@ async function evaluate(client, expression, awaitPromise = false) {
 
 async function configurePage(client, viewport, consoleErrors) {
   client.on("Runtime.consoleAPICalled", (params) => {
-    if (["error", "assert"].includes(params.type)) consoleErrors.push(params.args?.map((arg) => arg.value || arg.description || "").join(" "));
+    const text = params.args?.map((arg) => arg.value || arg.description || "").join(" ");
+    if (["error", "assert"].includes(params.type) && !ignorableBrowserLog(text)) consoleErrors.push(text);
   });
   client.on("Log.entryAdded", (params) => {
-    if (["error", "warning"].includes(params.entry?.level) && !/favicon/i.test(params.entry.text || "")) consoleErrors.push(params.entry.text);
+    if (["error", "warning"].includes(params.entry?.level) && !ignorableBrowserLog(params.entry.text || "")) consoleErrors.push(params.entry.text);
   });
   await client.send("Runtime.enable");
   await client.send("Page.enable");
@@ -485,7 +505,20 @@ async function waitForAppReady(client, scenario, { requireLessonVisual = false }
   }
   await evaluate(client, `(async () => {
     if (document.fonts?.ready) await document.fonts.ready;
-    await Promise.all([...document.images].map((img) => img.decode ? img.decode().catch(() => {}) : Promise.resolve()));
+    await Promise.all([...document.images].map((img) => new Promise((resolve) => {
+      const finish = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+      const timer = setTimeout(resolve, 750);
+      const rect = img.getBoundingClientRect();
+      const renderedSvg = /\\.svg(?:$|\\?)/i.test(img.currentSrc || img.src || "") && rect.width > 0 && rect.height > 0;
+      if (img.complete || renderedSvg || !img.decode) {
+        finish();
+        return;
+      }
+      img.decode().then(finish).catch(finish);
+    })));
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     return true;
   })()`, true);
@@ -563,6 +596,47 @@ async function focusVisibleText(client, text) {
   await waitForAppReady(client, { id: text.toLowerCase(), seed: {} });
 }
 
+async function selectPhase(client, phaseId) {
+  const selected = await evaluate(client, `(() => {
+    const phaseId = ${JSON.stringify(phaseId)};
+    const selector = document.querySelector(".ms-mobile-phase-selector select");
+    if (selector) {
+      selector.value = phaseId;
+      selector.dispatchEvent(new Event("change", { bubbles: true }));
+      return true;
+    }
+    const button = document.querySelector("[data-phase-id='" + phaseId + "']");
+    if (!button) return false;
+    button.click();
+    return true;
+  })()`);
+  if (!selected) throw new Error(`Could not select course phase: ${phaseId}`);
+  await waitForAppReady(client, { id: phaseId, seed: {} });
+}
+
+async function openLevelNumber(client, levelNumber) {
+  const opened = await evaluate(client, `(() => {
+    const levelNumber = ${JSON.stringify(levelNumber)};
+    const button = document.querySelector(".ms-course-level-card[data-level-number='" + levelNumber + "'] .ms-button");
+    if (!button) return false;
+    button.click();
+    return true;
+  })()`);
+  if (!opened) throw new Error(`Could not open level number: ${levelNumber}`);
+  await waitForAppReady(client, { id: `level-${levelNumber}`, seed: {} });
+}
+
+async function focusSelector(client, selector) {
+  const focused = await evaluate(client, `(() => {
+    const node = document.querySelector(${JSON.stringify(selector)});
+    if (!node) return false;
+    node.focus();
+    return document.activeElement === node;
+  })()`);
+  if (!focused) throw new Error(`Could not focus selector: ${selector}`);
+  await waitForAppReady(client, { id: selector, seed: {} });
+}
+
 async function collectGeometry(client) {
   return evaluate(client, `(() => {
     const rect = (node) => {
@@ -578,10 +652,23 @@ async function collectGeometry(client) {
       return box.width > 0 && box.height > 0 && getComputedStyle(item).display !== "none";
     });
     const nav = visibleSidebar || document.querySelector(".sidebar");
-    const hero = active?.querySelector(".ms-home-hero");
+    const hero = active?.querySelector(".ms-home-hero, .ms-level-hero");
     const bottomNav = document.querySelector(".ms-mobile-bottom-nav");
     const missionVisual = active?.querySelector(".ms-mission-visual img");
     const missionVisualText = active?.querySelector(".ms-mission-visual figcaption");
+    const phaseControl = active?.querySelector(".ms-phase-rail, .ms-mobile-phase-selector");
+    const timeline = active?.querySelector(".ms-level-timeline, .ms-level-mission-sequence");
+    const contextPanel = active?.querySelector(".ms-phase-context, .ms-readiness-summary");
+    const activeLevel = active?.querySelector(".ms-course-level-node.is-current, .ms-level-mission-sequence li.is-current");
+    const courseTitle = active?.querySelector("#courseTitle")?.textContent?.trim() || "";
+    const phaseButtonCount = active?.querySelectorAll("[data-phase-id]").length || 0;
+    const mobilePhaseOptionCount = active?.querySelectorAll(".ms-mobile-phase-selector option").length || 0;
+    const levelCardCount = active?.querySelectorAll(".ms-course-level-card").length || 0;
+    const sequenceCount = active?.querySelectorAll(".ms-level-mission-sequence li").length || 0;
+    const plannedStartCount = [...(active?.querySelectorAll(".is-planned .ms-button, .ms-planned-level-notice .ms-button") || [])]
+      .filter((button) => /^start\b/i.test(button.textContent.trim())).length;
+    const rawInternalIdPresent = /level_\d\d|phase_\d\d/.test(active?.textContent || "");
+    const zeroCountCopyPresent = /0 commands|0 mapped commands/i.test(active?.textContent || "");
     const activeNav = [...document.querySelectorAll("[data-ms-primary-nav='true']")].filter((item) => {
       const box = item.getBoundingClientRect();
       return box.width > 0 && box.height > 0 && getComputedStyle(item).display !== "none";
@@ -643,6 +730,10 @@ async function collectGeometry(client) {
       mainRect,
       navigationRect: rect(nav),
       heroRect: rect(hero),
+      phaseControlRect: rect(phaseControl),
+      timelineRect: rect(timeline),
+      contextRect: rect(contextPanel),
+      activeLevelRect: rect(activeLevel),
       bottomNavigationRect: rect(bottomNav),
       documentScrollWidth: scrollWidth,
       documentClientWidth: viewportWidth,
@@ -658,6 +749,14 @@ async function collectGeometry(client) {
       oldShellPresent: Boolean(document.querySelector(".app-shell, .sidebar, .main-panel, .nav-tabs, .status-stack")),
       pathChoiceCount: active?.querySelectorAll("[data-path-choice]").length || 0,
       dominantActionCount: active?.querySelectorAll("[data-dominant-action='true']").length || 0,
+      courseTitle,
+      phaseButtonCount,
+      mobilePhaseOptionCount,
+      levelCardCount,
+      sequenceCount,
+      plannedStartCount,
+      rawInternalIdPresent,
+      zeroCountCopyPresent,
       missionVisual: {
         present: Boolean(missionVisual),
         src: missionVisual?.getAttribute("src") || "",
@@ -672,6 +771,9 @@ async function captureScenario(client, scenario, runDir, consoleErrors) {
   for (const step of scenario.steps) {
     if (step.click) await clickVisibleText(client, step.click);
     if (step.focus) await focusVisibleText(client, step.focus);
+    if (step.phaseId) await selectPhase(client, step.phaseId);
+    if (step.openLevelNumber) await openLevelNumber(client, step.openLevelNumber);
+    if (step.focusSelector) await focusSelector(client, step.focusSelector);
   }
   if (scenario.scrollSelector) {
     await evaluate(client, `document.querySelector(${JSON.stringify(scenario.scrollSelector)})?.scrollIntoView({ block: "start" })`);
@@ -697,6 +799,10 @@ async function captureScenario(client, scenario, runDir, consoleErrors) {
     main_rectangle: geometry.mainRect,
     navigation_rectangle: geometry.navigationRect,
     hero_rectangle: geometry.heroRect,
+    phase_control_rectangle: geometry.phaseControlRect,
+    timeline_rectangle: geometry.timelineRect,
+    context_rectangle: geometry.contextRect,
+    active_level_rectangle: geometry.activeLevelRect,
     bottom_navigation_rectangle: geometry.bottomNavigationRect,
     document_scroll_width: geometry.documentScrollWidth,
     horizontal_overflow: geometry.horizontalOverflow,
@@ -711,6 +817,14 @@ async function captureScenario(client, scenario, runDir, consoleErrors) {
     old_shell_present: geometry.oldShellPresent,
     path_choice_count: geometry.pathChoiceCount,
     dominant_action_count: geometry.dominantActionCount,
+    course_title: geometry.courseTitle,
+    phase_button_count: geometry.phaseButtonCount,
+    mobile_phase_option_count: geometry.mobilePhaseOptionCount,
+    level_card_count: geometry.levelCardCount,
+    level_sequence_count: geometry.sequenceCount,
+    planned_start_count: geometry.plannedStartCount,
+    raw_internal_id_present: geometry.rawInternalIdPresent,
+    zero_count_copy_present: geometry.zeroCountCopyPresent,
     mission_visual: geometry.missionVisual,
     pixel_content_bounds: pixelContentBounds
   };
@@ -737,6 +851,33 @@ function validateRecord(record, scenario) {
     if (record.hero_rectangle.width < 320 || record.hero_rectangle.height < 220) throw new Error(`${scenario.id} mission hero is too small.`);
     if (!record.mission_visual.present || !record.mission_visual.src.includes("mission-studio-home-network.svg")) throw new Error(`${scenario.id} missing local mission visual asset.`);
     if (record.mission_visual.altLength < 30 || record.mission_visual.textLength < 40) throw new Error(`${scenario.id} mission visual lacks alt text or text alternative.`);
+  }
+  if (/course-phase|current-level|locked-planned/.test(scenario.id)) {
+    if (scenario.expectedPhaseTitle && record.course_title !== scenario.expectedPhaseTitle) {
+      throw new Error(`${scenario.id} course phase title mismatch: expected ${scenario.expectedPhaseTitle}, got ${record.course_title}.`);
+    }
+    if (mobile) {
+      if (record.mobile_phase_option_count !== 10) throw new Error(`${scenario.id} mobile phase selector does not expose ten phases.`);
+      if (record.phase_control_rectangle.width < 300 || record.phase_control_rectangle.height < 44) throw new Error(`${scenario.id} mobile phase selector is clipped or too small.`);
+    } else if (record.phase_button_count !== 10) {
+      throw new Error(`${scenario.id} desktop phase rail does not expose ten phases.`);
+    }
+    if (record.timeline_rectangle.width < 320 || record.timeline_rectangle.height < 220) throw new Error(`${scenario.id} timeline is too small for connected progression.`);
+    if (record.context_rectangle.width < 260 || record.context_rectangle.height < 160) throw new Error(`${scenario.id} phase context panel is not useful enough.`);
+    if (record.active_level_rectangle.width < 260 || record.active_level_rectangle.height < 80) throw new Error(`${scenario.id} active level is not visually present.`);
+    if (record.raw_internal_id_present) throw new Error(`${scenario.id} raw internal IDs leaked into learner copy.`);
+    if (record.zero_count_copy_present) throw new Error(`${scenario.id} zero-count learner copy leaked into Course.`);
+  }
+  if (/level-0-overview/.test(scenario.id)) {
+    if (record.course_title !== scenario.expectedLevelTitle) throw new Error(`${scenario.id} level title mismatch: expected ${scenario.expectedLevelTitle}, got ${record.course_title}.`);
+    if (record.hero_rectangle.width < 320 || record.hero_rectangle.height < 220) throw new Error(`${scenario.id} Level 0 hero is too small.`);
+    if (record.level_sequence_count !== 8) throw new Error(`${scenario.id} Level 0 should render eight lessons, got ${record.level_sequence_count}.`);
+    if (record.raw_internal_id_present || record.zero_count_copy_present) throw new Error(`${scenario.id} Level 0 overview leaked internal or zero-count copy.`);
+  }
+  if (/level-1-planned-overview/.test(scenario.id)) {
+    if (record.course_title !== scenario.expectedLevelTitle) throw new Error(`${scenario.id} level title mismatch: expected ${scenario.expectedLevelTitle}, got ${record.course_title}.`);
+    if (record.planned_start_count > 0) throw new Error(`${scenario.id} planned level false start: Start action is present.`);
+    if (record.raw_internal_id_present || record.zero_count_copy_present) throw new Error(`${scenario.id} planned overview leaked internal or zero-count copy.`);
   }
   if (!mobile && (record.navigation_rectangle.width < 240 || record.navigation_rectangle.width > 264)) throw new Error(`${scenario.id} desktop sidebar width outside approved range.`);
   if (mobile && record.bottom_navigation_rectangle.height < 44) throw new Error(`${scenario.id} mobile bottom navigation is missing or too small.`);
@@ -801,7 +942,20 @@ async function waitForAppReadyPage(page, scenario, { requireLessonVisual = false
   }
   await page.evaluate(async () => {
     if (document.fonts?.ready) await document.fonts.ready;
-    await Promise.all([...document.images].map((img) => img.decode ? img.decode().catch(() => {}) : Promise.resolve()));
+    await Promise.all([...document.images].map((img) => new Promise((resolve) => {
+      const finish = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+      const timer = setTimeout(resolve, 750);
+      const rect = img.getBoundingClientRect();
+      const renderedSvg = /\.svg(?:$|\?)/i.test(img.currentSrc || img.src || "") && rect.width > 0 && rect.height > 0;
+      if (img.complete || renderedSvg || !img.decode) {
+        finish();
+        return;
+      }
+      img.decode().then(finish).catch(finish);
+    })));
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
   await waitForStableGeometryPage(page);
@@ -851,6 +1005,45 @@ async function focusVisibleTextPage(page, text) {
   await waitForAppReadyPage(page, { id: text.toLowerCase(), seed: {} });
 }
 
+async function selectPhasePage(page, phaseId) {
+  const selected = await page.evaluate((value) => {
+    const selector = document.querySelector(".ms-mobile-phase-selector select");
+    if (selector) {
+      selector.value = value;
+      selector.dispatchEvent(new Event("change", { bubbles: true }));
+      return true;
+    }
+    const button = document.querySelector(`[data-phase-id="${value}"]`);
+    if (!button) return false;
+    button.click();
+    return true;
+  }, phaseId);
+  if (!selected) throw new Error(`Could not select course phase: ${phaseId}`);
+  await waitForAppReadyPage(page, { id: phaseId, seed: {} });
+}
+
+async function openLevelNumberPage(page, levelNumber) {
+  const opened = await page.evaluate((value) => {
+    const button = document.querySelector(`.ms-course-level-card[data-level-number="${value}"] .ms-button`);
+    if (!button) return false;
+    button.click();
+    return true;
+  }, levelNumber);
+  if (!opened) throw new Error(`Could not open level number: ${levelNumber}`);
+  await waitForAppReadyPage(page, { id: `level-${levelNumber}`, seed: {} });
+}
+
+async function focusSelectorPage(page, selector) {
+  const focused = await page.evaluate((value) => {
+    const node = document.querySelector(value);
+    if (!node) return false;
+    node.focus();
+    return document.activeElement === node;
+  }, selector);
+  if (!focused) throw new Error(`Could not focus selector: ${selector}`);
+  await waitForAppReadyPage(page, { id: selector, seed: {} });
+}
+
 async function collectGeometryPage(page) {
   return page.evaluate(() => {
     const rect = (node) => {
@@ -866,10 +1059,23 @@ async function collectGeometryPage(page) {
       return box.width > 0 && box.height > 0 && getComputedStyle(item).display !== "none";
     });
     const nav = visibleSidebar || document.querySelector(".sidebar");
-    const hero = active?.querySelector(".ms-home-hero");
+    const hero = active?.querySelector(".ms-home-hero, .ms-level-hero");
     const bottomNav = document.querySelector(".ms-mobile-bottom-nav");
     const missionVisual = active?.querySelector(".ms-mission-visual img");
     const missionVisualText = active?.querySelector(".ms-mission-visual figcaption");
+    const phaseControl = active?.querySelector(".ms-phase-rail, .ms-mobile-phase-selector");
+    const timeline = active?.querySelector(".ms-level-timeline, .ms-level-mission-sequence");
+    const contextPanel = active?.querySelector(".ms-phase-context, .ms-readiness-summary");
+    const activeLevel = active?.querySelector(".ms-course-level-node.is-current, .ms-level-mission-sequence li.is-current");
+    const courseTitle = active?.querySelector("#courseTitle")?.textContent?.trim() || "";
+    const phaseButtonCount = active?.querySelectorAll("[data-phase-id]").length || 0;
+    const mobilePhaseOptionCount = active?.querySelectorAll(".ms-mobile-phase-selector option").length || 0;
+    const levelCardCount = active?.querySelectorAll(".ms-course-level-card").length || 0;
+    const sequenceCount = active?.querySelectorAll(".ms-level-mission-sequence li").length || 0;
+    const plannedStartCount = [...(active?.querySelectorAll(".is-planned .ms-button, .ms-planned-level-notice .ms-button") || [])]
+      .filter((button) => /^start\b/i.test(button.textContent.trim())).length;
+    const rawInternalIdPresent = /level_\d\d|phase_\d\d/.test(active?.textContent || "");
+    const zeroCountCopyPresent = /0 commands|0 mapped commands/i.test(active?.textContent || "");
     const activeNav = [...document.querySelectorAll("[data-ms-primary-nav='true']")].filter((item) => {
       const box = item.getBoundingClientRect();
       return box.width > 0 && box.height > 0 && getComputedStyle(item).display !== "none";
@@ -930,6 +1136,10 @@ async function collectGeometryPage(page) {
       mainRect,
       navigationRect: rect(nav),
       heroRect: rect(hero),
+      phaseControlRect: rect(phaseControl),
+      timelineRect: rect(timeline),
+      contextRect: rect(contextPanel),
+      activeLevelRect: rect(activeLevel),
       bottomNavigationRect: rect(bottomNav),
       documentScrollWidth: scrollWidth,
       documentClientWidth: viewportWidth,
@@ -945,6 +1155,14 @@ async function collectGeometryPage(page) {
       oldShellPresent: Boolean(document.querySelector(".app-shell, .sidebar, .main-panel, .nav-tabs, .status-stack")),
       pathChoiceCount: active?.querySelectorAll("[data-path-choice]").length || 0,
       dominantActionCount: active?.querySelectorAll("[data-dominant-action='true']").length || 0,
+      courseTitle,
+      phaseButtonCount,
+      mobilePhaseOptionCount,
+      levelCardCount,
+      sequenceCount,
+      plannedStartCount,
+      rawInternalIdPresent,
+      zeroCountCopyPresent,
       missionVisual: {
         present: Boolean(missionVisual),
         src: missionVisual?.getAttribute("src") || "",
@@ -959,6 +1177,9 @@ async function captureScenarioPage(page, scenario, runDir, consoleErrors) {
   for (const step of scenario.steps) {
     if (step.click) await clickVisibleTextPage(page, step.click);
     if (step.focus) await focusVisibleTextPage(page, step.focus);
+    if (step.phaseId) await selectPhasePage(page, step.phaseId);
+    if (step.openLevelNumber) await openLevelNumberPage(page, step.openLevelNumber);
+    if (step.focusSelector) await focusSelectorPage(page, step.focusSelector);
   }
   if (scenario.scrollSelector) {
     await page.locator(scenario.scrollSelector).first().scrollIntoViewIfNeeded({ timeout: 10000 });
@@ -982,6 +1203,10 @@ async function captureScenarioPage(page, scenario, runDir, consoleErrors) {
     main_rectangle: geometry.mainRect,
     navigation_rectangle: geometry.navigationRect,
     hero_rectangle: geometry.heroRect,
+    phase_control_rectangle: geometry.phaseControlRect,
+    timeline_rectangle: geometry.timelineRect,
+    context_rectangle: geometry.contextRect,
+    active_level_rectangle: geometry.activeLevelRect,
     bottom_navigation_rectangle: geometry.bottomNavigationRect,
     document_scroll_width: geometry.documentScrollWidth,
     horizontal_overflow: geometry.horizontalOverflow,
@@ -996,6 +1221,14 @@ async function captureScenarioPage(page, scenario, runDir, consoleErrors) {
     old_shell_present: geometry.oldShellPresent,
     path_choice_count: geometry.pathChoiceCount,
     dominant_action_count: geometry.dominantActionCount,
+    course_title: geometry.courseTitle,
+    phase_button_count: geometry.phaseButtonCount,
+    mobile_phase_option_count: geometry.mobilePhaseOptionCount,
+    level_card_count: geometry.levelCardCount,
+    level_sequence_count: geometry.sequenceCount,
+    planned_start_count: geometry.plannedStartCount,
+    raw_internal_id_present: geometry.rawInternalIdPresent,
+    zero_count_copy_present: geometry.zeroCountCopyPresent,
     mission_visual: geometry.missionVisual,
     pixel_content_bounds: pixelContentBounds
   };
@@ -1022,7 +1255,7 @@ async function runEvidencePlaywright(playwright, baseUrl, runIndex, browserPath)
       });
       const page = await context.newPage();
       page.on("console", (message) => {
-        if (["error", "warning"].includes(message.type()) && !/favicon|Failed to load resource: the server responded with a status of 404/i.test(message.text())) consoleErrors.push(message.text());
+        if (["error", "warning"].includes(message.type()) && !ignorableBrowserLog(message.text()) && !/Failed to load resource: the server responded with a status of 404/i.test(message.text())) consoleErrors.push(message.text());
       });
       page.on("pageerror", (error) => consoleErrors.push(error.message));
       page.on("response", (response) => {

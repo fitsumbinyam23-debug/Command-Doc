@@ -29,9 +29,24 @@ const components = sandbox.module.exports;
   "appShellState",
   "recommendedActionCard",
   "continueMissionCard",
+  "courseWorkspace",
+  "courseHeader",
+  "coursePhaseNavigator",
   "coursePhaseRail",
+  "courseTimeline",
+  "courseLevelNode",
+  "courseLevelCard",
   "levelCard",
   "phaseContextPanel",
+  "courseLegend",
+  "levelOverviewWorkspace",
+  "levelOverviewHero",
+  "levelOutcomeList",
+  "levelMissionSequence",
+  "levelPrerequisiteSummary",
+  "levelVisualPreview",
+  "plannedLevelNotice",
+  "accessibleCourseStatus",
   "lessonTimeline",
   "lessonStepPanel",
   "visualLearningPanel",
@@ -86,7 +101,10 @@ check(missionTest.includes("validateVisualAssetRegistry"), "Mission Studio test 
   "desktop mission hero missing visual",
   "mobile home partial viewport",
   "mobile bottom navigation overlap",
-  "screenshot metric mismatch"
+  "screenshot metric mismatch",
+  "course phase title mismatch",
+  "planned level false start",
+  "stage 1 home regression"
 ].forEach((failureId) => check(missionTest.includes(failureId), `Review screenshot guard missing: ${failureId}`));
 
 if (errors.length) {
