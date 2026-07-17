@@ -29,7 +29,10 @@ const reviewFailureGuards = [
   "desktop mission hero missing visual",
   "mobile home partial viewport",
   "mobile bottom navigation overlap",
-  "screenshot metric mismatch"
+  "screenshot metric mismatch",
+  "icon namespace mismatch",
+  "icon painted pixel missing",
+  "screenshot hash mismatch"
 ];
 
 const level0State = (stepId = "mission") => ({
@@ -51,12 +54,14 @@ const scenarios = [
   { id: "desktop-home-zero", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Home" }] },
   { id: "desktop-home-practice-path", viewport: cssViewportDesktop, seed: { path: "practice" }, steps: [{ click: "Home" }] },
   { id: "desktop-home-technician-path", viewport: cssViewportDesktop, seed: { path: "tools" }, steps: [{ click: "Home" }] },
+  { id: "desktop-technician-shortcuts", viewport: cssViewportDesktop, seed: { path: "tools" }, steps: [{ click: "Home" }], scrollSelector: ".ms-shortcuts" },
   { id: "desktop-home-recent-activity", viewport: cssViewportDesktop, seed: { path: "zero", step: "see", activity: "recent" }, steps: [{ click: "Home" }] },
   { id: "desktop-home-empty-activity", viewport: cssViewportDesktop, seed: { path: "zero", step: "mission" }, steps: [{ click: "Home" }] },
   { id: "desktop-navigation-focus", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ focus: "Practice" }] },
   { id: "desktop-1280-home-zero", viewport: cssViewportDesktopCompact, seed: { path: "zero" }, steps: [{ click: "Home" }] },
   { id: "mobile-onboarding", viewport: cssViewportMobile, seed: { path: "" }, steps: [] },
   { id: "mobile-home-zero", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Home" }] },
+  { id: "mobile-home-shortcuts", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Home" }], scrollSelector: ".ms-shortcuts" },
   { id: "mobile-home-bottom-scroll", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Home" }], scrollSelector: ".ms-recommendation-row" },
   { id: "mobile-navigation-focus", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ focus: "Tools" }] }
 ];
@@ -150,6 +155,8 @@ async function findBrowser() {
 
 const exists = (target) => fs.access(target).then(() => true).catch(() => false);
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const svgNamespace = "http://www.w3.org/2000/svg";
+const ignorableBrowserLog = (text = "") => /favicon|net::ERR_NETWORK_CHANGED/i.test(String(text));
 
 async function waitForExit(process, timeoutMs = 3000) {
   if (process.exitCode !== null || process.signalCode !== null) return;
@@ -418,10 +425,11 @@ async function evaluate(client, expression, awaitPromise = false) {
 
 async function configurePage(client, viewport, consoleErrors) {
   client.on("Runtime.consoleAPICalled", (params) => {
-    if (["error", "assert"].includes(params.type)) consoleErrors.push(params.args?.map((arg) => arg.value || arg.description || "").join(" "));
+    const text = params.args?.map((arg) => arg.value || arg.description || "").join(" ");
+    if (["error", "assert"].includes(params.type) && !ignorableBrowserLog(text)) consoleErrors.push(text);
   });
   client.on("Log.entryAdded", (params) => {
-    if (["error", "warning"].includes(params.entry?.level) && !/favicon/i.test(params.entry.text || "")) consoleErrors.push(params.entry.text);
+    if (["error", "warning"].includes(params.entry?.level) && !ignorableBrowserLog(params.entry.text || "")) consoleErrors.push(params.entry.text);
   });
   await client.send("Runtime.enable");
   await client.send("Page.enable");
@@ -485,7 +493,20 @@ async function waitForAppReady(client, scenario, { requireLessonVisual = false }
   }
   await evaluate(client, `(async () => {
     if (document.fonts?.ready) await document.fonts.ready;
-    await Promise.all([...document.images].map((img) => img.decode ? img.decode().catch(() => {}) : Promise.resolve()));
+    await Promise.all([...document.images].map((img) => new Promise((resolve) => {
+      const finish = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+      const timer = setTimeout(resolve, 750);
+      const rect = img.getBoundingClientRect();
+      const renderedSvg = /\\.svg(?:$|\\?)/i.test(img.currentSrc || img.src || "") && rect.width > 0 && rect.height > 0;
+      if (img.complete || renderedSvg || !img.decode) {
+        finish();
+        return;
+      }
+      img.decode().then(finish).catch(finish);
+    })));
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     return true;
   })()`, true);
@@ -582,6 +603,37 @@ async function collectGeometry(client) {
     const bottomNav = document.querySelector(".ms-mobile-bottom-nav");
     const missionVisual = active?.querySelector(".ms-mission-visual img");
     const missionVisualText = active?.querySelector(".ms-mission-visual figcaption");
+    const visible = (node) => {
+      const box = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return box.width >= 1 && box.height >= 1 && box.bottom > 0 && box.top < window.innerHeight && box.right > 0 && box.left < window.innerWidth && style.display !== "none" && style.visibility !== "hidden";
+    };
+    const iconRecords = [
+      ["brand", ".ms-brand-shield"],
+      ["desktop_nav", ".ms-desktop-sidebar [data-ms-primary-nav='true'] .ms-nav-icon"],
+      ["mobile_nav", ".ms-mobile-bottom-nav [data-ms-primary-nav='true'] .ms-mobile-nav-icon"],
+      ["onboarding_network", ".view.active .ms-onboarding-network"],
+      ["path_card", ".view.active .ms-path-card .ms-path-icon"],
+      ["shortcut", ".view.active .ms-shortcut-icon"]
+    ].flatMap(([group, selector]) => [...document.querySelectorAll(selector)]
+      .filter(visible)
+      .map((node, index) => {
+        const style = getComputedStyle(node);
+        const shapes = [...node.querySelectorAll("path, circle, rect")];
+        return {
+          group,
+          selector,
+          index,
+          namespace_uri: node.namespaceURI || "",
+          child_namespace_uris: [...new Set(shapes.map((shape) => shape.namespaceURI || ""))],
+          rectangle: rect(node),
+          computed_color: style.color || "",
+          computed_stroke: style.stroke || "",
+          computed_fill: style.fill || "",
+          shape_count: shapes.length,
+          shape_data: shapes.map((shape) => shape.getAttribute("d") || shape.getAttribute("r") || shape.getAttribute("width") || "").filter(Boolean).join("|")
+        };
+      }));
     const activeNav = [...document.querySelectorAll("[data-ms-primary-nav='true']")].filter((item) => {
       const box = item.getBoundingClientRect();
       return box.width > 0 && box.height > 0 && getComputedStyle(item).display !== "none";
@@ -658,6 +710,7 @@ async function collectGeometry(client) {
       oldShellPresent: Boolean(document.querySelector(".app-shell, .sidebar, .main-panel, .nav-tabs, .status-stack")),
       pathChoiceCount: active?.querySelectorAll("[data-path-choice]").length || 0,
       dominantActionCount: active?.querySelectorAll("[data-dominant-action='true']").length || 0,
+      iconRecords,
       missionVisual: {
         present: Boolean(missionVisual),
         src: missionVisual?.getAttribute("src") || "",
@@ -684,6 +737,7 @@ async function captureScenario(client, scenario, runDir, consoleErrors) {
   const screenshotPath = path.join(runDir, "screenshots", `${scenario.id}.png`);
   await fs.writeFile(screenshotPath, buffer);
   const pixelContentBounds = pngContentBounds(buffer);
+  const iconRecords = paintIconRecords(buffer, geometry.iconRecords || []);
   const record = {
     scenario_id: scenario.id,
     timestamp: new Date().toISOString(),
@@ -711,11 +765,90 @@ async function captureScenario(client, scenario, runDir, consoleErrors) {
     old_shell_present: geometry.oldShellPresent,
     path_choice_count: geometry.pathChoiceCount,
     dominant_action_count: geometry.dominantActionCount,
+    icon_records: iconRecords,
     mission_visual: geometry.missionVisual,
     pixel_content_bounds: pixelContentBounds
   };
   validateRecord(record, scenario);
   return record;
+}
+
+function parseRgb(value = "") {
+  const match = String(value).match(/rgba?\(([^)]+)\)/);
+  if (!match) return null;
+  const parts = match[1].split(",").map((part) => Number.parseFloat(part.trim()));
+  return { r: parts[0], g: parts[1], b: parts[2], a: parts[3] ?? 1 };
+}
+
+function colorDistance(first, second) {
+  return Math.abs(first.r - second.r) + Math.abs(first.g - second.g) + Math.abs(first.b - second.b);
+}
+
+function countPaintedPixels(png, rectangle, color) {
+  if (!color) return 0;
+  const left = Math.max(0, Math.floor(rectangle.left));
+  const top = Math.max(0, Math.floor(rectangle.top));
+  const right = Math.min(png.width - 1, Math.ceil(rectangle.right));
+  const bottom = Math.min(png.height - 1, Math.ceil(rectangle.bottom));
+  let count = 0;
+  for (let y = top; y <= bottom; y += 1) {
+    for (let x = left; x <= right; x += 1) {
+      const pixel = pixelAt(png, x, y);
+      if (pixel.a > 20 && colorDistance(pixel, color) < 120) count += 1;
+    }
+  }
+  return count;
+}
+
+function paintIconRecords(buffer, records) {
+  const png = decodePng(buffer);
+  return records.map((record) => ({
+    ...record,
+    painted_pixel_count: countPaintedPixels(png, record.rectangle, parseRgb(record.computed_color))
+  }));
+}
+
+function iconExpectationsFor(scenario) {
+  const mobile = scenario.viewport.mobile;
+  const expectations = /home-shortcuts|technician-shortcuts/.test(scenario.id)
+    ? []
+    : [
+      { group: "brand", minimum: 1 },
+      { group: mobile ? "mobile_nav" : "desktop_nav", exact: 5 }
+    ];
+  if (/onboarding/.test(scenario.id)) {
+    expectations.push({ group: "onboarding_network", minimum: 1 });
+    expectations.push(mobile ? { group: "path_card", minimum: 1 } : { group: "path_card", exact: 3 });
+  }
+  if (/home-shortcuts|technician-shortcuts/.test(scenario.id)) {
+    expectations.push({ group: "shortcut", minimum: /mobile/.test(scenario.id) ? 4 : 5 });
+  }
+  return expectations;
+}
+
+function validateIconRecords(record, scenario) {
+  const records = record.icon_records || [];
+  for (const expectation of iconExpectationsFor(scenario)) {
+    const groupRecords = records.filter((item) => item.group === expectation.group);
+    if (expectation.exact !== undefined && groupRecords.length !== expectation.exact) {
+      throw new Error(`${scenario.id} expected ${expectation.exact} ${expectation.group} icons, got ${groupRecords.length}.`);
+    }
+    if (expectation.minimum !== undefined && groupRecords.length < expectation.minimum) {
+      throw new Error(`${scenario.id} expected at least ${expectation.minimum} ${expectation.group} icons, got ${groupRecords.length}.`);
+    }
+    for (const icon of groupRecords) {
+      if (icon.namespace_uri !== svgNamespace) throw new Error(`${scenario.id} icon namespace mismatch for ${icon.selector}.`);
+      if (icon.child_namespace_uris.some((namespace) => namespace !== svgNamespace)) throw new Error(`${scenario.id} child icon namespace mismatch for ${icon.selector}.`);
+      if (icon.rectangle.width < 18 || icon.rectangle.height < 18) throw new Error(`${scenario.id} icon rectangle too small for ${icon.selector}.`);
+      if (icon.shape_count < 1 || !icon.shape_data) throw new Error(`${scenario.id} icon has no shape geometry for ${icon.selector}.`);
+      if (/rgba?\([^)]*,\s*0\s*\)|transparent/i.test(`${icon.computed_color} ${icon.computed_stroke} ${icon.computed_fill}`)) throw new Error(`${scenario.id} icon has transparent computed paint for ${icon.selector}.`);
+      if (icon.painted_pixel_count < 8) throw new Error(`${scenario.id} icon painted pixel missing for ${icon.selector}.`);
+    }
+    if (/nav/.test(expectation.group)) {
+      const distinctShapes = new Set(groupRecords.map((icon) => icon.shape_data));
+      if (distinctShapes.size !== 5) throw new Error(`${scenario.id} navigation icons are not five distinct shapes.`);
+    }
+  }
 }
 
 function validateRecord(record, scenario) {
@@ -741,6 +874,7 @@ function validateRecord(record, scenario) {
   if (!mobile && (record.navigation_rectangle.width < 240 || record.navigation_rectangle.width > 264)) throw new Error(`${scenario.id} desktop sidebar width outside approved range.`);
   if (mobile && record.bottom_navigation_rectangle.height < 44) throw new Error(`${scenario.id} mobile bottom navigation is missing or too small.`);
   if (record.console_errors.length) throw new Error(`${scenario.id} console errors: ${record.console_errors.join("; ")}`);
+  validateIconRecords(record, scenario);
   if (!record.contrast_results?.length) throw new Error(`${scenario.id} computed contrast audit did not run.`);
   const contrastFailures = record.contrast_results.filter((item) => item.ratio < item.minimum);
   if (contrastFailures.length) {
@@ -801,7 +935,20 @@ async function waitForAppReadyPage(page, scenario, { requireLessonVisual = false
   }
   await page.evaluate(async () => {
     if (document.fonts?.ready) await document.fonts.ready;
-    await Promise.all([...document.images].map((img) => img.decode ? img.decode().catch(() => {}) : Promise.resolve()));
+    await Promise.all([...document.images].map((img) => new Promise((resolve) => {
+      const finish = () => {
+        clearTimeout(timer);
+        resolve();
+      };
+      const timer = setTimeout(resolve, 750);
+      const rect = img.getBoundingClientRect();
+      const renderedSvg = /\.svg(?:$|\?)/i.test(img.currentSrc || img.src || "") && rect.width > 0 && rect.height > 0;
+      if (img.complete || renderedSvg || !img.decode) {
+        finish();
+        return;
+      }
+      img.decode().then(finish).catch(finish);
+    })));
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
   await waitForStableGeometryPage(page);
@@ -870,6 +1017,37 @@ async function collectGeometryPage(page) {
     const bottomNav = document.querySelector(".ms-mobile-bottom-nav");
     const missionVisual = active?.querySelector(".ms-mission-visual img");
     const missionVisualText = active?.querySelector(".ms-mission-visual figcaption");
+    const visible = (node) => {
+      const box = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      return box.width >= 1 && box.height >= 1 && box.bottom > 0 && box.top < window.innerHeight && box.right > 0 && box.left < window.innerWidth && style.display !== "none" && style.visibility !== "hidden";
+    };
+    const iconRecords = [
+      ["brand", ".ms-brand-shield"],
+      ["desktop_nav", ".ms-desktop-sidebar [data-ms-primary-nav='true'] .ms-nav-icon"],
+      ["mobile_nav", ".ms-mobile-bottom-nav [data-ms-primary-nav='true'] .ms-mobile-nav-icon"],
+      ["onboarding_network", ".view.active .ms-onboarding-network"],
+      ["path_card", ".view.active .ms-path-card .ms-path-icon"],
+      ["shortcut", ".view.active .ms-shortcut-icon"]
+    ].flatMap(([group, selector]) => [...document.querySelectorAll(selector)]
+      .filter(visible)
+      .map((node, index) => {
+        const style = getComputedStyle(node);
+        const shapes = [...node.querySelectorAll("path, circle, rect")];
+        return {
+          group,
+          selector,
+          index,
+          namespace_uri: node.namespaceURI || "",
+          child_namespace_uris: [...new Set(shapes.map((shape) => shape.namespaceURI || ""))],
+          rectangle: rect(node),
+          computed_color: style.color || "",
+          computed_stroke: style.stroke || "",
+          computed_fill: style.fill || "",
+          shape_count: shapes.length,
+          shape_data: shapes.map((shape) => shape.getAttribute("d") || shape.getAttribute("r") || shape.getAttribute("width") || "").filter(Boolean).join("|")
+        };
+      }));
     const activeNav = [...document.querySelectorAll("[data-ms-primary-nav='true']")].filter((item) => {
       const box = item.getBoundingClientRect();
       return box.width > 0 && box.height > 0 && getComputedStyle(item).display !== "none";
@@ -945,6 +1123,7 @@ async function collectGeometryPage(page) {
       oldShellPresent: Boolean(document.querySelector(".app-shell, .sidebar, .main-panel, .nav-tabs, .status-stack")),
       pathChoiceCount: active?.querySelectorAll("[data-path-choice]").length || 0,
       dominantActionCount: active?.querySelectorAll("[data-dominant-action='true']").length || 0,
+      iconRecords,
       missionVisual: {
         present: Boolean(missionVisual),
         src: missionVisual?.getAttribute("src") || "",
@@ -966,9 +1145,10 @@ async function captureScenarioPage(page, scenario, runDir, consoleErrors) {
   await waitForAppReadyPage(page, scenario, { requireLessonVisual: true });
   const geometry = await collectGeometryPage(page);
   const screenshotPath = path.join(runDir, "screenshots", `${scenario.id}.png`);
-  const buffer = await page.screenshot({ path: screenshotPath, fullPage: false, animations: "disabled" });
+    const buffer = await page.screenshot({ path: screenshotPath, fullPage: false, animations: "disabled" });
   const sha256 = crypto.createHash("sha256").update(buffer).digest("hex");
   const pixelContentBounds = pngContentBounds(buffer);
+  const iconRecords = paintIconRecords(buffer, geometry.iconRecords || []);
   const record = {
     scenario_id: scenario.id,
     timestamp: new Date().toISOString(),
@@ -996,6 +1176,7 @@ async function captureScenarioPage(page, scenario, runDir, consoleErrors) {
     old_shell_present: geometry.oldShellPresent,
     path_choice_count: geometry.pathChoiceCount,
     dominant_action_count: geometry.dominantActionCount,
+    icon_records: iconRecords,
     mission_visual: geometry.missionVisual,
     pixel_content_bounds: pixelContentBounds
   };
@@ -1022,7 +1203,7 @@ async function runEvidencePlaywright(playwright, baseUrl, runIndex, browserPath)
       });
       const page = await context.newPage();
       page.on("console", (message) => {
-        if (["error", "warning"].includes(message.type()) && !/favicon|Failed to load resource: the server responded with a status of 404/i.test(message.text())) consoleErrors.push(message.text());
+        if (["error", "warning"].includes(message.type()) && !ignorableBrowserLog(message.text()) && !/Failed to load resource: the server responded with a status of 404/i.test(message.text())) consoleErrors.push(message.text());
       });
       page.on("pageerror", (error) => consoleErrors.push(error.message));
       page.on("response", (response) => {
@@ -1182,6 +1363,7 @@ function compareRuns(runs) {
       };
       comparisons.push(delta);
       if (delta.geometry_delta > 2 || delta.pixel_width_delta > 4) errors.push(`${record.scenario_id} run ${runIndex + 1} geometry or pixel bounds drifted.`);
+      if (!delta.screenshot_hash_match) errors.push(`${record.scenario_id} run ${runIndex + 1} screenshot hash mismatch.`);
     }
   }
   return { equivalent: errors.length === 0, comparisons, errors };

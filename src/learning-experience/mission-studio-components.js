@@ -527,12 +527,22 @@
     return AccessibleViewStatus(message, politeness);
   }
 
-  function renderDescription(documentRef, description) {
+  const svgNamespace = "http://www.w3.org/2000/svg";
+  const svgTags = new Set(["svg", "path", "circle", "rect", "line", "polyline", "polygon", "g", "defs", "title", "desc", "use"]);
+
+  function renderDescription(documentRef, description, namespace = "") {
     if (description === null || description === undefined) return documentRef.createTextNode("");
     if (typeof description === "string" || typeof description === "number") return documentRef.createTextNode(String(description));
-    const element = documentRef.createElement(description.tag || "div");
+    const tag = description.tag || "div";
+    const childNamespace = tag === "svg" || (namespace === svgNamespace && svgTags.has(tag)) ? svgNamespace : "";
+    const element = childNamespace
+      ? documentRef.createElementNS(svgNamespace, tag)
+      : documentRef.createElement(tag);
     const props = description.props || {};
-    if (props.className) element.className = props.className;
+    if (props.className) {
+      if (childNamespace) element.setAttribute("class", props.className);
+      if (!childNamespace || typeof element.className === "string") element.className = props.className;
+    }
     if (props.text !== undefined) element.textContent = props.text;
     if (props.type) element.type = props.type;
     if (props.role) element.setAttribute("role", props.role);
@@ -551,7 +561,7 @@
       if (value !== "" && value !== undefined && value !== null) element.setAttribute(key, value);
     });
     if (typeof props.onClick === "function") element.addEventListener("click", props.onClick);
-    (description.children || []).forEach((child) => element.append(renderDescription(documentRef, child)));
+    (description.children || []).forEach((child) => element.append(renderDescription(documentRef, child, childNamespace)));
     return element;
   }
 

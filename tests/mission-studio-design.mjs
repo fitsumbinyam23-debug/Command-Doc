@@ -13,6 +13,8 @@ const errors = [];
 const check = (condition, message) => {
   if (!condition) errors.push(message);
 };
+const svgNamespace = "http://www.w3.org/2000/svg";
+const htmlNamespace = "http://www.w3.org/1999/xhtml";
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
@@ -29,29 +31,35 @@ function loadBrowserModule(source, filename, injectedGlobals = {}) {
 }
 
 function createFakeDocument() {
+  const createElementRecord = (tag, namespaceURI) => ({
+    tagName: tag.toUpperCase(),
+    localName: tag,
+    namespaceURI,
+    children: [],
+    attributes: {},
+    dataset: {},
+    className: "",
+    textContent: "",
+    style: {},
+    append(...nodes) {
+      this.children.push(...nodes);
+    },
+    setAttribute(name, value) {
+      this.attributes[name] = String(value);
+    },
+    addEventListener(type, handler) {
+      this[`on${type}`] = handler;
+    }
+  });
   return {
     createTextNode(text) {
       return { nodeType: 3, textContent: String(text) };
     },
     createElement(tag) {
-      return {
-        tagName: tag.toUpperCase(),
-        children: [],
-        attributes: {},
-        dataset: {},
-        className: "",
-        textContent: "",
-        style: {},
-        append(...nodes) {
-          this.children.push(...nodes);
-        },
-        setAttribute(name, value) {
-          this.attributes[name] = String(value);
-        },
-        addEventListener(type, handler) {
-          this[`on${type}`] = handler;
-        }
-      };
+      return createElementRecord(tag, htmlNamespace);
+    },
+    createElementNS(namespaceURI, tag) {
+      return createElementRecord(tag, namespaceURI);
     }
   };
 }
@@ -59,6 +67,23 @@ function createFakeDocument() {
 function flattenRendered(node) {
   if (!node || typeof node !== "object") return [];
   return [node, ...(node.children || []).flatMap(flattenRendered)];
+}
+
+function visibleSvgShapeNodes(svgNode) {
+  return flattenRendered(svgNode).filter((item) => ["path", "circle", "rect"].includes(item.localName));
+}
+
+function checkSvgIconNodes(nodes, selectorName, expectedCount) {
+  check(nodes.length === expectedCount, `${selectorName} renders ${expectedCount} icon nodes`);
+  nodes.forEach((svgNode, index) => {
+    check(svgNode.namespaceURI === svgNamespace, `${selectorName} ${index + 1} root uses SVG namespace`);
+    const shapes = visibleSvgShapeNodes(svgNode);
+    check(shapes.length > 0, `${selectorName} ${index + 1} contains path/circle/rect geometry`);
+    shapes.forEach((shape, shapeIndex) => {
+      check(shape.namespaceURI === svgNamespace, `${selectorName} ${index + 1} shape ${shapeIndex + 1} uses SVG namespace`);
+      check(Boolean(shape.attributes.d || shape.attributes.r || shape.attributes.width), `${selectorName} ${index + 1} shape ${shapeIndex + 1} has visible geometry attributes`);
+    });
+  });
 }
 
 function gitDiffNames(gitExecutable) {
@@ -262,6 +287,9 @@ check(shellNodes.some((item) => item.className === "ms-mobile-bottom-nav"), "Mis
 check(shellNodes.filter((item) => item.dataset?.msPrimaryNav === "true").length === 10, "desktop and mobile shell expose five destinations each");
 check(shellNodes.some((item) => item.textContent === "Command Doctor"), "brand wordmark is visible");
 check(shellNodes.some((item) => item.textContent === "Learn. Practise. Diagnose."), "new tagline is visible in shell");
+checkSvgIconNodes(shellNodes.filter((item) => item.className === "ms-brand-shield"), "brand icon", 2);
+checkSvgIconNodes(shellNodes.filter((item) => item.className === "ms-nav-icon"), "desktop navigation icons", 5);
+checkSvgIconNodes(shellNodes.filter((item) => item.className === "ms-mobile-nav-icon"), "mobile navigation icons", 5);
 
 const onboardingHome = views.renderMissionStudioHomeView(fakeDocument, {
   path: "",
@@ -272,6 +300,8 @@ const onboardingNodes = flattenRendered(onboardingHome);
 check(onboardingHome.className.includes("ms-onboarding"), "first-run Home renders the onboarding screen");
 check(onboardingNodes.filter((item) => item.dataset?.pathChoice).length === 3, "onboarding shows exactly three path choices");
 check(!onboardingNodes.some((item) => String(item.className || "").includes("ms-home-hero")), "normal Home dashboard is absent before path selection");
+checkSvgIconNodes(onboardingNodes.filter((item) => item.className === "ms-onboarding-network"), "onboarding network graphic", 1);
+checkSvgIconNodes(onboardingNodes.filter((item) => item.className === "ms-path-icon"), "onboarding path icons", 3);
 
 const renderedHome = views.renderMissionStudioHomeView(fakeDocument, {
   path: "zero",
@@ -313,6 +343,7 @@ check(homeNodes.some((item) => item.tagName === "IMG" && (item.alt || "").length
 check(homeNodes.some((item) => item.tagName === "FIGCAPTION" && (item.textContent || "").length >= 40), "mission visual has a structured text alternative");
 check(homeNodes.some((item) => item.attributes?.role === "progressbar" && item.attributes?.["aria-valuenow"] === "1"), "Home progress exposes accessible value semantics");
 check(homeNodes.filter((item) => item.dataset?.shortcutDestination).length === 4, "Home renders four technician shortcuts with destinations");
+checkSvgIconNodes(homeNodes.filter((item) => item.className === "ms-shortcut-icon"), "Home shortcut icons", 5);
 check(homeNodes.some((item) => item.textContent === "Why devices communicate"), "Home journey preview uses real Level 0 lesson data");
 
 for (const marker of [
