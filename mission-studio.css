@@ -1830,3 +1830,728 @@ body.mission-studio-shell {
     height: 22px;
   }
 }
+
+/* Stage 2: Course map and Level Overview only. */
+.ms-course-workspace,
+.ms-level-overview-workspace {
+  gap: 18px;
+}
+
+.ms-course-header,
+.ms-level-hero {
+  display: grid;
+  gap: 18px;
+  border: 1px solid var(--ms-border);
+  border-radius: var(--ms-radius-lg);
+  background: var(--ms-surface-elevated);
+  box-shadow: var(--ms-shadow-soft);
+}
+
+.ms-course-header {
+  grid-template-columns: minmax(0, 1fr) minmax(250px, 0.32fr);
+  align-items: center;
+  padding: 22px;
+}
+
+.ms-course-heading-copy,
+.ms-course-header-panel,
+.ms-level-card-main,
+.ms-level-overview-main,
+.ms-level-overview-rail,
+.ms-readiness-summary,
+.ms-level-visual-preview {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ms-course-heading-copy h2,
+.ms-level-hero-copy h2 {
+  margin: 0;
+  color: var(--ms-ink);
+  letter-spacing: 0;
+}
+
+.ms-course-heading-copy h2 {
+  font-size: clamp(2rem, 3vw, 3rem);
+  line-height: 1.04;
+}
+
+.ms-course-header-panel {
+  padding: 16px;
+  border: 1px solid #d8e4f0;
+  border-radius: var(--ms-radius-md);
+  background: #f7fbff;
+}
+
+.ms-course-phase-navigator {
+  display: none;
+}
+
+.ms-course-stage-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 252px) minmax(430px, 1fr) minmax(280px, 310px);
+  gap: 16px;
+  align-items: start;
+  min-width: 0;
+}
+
+.ms-phase-rail,
+.ms-phase-context,
+.ms-level-timeline {
+  min-width: 0;
+}
+
+.ms-phase-rail {
+  max-height: calc(100vh - 150px);
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--ms-border);
+  border-radius: var(--ms-radius-lg);
+  background: var(--ms-surface-elevated);
+  box-shadow: var(--ms-shadow-soft);
+}
+
+.ms-phase-rail-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 10px;
+  margin: 0 0 10px;
+}
+
+.ms-phase-rail ol,
+.ms-course-timeline-list,
+.ms-level-mission-sequence ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ms-phase-rail ol,
+.ms-course-timeline-list,
+.ms-level-mission-sequence ol {
+  display: grid;
+  gap: 10px;
+}
+
+.ms-phase-button {
+  width: 100%;
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: 28px auto minmax(0, 1fr);
+  gap: 3px 10px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: var(--ms-radius-md);
+  color: var(--ms-ink);
+  text-align: left;
+  background: transparent;
+}
+
+.ms-phase-button:hover,
+.ms-phase-button:focus-visible {
+  border-color: #78aef5;
+  background: #eef6ff;
+}
+
+.ms-phase-rail li.is-current .ms-phase-button {
+  border-color: #1664e8;
+  background: #eaf2ff;
+  box-shadow: inset 4px 0 0 #1664e8;
+}
+
+.ms-phase-icon {
+  grid-row: 1 / span 2;
+  width: 24px;
+  height: 24px;
+  color: #1664e8;
+}
+
+.ms-phase-number {
+  width: auto;
+  height: auto;
+  display: inline;
+  border-radius: 0;
+  background: transparent;
+  color: #0a5f57;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.ms-phase-button strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.94rem;
+  line-height: 1.15;
+}
+
+.ms-phase-status {
+  grid-column: 2 / 4;
+  color: var(--ms-muted);
+  font-size: 0.82rem;
+}
+
+.ms-level-timeline {
+  position: relative;
+  padding: 18px;
+  border: 1px solid var(--ms-border);
+  border-radius: var(--ms-radius-lg);
+  background: var(--ms-surface-elevated);
+  box-shadow: var(--ms-shadow-soft);
+}
+
+.ms-timeline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.ms-timeline-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.ms-timeline-alt {
+  max-width: 280px;
+  color: var(--ms-muted);
+  font-size: 0.82rem;
+}
+
+.ms-course-timeline-list {
+  position: relative;
+}
+
+.ms-course-timeline-list::before {
+  content: "";
+  position: absolute;
+  top: 28px;
+  bottom: 28px;
+  left: 19px;
+  width: 4px;
+  border-radius: 999px;
+  background: linear-gradient(#18a86b, #1664e8, #a7b5c5);
+}
+
+.ms-course-level-node {
+  position: relative;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.ms-level-connector {
+  display: none;
+}
+
+.ms-level-node-marker {
+  position: relative;
+  z-index: 1;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #b8c9dc;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #123568;
+  font-weight: 900;
+}
+
+.ms-course-level-node.is-current .ms-level-node-marker {
+  border-color: #1664e8;
+  background: #1664e8;
+  color: #ffffff;
+}
+
+.ms-course-level-node.is-available .ms-level-node-marker,
+.ms-course-level-node.is-completed .ms-level-node-marker {
+  border-color: #0c9b66;
+  background: #e8f8f0;
+  color: #086343;
+}
+
+.ms-course-level-node.is-locked .ms-level-node-marker {
+  border-color: #a7b5c5;
+  background: #eef2f6;
+  color: #5d6b7a;
+}
+
+.ms-course-level-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid #d8e4f0;
+  border-radius: var(--ms-radius-md);
+  background: #ffffff;
+}
+
+.ms-course-level-card.is-current {
+  border-color: #1664e8;
+  box-shadow: 0 0 0 3px rgba(22, 100, 232, 0.12);
+}
+
+.ms-course-level-card.is-locked,
+.ms-course-level-card.is-planned {
+  background: #f8fbfe;
+}
+
+.ms-level-card-title-row,
+.ms-level-hero-facts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.ms-course-level-card h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.ms-course-level-card p {
+  margin: 0;
+  color: var(--ms-muted);
+}
+
+.ms-current-label,
+.ms-lock-reason {
+  font-weight: 800;
+}
+
+.ms-current-label {
+  color: #0a5f57;
+}
+
+.ms-lock-reason {
+  color: #604100;
+}
+
+.ms-level-facts,
+.ms-readiness-summary dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.ms-level-facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ms-level-facts div,
+.ms-readiness-summary dl div {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border: 1px solid #e1e9f2;
+  border-radius: var(--ms-radius-sm);
+  background: #f8fbfe;
+}
+
+.ms-level-facts dt,
+.ms-readiness-summary dt {
+  color: var(--ms-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.ms-level-facts dd,
+.ms-readiness-summary dd {
+  margin: 0;
+  color: var(--ms-ink);
+  font-weight: 750;
+}
+
+.ms-pill-current,
+.ms-pill-action {
+  color: #084070;
+  background: #e6f1ff;
+}
+
+.ms-pill-locked {
+  color: #624600;
+  background: #fff3d8;
+}
+
+.ms-pill-planned {
+  color: #405164;
+  background: #edf2f7;
+}
+
+.ms-phase-context {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.ms-phase-context h3 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.ms-phase-visual {
+  margin: 0;
+}
+
+.ms-phase-visual img {
+  width: 100%;
+  display: block;
+  border-radius: var(--ms-radius-md);
+  border: 1px solid #d8e4f0;
+}
+
+.ms-phase-visual figcaption,
+.ms-level-hero-visual figcaption,
+.ms-level-visual-preview figcaption {
+  margin-top: 8px;
+  color: var(--ms-muted);
+  font-size: 0.84rem;
+}
+
+.ms-context-capabilities ul,
+.ms-level-outcomes ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.ms-context-next {
+  margin: 0;
+  color: #084070;
+  font-weight: 800;
+}
+
+.ms-course-legend {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ms-legend-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 8px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--ms-border);
+  border-radius: var(--ms-radius-md);
+  background: #ffffff;
+}
+
+.ms-legend-item > span {
+  grid-row: 1 / span 2;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #1664e8;
+}
+
+.ms-legend-item.is-available > span { background: #0c9b66; }
+.ms-legend-item.is-locked > span { background: #c78200; }
+.ms-legend-item.is-planned > span { background: #7d8b9b; }
+
+.ms-legend-item small {
+  color: var(--ms-muted);
+}
+
+.ms-level-hero {
+  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.74fr);
+  align-items: stretch;
+  padding: 22px;
+  overflow: hidden;
+}
+
+.ms-level-hero-copy {
+  display: grid;
+  align-content: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.ms-level-hero-copy h2 {
+  font-size: clamp(2rem, 3.2vw, 3.2rem);
+  line-height: 1.02;
+}
+
+.ms-level-progress {
+  width: 100%;
+  height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #dbe7f3;
+}
+
+.ms-level-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #0c9b66, #1664e8);
+}
+
+.ms-level-hero-visual {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  margin: 0;
+  min-width: 0;
+}
+
+.ms-level-hero-visual img {
+  width: 100%;
+  min-height: 230px;
+  object-fit: cover;
+  border: 1px solid #d8e4f0;
+  border-radius: var(--ms-radius-lg);
+  background: #071a3c;
+}
+
+.ms-level-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  gap: 16px;
+  align-items: start;
+}
+
+.ms-level-outcomes,
+.ms-level-mission-sequence,
+.ms-readiness-summary,
+.ms-level-visual-preview {
+  padding: 16px;
+}
+
+.ms-level-mission-sequence ol {
+  position: relative;
+}
+
+.ms-level-mission-sequence ol::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  bottom: 20px;
+  left: 17px;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(#0c9b66, #1664e8, #ccd7e4);
+}
+
+.ms-level-mission-sequence li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #e1e9f2;
+  border-radius: var(--ms-radius-md);
+  background: #ffffff;
+}
+
+.ms-sequence-marker {
+  position: relative;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #ccd7e4;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #123568;
+  font-weight: 900;
+}
+
+.ms-level-mission-sequence li.is-current {
+  border-color: #1664e8;
+  box-shadow: 0 0 0 3px rgba(22, 100, 232, 0.1);
+}
+
+.ms-level-mission-sequence li.is-current .ms-sequence-marker {
+  border-color: #1664e8;
+  background: #1664e8;
+  color: #ffffff;
+}
+
+.ms-level-mission-sequence li.is-complete .ms-sequence-marker {
+  border-color: #0c9b66;
+  background: #e8f8f0;
+  color: #086343;
+}
+
+.ms-level-mission-sequence p,
+.ms-level-mission-sequence small {
+  margin: 3px 0 0;
+  color: var(--ms-muted);
+}
+
+.ms-level-visual-preview figure {
+  margin: 0;
+}
+
+.ms-level-visual-preview figure img {
+  width: 100%;
+  display: block;
+  border-radius: var(--ms-radius-md);
+  border: 1px solid #d8e4f0;
+  background: #071a3c;
+}
+
+.ms-supporting-visuals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ms-supporting-visuals article {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ms-supporting-visuals img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--ms-radius-sm);
+  border: 1px solid #d8e4f0;
+}
+
+.ms-supporting-visuals span {
+  color: var(--ms-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.ms-planned-level-notice {
+  border-style: dashed;
+  background: #fffaf0;
+}
+
+@media (max-width: 1180px) {
+  .ms-course-stage-grid {
+    grid-template-columns: minmax(210px, 240px) minmax(0, 1fr);
+  }
+
+  .ms-phase-context {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 0.8fr) minmax(280px, 0.6fr);
+    align-items: center;
+  }
+
+  .ms-phase-context .ms-kicker,
+  .ms-phase-context h3,
+  .ms-phase-context p,
+  .ms-context-capabilities,
+  .ms-phase-context .ms-fact-row,
+  .ms-context-next {
+    grid-column: 1;
+  }
+
+  .ms-phase-visual {
+    grid-column: 2;
+    grid-row: 1 / span 6;
+  }
+}
+
+@media (max-width: 720px) {
+  .ms-course-header,
+  .ms-level-hero,
+  .ms-level-overview-grid,
+  .ms-course-stage-grid,
+  .ms-phase-context {
+    grid-template-columns: 1fr;
+  }
+
+  .ms-course-header,
+  .ms-level-hero,
+  .ms-level-timeline,
+  .ms-phase-context {
+    padding: 14px;
+    border-radius: var(--ms-radius-md);
+  }
+
+  .ms-course-heading-copy h2,
+  .ms-level-hero-copy h2 {
+    font-size: 1.9rem;
+  }
+
+  .ms-course-phase-navigator {
+    display: block;
+  }
+
+  .ms-mobile-phase-selector {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid var(--ms-border);
+    border-radius: var(--ms-radius-md);
+    background: #ffffff;
+    font-weight: 850;
+  }
+
+  .ms-mobile-phase-selector select {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 12px;
+    border: 1px solid #b8c9dc;
+    border-radius: var(--ms-radius-sm);
+    background: #ffffff;
+    color: var(--ms-ink);
+    font: inherit;
+  }
+
+  .ms-phase-rail {
+    display: none;
+  }
+
+  .ms-course-stage-grid {
+    gap: 12px;
+  }
+
+  .ms-timeline-header {
+    display: grid;
+  }
+
+  .ms-timeline-alt {
+    max-width: none;
+  }
+
+  .ms-course-level-card,
+  .ms-level-mission-sequence li {
+    grid-template-columns: 1fr;
+  }
+
+  .ms-level-facts,
+  .ms-course-legend,
+  .ms-supporting-visuals {
+    grid-template-columns: 1fr;
+  }
+
+  .ms-course-timeline-list::before {
+    left: 18px;
+  }
+
+  .ms-course-level-node {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .ms-course-level-card .ms-button,
+  .ms-level-mission-sequence .ms-button {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .ms-phase-visual {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .ms-level-hero-visual img {
+    min-height: 200px;
+  }
+}

@@ -102,72 +102,11 @@
   }
 
   function renderCourseMapView(documentRef, model = {}) {
-    const root = el(documentRef, "section", "ms-screen ms-course");
-    root.append(sectionHeader(documentRef, {
-      id: "courseTitle",
-      kicker: "Course",
-      title: "Switching Fundamentals",
-      body: "Move through phases, inspect level status, and keep planned content clearly separated from authored lessons."
-    }));
-    const layout = el(documentRef, "div", "ms-course-layout");
-    layout.append(renderDescription(documentRef, components().CoursePhaseRail({
-      phases: model.phases || [],
-      currentPhaseId: model.currentPhaseId
-    })));
-    layout.append(renderDescription(documentRef, components().CourseLevelTimeline({ levels: model.levels || [] })));
-    layout.append(renderDescription(documentRef, components().PhaseContextPanel(model.phaseContext)));
-    root.append(layout);
-    return root;
+    return renderDescription(documentRef, components().CourseWorkspace(model));
   }
 
   function renderLevelOverviewView(documentRef, model = {}) {
-    const root = el(documentRef, "section", "ms-screen ms-level-overview");
-    root.append(sectionHeader(documentRef, {
-      id: "courseTitle",
-      kicker: model.phaseLabel || "Level overview",
-      title: model.title || "Level",
-      body: model.purpose || "Preview this level before opening the lesson sequence."
-    }));
-    const hero = el(documentRef, "section", "ms-level-overview-grid");
-    const details = el(documentRef, "article", "ms-card ms-level-details");
-    details.append(facts(documentRef, model.facts || []));
-    const outcomes = el(documentRef, "div", "ms-outcome-list");
-    outcomes.append(el(documentRef, "h3", "", "Learning outcomes"));
-    const outcomeList = el(documentRef, "ul");
-    (model.outcomes || []).forEach((item) => outcomeList.append(el(documentRef, "li", "", item)));
-    outcomes.append(outcomeList);
-    details.append(outcomes);
-    const actions = el(documentRef, "div", "ms-action-row");
-    actions.append(button(documentRef, "Back to Course", "ms-button ms-button-secondary", model.onBack));
-    if (model.primaryActionLabel) actions.append(button(documentRef, model.primaryActionLabel, "ms-button ms-button-primary", model.onPrimaryAction));
-    details.append(actions);
-    hero.append(details);
-    const sequence = el(documentRef, "section", "ms-card ms-lesson-sequence");
-    sequence.append(el(documentRef, "div", "ms-kicker", model.sequenceKicker || "Lesson sequence"));
-    sequence.append(el(documentRef, "h3", "", model.sequenceTitle || "Connected lessons"));
-    (model.sequence || []).forEach((item, index) => {
-      const row = el(documentRef, "article", "ms-sequence-row");
-      row.append(el(documentRef, "span", "ms-step-number", String(index + 1)));
-      row.append(el(documentRef, "div", "", ""));
-      row.lastElementChild.append(el(documentRef, "strong", "", item.title));
-      row.lastElementChild.append(el(documentRef, "p", "", item.body));
-      sequence.append(row);
-    });
-    hero.append(sequence);
-    root.append(hero);
-    if (model.previewAssets?.length) {
-      const previews = el(documentRef, "section", "ms-switch-preview-panel switch-preview-panel");
-      previews.append(el(documentRef, "div", "ms-kicker", "Visual contract preview"));
-      previews.append(el(documentRef, "h3", "", "Future switch lesson visuals"));
-      previews.append(el(documentRef, "p", "ms-planned-text", "These generic switch previews define a visual standard only. They do not mark this level as authored."));
-      const previewGrid = el(documentRef, "div", "ms-preview-grid");
-      model.previewAssets.forEach((asset) => previewGrid.append(renderDescription(documentRef, components().VisualLearningPanel(asset))));
-      previews.append(previewGrid);
-      root.append(previews);
-    } else if (model.plannedNotice) {
-      root.append(renderDescription(documentRef, components().PlannedContentNotice(model.plannedNotice)));
-    }
-    return root;
+    return renderDescription(documentRef, components().LevelOverviewWorkspace(model));
   }
 
   function renderLessonView(documentRef, model = {}) {

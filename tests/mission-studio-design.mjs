@@ -133,6 +133,8 @@ const views = loadBrowserModule(viewsSource, "src/learning-experience/mission-st
   CommandDoctorMissionStudioComponents: components,
   CommandDoctorMissionStudioIcons: icons
 });
+const curriculum = await readJson("data/curriculum/complete-networking-curriculum.json");
+const levelsById = new Map(curriculum.levels.map((level) => [level.level_id, level]));
 
 check(packageJson.scripts?.["test:mission-studio"] === "node tests/mission-studio-design.mjs && node tests/mission-studio-review-regressions.mjs", "Mission Studio test script runs design and review regression guards");
 check(packageJson.scripts?.["review:mission-studio"] === "node tools/browser-review/mission-studio-browser-review.mjs --repeat 2", "Mission Studio browser review script is registered");
@@ -200,9 +202,25 @@ check(JSON.stringify(progressDescription).includes("\"aria-valuenow\":\"42\""), 
   "ContinueMissionCard",
   "DiagnosticShortcutCard",
   "RecentActivityStrip",
+  "CourseWorkspace",
+  "CourseHeader",
+  "CoursePhaseNavigator",
   "CoursePhaseRail",
+  "CoursePhaseSelectorMobile",
+  "CourseTimeline",
+  "CourseLevelNode",
+  "CourseLevelCard",
   "CourseLevelTimeline",
   "PhaseContextPanel",
+  "CourseLegend",
+  "LevelOverviewWorkspace",
+  "LevelOverviewHero",
+  "LevelOutcomeList",
+  "LevelMissionSequence",
+  "LevelPrerequisiteSummary",
+  "LevelVisualPreview",
+  "PlannedLevelNotice",
+  "AccessibleCourseStatus",
   "LevelOverviewHeader",
   "LessonStepRail",
   "LessonContentStage",
@@ -215,9 +233,24 @@ check(JSON.stringify(progressDescription).includes("\"aria-valuenow\":\"42\""), 
   "appShellState",
   "recommendedActionCard",
   "continueMissionCard",
+  "courseWorkspace",
+  "courseHeader",
+  "coursePhaseNavigator",
   "coursePhaseRail",
+  "courseTimeline",
+  "courseLevelNode",
+  "courseLevelCard",
   "levelCard",
   "phaseContextPanel",
+  "courseLegend",
+  "levelOverviewWorkspace",
+  "levelOverviewHero",
+  "levelOutcomeList",
+  "levelMissionSequence",
+  "levelPrerequisiteSummary",
+  "levelVisualPreview",
+  "plannedLevelNotice",
+  "accessibleCourseStatus",
   "lessonTimeline",
   "lessonStepPanel",
   "visualLearningPanel",
@@ -315,6 +348,197 @@ check(homeNodes.some((item) => item.attributes?.role === "progressbar" && item.a
 check(homeNodes.filter((item) => item.dataset?.shortcutDestination).length === 4, "Home renders four technician shortcuts with destinations");
 check(homeNodes.some((item) => item.textContent === "Why devices communicate"), "Home journey preview uses real Level 0 lesson data");
 
+const phaseModels = curriculum.phases.map((phase) => ({
+  ...phase,
+  state: phase.phase_id === "phase_01" ? "current" : "planned",
+  statusText: phase.status.replace(/_/g, " "),
+  onSelect: () => true
+}));
+const courseModelForPhase = (phaseNumber) => {
+  const phase = curriculum.phases.find((item) => item.phase_number === phaseNumber);
+  const phaseLevels = (phase.level_ids || []).map((id) => levelsById.get(id)).filter(Boolean);
+  return {
+    currentPhaseId: phase.phase_id,
+    onSelectPhaseId: () => true,
+    header: {
+      phase: { ...phase, state: "current" },
+      phaseLabel: `Phase ${phase.phase_number}`,
+      title: phase.title,
+      purpose: phase.purpose,
+      statusText: phase.status.replace(/_/g, " "),
+      progressLabel: phaseNumber === 1 ? "0/8 Level 0 lessons complete" : "Planned outline preview",
+      actionLabel: "Preview phase",
+      onAction: () => true
+    },
+    phases: phaseModels,
+    levels: phaseLevels.map((level, index) => ({
+      level,
+      current: index === 0,
+      state: level.level_id === "level_00" ? "available" : index === 0 ? "planned" : "locked",
+      title: level.title,
+      purpose: level.plain_language_summary,
+      statusText: level.level_id === "level_00" ? "Current authored level" : index === 0 ? "Current planned preview" : "Prerequisite first",
+      actionLabel: level.level_id === "level_00" ? "Continue" : index === 0 ? "Preview" : "Review prerequisite",
+      lockReason: index > 0 ? "Requires prior level review" : "",
+      facts: [
+        { label: "Duration", value: `${level.estimated_learning_hours} hours` },
+        { label: "Prerequisite", value: level.prerequisite_level_ids?.length ? "Requires prior level review" : "No prerequisites" },
+        { label: "Structure", value: level.level_id === "level_00" ? "8 authored lessons" : `${(level.modules || []).length} planned modules` }
+      ],
+      onAction: () => true
+    })),
+    timelineSummary: `${phase.title} progression`,
+    phaseContext: {
+      phase,
+      title: `Phase ${phase.phase_number} context`,
+      body: phase.purpose,
+      capabilities: phaseLevels.slice(0, 3).map((level) => level.title),
+      facts: [{ value: `${phaseLevels.length} levels` }, { value: "Detailed command mapping will be reviewed before authoring" }],
+      suggestedAction: "Suggested next action: preview only.",
+      visual: {
+        src: "src/learning-experience/assets/mission-studio-phase-context.svg",
+        alt: `Original phase visual for ${phase.title}.`,
+        text: "Endpoint, switch, gateway, and service path text alternative."
+      }
+    },
+    legend: {
+      items: [
+        { label: "Current", state: "current" },
+        { label: "Available", state: "available" },
+        { label: "Locked", state: "locked" },
+        { label: "Planned", state: "planned" }
+      ]
+    },
+    accessibleStatus: `Course map loaded for Phase ${phase.phase_number}.`
+  };
+};
+const renderedPhase1Course = views.renderCourseMapView(fakeDocument, courseModelForPhase(1));
+const renderedPhase5Course = views.renderCourseMapView(fakeDocument, courseModelForPhase(5));
+const renderedPhase10Course = views.renderCourseMapView(fakeDocument, courseModelForPhase(10));
+const phase1Nodes = flattenRendered(renderedPhase1Course);
+const phase5Nodes = flattenRendered(renderedPhase5Course);
+const phase10Nodes = flattenRendered(renderedPhase10Course);
+const phase1Text = phase1Nodes.map((item) => item.textContent || "").join(" ");
+const phase5Text = phase5Nodes.map((item) => item.textContent || "").join(" ");
+const phase10Text = phase10Nodes.map((item) => item.textContent || "").join(" ");
+check(phase1Text.includes("ABSOLUTE BEGINNER"), "Course title for Phase 1 comes from selected phase data");
+check(phase5Text.includes("SECURITY"), "Course title for Phase 5 comes from selected phase data");
+check(phase10Text.includes("ADVANCED NETWORKING"), "Course title for Phase 10 comes from selected phase data");
+check(!phase1Text.includes("Switching Fundamentals"), "Course view has no hard-coded unrelated title");
+check(phase1Nodes.filter((item) => item.dataset?.phaseId).length === 10, "all ten phases render as reachable phase buttons");
+check(phase1Nodes.filter((item) => item.tagName === "OPTION").length === 10, "mobile phase selector reaches all ten phases");
+check(phase1Nodes.some((item) => item.attributes?.["aria-current"] === "step"), "Course exposes aria-current for current phase or level");
+check(phase1Nodes.some((item) => String(item.className || "").includes("ms-course-timeline-list")), "Course timeline uses connected progression structure");
+for (const stateName of ["current", "available", "locked", "planned"]) {
+  check(phase1Text.includes(stateName[0].toUpperCase() + stateName.slice(1)) || phase1Nodes.some((item) => String(item.className || "").includes(`is-${stateName}`)), `Course distinguishes ${stateName} state`);
+}
+check(!/level_\d\d/.test(phase1Text + phase5Text + phase10Text), "Course rendered copy suppresses raw internal level IDs");
+check(!/0 commands|0 mapped commands/i.test(phase1Text + phase5Text + phase10Text), "Course rendered copy suppresses zero-count command copy");
+check(phase5Nodes.some((item) => item.dataset?.phaseVisual === "true"), "Phase context includes a local visual");
+check(phase5Text.includes("Detailed command mapping will be reviewed before authoring"), "Phase context keeps planned command review honest");
+
+const level0Overview = views.renderLevelOverviewView(fakeDocument, {
+  isLevel0: true,
+  hero: {
+    phaseLabel: "Phase 1 - ABSOLUTE BEGINNER",
+    levelLabel: "Level 0",
+    title: "Welcome to Networking",
+    purpose: "Beginners need a safe mental model before command syntax.",
+    duration: "1.5 hours",
+    percent: 1,
+    progressLabel: "0/8 lessons complete",
+    actionLabel: "Start Level 0",
+    onAction: () => true,
+    secondaryActionLabel: "Back to Course",
+    onSecondaryAction: () => true,
+    visual: {
+      src: "data/curriculum/level0-network-shared-service.svg",
+      alt: "Level 0 visual showing devices connected to a shared service.",
+      text: "A local visual explains devices, links, and a shared service."
+    }
+  },
+  outcomes: model.createLevel0Lessons().slice(0, 4).map((lesson) => lesson.objective),
+  sequence: {
+    title: "Level 0 connected beginner lessons",
+    currentLessonId: "level00_what_is_a_network",
+    actionLabel: "Continue",
+    onAction: () => true,
+    lessons: model.createLevel0Lessons().map((lesson, index) => ({
+      id: lesson.lesson_id,
+      title: lesson.title,
+      body: lesson.objective,
+      current: index === 0,
+      state: index === 0 ? "current" : "upcoming",
+      statusText: index === 0 ? "Current step: Mission" : "Upcoming"
+    }))
+  },
+  readiness: {
+    prerequisite: "No prerequisites",
+    checkpoint: "Checkpoint appears in the final Level 0 lesson",
+    confidence: "Not rated yet",
+    mastery: "Level 0 records concept orientation only. It does not award command mastery."
+  },
+  visuals: {
+    featured: registry.assets.find((asset) => asset.asset_id === "level0_network_shared_service"),
+    previews: registry.assets.filter((asset) => asset.status === "authored").slice(1, 4)
+  }
+});
+const level0Nodes = flattenRendered(level0Overview);
+const level0Text = level0Nodes.map((item) => item.textContent || "").join(" ");
+check(level0Nodes.some((item) => item.dataset?.component === "LevelOverviewHero"), "Level 0 overview has a premium hero component");
+check(level0Nodes.filter((item) => String(item.className || "").includes("is-current")).length >= 1, "Level 0 sequence marks the current lesson");
+check(level0Nodes.filter((item) => item.tagName === "LI" && /level/i.test(String(item.className || "")) === false).length >= 8, "Level 0 overview renders eight lesson sequence rows");
+check(level0Nodes.some((item) => item.attributes?.role === "progressbar" && item.attributes?.["aria-valuenow"] === "1"), "Level 0 progress exposes accessible value semantics");
+check(level0Text.includes("does not award command mastery"), "Level 0 overview states command mastery is not awarded");
+check(level0Nodes.some((item) => item.dataset?.levelVisual === "featured"), "Level 0 overview uses a featured local visual");
+
+const plannedOverview = views.renderLevelOverviewView(fakeDocument, {
+  isLevel0: false,
+  hero: {
+    phaseLabel: "Phase 1 - ABSOLUTE BEGINNER",
+    levelLabel: "Level 1",
+    title: "Network Devices and Connections",
+    purpose: "A planned subject-specific outline.",
+    duration: "3 hours",
+    progressLabel: "Planned preview",
+    planned: true,
+    secondaryActionLabel: "Back to Course",
+    onSecondaryAction: () => true,
+    visual: {
+      src: "data/curriculum/switch-preview-24-port-front.svg",
+      alt: "Preview-only generic switch visual.",
+      text: "Preview contract visual only; it does not claim authored lessons."
+    }
+  },
+  outcomes: ["Identify network devices.", "Explain connection roles.", "Review command placement before authoring."],
+  sequence: {
+    title: "Planned modules",
+    lessons: [{ id: "planned", title: "Device roles", body: "Command lessons are planned.", state: "planned", statusText: "Planned" }]
+  },
+  readiness: {
+    prerequisite: "Requires Level 0 - Welcome to Networking",
+    checkpoint: "Checkpoint design is planned with the lesson authoring pass",
+    confidence: "Not yet available for mastery",
+    mastery: "Not yet available for mastery. Detailed command mapping will be reviewed before authoring."
+  },
+  visuals: {
+    featured: registry.assets.find((asset) => asset.status === "preview_contract"),
+    previews: registry.assets.filter((asset) => asset.status === "preview_contract").slice(1, 4)
+  },
+  plannedNotice: {
+    title: "Planned level - preview only",
+    body: "Detailed command placement will be reviewed before authoring. This level cannot start authored content, award completion, or grant command mastery yet.",
+    actionLabel: "Back to Course",
+    onAction: () => true
+  }
+});
+const plannedNodes = flattenRendered(plannedOverview);
+const plannedText = plannedNodes.map((item) => item.textContent || "").join(" ");
+check(plannedNodes.some((item) => item.dataset?.component === "PlannedLevelNotice"), "planned level overview renders a strong planned notice");
+check(plannedText.includes("Detailed command placement will be reviewed before authoring"), "planned level overview includes honest command-placement review copy");
+check(!plannedText.includes("Start Level"), "planned level overview has no Start action");
+check(plannedText.includes("Preview contract visual only") || plannedText.includes("preview"), "planned Level 1 uses preview-only visual language");
+
 for (const marker of [
   "--mission-sidebar-width",
   "--ms-sidebar-width",
@@ -327,6 +551,14 @@ for (const marker of [
   "@media (max-width: 720px)",
   ".ms-home-grid",
   ".ms-continue-card",
+  ".ms-course-stage-grid",
+  ".ms-mobile-phase-selector",
+  ".ms-course-timeline-list::before",
+  ".ms-course-level-card",
+  ".ms-course-legend",
+  ".ms-level-hero",
+  ".ms-level-mission-sequence",
+  ".ms-planned-level-notice",
   ".ms-course-layout",
   ".ms-phase-rail",
   ".ms-level-timeline",
@@ -341,6 +573,12 @@ for (const marker of [
 }
 check(!/home-hero::after/.test(css), "Home has no empty decorative navy rectangle");
 check(!/@import\s+url|url\(["']?https?:|font-face/i.test(css), "CSS does not import remote fonts or images");
+const phaseVisualSource = await read("src/learning-experience/assets/mission-studio-phase-context.svg");
+check(phaseVisualSource.includes('"rights_status": "original_command_doctor_asset"'), "Stage 2 phase visual has rights metadata");
+check(phaseVisualSource.includes('"remote_dependencies": []'), "Stage 2 phase visual declares no remote dependencies");
+check(!/<script|(?:href|src)=["']https?:|@import\s+url/i.test(phaseVisualSource), "Stage 2 phase visual has no remote references or scripts");
+check(appSource.includes("friendlyLevelNameFor") && appSource.includes("Requires Level"), "Course prerequisites use friendly level names");
+check(!appSource.includes("Switching Fundamentals"), "Course integration does not hard-code the rejected course title");
 
 [
   "Approved Mission Studio Direction",
@@ -487,10 +725,25 @@ for (const marker of [
   "desktop-home-empty-activity",
   "desktop-navigation-focus",
   "desktop-1280-home-zero",
+  "desktop-course-phase-1",
+  "desktop-course-phase-5",
+  "desktop-course-phase-10",
+  "desktop-level-0-overview",
+  "desktop-level-1-planned-overview",
+  "desktop-current-level-focus",
+  "desktop-locked-planned-state-comparison",
+  "desktop-1280-course-phase-1",
+  "desktop-1280-level-0-overview",
   "mobile-onboarding",
   "mobile-home-zero",
   "mobile-home-bottom-scroll",
-  "mobile-navigation-focus"
+  "mobile-navigation-focus",
+  "mobile-course-phase-1",
+  "mobile-course-phase-5",
+  "mobile-course-phase-10",
+  "mobile-level-0-overview",
+  "mobile-level-1-planned-overview",
+  "mobile-bottom-action-visibility"
 ]) {
   check(browserReviewSource.includes(marker), `browser review runner includes ${marker}`);
 }
@@ -501,7 +754,10 @@ for (const failureId of [
   "desktop mission hero missing visual",
   "mobile home partial viewport",
   "mobile bottom navigation overlap",
-  "screenshot metric mismatch"
+  "screenshot metric mismatch",
+  "course phase title mismatch",
+  "planned level false start",
+  "stage 1 home regression"
 ]) {
   check(browserReviewSource.includes(failureId) || failureId === "screenshot metric mismatch", `Review screenshot guard exists: ${failureId}`);
 }

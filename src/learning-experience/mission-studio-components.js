@@ -382,52 +382,345 @@
     return HomeRecentActivity({ items });
   }
 
+  function courseStatusTone(kind = "planned") {
+    return {
+      completed: "success",
+      current: "current",
+      available: "action",
+      locked: "locked",
+      planned: "planned"
+    }[kind] || "planned";
+  }
+
+  function CourseWorkspace(model = {}) {
+    return node("section", {
+      className: "ms-screen ms-course ms-course-workspace",
+      dataset: { component: "CourseWorkspace", activePhase: model.currentPhaseId || "" }
+    }, [
+      CourseHeader(model.header || {}),
+      CoursePhaseNavigator({
+        phases: model.phases || [],
+        currentPhaseId: model.currentPhaseId,
+        onSelectPhaseId: model.onSelectPhaseId
+      }),
+      node("div", { className: "ms-course-stage-grid" }, [
+        CoursePhaseRail({
+          phases: model.phases || [],
+          currentPhaseId: model.currentPhaseId
+        }),
+        CourseTimeline({
+          levels: model.levels || [],
+          summary: model.timelineSummary
+        }),
+        PhaseContextPanel(model.phaseContext || {})
+      ]),
+      CourseLegend(model.legend || {}),
+      AccessibleCourseStatus(model.accessibleStatus || "Course map loaded.")
+    ]);
+  }
+
+  function CourseHeader({ phase, phaseLabel, title, purpose, statusText, progressLabel, actionLabel, onAction } = {}) {
+    const resolvedTitle = title || phase?.title || "Course phase";
+    return node("header", { className: "ms-course-header", dataset: { component: "CourseHeader" } }, [
+      node("div", { className: "ms-course-heading-copy" }, [
+        node("p", { className: "ms-kicker", text: phaseLabel || `Phase ${phase?.phase_number ?? ""}`.trim() }),
+        node("h2", { text: resolvedTitle, tabIndex: -1, attrs: { id: "courseTitle" } }),
+        node("p", { className: "ms-screen-intro", text: purpose || phase?.purpose || "Move through the selected phase with authored work separated from planned previews." })
+      ]),
+      node("div", { className: "ms-course-header-panel" }, [
+        StatusPill(statusText || "Planned outline", courseStatusTone(phase?.state)),
+        node("span", { text: progressLabel || "Preview the current phase" }),
+        actionLabel ? ActionButton(actionLabel, onAction, "primary", actionLabel, { icon: "course" }) : null
+      ])
+    ]);
+  }
+
+  function CoursePhaseNavigator({ phases = [], currentPhaseId = "", onSelectPhaseId } = {}) {
+    return node("section", {
+      className: "ms-course-phase-navigator",
+      ariaLabel: "Course phase controls",
+      dataset: { component: "CoursePhaseNavigator" }
+    }, [
+      CoursePhaseSelectorMobile({ phases, currentPhaseId, onSelectPhaseId })
+    ]);
+  }
+
+  function CoursePhaseSelectorMobile({ phases = [], currentPhaseId = "", onSelectPhaseId } = {}) {
+    return node("label", { className: "ms-mobile-phase-selector", dataset: { component: "CoursePhaseSelectorMobile" } }, [
+      node("span", { text: "Phase" }),
+      node("select", {
+        value: currentPhaseId,
+        ariaLabel: "Choose course phase",
+        onChange: (event) => {
+          if (typeof onSelectPhaseId === "function") onSelectPhaseId(event.target.value);
+        }
+      }, phases.map((phase) => node("option", {
+        value: phase.phase_id || "",
+        selected: phase.phase_id === currentPhaseId,
+        text: `Phase ${phase.phase_number ?? ""} - ${phase.title || "Course phase"}`
+      })))
+    ]);
+  }
+
   function CoursePhaseRail({ phases = [], currentPhaseId = "" } = {}) {
-    return node("nav", { className: "ms-phase-rail", ariaLabel: "Course phases" }, [
+    return node("nav", { className: "ms-phase-rail", ariaLabel: "Course phases", dataset: { component: "CoursePhaseRail" } }, [
+      node("div", { className: "ms-phase-rail-head" }, [
+        node("p", { className: "ms-kicker", text: "Course map" }),
+        node("strong", { text: "Ten phases" })
+      ]),
       node("ol", {}, phases.map((phase) => {
         const active = phase.phase_id === currentPhaseId;
-        return node("li", { className: active ? "is-current" : "" }, [
+        const state = phase.state || "planned";
+        return node("li", { className: `is-${state}${active ? " is-current" : ""}` }, [
           node("button", {
             className: "ms-phase-button",
             type: "button",
             ariaCurrent: active ? "step" : "",
             onClick: phase.onSelect,
-            dataset: { phaseId: phase.phase_id || "" }
+            dataset: { phaseId: phase.phase_id || "", phaseState: state }
           }, [
-            node("span", { className: "ms-phase-number", text: String(phase.phase_number ?? phase.number ?? "") }),
+            icon(phase.icon || "course", "ms-phase-icon"),
+            node("span", { className: "ms-phase-number", text: `P${phase.phase_number ?? ""}` }),
             node("strong", { text: phase.title || "Phase" }),
-            node("span", { text: phase.statusText || phase.status || "planned" })
+            node("span", { className: "ms-phase-status", text: phase.statusText || "Planned" })
           ])
         ]);
       }))
     ]);
   }
 
-  function CourseLevelTimeline({ levels = [] } = {}) {
-    return node("section", { className: "ms-level-timeline", ariaLabel: "Course levels" }, levels.map((level) => LevelOverviewHeader(level)));
-  }
-
-  function LevelOverviewHeader({ level, statusText, actionLabel, onAction, current = false, facts = [] } = {}) {
-    const item = level || {};
-    return node("article", { className: current ? "ms-level-row is-current" : "ms-level-row" }, [
-      node("span", { className: "ms-level-number", text: String(item.level_number ?? 0) }),
-      node("div", { className: "ms-level-main" }, [
-        node("span", { className: "ms-kicker", text: statusText || item.content_status || "planned" }),
-        node("h3", { text: item.title || "Planned level" }),
-        node("p", { text: item.plain_language_summary || item.why_it_matters || item.purpose || "Previewed until complete lesson evidence exists." }),
-        node("div", { className: "ms-fact-row" }, facts.map((fact) => StatusPill(fact)))
+  function CourseTimeline({ levels = [], summary = "Connected level progression" } = {}) {
+    return node("section", {
+      className: "ms-level-timeline",
+      ariaLabel: "Course levels",
+      dataset: { component: "CourseTimeline" }
+    }, [
+      node("div", { className: "ms-timeline-header" }, [
+        node("div", {}, [
+          node("p", { className: "ms-kicker", text: "Level timeline" }),
+          node("h3", { text: summary })
+        ]),
+        node("span", { className: "ms-timeline-alt", text: "Text alternative: levels are listed in order with status, prerequisite, duration, and one safe action." })
       ]),
-      ActionButton(actionLabel || "Preview plan", onAction, current ? "primary" : "secondary")
+      node("ol", { className: "ms-course-timeline-list" }, levels.map((level, index) => CourseLevelNode({ ...level, index })))
     ]);
   }
 
-  function PhaseContextPanel({ phase, title = "About this phase", body, facts = [] } = {}) {
-    return node("aside", { className: "ms-card ms-phase-context", ariaLabel: title }, [
+  function CourseLevelNode(model = {}) {
+    const state = model.state || "planned";
+    const current = Boolean(model.current);
+    return node("li", {
+      className: `ms-course-level-node is-${state}${current ? " is-current" : ""}`,
+      ariaCurrent: current ? "step" : "",
+      dataset: { component: "CourseLevelNode", levelState: state }
+    }, [
+      node("span", { className: "ms-level-connector", ariaHidden: "true" }),
+      node("span", { className: "ms-level-node-marker", text: String(model.level?.level_number ?? model.number ?? 0) }),
+      CourseLevelCard(model)
+    ]);
+  }
+
+  function CourseLevelCard({ level, title, purpose, statusText, state = "planned", current = false, actionLabel, onAction, facts = [], lockReason } = {}) {
+    const item = level || {};
+    const status = statusText || "Planned preview";
+    return node("article", {
+      className: `ms-course-level-card is-${state}${current ? " is-current" : ""}`,
+      dataset: { component: "CourseLevelCard", levelState: state, levelNumber: String(item.level_number ?? "") }
+    }, [
+      node("div", { className: "ms-level-card-main" }, [
+        node("div", { className: "ms-level-card-title-row" }, [
+          StatusPill(status, courseStatusTone(state)),
+          current ? node("span", { className: "ms-current-label", text: "Current" }) : null
+        ]),
+        node("h3", { text: title || item.title || "Planned level" }),
+        node("p", { text: purpose || item.plain_language_summary || item.why_it_matters || "Previewed until complete lesson evidence exists." }),
+        lockReason ? node("p", { className: "ms-lock-reason", text: lockReason }) : null,
+        node("dl", { className: "ms-level-facts" }, facts.map((fact) => [
+          node("div", {}, [
+            node("dt", { text: fact.label || "Detail" }),
+            node("dd", { text: fact.value || fact })
+          ])
+        ]).flat())
+      ]),
+      ActionButton(actionLabel || "Preview", onAction, state === "current" || current ? "primary" : "secondary")
+    ]);
+  }
+
+  function PhaseContextPanel({ phase, title = "About this phase", body, facts = [], capabilities = [], suggestedAction = "", visual = {} } = {}) {
+    return node("aside", { className: "ms-card ms-phase-context", ariaLabel: title, dataset: { component: "PhaseContextPanel" } }, [
       node("div", { className: "ms-kicker", text: title }),
       node("h3", { text: phase?.title || "Phase context" }),
-      node("p", { text: body || phase?.purpose || "This phase is visible for planning until every lesson is authored and verified." }),
-      node("div", { className: "ms-fact-row" }, facts.map((fact) => StatusPill(fact)))
+      node("p", { text: body || phase?.purpose || "This phase remains visible for planning until every lesson is authored and verified." }),
+      node("figure", { className: "ms-phase-visual", dataset: { phaseVisual: "true" } }, [
+        node("img", {
+          src: visual.src || "src/learning-experience/assets/mission-studio-phase-context.svg",
+          alt: visual.alt || "Original Command Doctor network-path illustration for the selected phase.",
+          loading: "lazy",
+          decoding: "async"
+        }),
+        node("figcaption", { text: visual.text || "A simple endpoint, switch, gateway, and service path anchors the selected phase context." })
+      ]),
+      capabilities.length ? node("div", { className: "ms-context-capabilities" }, [
+        node("strong", { text: "Learner will understand" }),
+        node("ul", {}, capabilities.slice(0, 4).map((item) => node("li", { text: item })))
+      ]) : null,
+      node("div", { className: "ms-fact-row" }, facts.map((fact) => StatusPill(fact.value || fact, fact.tone || "neutral"))),
+      suggestedAction ? node("p", { className: "ms-context-next", text: suggestedAction }) : null
     ]);
+  }
+
+  function CourseLegend({ items = [] } = {}) {
+    const values = items.length ? items : [
+      { label: "Current", state: "current" },
+      { label: "Available", state: "available" },
+      { label: "Locked", state: "locked" },
+      { label: "Planned", state: "planned" }
+    ];
+    return node("section", { className: "ms-course-legend", ariaLabel: "Course status legend", dataset: { component: "CourseLegend" } }, values.map((item) => node("span", { className: `ms-legend-item is-${item.state}` }, [
+      node("span", { ariaHidden: "true" }),
+      node("strong", { text: item.label }),
+      item.description ? node("small", { text: item.description }) : null
+    ])));
+  }
+
+  function LevelOverviewWorkspace(model = {}) {
+    return node("section", {
+      className: `ms-screen ms-level-overview ms-level-overview-workspace ${model.isLevel0 ? "is-authored-level" : "is-planned-level"}`,
+      dataset: { component: "LevelOverviewWorkspace", levelStatus: model.isLevel0 ? "authored" : "planned" }
+    }, [
+      LevelOverviewHero(model.hero || {}),
+      node("div", { className: "ms-level-overview-grid" }, [
+        node("div", { className: "ms-level-overview-main" }, [
+          LevelOutcomeList({ outcomes: model.outcomes || [], planned: !model.isLevel0 }),
+          LevelMissionSequence(model.sequence || {})
+        ]),
+        node("aside", { className: "ms-level-overview-rail" }, [
+          LevelPrerequisiteSummary(model.readiness || {}),
+          LevelVisualPreview(model.visuals || {}),
+          model.plannedNotice ? PlannedLevelNotice(model.plannedNotice) : null
+        ])
+      ]),
+      AccessibleCourseStatus(model.accessibleStatus || "Level overview loaded.")
+    ]);
+  }
+
+  function LevelOverviewHero({ phaseLabel, levelLabel, title, purpose, duration, percent, progressLabel, actionLabel, onAction, secondaryActionLabel, onSecondaryAction, visual = {}, planned = false } = {}) {
+    const showProgress = typeof percent === "number" && !planned;
+    return node("header", { className: "ms-level-hero", dataset: { component: "LevelOverviewHero" } }, [
+      node("div", { className: "ms-level-hero-copy" }, [
+        node("p", { className: "ms-kicker", text: `${phaseLabel || "Phase"} / ${levelLabel || "Level"}` }),
+        node("h2", { text: title || "Level overview", tabIndex: -1, attrs: { id: "courseTitle" } }),
+        node("p", { className: "ms-screen-intro", text: purpose || "Preview this level before opening the lesson sequence." }),
+        node("div", { className: "ms-level-hero-facts" }, [
+          duration ? StatusPill(duration, "neutral") : null,
+          planned ? StatusPill("Planned preview", "planned") : StatusPill(progressLabel || "In progress", "current")
+        ]),
+        showProgress ? node("div", {
+          className: "ms-level-progress",
+          role: "progressbar",
+          ariaLabel: progressLabel || `${percent}% complete`,
+          attrs: {
+            "aria-valuemin": "0",
+            "aria-valuemax": "100",
+            "aria-valuenow": String(percent)
+          }
+        }, [
+          node("span", { style: { width: `${percent}%` } })
+        ]) : null,
+        node("div", { className: "ms-action-row" }, [
+          secondaryActionLabel ? ActionButton(secondaryActionLabel, onSecondaryAction, "secondary") : null,
+          actionLabel ? ActionButton(actionLabel, onAction, planned ? "secondary" : "primary", actionLabel, planned ? { icon: "course" } : { icon: "play" }) : null
+        ])
+      ]),
+      node("figure", { className: "ms-level-hero-visual", dataset: { levelVisual: "featured" } }, [
+        node("img", {
+          src: visual.src || "src/learning-experience/assets/mission-studio-phase-context.svg",
+          alt: visual.alt || "Original Command Doctor learning visual for this level overview.",
+          loading: "lazy",
+          decoding: "async"
+        }),
+        node("figcaption", { text: visual.text || "The visual summarizes the learning path without implying command mastery." })
+      ])
+    ]);
+  }
+
+  function LevelOutcomeList({ outcomes = [], planned = false } = {}) {
+    return node("section", { className: "ms-card ms-level-outcomes", dataset: { component: "LevelOutcomeList" } }, [
+      node("div", { className: "ms-section-head" }, [
+        node("div", {}, [
+          node("p", { className: "ms-kicker", text: planned ? "Intended outcomes" : "Learning outcomes" }),
+          node("h3", { text: planned ? "What this level will prepare" : "What you will understand" })
+        ])
+      ]),
+      node("ul", {}, outcomes.slice(0, 5).map((item) => node("li", { text: item })))
+    ]);
+  }
+
+  function LevelMissionSequence({ title = "Mission sequence", kicker = "Sequence", lessons = [], currentLessonId = "", actionLabel, onAction } = {}) {
+    return node("section", { className: "ms-card ms-level-mission-sequence", dataset: { component: "LevelMissionSequence" } }, [
+      node("p", { className: "ms-kicker", text: kicker }),
+      node("h3", { text: title }),
+      node("ol", {}, lessons.map((lesson, index) => {
+        const current = lesson.id === currentLessonId || lesson.current;
+        const state = lesson.state || (current ? "current" : "upcoming");
+        return node("li", { className: `is-${state}${current ? " is-current" : ""}`, ariaCurrent: current ? "step" : "" }, [
+          node("span", { className: "ms-sequence-marker", text: String(index + 1) }),
+          node("div", {}, [
+            node("strong", { text: lesson.title || "Lesson" }),
+            node("p", { text: lesson.body || lesson.purpose || "Planned lesson purpose." }),
+            node("small", { text: lesson.statusText || (current ? "Current" : state === "complete" ? "Complete" : "Upcoming") })
+          ]),
+          current && actionLabel ? ActionButton(actionLabel, onAction, "primary") : null
+        ]);
+      }))
+    ]);
+  }
+
+  function LevelPrerequisiteSummary({ prerequisite = "No prerequisites", checkpoint = "", confidence = "", mastery = "" } = {}) {
+    return node("section", { className: "ms-card ms-readiness-summary", dataset: { component: "LevelPrerequisiteSummary" } }, [
+      node("p", { className: "ms-kicker", text: "Readiness" }),
+      node("h3", { text: "Checkpoint and safety" }),
+      node("dl", {}, [
+        node("div", {}, [node("dt", { text: "Prerequisite" }), node("dd", { text: prerequisite })]),
+        checkpoint ? node("div", {}, [node("dt", { text: "Checkpoint" }), node("dd", { text: checkpoint })]) : null,
+        confidence ? node("div", {}, [node("dt", { text: "Confidence" }), node("dd", { text: confidence })]) : null,
+        mastery ? node("div", {}, [node("dt", { text: "Mastery" }), node("dd", { text: mastery })]) : null
+      ])
+    ]);
+  }
+
+  function LevelVisualPreview({ featured, previews = [] } = {}) {
+    const all = [featured, ...previews].filter(Boolean);
+    if (!all.length) return null;
+    const primary = all[0];
+    return node("section", { className: "ms-card ms-level-visual-preview", dataset: { component: "LevelVisualPreview" } }, [
+      node("p", { className: "ms-kicker", text: "Related visuals" }),
+      node("h3", { text: primary.title || "Visual preview" }),
+      node("figure", {}, [
+        node("img", { src: primary.local_asset_path || primary.src, alt: primary.alt_text || primary.alt || primary.title || "Command Doctor visual", loading: "lazy", decoding: "async" }),
+        node("figcaption", { text: primary.text_alternative || primary.caption || "Local visual evidence for this learning mission." })
+      ]),
+      previews.length ? node("div", { className: "ms-supporting-visuals" }, previews.slice(0, 3).map((asset) => node("article", {}, [
+        node("img", { src: asset.local_asset_path || asset.src, alt: asset.alt_text || asset.alt || asset.title || "Supporting visual", loading: "lazy", decoding: "async" }),
+        node("span", { text: asset.title || asset.caption || "Supporting visual" })
+      ]))) : null
+    ]);
+  }
+
+  function PlannedLevelNotice({ title = "Planned level", body = "Detailed command placement will be reviewed before authoring.", actionLabel, onAction } = {}) {
+    return node("section", { className: "ms-planned-notice ms-planned-level-notice", dataset: { component: "PlannedLevelNotice" } }, [
+      node("strong", { text: title }),
+      node("p", { text: body }),
+      actionLabel ? ActionButton(actionLabel, onAction, "secondary") : null
+    ]);
+  }
+
+  function AccessibleCourseStatus(message, politeness = "polite") {
+    return AccessibleViewStatus(message, politeness);
+  }
+
+  function LevelOverviewHeader(props = {}) {
+    return CourseLevelCard(props);
   }
 
   function LessonStepRail({ stepNames = lessonStepper, stepIds = [], activeStepId = "", activeIndex = 0 } = {}) {
@@ -532,9 +825,13 @@
     if (typeof description === "string" || typeof description === "number") return documentRef.createTextNode(String(description));
     const element = documentRef.createElement(description.tag || "div");
     const props = description.props || {};
+    if (props.id) element.id = props.id;
     if (props.className) element.className = props.className;
     if (props.text !== undefined) element.textContent = props.text;
     if (props.type) element.type = props.type;
+    if (props.value !== undefined) element.value = props.value;
+    if (props.selected !== undefined) element.selected = Boolean(props.selected);
+    if (props.disabled !== undefined) element.disabled = Boolean(props.disabled);
     if (props.role) element.setAttribute("role", props.role);
     if (props.ariaLabel) element.setAttribute("aria-label", props.ariaLabel);
     if (props.ariaHidden) element.setAttribute("aria-hidden", props.ariaHidden);
@@ -551,6 +848,7 @@
       if (value !== "" && value !== undefined && value !== null) element.setAttribute(key, value);
     });
     if (typeof props.onClick === "function") element.addEventListener("click", props.onClick);
+    if (typeof props.onChange === "function") element.addEventListener("change", props.onChange);
     (description.children || []).forEach((child) => element.append(renderDescription(documentRef, child)));
     return element;
   }
@@ -584,9 +882,25 @@
     ContinueMissionCard,
     DiagnosticShortcutCard,
     RecentActivityStrip,
+    CourseWorkspace,
+    CourseHeader,
+    CoursePhaseNavigator,
     CoursePhaseRail,
-    CourseLevelTimeline,
+    CoursePhaseSelectorMobile,
+    CourseTimeline,
+    CourseLevelNode,
+    CourseLevelCard,
+    CourseLevelTimeline: CourseTimeline,
     PhaseContextPanel,
+    CourseLegend,
+    LevelOverviewWorkspace,
+    LevelOverviewHero,
+    LevelOutcomeList,
+    LevelMissionSequence,
+    LevelPrerequisiteSummary,
+    LevelVisualPreview,
+    PlannedLevelNotice,
+    AccessibleCourseStatus,
     LevelOverviewHeader,
     LessonStepRail,
     LessonContentStage,
@@ -601,8 +915,23 @@
     recommendedActionCard: DiagnosticShortcutCard,
     continueMissionCard: ContinueMissionCard,
     coursePhaseRail: CoursePhaseRail,
-    levelCard: LevelOverviewHeader,
+    levelCard: CourseLevelCard,
     phaseContextPanel: PhaseContextPanel,
+    courseWorkspace: CourseWorkspace,
+    courseHeader: CourseHeader,
+    coursePhaseNavigator: CoursePhaseNavigator,
+    courseTimeline: CourseTimeline,
+    courseLevelNode: CourseLevelNode,
+    courseLevelCard: CourseLevelCard,
+    courseLegend: CourseLegend,
+    levelOverviewWorkspace: LevelOverviewWorkspace,
+    levelOverviewHero: LevelOverviewHero,
+    levelOutcomeList: LevelOutcomeList,
+    levelMissionSequence: LevelMissionSequence,
+    levelPrerequisiteSummary: LevelPrerequisiteSummary,
+    levelVisualPreview: LevelVisualPreview,
+    plannedLevelNotice: PlannedLevelNotice,
+    accessibleCourseStatus: AccessibleCourseStatus,
     lessonTimeline: LessonStepRail,
     lessonStepPanel: LessonContentStage,
     visualLearningPanel: VisualLearningPanel,
