@@ -28,23 +28,30 @@
   }
 
   function recentActivity({ progress = {}, lesson, historyCount = 0, vendorProgressCount = 0, currentStepLabel = "Mission" } = {}) {
-    return [
-      {
-        symbol: "LS",
+    const items = [];
+    const hasLessonProgress = safeArray(progress.completed_lesson_ids).length > 0 || progress.current_step_id !== "mission" || Boolean(progress.resume_timestamp);
+    if (lesson && hasLessonProgress) {
+      items.push({
+        icon: "book",
         title: lesson?.title || "Level 0",
         detail: `Current step: ${currentStepLabel}`
-      },
-      {
-        symbol: "CF",
+      });
+    }
+    if (progress.confidence_by_lesson?.[progress.current_lesson_id]) {
+      items.push({
+        icon: "progress",
         title: "Confidence",
         detail: progress.confidence_by_lesson?.[progress.current_lesson_id] || "Not rated"
-      },
-      {
-        symbol: "LC",
+      });
+    }
+    if (historyCount > 0 || vendorProgressCount > 0) {
+      items.push({
+        icon: "report",
         title: "Local records",
         detail: `${historyCount} reports, ${vendorProgressCount} vendor tracks`
-      }
-    ];
+      });
+    }
+    return items;
   }
 
   function phaseStatus(phase = {}, humanStatus = (value) => value || "planned") {
