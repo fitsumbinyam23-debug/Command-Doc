@@ -82,10 +82,10 @@ check(missionTest.includes("validateVisualAssetRegistry"), "Mission Studio test 
 [
   "desktop onboarding narrow content strip",
   "desktop home narrow content strip",
-  "desktop course narrow content strip",
-  "desktop level overview narrow content strip",
+  "desktop shell old layout reuse",
+  "desktop mission hero missing visual",
   "mobile home partial viewport",
-  "mobile tools duplicate content",
+  "mobile bottom navigation overlap",
   "screenshot metric mismatch"
 ].forEach((failureId) => check(missionTest.includes(failureId), `Review screenshot guard missing: ${failureId}`));
 

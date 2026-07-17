@@ -32,10 +32,18 @@
   ]);
 
   const pathCards = Object.freeze([
-    { id: "zero", label: "Learn From Zero", description: "Start with the Level 0 mission sequence." },
-    { id: "practice", label: "Practise", description: "Open local practice routes and specialization previews." },
-    { id: "tools", label: "Technician", description: "Jump into diagnostic and reference tools." }
+    { id: "zero", label: "Learn From Zero", description: "Build the networking basics first, then move into safe command practice.", icon: "network" },
+    { id: "practice", label: "Practise and Specialize", description: "Use authored local routes and specialization previews when the basics are familiar.", icon: "practice" },
+    { id: "tools", label: "Technician Tools", description: "Open diagnostic, lookup, lab, and report tools for focused troubleshooting work.", icon: "tools" }
   ]);
+
+  function iconApi() {
+    return global.CommandDoctorMissionStudioIcons;
+  }
+
+  function icon(name, className = "ms-icon") {
+    return iconApi()?.icon?.(name, className) || node("span", { className, ariaHidden: "true" });
+  }
 
   function freezeDescription(description) {
     if (!description || typeof description !== "object") return description;
@@ -62,71 +70,289 @@
     return node("button", {
       className,
       type: "button",
-      text: label,
       ariaLabel,
       onClick: onAction,
       dataset: extra.dataset || {},
       attrs: extra.attrs || {}
-    });
+    }, [
+      ...(extra.icon ? [icon(extra.icon, "ms-button-icon")] : []),
+      node("span", { text: label })
+    ]);
   }
 
   function StatusPill(text, tone = "neutral") {
     return node("span", { className: `ms-pill ms-pill-${tone}`, text });
   }
 
-  function MissionStudioShell({ activeView = "home", pathLabel = "Choose a path" } = {}) {
-    return node("div", { className: "ms-shell", dataset: { activeView } }, [
-      DesktopSidebar({ activeView, pathLabel }),
-      node("main", { className: "ms-shell-main" }),
-      MobileProductHeader({ pathLabel }),
-      MobileBottomNavigation({ activeView })
-    ]);
-  }
-
-  function DesktopSidebar({ activeView = "home", pathLabel = "Choose a path" } = {}) {
-    return node("aside", { className: "ms-desktop-sidebar", ariaLabel: "Mission Studio navigation" }, [
-      node("div", { className: "ms-product-lockup" }, [
-        node("span", { className: "ms-product-mark", text: "CD", ariaHidden: "true" }),
-        node("span", { className: "ms-product-name", text: "Command Doctor" })
+  function MissionStudioBrand() {
+    return node("div", { className: "ms-brand", dataset: { component: "MissionStudioBrand" } }, [
+      node("span", { className: "ms-brand-mark", ariaHidden: "true" }, [
+        icon("shield", "ms-brand-shield"),
+        node("span", { className: "ms-brand-dot" })
       ]),
-      node("nav", { className: "ms-sidebar-nav", ariaLabel: "Primary learning views" }, navItems.map((item) => {
-        const active = item.view === activeView;
-        return node("button", {
-          className: active ? "ms-nav-item is-active" : "ms-nav-item",
-          type: "button",
-          text: item.label,
-          ariaCurrent: active ? "page" : "",
-          dataset: { view: item.view, navIcon: item.icon }
-        });
-      })),
-      node("section", { className: "ms-sidebar-summary", ariaLabel: "Learning path" }, [
-        node("strong", { text: "Your mission" }),
-        node("p", { text: pathLabel })
+      node("div", { className: "ms-brand-copy" }, [
+        node("strong", { className: "ms-product-name", text: "Command Doctor" }),
+        node("span", { className: "ms-product-tagline", text: "Learn. Practise. Diagnose." })
       ])
     ]);
   }
 
-  function MobileProductHeader({ pathLabel = "Choose a path" } = {}) {
-    return node("header", { className: "ms-mobile-product-header", ariaLabel: "Command Doctor" }, [
-      node("span", { className: "ms-product-mark", text: "CD", ariaHidden: "true" }),
-      node("div", {}, [
-        node("strong", { text: "Command Doctor" }),
-        node("span", { text: pathLabel })
-      ])
-    ]);
-  }
-
-  function MobileBottomNavigation({ activeView = "home" } = {}) {
-    return node("nav", { className: "ms-mobile-bottom-navigation", ariaLabel: "Mobile learning views" }, navItems.map((item) => {
+  function MissionStudioPrimaryNav({ activeView = "home", onNavigate } = {}) {
+    return node("nav", { className: "ms-primary-nav", ariaLabel: "Primary learning views", dataset: { component: "MissionStudioPrimaryNav" } }, navItems.map((item) => {
       const active = item.view === activeView;
       return node("button", {
-        className: active ? "ms-nav-item is-active" : "ms-nav-item",
+        className: active ? "ms-nav-item nav-tab is-active active" : "ms-nav-item nav-tab",
         type: "button",
-        text: item.label,
         ariaCurrent: active ? "page" : "",
-        dataset: { view: item.view, navIcon: item.icon }
-      });
+        dataset: { view: item.view, navIcon: item.icon, msPrimaryNav: "true" }
+      }, [
+        icon(item.icon, "ms-nav-icon"),
+        node("span", { text: item.label })
+      ]);
     }));
+  }
+
+  function MissionStudioSidebarProfile({ pathLabel = "Choose a path", offlineStatus = "Works offline" } = {}) {
+    return node("section", { className: "ms-sidebar-profile", ariaLabel: "Learning path", dataset: { component: "MissionStudioSidebarProfile" } }, [
+      icon("flag", "ms-profile-icon"),
+      node("div", {}, [
+        node("strong", { text: "Your mission" }),
+        node("p", { text: pathLabel, dataset: { msPathSummary: "true" } }),
+        node("span", { text: offlineStatus, dataset: { msOfflineStatus: "true" } })
+      ])
+    ]);
+  }
+
+  function MissionStudioSidebar({ activeView = "home", pathLabel = "Choose a path", onNavigate } = {}) {
+    return node("aside", { className: "ms-desktop-sidebar", ariaLabel: "Mission Studio navigation", dataset: { component: "MissionStudioSidebar" } }, [
+      MissionStudioBrand(),
+      MissionStudioPrimaryNav({ activeView, onNavigate }),
+      node("div", { className: "ms-sidebar-spacer" }),
+      MissionStudioSidebarProfile({ pathLabel })
+    ]);
+  }
+
+  function MissionStudioMobileHeader({ activeView = "home", pathLabel = "Choose a path" } = {}) {
+    const current = navItems.find((item) => item.view === activeView) || navItems[0];
+    return node("header", { className: "ms-mobile-header", ariaLabel: "Command Doctor", dataset: { component: "MissionStudioMobileHeader" } }, [
+      MissionStudioBrand(),
+      node("div", { className: "ms-mobile-page" }, [
+        node("span", { text: current.label }),
+        node("small", { text: pathLabel, dataset: { msMobilePath: "true" } })
+      ])
+    ]);
+  }
+
+  function MissionStudioMobileBottomNav({ activeView = "home", onNavigate } = {}) {
+    return node("nav", { className: "ms-mobile-bottom-nav", ariaLabel: "Mobile learning views", dataset: { component: "MissionStudioMobileBottomNav" } }, navItems.map((item) => {
+      const active = item.view === activeView;
+      return node("button", {
+        className: active ? "ms-mobile-nav-item nav-tab is-active active" : "ms-mobile-nav-item nav-tab",
+        type: "button",
+        ariaCurrent: active ? "page" : "",
+        dataset: { view: item.view, navIcon: item.icon, msPrimaryNav: "true" }
+      }, [
+        icon(item.icon, "ms-mobile-nav-icon"),
+        node("span", { text: item.label })
+      ]);
+    }));
+  }
+
+  function MissionStudioContentHeader({ kicker, title, body, id } = {}) {
+    return node("header", { className: "ms-content-header", dataset: { component: "MissionStudioContentHeader" } }, [
+      kicker ? node("p", { className: "ms-kicker", text: kicker }) : null,
+      node("h2", { text: title || "Mission Studio", tabIndex: id ? -1 : undefined, attrs: id ? { id } : {} }),
+      body ? node("p", { className: "ms-screen-intro", text: body }) : null
+    ]);
+  }
+
+  function MissionStudioShell({ activeView = "home", pathLabel = "Choose a path", onNavigate } = {}) {
+    return node("div", { className: "ms-app-shell", dataset: { component: "MissionStudioShell", activeView } }, [
+      MissionStudioSidebar({ activeView, pathLabel, onNavigate }),
+      node("div", { className: "ms-stage-canvas" }, [
+        MissionStudioMobileHeader({ activeView, pathLabel }),
+        node("main", { className: "ms-shell-main", attrs: { id: "missionStudioMain" } })
+      ]),
+      MissionStudioMobileBottomNav({ activeView, onNavigate })
+    ]);
+  }
+
+  function AccessibleViewStatus(message = "Mission Studio view updated.", politeness = "polite") {
+    return node("div", { className: "sr-only", role: "status", ariaLive: politeness, text: message, dataset: { component: "AccessibleViewStatus" } });
+  }
+
+  function FirstRunMissionSelector({ paths = pathCards, onChoosePath } = {}) {
+    return node("section", { className: "ms-onboarding-panel", ariaLabel: "Choose your Command Doctor mission", dataset: { component: "FirstRunMissionSelector" } }, [
+      node("div", { className: "ms-onboarding-hero" }, [
+        node("div", {}, [
+          node("p", { className: "ms-kicker", text: "Command Doctor Mission Studio" }),
+          node("h3", { text: "Choose the way you want to train today." }),
+          node("p", { text: "Start from first principles, practise a focused route, or jump into technician tools. Your choice only changes the learning path on this browser." })
+        ]),
+        node("div", { className: "ms-onboarding-graphic", ariaHidden: "true" }, [
+          icon("network", "ms-onboarding-network"),
+          node("span"),
+          node("span"),
+          node("span")
+        ])
+      ]),
+      node("div", { className: "ms-path-choices" }, paths.slice(0, 3).map((path) => node("button", {
+        className: "ms-path-card",
+        type: "button",
+        ariaLabel: `Choose ${path.label}`,
+        onClick: () => onChoosePath?.(path.id),
+        dataset: { pathChoice: path.id }
+      }, [
+        icon(path.icon || "network", "ms-path-icon"),
+        node("strong", { text: path.label }),
+        node("span", { text: path.description }),
+        node("em", { text: path.actionLabel || "Select path" })
+      ])))
+    ]);
+  }
+
+  function HomeMissionHero(model = {}) {
+    const percent = Math.max(0, Math.min(100, Number(model.progressPercent) || 0));
+    return node("section", { className: "ms-home-hero", ariaLabel: "Current mission", dataset: { component: "HomeMissionHero" } }, [
+      node("div", { className: "ms-home-hero-copy" }, [
+        node("p", { className: "ms-kicker", text: model.pathLabel || "Learn From Zero" }),
+        node("h3", { text: model.title || "Level 0 - Welcome to Networking" }),
+        node("p", { className: "ms-hero-lesson", text: model.lessonLabel || "Lesson 1 of 8" }),
+        node("p", { className: "ms-hero-statement", text: model.statement || "Understand what a network is and why connected devices communicate." }),
+        node("div", { className: "ms-hero-progress-row" }, [
+          node("div", {
+            className: "ms-progress-bar",
+            role: "progressbar",
+            ariaLabel: model.progressLabel || `${percent}% complete`,
+            attrs: { "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": String(percent) }
+          }, [
+            node("span", { style: { width: `${percent}%` } })
+          ]),
+          node("strong", { text: `${percent}%` })
+        ]),
+        node("div", { className: "ms-hero-actions" }, [
+          ActionButton(model.actionLabel || "Continue Level 0", model.onAction, "primary", model.actionLabel || "Continue Level 0", { icon: "arrow", dataset: { dominantAction: "true" } }),
+          model.secondaryActionLabel ? ActionButton(model.secondaryActionLabel, model.onSecondaryAction, "quiet") : null
+        ])
+      ]),
+      node("figure", { className: "ms-mission-visual", dataset: { localVisual: "mission-studio-home-network" } }, [
+        node("img", {
+          src: model.visualSrc || "src/learning-experience/assets/mission-studio-home-network.svg",
+          alt: model.visualAlt || "Generic switch connecting local devices, a gateway, and a service in a learning network.",
+          loading: "eager",
+          decoding: "async"
+        }),
+        node("figcaption", { text: model.visualText || "A generic local network scene shows endpoints, a switch, a gateway, and a service linked together." })
+      ])
+    ]);
+  }
+
+  function HomeProgressSummary({ title = "Level 0 orientation", percent = 0, facts = [] } = {}) {
+    const safePercent = Math.max(0, Math.min(100, Number(percent) || 0));
+    return node("section", { className: "ms-rail-card ms-progress-summary", ariaLabel: "Progress summary", dataset: { component: "HomeProgressSummary" } }, [
+      node("p", { className: "ms-kicker", text: "Progress" }),
+      node("h3", { text: title }),
+      node("div", {
+        className: "ms-progress-bar",
+        role: "progressbar",
+        ariaLabel: `${safePercent}% complete`,
+        attrs: { "aria-valuemin": "0", "aria-valuemax": "100", "aria-valuenow": String(safePercent) }
+      }, [
+        node("span", { style: { width: `${safePercent}%` } })
+      ]),
+      node("div", { className: "ms-rail-facts" }, facts.map((fact) => node("div", {}, [
+        node("span", { text: fact.label }),
+        node("strong", { text: fact.value }),
+        fact.detail ? node("small", { text: fact.detail }) : null
+      ])))
+    ]);
+  }
+
+  function HomeNextCheckpoint({ title = "Next checkpoint", body = "Checkpoint opens after the current lesson steps are complete.", state = "Not ready yet" } = {}) {
+    return node("section", { className: "ms-rail-card ms-next-checkpoint", ariaLabel: "Next checkpoint", dataset: { component: "HomeNextCheckpoint" } }, [
+      node("p", { className: "ms-kicker", text: "Checkpoint" }),
+      node("h3", { text: title }),
+      node("p", { text: body }),
+      node("span", { className: "ms-state-chip", text: state })
+    ]);
+  }
+
+  function HomeTechnicianAction({ title = "Open Diagnose", body = "Paste output and build an evidence-first diagnostic summary.", actionLabel = "Open Tools", iconName = "pulse", onAction } = {}) {
+    return node("section", { className: "ms-rail-card ms-technician-action", ariaLabel: "Quick technician action", dataset: { component: "HomeTechnicianAction" } }, [
+      node("p", { className: "ms-kicker", text: "Technician shortcut" }),
+      node("div", { className: "ms-rail-action-head" }, [
+        icon(iconName, "ms-shortcut-icon"),
+        node("h3", { text: title })
+      ]),
+      node("p", { text: body }),
+      ActionButton(actionLabel, onAction, "secondary")
+    ]);
+  }
+
+  function HomeRecentActivity({ items = [], onAction } = {}) {
+    const visibleItems = items.slice(0, 4);
+    return node("section", { className: "ms-home-section ms-recent-activity", ariaLabel: "Recent activity", dataset: { component: "HomeRecentActivity" } }, [
+      node("div", { className: "ms-section-head" }, [
+        node("div", {}, [
+          node("p", { className: "ms-kicker", text: "Recent activity" }),
+          node("h3", { text: "Saved locally" })
+        ]),
+        onAction ? ActionButton("Open reports", onAction, "quiet") : null
+      ]),
+      visibleItems.length ? node("div", { className: "ms-recent-list" }, visibleItems.map((item) => node("article", { className: "ms-recent-item" }, [
+        icon(item.icon || "book", "ms-recent-icon"),
+        node("div", {}, [
+          node("strong", { text: item.title }),
+          node("span", { text: item.detail }),
+          item.status ? node("small", { text: item.status }) : null
+        ])
+      ]))) : node("div", { className: "ms-empty-state" }, [
+        icon("book", "ms-empty-icon"),
+        node("strong", { text: "No local activity yet" }),
+        node("span", { text: "Start a lesson or save a diagnostic report and it will appear here." })
+      ])
+    ]);
+  }
+
+  function HomeTechnicianShortcuts({ shortcuts = [] } = {}) {
+    return node("section", { className: "ms-home-section ms-shortcuts", ariaLabel: "Technician shortcuts", dataset: { component: "HomeTechnicianShortcuts" } }, [
+      node("div", { className: "ms-section-head" }, [
+        node("div", {}, [
+          node("p", { className: "ms-kicker", text: "Technician shortcuts" }),
+          node("h3", { text: "Useful tools" })
+        ])
+      ]),
+      node("div", { className: "ms-shortcut-grid" }, shortcuts.slice(0, 4).map((shortcut) => node("button", {
+        className: "ms-shortcut-card",
+        type: "button",
+        onClick: shortcut.onAction,
+        ariaLabel: `Open ${shortcut.label}`,
+        dataset: { shortcutDestination: shortcut.view || "", toolId: shortcut.id || "" }
+      }, [
+        icon(shortcut.icon || "tools", "ms-shortcut-icon"),
+        node("strong", { text: shortcut.label }),
+        node("span", { text: shortcut.description })
+      ])))
+    ]);
+  }
+
+  function HomeJourneyPreview({ lessons = [] } = {}) {
+    return node("section", { className: "ms-home-section ms-journey-preview", ariaLabel: "Learning path preview", dataset: { component: "HomeJourneyPreview" } }, [
+      node("div", { className: "ms-section-head" }, [
+        node("div", {}, [
+          node("p", { className: "ms-kicker", text: "Journey preview" }),
+          node("h3", { text: "Level 0 path" })
+        ])
+      ]),
+      node("ol", { className: "ms-journey-timeline" }, lessons.slice(0, 3).map((lesson) => node("li", { className: `is-${lesson.state || "upcoming"}` }, [
+        node("span", { className: "ms-journey-dot", text: lesson.indexLabel || "" }),
+        node("div", {}, [
+          node("strong", { text: lesson.title }),
+          node("span", { text: lesson.detail }),
+          node("small", { text: lesson.stateLabel || "Upcoming" })
+        ])
+      ])))
+    ]);
   }
 
   function ContinueMissionCard({ title, lessonTitle, phaseLabel, levelLabel, progressLabel, actionLabel, onAction } = {}) {
@@ -153,17 +379,7 @@
   }
 
   function RecentActivityStrip({ items = [] } = {}) {
-    return node("section", { className: "ms-recent-strip", ariaLabel: "Recent activity" }, [
-      node("div", { className: "ms-section-head" }, [
-        node("span", { className: "ms-kicker", text: "Recent activity" }),
-        node("strong", { text: "Saved locally" })
-      ]),
-      node("div", { className: "ms-recent-list" }, items.map((item) => node("article", { className: "ms-recent-item" }, [
-        node("span", { className: "ms-tool-symbol", text: item.symbol || "MS", ariaHidden: "true" }),
-        node("strong", { text: item.title }),
-        node("span", { text: item.detail })
-      ])))
-    ]);
+    return HomeRecentActivity({ items });
   }
 
   function CoursePhaseRail({ phases = [], currentPhaseId = "" } = {}) {
@@ -288,7 +504,7 @@
 
   function TechnicianToolCard({ tool, symbol, onAction } = {}) {
     return node("article", { className: "ms-tool-card", dataset: { toolId: tool?.id || "" } }, [
-      node("span", { className: "ms-tool-symbol", text: symbol || tool?.symbol || "TL", ariaHidden: "true" }),
+      icon(iconApi()?.toolSymbol?.(tool?.id) || symbol || "tools", "ms-tool-symbol"),
       node("div", { className: "ms-kicker", text: "Tool" }),
       node("h3", { text: tool?.label || "Tool" }),
       node("p", { text: tool?.description || "Open a local Command Doctor tool." }),
@@ -308,7 +524,7 @@
   }
 
   function AccessibleStatusMessage(message, politeness = "polite") {
-    return node("div", { className: "sr-only", role: "status", ariaLive: politeness, text: message });
+    return AccessibleViewStatus(message, politeness);
   }
 
   function renderDescription(documentRef, description) {
@@ -346,9 +562,25 @@
     pathCards,
     appShellState,
     MissionStudioShell,
-    DesktopSidebar,
-    MobileProductHeader,
-    MobileBottomNavigation,
+    MissionStudioSidebar,
+    MissionStudioBrand,
+    MissionStudioPrimaryNav,
+    MissionStudioSidebarProfile,
+    MissionStudioMobileHeader,
+    MissionStudioMobileBottomNav,
+    MissionStudioContentHeader,
+    FirstRunMissionSelector,
+    HomeMissionHero,
+    HomeProgressSummary,
+    HomeNextCheckpoint,
+    HomeTechnicianAction,
+    HomeTechnicianShortcuts,
+    HomeRecentActivity,
+    HomeJourneyPreview,
+    AccessibleViewStatus,
+    DesktopSidebar: MissionStudioSidebar,
+    MobileProductHeader: MissionStudioMobileHeader,
+    MobileBottomNavigation: MissionStudioMobileBottomNav,
     ContinueMissionCard,
     DiagnosticShortcutCard,
     RecentActivityStrip,

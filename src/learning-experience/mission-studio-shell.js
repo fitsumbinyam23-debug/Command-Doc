@@ -1,51 +1,73 @@
 "use strict";
 
 (function exposeMissionStudioShell(global) {
-  function setupMissionStudioShell(documentRef, { getPathLabel } = {}) {
+  function components() {
+    return global.CommandDoctorMissionStudioComponents;
+  }
+
+  function render(documentRef, description) {
+    return components()?.renderDescription(documentRef, description);
+  }
+
+  function activeViewFromDocument(documentRef) {
+    const active = documentRef.querySelector(".view.active");
+    return active?.id?.replace(/View$/, "") || "home";
+  }
+
+  function setupMissionStudioShell(documentRef, { getPathLabel, onNavigate } = {}) {
     documentRef.body.classList.add("mission-studio-shell");
-    const sidebar = documentRef.querySelector(".sidebar");
-    const main = documentRef.querySelector(".main-panel");
-    const brand = sidebar?.querySelector(".brand");
-    const status = sidebar?.querySelector(".status-stack");
-    if (sidebar) sidebar.classList.add("ms-desktop-sidebar");
-    if (main) main.classList.add("ms-main-panel");
-    if (brand) {
-      brand.classList.add("ms-product-lockup");
-      const mark = brand.querySelector(".brand-mark");
-      if (mark) mark.classList.add("ms-product-mark");
+    const legacyShell = documentRef.querySelector(".app-shell");
+    if (!legacyShell || documentRef.querySelector(".ms-app-shell")) {
+      syncMissionStudioShell(documentRef, {
+        activeView: activeViewFromDocument(documentRef),
+        pathLabel: typeof getPathLabel === "function" ? getPathLabel() : "Choose a path",
+        onNavigate
+      });
+      return;
     }
-    let summary = documentRef.querySelector(".ms-sidebar-summary");
-    if (!summary && status) {
-      summary = documentRef.createElement("section");
-      summary.className = "ms-sidebar-summary";
-      summary.setAttribute("aria-label", "Learning path");
-      summary.innerHTML = "<strong>Your mission</strong><p data-ms-path-summary></p>";
-      status.replaceWith(summary);
-    }
-    let mobileHeader = documentRef.querySelector(".ms-mobile-product-header");
-    if (!mobileHeader && main) {
-      mobileHeader = documentRef.createElement("header");
-      mobileHeader.className = "ms-mobile-product-header";
-      mobileHeader.setAttribute("aria-label", "Command Doctor");
-      mobileHeader.innerHTML = "<span class=\"ms-product-mark\" aria-hidden=\"true\">CD</span><div><strong>Command Doctor</strong><span data-ms-mobile-path></span></div>";
-      main.prepend(mobileHeader);
-    }
+
+    const legacyMain = legacyShell.querySelector(".main-panel");
+    const views = Array.from(legacyMain?.querySelectorAll(":scope > .view") || documentRef.querySelectorAll(".view"));
+    const shell = render(documentRef, components().MissionStudioShell({
+      activeView: activeViewFromDocument(documentRef),
+      pathLabel: typeof getPathLabel === "function" ? getPathLabel() : "Choose a path",
+      onNavigate
+    }));
+    const main = shell.querySelector(".ms-shell-main");
+    views.forEach((view) => main.append(view));
+    legacyShell.replaceWith(shell);
+
     syncMissionStudioShell(documentRef, {
-      activeView: documentRef.querySelector(".nav-tab.active")?.dataset.view || "home",
-      pathLabel: typeof getPathLabel === "function" ? getPathLabel() : "Choose a path"
+      activeView: activeViewFromDocument(documentRef),
+      pathLabel: typeof getPathLabel === "function" ? getPathLabel() : "Choose a path",
+      onNavigate
     });
   }
 
-  function syncMissionStudioShell(documentRef, { activeView = "home", pathLabel = "Choose a path" } = {}) {
-    documentRef.querySelectorAll(".nav-tab").forEach((tab) => {
-      const active = tab.dataset.view === activeView;
-      tab.classList.toggle("is-active", active);
-      if (active) tab.setAttribute("aria-current", "page");
-      else tab.removeAttribute("aria-current");
+  function syncMissionStudioShell(documentRef, { activeView = "home", pathLabel = "Choose a path", onNavigate } = {}) {
+    const navButtons = Array.from(documentRef.querySelectorAll("[data-ms-primary-nav='true']"));
+    navButtons.forEach((button) => {
+      const active = button.dataset.view === activeView;
+      button.classList.toggle("is-active", active);
+      button.classList.toggle("active", active);
+      if (active) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+      if (typeof onNavigate === "function" && !button.dataset.msBound) {
+        button.addEventListener("click", () => onNavigate(button.dataset.view || "home"));
+        button.dataset.msBound = "true";
+      }
     });
+
     documentRef.querySelectorAll("[data-ms-path-summary], [data-ms-mobile-path]").forEach((node) => {
       node.textContent = pathLabel;
     });
+
+    const shell = documentRef.querySelector(".ms-app-shell");
+    if (shell) shell.dataset.activeView = activeView;
+    const mobileHeader = documentRef.querySelector(".ms-mobile-header");
+    const current = components()?.navItems?.find((item) => item.view === activeView);
+    const pageLabel = mobileHeader?.querySelector(".ms-mobile-page > span");
+    if (pageLabel && current) pageLabel.textContent = current.label;
   }
 
   const api = Object.freeze({ setupMissionStudioShell, syncMissionStudioShell });

@@ -2760,13 +2760,19 @@ function currentMissionPathLabel() {
 }
 
 function setupMissionStudioShell() {
-  missionStudioShell()?.setupMissionStudioShell(document, { getPathLabel: currentMissionPathLabel });
+  missionStudioShell()?.setupMissionStudioShell(document, {
+    getPathLabel: currentMissionPathLabel,
+    onNavigate: (viewName) => switchView(viewName, { resetLab: viewName === "lab" })
+  });
+  els.navTabs = Array.from(document.querySelectorAll("[data-ms-primary-nav='true']"));
+  els.views = Array.from(document.querySelectorAll(".view"));
 }
 
 function syncMissionStudioShell(viewName) {
   missionStudioShell()?.syncMissionStudioShell(document, {
     activeView: viewName,
-    pathLabel: currentMissionPathLabel()
+    pathLabel: currentMissionPathLabel(),
+    onNavigate: (nextView) => switchView(nextView, { resetLab: nextView === "lab" })
   });
 }
 
@@ -4964,6 +4970,7 @@ function renderHome() {
   const api = beginnerExperience();
   const views = missionStudioViews();
   const stateApi = missionStudioState();
+  const iconApi = window.CommandDoctorMissionStudioIcons;
   const track = activeTrack();
   const progress = trackProgress(track);
   const learned = Object.keys(progress.learnedCommands).length;
@@ -4971,15 +4978,44 @@ function renderHome() {
   const level0Progress = state.learning.level0Progress || api.createLevel0State();
   const currentLesson = level0CurrentLesson();
   const stepIndex = currentLevel0StepIndex();
+  const lessonIndex = Math.max(0, level0Lessons().findIndex((lesson) => lesson.lesson_id === currentLesson?.lesson_id));
   const completion = stateApi?.level0Completion(level0Progress, level0Lessons(), api.STEP_IDS) || { percent: 0, completedLessons: 0, lessonCount: 8 };
   const homeState = api.homeStateForPath(state.learning.path, { lessonTitle: currentLesson?.title, lastTool: state.learning.recentTool || "diagnose" });
   const tool = api.toolDestination(state.learning.recentTool || "diagnose");
+  const shortcutIds = ["diagnose", "command-lookup", "switch-workbench", "saved-reports"];
+  const pathIcon = (id) => id === "zero" ? "network" : id === "practice" ? "practice" : "tools";
+  const missionTitle = state.learning.path === "practice"
+    ? "Practise and Specialize"
+    : state.learning.path === "tools"
+      ? "Technician Tools"
+      : "Level 0 - Welcome to Networking";
+  const missionStatement = state.learning.path === "practice"
+    ? "Open authored local practice routes and build confidence without touching production devices."
+    : state.learning.path === "tools"
+      ? "Use local diagnostic, lookup, lab, and report tools for focused technician work."
+      : currentLesson?.mission || "Understand what a network is and why connected devices communicate.";
+  const nextLessons = level0Lessons()
+    .slice(lessonIndex, lessonIndex + 3)
+    .map((lesson, index) => {
+      const complete = level0Progress.completed_lesson_ids?.includes(lesson.lesson_id);
+      const current = lesson.lesson_id === currentLesson?.lesson_id;
+      return {
+        title: lesson.title,
+        detail: lesson.objective,
+        indexLabel: String(lessonIndex + index + 1),
+        state: complete ? "complete" : current ? "current" : "upcoming",
+        stateLabel: complete ? "Complete" : current ? "Current" : "Upcoming"
+      };
+    });
   const model = {
     path: state.learning.path,
     pathLabel: homeState.label,
+    headerKicker: "Mission Studio",
+    headerBody: "Continue the current mission, inspect local activity, or open one useful technician shortcut.",
     paths: api.PATHS.map((path) => ({
       ...path,
-      symbol: path.id === "zero" ? "L0" : path.id === "practice" ? "PR" : "TL"
+      icon: pathIcon(path.id),
+      actionLabel: path.id === "zero" ? "Start Level 0" : path.id === "practice" ? "Open Practice" : "Open Tools"
     })),
     onChoosePath: (pathId) => {
       const choice = api.applyPathChoice(pathId);
@@ -4991,29 +5027,48 @@ function renderHome() {
       syncMissionStudioShell(choice.view);
       switchView(choice.view);
     },
-    continueMission: {
-      title: homeState.primaryAction.label,
-      lessonTitle: currentLesson?.title || "Welcome to Networking",
-      phaseLabel: "Phase 1: Foundation",
-      levelLabel: "Level 0",
+    missionHero: {
+      pathLabel: homeState.label,
+      title: missionTitle,
+      lessonLabel: state.learning.path === "zero" ? `Lesson ${lessonIndex + 1} of ${completion.lessonCount}: ${currentLesson?.title || "What is a network?"}` : "Local browser mission",
+      statement: missionStatement,
+      progressPercent: completion.percent,
       progressLabel: level0Progress.level_complete ? "Orientation complete" : `${completion.percent}% complete`,
       actionLabel: homeState.primaryAction.label,
-      onAction: () => applyHomePrimaryAction(homeState.primaryAction)
+      onAction: () => applyHomePrimaryAction(homeState.primaryAction),
+      visualSrc: "src/learning-experience/assets/mission-studio-home-network.svg",
+      visualAlt: "Generic switch connecting endpoints, an access point, a gateway, and a service in a Command Doctor learning network.",
+      visualText: "The local visual shows endpoints using a switch and gateway to reach a service, matching the beginner idea that networks move useful information between connected devices."
     },
-    diagnosticShortcut: {
+    progressSummary: {
+      title: "Level 0 orientation",
+      percent: completion.percent,
+      facts: [
+        { label: "Lessons", value: `${completion.completedLessons}/${completion.lessonCount}`, detail: "complete" },
+        { label: "Current step", value: `${stepIndex + 1}/${api.STEPPER_STEPS.length}`, detail: api.humanStatus(level0Progress.current_step_id) },
+        { label: "Commands learned", value: String(learned), detail: "local track" }
+      ]
+    },
+    nextCheckpoint: {
+      title: level0Progress.level_complete ? "Level 0 complete" : "Level checkpoint",
+      body: level0Progress.level_complete ? "Orientation is complete. Practice remains separate from mastery." : "The checkpoint opens after the Level 0 lessons and required reflection steps are complete.",
+      state: level0Progress.final_checkpoint_result?.submitted ? "Submitted locally" : "Not ready yet"
+    },
+    technicianAction: {
       title: `Open ${tool.label}`,
       body: tool.description,
-      actionLabel: "Open Tools",
-      onAction: () => switchView("tools")
+      actionLabel: `Open ${tool.label}`,
+      iconName: iconApi?.toolSymbol?.(tool.id) || "tools",
+      onAction: () => openTechnicianTool(tool)
     },
-    progressTitle: "Level 0 orientation",
-    progressPercent: completion.percent,
-    progressFacts: [
-      `${completion.completedLessons}/${completion.lessonCount} lessons complete`,
-      `Step ${stepIndex + 1}/${api.STEPPER_STEPS.length}`,
-      `Commands learned: ${learned}`,
-      `Needs review: ${review}`
-    ],
+    shortcuts: shortcutIds.map((id) => {
+      const destination = api.toolDestination(id);
+      return {
+        ...destination,
+        icon: iconApi?.toolSymbol?.(destination.id) || "tools",
+        onAction: () => openTechnicianTool(destination)
+      };
+    }),
     recentActivity: stateApi?.recentActivity({
       progress: level0Progress,
       lesson: currentLesson,
@@ -5021,7 +5076,9 @@ function renderHome() {
       vendorProgressCount: Object.keys(state.lab.vendorProgress || {}).length,
       currentStepLabel: api.humanStatus(level0Progress.current_step_id)
     }) || [],
+    journeyPreview: nextLessons,
     recommendation: level0Progress.level_complete ? "Recommended next action: open local practice when you are ready." : "Recommended next action: continue the active Level 0 lesson.",
+    onOpenReports: () => switchView("history"),
     onChangePath: () => {
       saveLearningPath("");
       announcePathChoice("Choose a learning path.");

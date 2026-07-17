@@ -53,48 +53,51 @@
   function renderMissionStudioHomeView(documentRef, model = {}) {
     const root = el(documentRef, "section", model.path ? "ms-screen ms-home" : "ms-screen ms-onboarding");
     if (!model.path) {
-      root.append(sectionHeader(documentRef, {
+      root.append(renderDescription(documentRef, components().MissionStudioContentHeader({
         id: "homeTitle",
-        kicker: "Mission Studio",
-        title: "Choose your starting mission",
-        body: "Pick one path. Command Doctor will route you directly there and preserve existing local records."
-      }));
-      const choices = el(documentRef, "div", "ms-path-choices");
-      (model.paths || []).forEach((path) => {
-        const card = el(documentRef, "article", "ms-card ms-path-card");
-        card.append(el(documentRef, "span", "ms-tool-symbol", path.symbol || "MS"));
-        card.append(el(documentRef, "h3", "", path.label));
-        card.append(el(documentRef, "p", "", path.description));
-        card.append(button(documentRef, `Choose ${path.label}`, "ms-button ms-button-primary", () => model.onChoosePath?.(path.id)));
-        choices.append(card);
-      });
-      root.append(choices);
+        kicker: "Welcome to Mission Studio",
+        title: "Choose your Command Doctor mission",
+        body: "Pick one path for this browser. You can start from zero, practise a route, or open technician tools."
+      })));
+      root.append(renderDescription(documentRef, components().FirstRunMissionSelector({
+        paths: model.paths || [],
+        onChoosePath: model.onChoosePath
+      })));
+      root.append(renderDescription(documentRef, components().AccessibleViewStatus("Choose one Command Doctor mission path.")));
       return root;
     }
 
-    root.append(sectionHeader(documentRef, {
+    root.append(renderDescription(documentRef, components().MissionStudioContentHeader({
       id: "homeTitle",
-      kicker: "Mission Studio",
+      kicker: model.headerKicker || "Mission Studio",
       title: `Welcome back to ${model.pathLabel}`,
-      body: "Continue the current mission, inspect recent local activity, or open one technician shortcut."
-    }));
-    const grid = el(documentRef, "div", "ms-home-grid");
-    grid.append(renderDescription(documentRef, components().ContinueMissionCard(model.continueMission)));
-    grid.append(renderDescription(documentRef, components().DiagnosticShortcutCard(model.diagnosticShortcut)));
-    const progress = el(documentRef, "section", "ms-card ms-home-progress");
-    progress.append(el(documentRef, "div", "ms-kicker", "Progress summary"));
-    progress.append(el(documentRef, "h3", "", model.progressTitle || "Level 0 orientation"));
-    const meter = el(documentRef, "div", "ms-progress-bar");
-    meter.append(el(documentRef, "span"));
-    meter.firstElementChild.style.width = `${model.progressPercent || 0}%`;
-    progress.append(meter, facts(documentRef, model.progressFacts || []));
-    grid.append(progress);
-    root.append(grid);
-    root.append(renderDescription(documentRef, components().RecentActivityStrip({ items: model.recentActivity || [] })));
+      body: model.headerBody || "Continue your mission, inspect recent local activity, or open one technician shortcut."
+    })));
+    const top = el(documentRef, "div", "ms-home-top-row");
+    top.append(renderDescription(documentRef, components().HomeMissionHero(model.missionHero || {})));
+    const rail = el(documentRef, "aside", "ms-home-right-rail");
+    rail.append(
+      renderDescription(documentRef, components().HomeProgressSummary(model.progressSummary || {})),
+      renderDescription(documentRef, components().HomeNextCheckpoint(model.nextCheckpoint || {})),
+      renderDescription(documentRef, components().HomeTechnicianAction(model.technicianAction || model.diagnosticShortcut || {}))
+    );
+    top.append(rail);
+    root.append(top);
+    const lower = el(documentRef, "div", "ms-home-lower-grid");
+    lower.append(
+      renderDescription(documentRef, components().HomeRecentActivity({
+        items: model.recentActivity || [],
+        onAction: model.onOpenReports
+      })),
+      renderDescription(documentRef, components().HomeTechnicianShortcuts({ shortcuts: model.shortcuts || [] })),
+      renderDescription(documentRef, components().HomeJourneyPreview({ lessons: model.journeyPreview || [] }))
+    );
+    root.append(lower);
     const recommendation = el(documentRef, "section", "ms-recommendation-row");
     recommendation.append(el(documentRef, "strong", "", model.recommendation || "Recommended next action: continue your current lesson."));
     recommendation.append(button(documentRef, "Change Path", "ms-button ms-button-quiet", model.onChangePath));
     root.append(recommendation);
+    root.append(renderDescription(documentRef, components().AccessibleViewStatus(`Home loaded for ${model.pathLabel}.`)));
     return root;
   }
 

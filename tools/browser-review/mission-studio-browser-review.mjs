@@ -19,15 +19,16 @@ const clientRoot = path.resolve(args.client || defaultClient);
 const externalBaseUrl = typeof args["base-url"] === "string"
   ? args["base-url"].replace(/\/lab\.html.*$/i, "").replace(/\/$/, "")
   : "";
-const cssViewportDesktop = { width: 1280, height: 900, mobile: false };
+const cssViewportDesktop = { width: 1440, height: 900, mobile: false };
+const cssViewportDesktopCompact = { width: 1280, height: 800, mobile: false };
 const cssViewportMobile = { width: 390, height: 844, mobile: true };
 const reviewFailureGuards = [
   "desktop onboarding narrow content strip",
   "desktop home narrow content strip",
-  "desktop course narrow content strip",
-  "desktop level overview narrow content strip",
+  "desktop shell old layout reuse",
+  "desktop mission hero missing visual",
   "mobile home partial viewport",
-  "mobile tools duplicate content",
+  "mobile bottom navigation overlap",
   "screenshot metric mismatch"
 ];
 
@@ -47,23 +48,17 @@ const level0State = (stepId = "mission") => ({
 
 const scenarios = [
   { id: "desktop-onboarding", viewport: cssViewportDesktop, seed: { path: "" }, steps: [] },
-  { id: "desktop-home", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Home" }] },
-  { id: "desktop-course-map", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Course" }] },
-  { id: "desktop-level-overview", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Course" }, { click: "Open overview" }] },
-  { id: "desktop-switch-preview-visuals", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Course" }, { click: "Preview plan" }], scrollSelector: ".switch-preview-panel" },
-  { id: "desktop-lesson-mission", viewport: cssViewportDesktop, seed: { path: "zero", step: "mission" }, steps: [{ click: "Course" }, { click: "Open overview" }, { click: "Start Level 0 lesson" }] },
-  { id: "desktop-lesson-see", viewport: cssViewportDesktop, seed: { path: "zero", step: "see" }, steps: [{ click: "Course" }, { click: "Open overview" }, { click: "Start Level 0 lesson" }] },
-  { id: "desktop-lesson-predict", viewport: cssViewportDesktop, seed: { path: "zero", step: "predict" }, steps: [{ click: "Course" }, { click: "Open overview" }, { click: "Start Level 0 lesson" }] },
-  { id: "desktop-practice", viewport: cssViewportDesktop, seed: { path: "practice" }, steps: [{ click: "Practice" }] },
-  { id: "desktop-progress", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Progress" }] },
-  { id: "desktop-tools", viewport: cssViewportDesktop, seed: { path: "tools" }, steps: [{ click: "Tools" }] },
+  { id: "desktop-home-zero", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ click: "Home" }] },
+  { id: "desktop-home-practice-path", viewport: cssViewportDesktop, seed: { path: "practice" }, steps: [{ click: "Home" }] },
+  { id: "desktop-home-technician-path", viewport: cssViewportDesktop, seed: { path: "tools" }, steps: [{ click: "Home" }] },
+  { id: "desktop-home-recent-activity", viewport: cssViewportDesktop, seed: { path: "zero", step: "see", activity: "recent" }, steps: [{ click: "Home" }] },
+  { id: "desktop-home-empty-activity", viewport: cssViewportDesktop, seed: { path: "zero", step: "mission" }, steps: [{ click: "Home" }] },
+  { id: "desktop-navigation-focus", viewport: cssViewportDesktop, seed: { path: "zero" }, steps: [{ focus: "Practice" }] },
+  { id: "desktop-1280-home-zero", viewport: cssViewportDesktopCompact, seed: { path: "zero" }, steps: [{ click: "Home" }] },
   { id: "mobile-onboarding", viewport: cssViewportMobile, seed: { path: "" }, steps: [] },
-  { id: "mobile-home", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Home" }] },
-  { id: "mobile-course", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Course" }] },
-  { id: "mobile-lesson-visual", viewport: cssViewportMobile, seed: { path: "zero", step: "see" }, steps: [{ click: "Course" }, { click: "Open overview" }, { click: "Start Level 0 lesson" }] },
-  { id: "mobile-practice", viewport: cssViewportMobile, seed: { path: "practice" }, steps: [{ click: "Practice" }] },
-  { id: "mobile-progress", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Progress" }] },
-  { id: "mobile-tools", viewport: cssViewportMobile, seed: { path: "tools" }, steps: [{ click: "Tools" }] }
+  { id: "mobile-home-zero", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Home" }] },
+  { id: "mobile-home-bottom-scroll", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ click: "Home" }], scrollSelector: ".ms-recommendation-row" },
+  { id: "mobile-navigation-focus", viewport: cssViewportMobile, seed: { path: "zero" }, steps: [{ focus: "Tools" }] }
 ];
 
 function parseArgs(argv) {
@@ -450,6 +445,10 @@ async function navigateAndSeed(client, baseUrl, scenario) {
     level0: level0State(scenario.seed.step || "mission"),
     recentTool: "diagnose"
   };
+  if (scenario.seed.activity === "recent") {
+    seed.level0.resume_timestamp = "2026-07-17T00:00:00.000Z";
+    seed.level0.confidence_by_lesson[seed.level0.current_lesson_id] = "Growing";
+  }
   await evaluate(client, `(() => {
     localStorage.clear();
     sessionStorage.clear();
@@ -475,7 +474,7 @@ async function waitForAppReady(client, scenario, { requireLessonVisual = false }
   await waitForReadyState(client);
   for (let attempt = 0; attempt < 160; attempt += 1) {
     const ready = await evaluate(client, `(() => {
-      const nav = [...document.querySelectorAll(".nav-tab")].map((item) => item.textContent.trim()).join("|");
+      const nav = [...document.querySelectorAll("[data-ms-primary-nav='true']")].slice(0, 5).map((item) => item.textContent.trim()).join("|");
       const active = document.querySelector(".view.active");
       const activeRoot = active?.querySelector("[id$='Root'], .history-list, .knowledge-grid") || active;
       return Boolean(window.CommandDoctorBeginnerExperience && window.CommandDoctorMissionStudioComponents && nav === "Home|Course|Practice|Progress|Tools" && activeRoot && activeRoot.children.length);
@@ -547,6 +546,23 @@ async function clickVisibleText(client, text) {
   await waitForAppReady(client, { id: text.toLowerCase(), seed: {} });
 }
 
+async function focusVisibleText(client, text) {
+  const focused = await evaluate(client, `(() => {
+    const targetText = ${JSON.stringify(text)};
+    const candidates = [...document.querySelectorAll("button, summary, a")].filter((node) => {
+      const rect = node.getBoundingClientRect();
+      const visible = rect.width > 0 && rect.height > 0 && getComputedStyle(node).visibility !== "hidden";
+      return visible && node.textContent.trim().includes(targetText);
+    });
+    const node = candidates[0];
+    if (!node) return false;
+    node.focus();
+    return document.activeElement === node;
+  })()`);
+  if (!focused) throw new Error(`Could not focus visible UI control: ${text}`);
+  await waitForAppReady(client, { id: text.toLowerCase(), seed: {} });
+}
+
 async function collectGeometry(client) {
   return evaluate(client, `(() => {
     const rect = (node) => {
@@ -555,14 +571,26 @@ async function collectGeometry(client) {
     };
     const active = document.querySelector(".view.active");
     const activeRoot = active?.querySelector("[id$='Root'], .history-list, .knowledge-grid, .admin-root") || active;
-    const main = document.querySelector(".main-panel");
-    const nav = document.querySelector(".sidebar");
-    const activeNav = [...document.querySelectorAll(".nav-tab")].filter((item) => {
+    const shell = document.querySelector(".ms-app-shell");
+    const main = document.querySelector(".ms-shell-main") || document.querySelector(".main-panel");
+    const visibleSidebar = [...document.querySelectorAll(".ms-desktop-sidebar, .ms-mobile-header")].find((item) => {
+      const box = item.getBoundingClientRect();
+      return box.width > 0 && box.height > 0 && getComputedStyle(item).display !== "none";
+    });
+    const nav = visibleSidebar || document.querySelector(".sidebar");
+    const hero = active?.querySelector(".ms-home-hero");
+    const bottomNav = document.querySelector(".ms-mobile-bottom-nav");
+    const missionVisual = active?.querySelector(".ms-mission-visual img");
+    const missionVisualText = active?.querySelector(".ms-mission-visual figcaption");
+    const activeNav = [...document.querySelectorAll("[data-ms-primary-nav='true']")].filter((item) => {
       const box = item.getBoundingClientRect();
       return box.width > 0 && box.height > 0 && getComputedStyle(item).display !== "none";
     });
     const activeViewCount = [...document.querySelectorAll(".view.active")].length;
-    const fixedBottomNavCount = [...document.querySelectorAll(".sidebar")].filter((item) => getComputedStyle(item).position === "fixed").length;
+    const fixedBottomNavCount = [...document.querySelectorAll(".ms-mobile-bottom-nav")].filter((item) => {
+      const box = item.getBoundingClientRect();
+      return box.width > 0 && box.height > 0 && getComputedStyle(item).position === "fixed";
+    }).length;
     const duplicateRootContent = [...document.querySelectorAll(".view.active [id$='Root']")].filter((item) => item.children.length > 0).length > 1;
     const focused = document.activeElement;
     const colorParts = (value) => {
@@ -590,7 +618,7 @@ async function collectGeometry(client) {
       const second = luminance(bg);
       return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
     };
-    const contrastResults = [".ms-screen-header h2", ".ms-card p", ".ms-button-primary", ".ms-button-secondary", ".nav-tab.active", ".ms-kicker"].map((selector) => {
+    const contrastResults = [".ms-content-header h2", ".ms-home-section p", ".ms-button-primary", ".ms-button-secondary", ".nav-tab.active", ".ms-kicker"].map((selector) => {
       const node = active?.querySelector(selector) || document.querySelector(selector);
       if (!node) return null;
       const style = getComputedStyle(node);
@@ -610,9 +638,12 @@ async function collectGeometry(client) {
     return {
       activeViewId: active?.id || "",
       activeRootSelector: activeRoot?.id ? "#" + activeRoot.id : "." + [...(activeRoot?.classList || [])].join("."),
+      shellRect: rect(shell),
       activeRootRect: rootRect,
       mainRect,
       navigationRect: rect(nav),
+      heroRect: rect(hero),
+      bottomNavigationRect: rect(bottomNav),
       documentScrollWidth: scrollWidth,
       documentClientWidth: viewportWidth,
       viewportHeight,
@@ -623,13 +654,25 @@ async function collectGeometry(client) {
       activeViewCount,
       duplicateRootContent,
       contrastResults,
-      contentWidthRatio: rootRect.width / availableMainWidth
+      contentWidthRatio: rootRect.width / availableMainWidth,
+      oldShellPresent: Boolean(document.querySelector(".app-shell, .sidebar, .main-panel, .nav-tabs, .status-stack")),
+      pathChoiceCount: active?.querySelectorAll("[data-path-choice]").length || 0,
+      dominantActionCount: active?.querySelectorAll("[data-dominant-action='true']").length || 0,
+      missionVisual: {
+        present: Boolean(missionVisual),
+        src: missionVisual?.getAttribute("src") || "",
+        altLength: missionVisual?.getAttribute("alt")?.length || 0,
+        textLength: missionVisualText?.textContent?.trim().length || 0
+      }
     };
   })()`);
 }
 
 async function captureScenario(client, scenario, runDir, consoleErrors) {
-  for (const step of scenario.steps) await clickVisibleText(client, step.click);
+  for (const step of scenario.steps) {
+    if (step.click) await clickVisibleText(client, step.click);
+    if (step.focus) await focusVisibleText(client, step.focus);
+  }
   if (scenario.scrollSelector) {
     await evaluate(client, `document.querySelector(${JSON.stringify(scenario.scrollSelector)})?.scrollIntoView({ block: "start" })`);
   }
@@ -649,9 +692,12 @@ async function captureScenario(client, scenario, runDir, consoleErrors) {
     screenshot_sha256: sha256,
     screenshot_path: path.relative(outDir, screenshotPath).replace(/\\/g, "/"),
     active_root_selector: geometry.activeRootSelector,
+    shell_rectangle: geometry.shellRect,
     active_root_rectangle: geometry.activeRootRect,
     main_rectangle: geometry.mainRect,
     navigation_rectangle: geometry.navigationRect,
+    hero_rectangle: geometry.heroRect,
+    bottom_navigation_rectangle: geometry.bottomNavigationRect,
     document_scroll_width: geometry.documentScrollWidth,
     horizontal_overflow: geometry.horizontalOverflow,
     focused_element: geometry.focusedElement,
@@ -662,6 +708,10 @@ async function captureScenario(client, scenario, runDir, consoleErrors) {
     active_view_count: geometry.activeViewCount,
     duplicate_root_content: geometry.duplicateRootContent,
     contrast_results: geometry.contrastResults,
+    old_shell_present: geometry.oldShellPresent,
+    path_choice_count: geometry.pathChoiceCount,
+    dominant_action_count: geometry.dominantActionCount,
+    mission_visual: geometry.missionVisual,
     pixel_content_bounds: pixelContentBounds
   };
   validateRecord(record, scenario);
@@ -680,6 +730,16 @@ function validateRecord(record, scenario) {
   if (record.visible_navigation_count !== 5) throw new Error(`${scenario.id} expected one visible navigation with five tabs.`);
   if (record.fixed_bottom_navigation_count > 1) throw new Error(`${scenario.id} duplicate fixed nav in full-page capture risk.`);
   if (record.active_view_count !== 1 || record.duplicate_root_content) throw new Error(`${scenario.id} duplicated root content detected.`);
+  if (record.old_shell_present) throw new Error(`${scenario.id} old shell classes are still present in the active product DOM.`);
+  if (/onboarding/.test(scenario.id) && record.path_choice_count !== 3) throw new Error(`${scenario.id} expected exactly three path choices.`);
+  if (/home/.test(scenario.id) && !/onboarding/.test(scenario.id)) {
+    if (record.dominant_action_count !== 1) throw new Error(`${scenario.id} expected one dominant mission action.`);
+    if (record.hero_rectangle.width < 320 || record.hero_rectangle.height < 220) throw new Error(`${scenario.id} mission hero is too small.`);
+    if (!record.mission_visual.present || !record.mission_visual.src.includes("mission-studio-home-network.svg")) throw new Error(`${scenario.id} missing local mission visual asset.`);
+    if (record.mission_visual.altLength < 30 || record.mission_visual.textLength < 40) throw new Error(`${scenario.id} mission visual lacks alt text or text alternative.`);
+  }
+  if (!mobile && (record.navigation_rectangle.width < 240 || record.navigation_rectangle.width > 264)) throw new Error(`${scenario.id} desktop sidebar width outside approved range.`);
+  if (mobile && record.bottom_navigation_rectangle.height < 44) throw new Error(`${scenario.id} mobile bottom navigation is missing or too small.`);
   if (record.console_errors.length) throw new Error(`${scenario.id} console errors: ${record.console_errors.join("; ")}`);
   if (!record.contrast_results?.length) throw new Error(`${scenario.id} computed contrast audit did not run.`);
   const contrastFailures = record.contrast_results.filter((item) => item.ratio < item.minimum);
@@ -700,6 +760,10 @@ async function navigateAndSeedPage(page, baseUrl, scenario) {
     level0: level0State(scenario.seed.step || "mission"),
     recentTool: "diagnose"
   };
+  if (scenario.seed.activity === "recent") {
+    seed.level0.resume_timestamp = "2026-07-17T00:00:00.000Z";
+    seed.level0.confidence_by_lesson[seed.level0.current_lesson_id] = "Growing";
+  }
   await page.evaluate((payload) => {
     localStorage.clear();
     sessionStorage.clear();
@@ -712,12 +776,29 @@ async function navigateAndSeedPage(page, baseUrl, scenario) {
 }
 
 async function waitForAppReadyPage(page, scenario, { requireLessonVisual = false } = {}) {
-  await page.waitForFunction(() => {
-    const nav = [...document.querySelectorAll(".nav-tab")].map((item) => item.textContent.trim()).join("|");
-    const active = document.querySelector(".view.active");
-    const activeRoot = active?.querySelector("[id$='Root'], .history-list, .knowledge-grid") || active;
-    return Boolean(window.CommandDoctorBeginnerExperience && window.CommandDoctorMissionStudioComponents && nav === "Home|Course|Practice|Progress|Tools" && activeRoot && activeRoot.children.length);
-  }, null, { timeout: 15000 });
+  try {
+    await page.waitForFunction(() => {
+      const nav = [...document.querySelectorAll("[data-ms-primary-nav='true']")].slice(0, 5).map((item) => item.textContent.trim()).join("|");
+      const active = document.querySelector(".view.active");
+      const activeRoot = active?.querySelector("[id$='Root'], .history-list, .knowledge-grid") || active;
+      return Boolean(window.CommandDoctorBeginnerExperience && window.CommandDoctorMissionStudioComponents && nav === "Home|Course|Practice|Progress|Tools" && activeRoot && activeRoot.children.length);
+    }, null, { timeout: 15000 });
+  } catch (error) {
+    const diagnostic = await page.evaluate(() => {
+      const nav = [...document.querySelectorAll("[data-ms-primary-nav='true']")].slice(0, 5).map((item) => item.textContent.trim()).join("|");
+      const active = document.querySelector(".view.active");
+      const activeRoot = active?.querySelector("[id$='Root'], .history-list, .knowledge-grid") || active;
+      return {
+        nav,
+        active: active?.id || "",
+        activeChildren: activeRoot?.children.length || 0,
+        beginner: Boolean(window.CommandDoctorBeginnerExperience),
+        components: Boolean(window.CommandDoctorMissionStudioComponents),
+        bodyClass: document.body.className
+      };
+    }).catch(() => ({}));
+    throw new Error(`${scenario.id} readiness timeout: ${JSON.stringify(diagnostic)} (${error.message})`);
+  }
   await page.evaluate(async () => {
     if (document.fonts?.ready) await document.fonts.ready;
     await Promise.all([...document.images].map((img) => img.decode ? img.decode().catch(() => {}) : Promise.resolve()));
@@ -759,8 +840,14 @@ async function waitForStableGeometryPage(page) {
 }
 
 async function clickVisibleTextPage(page, text) {
-  const control = page.locator("button, summary, a").filter({ hasText: text }).first();
+  const control = page.locator("button:visible, summary:visible, a:visible").filter({ hasText: text }).first();
   await control.click({ timeout: 10000 });
+  await waitForAppReadyPage(page, { id: text.toLowerCase(), seed: {} });
+}
+
+async function focusVisibleTextPage(page, text) {
+  const control = page.locator("button:visible, summary:visible, a:visible").filter({ hasText: text }).first();
+  await control.focus({ timeout: 10000 });
   await waitForAppReadyPage(page, { id: text.toLowerCase(), seed: {} });
 }
 
@@ -772,14 +859,26 @@ async function collectGeometryPage(page) {
     };
     const active = document.querySelector(".view.active");
     const activeRoot = active?.querySelector("[id$='Root'], .history-list, .knowledge-grid, .admin-root") || active;
-    const main = document.querySelector(".main-panel");
-    const nav = document.querySelector(".sidebar");
-    const activeNav = [...document.querySelectorAll(".nav-tab")].filter((item) => {
+    const shell = document.querySelector(".ms-app-shell");
+    const main = document.querySelector(".ms-shell-main") || document.querySelector(".main-panel");
+    const visibleSidebar = [...document.querySelectorAll(".ms-desktop-sidebar, .ms-mobile-header")].find((item) => {
+      const box = item.getBoundingClientRect();
+      return box.width > 0 && box.height > 0 && getComputedStyle(item).display !== "none";
+    });
+    const nav = visibleSidebar || document.querySelector(".sidebar");
+    const hero = active?.querySelector(".ms-home-hero");
+    const bottomNav = document.querySelector(".ms-mobile-bottom-nav");
+    const missionVisual = active?.querySelector(".ms-mission-visual img");
+    const missionVisualText = active?.querySelector(".ms-mission-visual figcaption");
+    const activeNav = [...document.querySelectorAll("[data-ms-primary-nav='true']")].filter((item) => {
       const box = item.getBoundingClientRect();
       return box.width > 0 && box.height > 0 && getComputedStyle(item).display !== "none";
     });
     const activeViewCount = [...document.querySelectorAll(".view.active")].length;
-    const fixedBottomNavCount = [...document.querySelectorAll(".sidebar")].filter((item) => getComputedStyle(item).position === "fixed").length;
+    const fixedBottomNavCount = [...document.querySelectorAll(".ms-mobile-bottom-nav")].filter((item) => {
+      const box = item.getBoundingClientRect();
+      return box.width > 0 && box.height > 0 && getComputedStyle(item).position === "fixed";
+    }).length;
     const duplicateRootContent = [...document.querySelectorAll(".view.active [id$='Root']")].filter((item) => item.children.length > 0).length > 1;
     const focused = document.activeElement;
     const colorParts = (value) => {
@@ -807,7 +906,7 @@ async function collectGeometryPage(page) {
       const second = luminance(bg);
       return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
     };
-    const contrastResults = [".ms-screen-header h2", ".ms-card p", ".ms-button-primary", ".ms-button-secondary", ".nav-tab.active", ".ms-kicker"].map((selector) => {
+    const contrastResults = [".ms-content-header h2", ".ms-home-section p", ".ms-button-primary", ".ms-button-secondary", ".nav-tab.active", ".ms-kicker"].map((selector) => {
       const node = active?.querySelector(selector) || document.querySelector(selector);
       if (!node) return null;
       const style = getComputedStyle(node);
@@ -826,9 +925,12 @@ async function collectGeometryPage(page) {
     return {
       activeViewId: active?.id || "",
       activeRootSelector: activeRoot?.id ? "#" + activeRoot.id : "." + [...(activeRoot?.classList || [])].join("."),
+      shellRect: rect(shell),
       activeRootRect: rootRect,
       mainRect,
       navigationRect: rect(nav),
+      heroRect: rect(hero),
+      bottomNavigationRect: rect(bottomNav),
       documentScrollWidth: scrollWidth,
       documentClientWidth: viewportWidth,
       viewportHeight: window.innerHeight,
@@ -839,15 +941,27 @@ async function collectGeometryPage(page) {
       activeViewCount,
       duplicateRootContent,
       contrastResults,
-      contentWidthRatio: rootRect.width / availableMainWidth
+      contentWidthRatio: rootRect.width / availableMainWidth,
+      oldShellPresent: Boolean(document.querySelector(".app-shell, .sidebar, .main-panel, .nav-tabs, .status-stack")),
+      pathChoiceCount: active?.querySelectorAll("[data-path-choice]").length || 0,
+      dominantActionCount: active?.querySelectorAll("[data-dominant-action='true']").length || 0,
+      missionVisual: {
+        present: Boolean(missionVisual),
+        src: missionVisual?.getAttribute("src") || "",
+        altLength: missionVisual?.getAttribute("alt")?.length || 0,
+        textLength: missionVisualText?.textContent?.trim().length || 0
+      }
     };
   });
 }
 
 async function captureScenarioPage(page, scenario, runDir, consoleErrors) {
-  for (const step of scenario.steps) await clickVisibleTextPage(page, step.click);
+  for (const step of scenario.steps) {
+    if (step.click) await clickVisibleTextPage(page, step.click);
+    if (step.focus) await focusVisibleTextPage(page, step.focus);
+  }
   if (scenario.scrollSelector) {
-    await page.locator(scenario.scrollSelector).scrollIntoViewIfNeeded({ timeout: 10000 });
+    await page.locator(scenario.scrollSelector).first().scrollIntoViewIfNeeded({ timeout: 10000 });
   }
   await waitForAppReadyPage(page, scenario, { requireLessonVisual: true });
   const geometry = await collectGeometryPage(page);
@@ -863,9 +977,12 @@ async function captureScenarioPage(page, scenario, runDir, consoleErrors) {
     screenshot_sha256: sha256,
     screenshot_path: path.relative(outDir, screenshotPath).replace(/\\/g, "/"),
     active_root_selector: geometry.activeRootSelector,
+    shell_rectangle: geometry.shellRect,
     active_root_rectangle: geometry.activeRootRect,
     main_rectangle: geometry.mainRect,
     navigation_rectangle: geometry.navigationRect,
+    hero_rectangle: geometry.heroRect,
+    bottom_navigation_rectangle: geometry.bottomNavigationRect,
     document_scroll_width: geometry.documentScrollWidth,
     horizontal_overflow: geometry.horizontalOverflow,
     focused_element: geometry.focusedElement,
@@ -876,6 +993,10 @@ async function captureScenarioPage(page, scenario, runDir, consoleErrors) {
     active_view_count: geometry.activeViewCount,
     duplicate_root_content: geometry.duplicateRootContent,
     contrast_results: geometry.contrastResults,
+    old_shell_present: geometry.oldShellPresent,
+    path_choice_count: geometry.pathChoiceCount,
+    dominant_action_count: geometry.dominantActionCount,
+    mission_visual: geometry.missionVisual,
     pixel_content_bounds: pixelContentBounds
   };
   validateRecord(record, scenario);
