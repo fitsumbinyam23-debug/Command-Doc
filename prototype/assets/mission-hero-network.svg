@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="410" viewBox="0 0 620 410" role="img" aria-labelledby="title desc">
+  <title id="title">Mission network visual</title>
+  <desc id="desc">A large original network switch connecting a laptop, access point, service, and gateway with glowing data paths.</desc>
+  <defs>
+    <linearGradient id="switchBody" x1="128" y1="142" x2="512" y2="288" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#18253C"/>
+      <stop offset="0.55" stop-color="#0D1728"/>
+      <stop offset="1" stop-color="#050C18"/>
+    </linearGradient>
+    <linearGradient id="portGlow" x1="146" y1="220" x2="474" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10C6C3"/>
+      <stop offset="1" stop-color="#2086FF"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0B66F0"/>
+      <stop offset="1" stop-color="#10C6C3"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#010713" flood-opacity="0.48"/>
+    </filter>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="40" y="38" width="540" height="330" rx="18" fill="#061A3E" opacity="0.1"/>
+  <path d="M98 302C142 354 255 378 352 354c86-21 147-78 168-153 18-64 3-111-45-140" fill="none" stroke="#1D7DF0" stroke-width="2" opacity="0.22"/>
+  <path d="M102 104c82-53 204-57 286-16 90 45 123 141 77 218" fill="none" stroke="#10C6C3" stroke-width="2" opacity="0.16"/>
+
+  <g filter="url(#softShadow)">
+    <path d="M132 160h344c18 0 32 14 32 32v74c0 18-14 32-32 32H132c-18 0-32-14-32-32v-74c0-18 14-32 32-32Z" fill="url(#switchBody)"/>
+    <path d="M132 160h344c18 0 32 14 32 32v10H100v-10c0-18 14-32 32-32Z" fill="#23314A" opacity="0.86"/>
+    <rect x="120" y="190" width="368" height="86" rx="12" fill="#0A1322" stroke="#38516E" stroke-width="2"/>
+    <g fill="#D9F7FF">
+      <rect x="144" y="209" width="28" height="22" rx="4"/>
+      <rect x="181" y="209" width="28" height="22" rx="4"/>
+      <rect x="218" y="209" width="28" height="22" rx="4"/>
+      <rect x="255" y="209" width="28" height="22" rx="4"/>
+      <rect x="292" y="209" width="28" height="22" rx="4"/>
+      <rect x="329" y="209" width="28" height="22" rx="4"/>
+      <rect x="366" y="209" width="28" height="22" rx="4"/>
+      <rect x="403" y="209" width="28" height="22" rx="4"/>
+      <rect x="440" y="209" width="28" height="22" rx="4"/>
+    </g>
+    <g fill="#0F1D33">
+      <rect x="149" y="214" width="18" height="12" rx="2"/>
+      <rect x="186" y="214" width="18" height="12" rx="2"/>
+      <rect x="223" y="214" width="18" height="12" rx="2"/>
+      <rect x="260" y="214" width="18" height="12" rx="2"/>
+      <rect x="297" y="214" width="18" height="12" rx="2"/>
+      <rect x="334" y="214" width="18" height="12" rx="2"/>
+      <rect x="371" y="214" width="18" height="12" rx="2"/>
+      <rect x="408" y="214" width="18" height="12" rx="2"/>
+      <rect x="445" y="214" width="18" height="12" rx="2"/>
+    </g>
+    <path d="M144 249h324" stroke="url(#portGlow)" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+    <g fill="#73F4EF" filter="url(#glow)">
+      <circle cx="158" cy="250" r="4"/>
+      <circle cx="232" cy="250" r="4"/>
+      <circle cx="306" cy="250" r="4"/>
+      <circle cx="380" cy="250" r="4"/>
+      <circle cx="454" cy="250" r="4"/>
+    </g>
+  </g>
+
+  <g fill="none" stroke="#66F3F1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
+    <path d="M158 250C124 250 110 214 83 214"/>
+    <path d="M232 250c-7-61 35-82 76-82"/>
+    <path d="M306 250c22-35 59-46 110-33"/>
+    <path d="M380 250c27 49 70 57 116 31"/>
+  </g>
+
+  <g>
+    <rect x="39" y="188" width="88" height="52" rx="10" fill="#082457" stroke="#6FE9FF" stroke-width="2"/>
+    <path d="M62 220h42M68 207h30" stroke="#DDF8FF" stroke-width="4" stroke-linecap="round"/>
+    <text x="83" y="258" text-anchor="middle" fill="#CDE8FF" font-size="18" font-family="Segoe UI, Arial" font-weight="700">Laptop</text>
+  </g>
+
+  <g>
+    <rect x="264" y="106" width="92" height="58" rx="12" fill="#082457" stroke="#6FE9FF" stroke-width="2"/>
+    <path d="M289 134c13-14 29-14 42 0M297 143c8-8 18-8 26 0M307 152h6" stroke="#DDF8FF" stroke-width="4" stroke-linecap="round"/>
+    <text x="310" y="91" text-anchor="middle" fill="#CDE8FF" font-size="18" font-family="Segoe UI, Arial" font-weight="700">Access point</text>
+  </g>
+
+  <g>
+    <rect x="390" y="178" width="104" height="70" rx="12" fill="#082457" stroke="#6FE9FF" stroke-width="2"/>
+    <path d="M417 201h50M417 216h50M417 231h32" stroke="#DDF8FF" stroke-width="4" stroke-linecap="round"/>
+    <text x="442" y="266" text-anchor="middle" fill="#CDE8FF" font-size="18" font-family="Segoe UI, Arial" font-weight="700">Service</text>
+  </g>
+
+  <g>
+    <rect x="462" y="266" width="104" height="58" rx="12" fill="#082457" stroke="#6FE9FF" stroke-width="2"/>
+    <path d="M488 295h52M514 279v32" stroke="#DDF8FF" stroke-width="4" stroke-linecap="round"/>
+    <text x="514" y="349" text-anchor="middle" fill="#CDE8FF" font-size="18" font-family="Segoe UI, Arial" font-weight="700">Gateway</text>
+  </g>
+
+  <g filter="url(#glow)" fill="url(#card)">
+    <circle cx="83" cy="214" r="5"/>
+    <circle cx="308" cy="168" r="5"/>
+    <circle cx="416" cy="217" r="5"/>
+    <circle cx="496" cy="281" r="5"/>
+  </g>
+
+  <path d="M120 326c78 28 206 33 304 10" fill="none" stroke="#2086FF" stroke-width="8" stroke-linecap="round" opacity="0.16"/>
+</svg>

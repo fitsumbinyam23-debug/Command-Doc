@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Command Doctor Mission Studio - Home Prototype V2</title>
+    <link rel="stylesheet" href="./mission-studio-home-v2.css" />
+  </head>
+  <body>
+    <div class="studio-shell">
+      <aside class="studio-sidebar" aria-label="Mission Studio navigation">
+        <a class="brand-lockup" href="#" aria-label="Command Doctor home">
+          <img src="./assets/mission-studio-logo.svg" alt="" class="brand-mark" />
+          <span class="brand-text">
+            <span class="brand-name">Command Doctor</span>
+            <span class="brand-tagline">Learn. Practise. Diagnose.</span>
+          </span>
+        </a>
+
+        <nav class="side-nav" aria-label="Primary">
+          <a class="side-link is-active" href="#">
+            <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-home"></use></svg>
+            <span>Home</span>
+          </a>
+          <a class="side-link" href="#">
+            <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-course"></use></svg>
+            <span>Course</span>
+          </a>
+          <a class="side-link" href="#">
+            <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-practice"></use></svg>
+            <span>Practice</span>
+          </a>
+          <a class="side-link" href="#">
+            <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-progress"></use></svg>
+            <span>Progress</span>
+          </a>
+          <a class="side-link" href="#">
+            <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-tools"></use></svg>
+            <span>Tools</span>
+          </a>
+        </nav>
+
+        <section class="path-summary" aria-label="Current path summary">
+          <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-path"></use></svg>
+          <div>
+            <strong>Your mission</strong>
+            <span>Learn from Zero</span>
+          </div>
+        </section>
+      </aside>
+
+      <main class="studio-main">
+        <header class="welcome-row">
+          <div>
+            <p class="section-kicker">Mission Studio</p>
+            <h1>Welcome back, Alex</h1>
+            <p class="welcome-copy">
+              Continue the beginner path, build real network intuition, and open technician tools when you need evidence.
+            </p>
+          </div>
+          <div class="top-progress" aria-label="Current course progress">
+            <span>Course progress</span>
+            <strong>12%</strong>
+          </div>
+        </header>
+
+        <section class="primary-grid" aria-label="Current mission and progress">
+          <article class="mission-hero">
+            <div class="hero-content">
+              <p class="hero-label">Continue learning</p>
+              <h2>Level 0 - Welcome to Networking</h2>
+              <p class="hero-lesson">Lesson 1 - What is a network?</p>
+              <p class="hero-copy">
+                See how devices connect, communicate, and reach shared services.
+              </p>
+
+              <div class="hero-progress" aria-label="Mission progress">
+                <div class="hero-progress-row">
+                  <span>Mission progress</span>
+                  <strong>12%</strong>
+                </div>
+                <div class="progress-track">
+                  <span style="width: 12%"></span>
+                </div>
+              </div>
+
+              <div class="hero-actions">
+                <button class="primary-action" type="button" data-prototype-action="continue">
+                  Continue Mission
+                  <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-arrow"></use></svg>
+                </button>
+                <button class="secondary-action" type="button" data-prototype-action="map">
+                  View path
+                </button>
+              </div>
+            </div>
+
+            <div class="mission-visual" aria-hidden="true">
+              <img src="./assets/mission-hero-network.svg" alt="" />
+            </div>
+          </article>
+
+          <aside class="progress-rail" aria-label="Mission status">
+            <article class="rail-panel rail-progress">
+              <div class="rail-icon">
+                <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-progress"></use></svg>
+              </div>
+              <div>
+                <h3>Learning progress</h3>
+                <p>Level 0 orientation is active with seven beginner lessons ahead.</p>
+              </div>
+              <div class="rail-meter" aria-hidden="true"><span></span></div>
+            </article>
+
+            <article class="rail-panel rail-checkpoint">
+              <div class="rail-icon">
+                <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-checkpoint"></use></svg>
+              </div>
+              <div>
+                <h3>Next checkpoint</h3>
+                <p>Complete four lessons to unlock the first reflection checkpoint.</p>
+              </div>
+              <span class="rail-state">Not ready yet</span>
+            </article>
+
+            <article class="rail-panel rail-action">
+              <div class="rail-icon">
+                <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-diagnose"></use></svg>
+              </div>
+              <div>
+                <h3>Technician quick action</h3>
+                <p>Paste command output and build an evidence-first summary.</p>
+              </div>
+              <button class="rail-button" type="button" data-prototype-action="diagnose">Open Diagnose</button>
+            </article>
+          </aside>
+        </section>
+
+        <section class="lower-row" aria-label="Mission support">
+          <article class="recent-panel lower-panel">
+            <div class="lower-heading">
+              <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-reports"></use></svg>
+              <h2>Recent activity</h2>
+            </div>
+            <div class="activity-list">
+              <div class="activity-item">
+                <span class="activity-type">Report</span>
+                <strong>Local records are saved</strong>
+                <p>Reports are saved locally.</p>
+              </div>
+              <div class="activity-item">
+                <span class="activity-type">Lesson</span>
+                <strong>What is a network?</strong>
+                <p>Device roles are in progress.</p>
+              </div>
+              <div class="activity-item">
+                <span class="activity-type">Tool</span>
+                <strong>Switch Workbench prepared</strong>
+                <p>The first lab route is ready.</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="shortcut-panel lower-panel">
+            <div class="lower-heading">
+              <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-tools"></use></svg>
+              <h2>Technician shortcuts</h2>
+            </div>
+            <div class="shortcut-list">
+              <button type="button" class="shortcut" data-prototype-action="diagnose">
+                <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-diagnose"></use></svg>
+                <span>
+                  <strong>Diagnose</strong>
+                  <small>Summarize output.</small>
+                </span>
+              </button>
+              <button type="button" class="shortcut" data-prototype-action="lookup">
+                <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-lookup"></use></svg>
+                <span>
+                  <strong>Command Lookup</strong>
+                  <small>Syntax examples.</small>
+                </span>
+              </button>
+              <button type="button" class="shortcut" data-prototype-action="workbench">
+                <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-switch"></use></svg>
+                <span>
+                  <strong>Switch Workbench</strong>
+                  <small>Network state.</small>
+                </span>
+              </button>
+              <button type="button" class="shortcut" data-prototype-action="reports">
+                <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-reports"></use></svg>
+                <span>
+                  <strong>Saved Reports</strong>
+                  <small>Local evidence.</small>
+                </span>
+              </button>
+            </div>
+          </article>
+
+          <article class="journey-panel lower-panel">
+            <div class="lower-heading">
+              <svg aria-hidden="true"><use href="./assets/home-icons.svg#icon-course"></use></svg>
+              <h2>Journey preview</h2>
+            </div>
+            <ol class="journey-list">
+              <li class="is-current">
+                <span>1</span>
+                <div>
+                  <strong>What is a network?</strong>
+                  <p>Current - connected device language.</p>
+                </div>
+              </li>
+              <li>
+                <span>2</span>
+                <div>
+                  <strong>Why devices communicate</strong>
+                  <p>Next - services and users.</p>
+                </div>
+              </li>
+              <li>
+                <span>3</span>
+                <div>
+                  <strong>LAN, WAN, and the internet</strong>
+                  <p>Upcoming - local and wide-area paths.</p>
+                </div>
+              </li>
+            </ol>
+          </article>
+        </section>
+      </main>
+    </div>
+
+    <script src="./mission-studio-home-v2.js"></script>
+  </body>
+</html>
