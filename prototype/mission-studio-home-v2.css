@@ -16,6 +16,9 @@
   --paper: #ffffff;
   --canvas: #eef5f4;
   --canvas-warm: #f7f3ec;
+  --surface-blue: #edf6ff;
+  --surface-mint: #eafbf8;
+  --surface-gold: #fff6e9;
   --shadow-soft: 0 22px 48px rgba(7, 19, 37, 0.12);
   --shadow-card: 0 12px 28px rgba(7, 19, 37, 0.08);
 }
@@ -92,7 +95,7 @@ button {
 .brand-name {
   max-width: 130px;
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 780;
   line-height: 1.08;
 }
 
@@ -118,7 +121,7 @@ button {
   border-radius: 8px;
   color: #d7e8ff;
   font-size: 15px;
-  font-weight: 750;
+  font-weight: 700;
   text-decoration: none;
 }
 
@@ -178,10 +181,7 @@ button {
 }
 
 .welcome-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 28px;
+  display: block;
   margin-bottom: 18px;
 }
 
@@ -190,7 +190,7 @@ button {
   margin: 0 0 8px;
   color: #00777b;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 760;
 }
 
 .welcome-row h1 {
@@ -198,37 +198,14 @@ button {
   color: var(--ink-900);
   font-size: 36px;
   line-height: 1.08;
-  font-weight: 850;
+  font-weight: 780;
 }
 
 .welcome-copy {
-  max-width: 720px;
+  max-width: 780px;
   margin: 8px 0 0;
   color: var(--ink-500);
   font-size: 16px;
-}
-
-.top-progress {
-  display: grid;
-  min-width: 184px;
-  gap: 8px;
-  padding: 14px 16px;
-  border: 1px solid rgba(11, 102, 240, 0.16);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.68);
-  box-shadow: var(--shadow-card);
-}
-
-.top-progress span {
-  color: var(--ink-500);
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.top-progress strong {
-  color: var(--navy-900);
-  font-size: 26px;
-  line-height: 1;
 }
 
 .primary-grid {
@@ -267,14 +244,14 @@ button {
   margin: 0;
   font-size: 32px;
   line-height: 1.08;
-  font-weight: 850;
+  font-weight: 780;
 }
 
 .hero-lesson {
   margin: 12px 0 0;
   color: #cde8ff;
   font-size: 18px;
-  font-weight: 760;
+  font-weight: 680;
 }
 
 .hero-copy {
@@ -294,7 +271,7 @@ button {
   justify-content: space-between;
   color: #c8dcf5;
   font-size: 14px;
-  font-weight: 720;
+  font-weight: 650;
 }
 
 .hero-progress-row strong {
@@ -332,7 +309,7 @@ button {
   min-height: 46px;
   border-radius: 8px;
   font-size: 15px;
-  font-weight: 800;
+  font-weight: 730;
 }
 
 .primary-action {
@@ -375,7 +352,7 @@ button {
 
 .progress-rail {
   display: grid;
-  gap: 11px;
+  gap: 13px;
 }
 
 .rail-panel {
@@ -386,26 +363,52 @@ button {
   height: 110px;
   padding: 14px;
   border-radius: 8px;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 12px 28px rgba(7, 19, 37, 0.07);
 }
 
 .rail-action {
-  height: 116px;
+  height: 122px;
 }
 
 .rail-progress {
-  border: 1px solid rgba(16, 198, 195, 0.24);
-  background: linear-gradient(135deg, #ffffff, #e9fbfb);
+  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-items: start;
+  column-gap: 12px;
+  row-gap: 8px;
+  height: 104px;
+  padding: 15px 16px;
+  border: 0;
+  background:
+    linear-gradient(90deg, rgba(16, 198, 195, 0.14), rgba(32, 134, 255, 0.08)),
+    var(--surface-mint);
 }
 
 .rail-checkpoint {
-  border: 1px solid rgba(245, 141, 47, 0.22);
-  background: linear-gradient(135deg, #fffaf4, #ffffff);
+  grid-template-columns: 52px minmax(0, 1fr);
+  height: 114px;
+  overflow: hidden;
+  border: 0;
+  background: var(--surface-gold);
+}
+
+.rail-checkpoint::before {
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 38px;
+  width: 2px;
+  content: "";
+  background: linear-gradient(180deg, var(--orange-500), rgba(245, 141, 47, 0.15));
 }
 
 .rail-action {
-  border: 1px solid rgba(11, 102, 240, 0.22);
-  background: linear-gradient(135deg, #ffffff, #edf5ff);
+  grid-template-columns: 42px minmax(0, 1fr);
+  height: 122px;
+  border: 1px solid rgba(32, 134, 255, 0.28);
+  background:
+    radial-gradient(circle at 90% 20%, rgba(32, 134, 255, 0.2), transparent 38%),
+    linear-gradient(135deg, #f6fbff, var(--surface-blue));
 }
 
 .rail-icon {
@@ -437,17 +440,19 @@ button {
   margin: 0;
   font-size: 18px;
   line-height: 1.2;
+  font-weight: 680;
 }
 
 .rail-panel p {
   margin: 6px 0 0;
   color: var(--ink-500);
   font-size: 14px;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 
 .rail-meter {
   grid-column: 1 / -1;
+  width: 100%;
   height: 6px;
   overflow: hidden;
   border-radius: 999px;
@@ -462,6 +467,7 @@ button {
 }
 
 .rail-state {
+  position: relative;
   grid-column: 2;
   align-self: end;
   width: max-content;
@@ -470,17 +476,18 @@ button {
   color: #7c4300;
   background: #ffe8c2;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .rail-button {
   grid-column: 1 / -1;
   width: 100%;
   min-height: 38px;
-  margin-top: -10px;
-  border: 1px solid rgba(11, 102, 240, 0.24);
-  color: var(--blue-700);
-  background: #ffffff;
+  margin-top: -8px;
+  border: 0;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--blue-700), #0a8fb2);
+  box-shadow: 0 10px 18px rgba(11, 102, 240, 0.18);
 }
 
 .lower-row {
@@ -494,29 +501,24 @@ button {
   min-height: 226px;
   padding: 16px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: var(--shadow-card);
 }
 
 .recent-panel {
-  border: 1px solid rgba(25, 168, 116, 0.18);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(237, 252, 246, 0.84)),
-    #ffffff;
+  border: 0;
+  background: linear-gradient(135deg, rgba(234, 251, 248, 0.72), rgba(255, 255, 255, 0.36));
+  box-shadow: none;
 }
 
 .shortcut-panel {
-  border: 1px solid rgba(11, 102, 240, 0.16);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(241, 247, 255, 0.86)),
-    #ffffff;
+  border: 1px solid rgba(11, 102, 240, 0.12);
+  background: rgba(246, 251, 255, 0.68);
+  box-shadow: 0 10px 24px rgba(7, 19, 37, 0.05);
 }
 
 .journey-panel {
-  border: 1px solid rgba(7, 26, 61, 0.12);
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(247, 243, 236, 0.8)),
-    #ffffff;
+  border: 0;
+  background: linear-gradient(135deg, rgba(255, 246, 233, 0.74), rgba(255, 255, 255, 0.4));
+  box-shadow: none;
 }
 
 .lower-heading {
@@ -536,36 +538,64 @@ button {
   margin: 0;
   font-size: 20px;
   line-height: 1.2;
+  font-weight: 680;
 }
 
 .activity-list {
+  position: relative;
   display: grid;
   gap: 9px;
+  padding-left: 4px;
+}
+
+.activity-list::before {
+  position: absolute;
+  top: 8px;
+  bottom: 10px;
+  left: 8px;
+  width: 2px;
+  content: "";
+  background: linear-gradient(180deg, var(--teal-500), var(--blue-500), var(--orange-500));
 }
 
 .activity-item {
+  position: relative;
   display: grid;
   gap: 3px;
-  padding-left: 12px;
-  border-left: 3px solid var(--teal-500);
+  padding-left: 24px;
+  border-left: 0;
 }
 
-.activity-item:nth-child(2) {
-  border-left-color: var(--blue-500);
+.activity-item::before {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  width: 18px;
+  height: 18px;
+  border: 3px solid #ffffff;
+  border-radius: 999px;
+  content: "";
+  background: var(--teal-500);
+  box-shadow: 0 0 0 1px rgba(16, 198, 195, 0.28);
 }
 
-.activity-item:nth-child(3) {
-  border-left-color: var(--orange-500);
+.activity-item:nth-child(2)::before {
+  background: var(--blue-500);
+}
+
+.activity-item:nth-child(3)::before {
+  background: var(--orange-500);
 }
 
 .activity-type {
   color: var(--ink-500);
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 680;
 }
 
 .activity-item strong {
   font-size: 16px;
+  font-weight: 680;
 }
 
 .activity-item p {
@@ -587,11 +617,12 @@ button {
   gap: 11px;
   min-height: 76px;
   padding: 11px;
-  border: 1px solid var(--line-soft);
+  border: 1px solid rgba(11, 102, 240, 0.14);
   border-radius: 8px;
   color: var(--ink-900);
   text-align: left;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.5);
+  box-shadow: none;
 }
 
 .shortcut svg {
@@ -613,6 +644,7 @@ button {
   display: block;
   font-size: 15px;
   line-height: 1.2;
+  font-weight: 680;
 }
 
 .shortcut small {
@@ -639,7 +671,7 @@ button {
   left: 16px;
   width: 2px;
   content: "";
-  background: linear-gradient(180deg, var(--blue-500), var(--line));
+  background: linear-gradient(180deg, var(--blue-500), var(--teal-500), rgba(205, 217, 232, 0.65));
 }
 
 .journey-list li {
@@ -659,7 +691,7 @@ button {
   color: var(--ink-700);
   background: #ffffff;
   font-size: 14px;
-  font-weight: 850;
+  font-weight: 720;
 }
 
 .journey-list li.is-current > span {
@@ -672,6 +704,7 @@ button {
   display: block;
   font-size: 16px;
   line-height: 1.25;
+  font-weight: 680;
 }
 
 .journey-list p {
@@ -783,6 +816,15 @@ button {
     padding: 15px;
   }
 
+  .rail-progress {
+    height: 96px;
+    padding-block: 14px;
+  }
+
+  .rail-checkpoint {
+    height: 106px;
+  }
+
   .rail-action {
     height: 112px;
   }
@@ -792,12 +834,14 @@ button {
   }
 
   .rail-panel p {
-    font-size: 14px;
+    margin-top: 4px;
+    font-size: 13px;
+    line-height: 1.25;
   }
 
   .rail-button {
     min-height: 34px;
-    margin-top: -15px;
+    margin-top: -13px;
   }
 
   .lower-row {
@@ -823,8 +867,14 @@ button {
     grid-template-rows: auto auto;
     gap: 1px 9px;
     min-height: 50px;
-    padding-left: 10px;
+    padding-left: 30px;
     align-items: center;
+  }
+
+  .activity-item::before {
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
   }
 
   .activity-type {
