@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="410" viewBox="0 0 620 410" role="img" aria-labelledby="title desc">
+  <title id="title">Vendor-neutral physical network scene</title>
+  <desc id="desc">A generic physical switch front panel with clear port LEDs, patch cables, an endpoint, a gateway, and an access point.</desc>
+  <defs>
+    <linearGradient id="switchTop" x1="124" y1="146" x2="512" y2="196" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#334966"/>
+      <stop offset="0.48" stop-color="#17283F"/>
+      <stop offset="1" stop-color="#0A1323"/>
+    </linearGradient>
+    <linearGradient id="switchFace" x1="104" y1="194" x2="514" y2="302" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1D304A"/>
+      <stop offset="0.46" stop-color="#0B1728"/>
+      <stop offset="1" stop-color="#050A13"/>
+    </linearGradient>
+    <linearGradient id="frontPlate" x1="126" y1="208" x2="492" y2="274" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0E2038"/>
+      <stop offset="1" stop-color="#040914"/>
+    </linearGradient>
+    <linearGradient id="portFace" x1="144" y1="222" x2="362" y2="248" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ECFBFF"/>
+      <stop offset="1" stop-color="#A9D2E9"/>
+    </linearGradient>
+    <linearGradient id="cableBlue" x1="102" y1="258" x2="544" y2="326" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#13D8D1"/>
+      <stop offset="0.52" stop-color="#168CFF"/>
+      <stop offset="1" stop-color="#73F4EF"/>
+    </linearGradient>
+    <linearGradient id="deviceFill" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#0E3D7D"/>
+      <stop offset="1" stop-color="#071D49"/>
+    </linearGradient>
+    <filter id="deviceShadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="16" flood-color="#010713" flood-opacity="0.46"/>
+    </filter>
+    <filter id="smallGlow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="2.1" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="34" y="34" width="552" height="342" rx="22" fill="#061A3E" opacity="0.08"/>
+  <path d="M78 326c55 34 161 49 273 34 87-12 151-47 194-105" fill="none" stroke="#2086FF" stroke-width="3" opacity="0.13"/>
+  <path d="M86 126c93-64 238-74 340-31 70 29 111 83 112 147" fill="none" stroke="#10C6C3" stroke-width="2" opacity="0.17"/>
+
+  <g filter="url(#deviceShadow)">
+    <path d="M126 148h356c21 0 38 17 38 38v20H88v-20c0-21 17-38 38-38Z" fill="url(#switchTop)"/>
+    <path d="M88 202h432v66c0 20-16 36-36 36H124c-20 0-36-16-36-36v-66Z" fill="url(#switchFace)"/>
+    <path d="M103 199h402v18H103Z" fill="#405873" opacity="0.38"/>
+    <path d="M120 214h370c8 0 14 6 14 14v42c0 8-6 14-14 14H120c-8 0-14-6-14-14v-42c0-8 6-14 14-14Z" fill="url(#frontPlate)" stroke="#58708D" stroke-width="2"/>
+    <path d="M128 173h86M232 173h42" stroke="#7894B6" stroke-width="3" stroke-linecap="round" opacity="0.82"/>
+    <path d="M102 202h404" stroke="#7FA2C7" stroke-width="1" opacity="0.5"/>
+    <path d="M107 281h394" stroke="#000814" stroke-width="3" opacity="0.58"/>
+
+    <g>
+      <rect x="138" y="226" width="238" height="35" rx="6" fill="#07101D" stroke="#6C86A1" stroke-width="1.5"/>
+      <rect x="397" y="225" width="72" height="36" rx="7" fill="#07101D" stroke="#6C86A1" stroke-width="1.5"/>
+      <g fill="url(#portFace)">
+        <rect x="150" y="234" width="20" height="14" rx="2"/>
+        <rect x="178" y="234" width="20" height="14" rx="2"/>
+        <rect x="206" y="234" width="20" height="14" rx="2"/>
+        <rect x="234" y="234" width="20" height="14" rx="2"/>
+        <rect x="262" y="234" width="20" height="14" rx="2"/>
+        <rect x="290" y="234" width="20" height="14" rx="2"/>
+        <rect x="318" y="234" width="20" height="14" rx="2"/>
+        <rect x="346" y="234" width="20" height="14" rx="2"/>
+      </g>
+      <g fill="#0A1323">
+        <rect x="154" y="237" width="12" height="8" rx="1"/>
+        <rect x="182" y="237" width="12" height="8" rx="1"/>
+        <rect x="210" y="237" width="12" height="8" rx="1"/>
+        <rect x="238" y="237" width="12" height="8" rx="1"/>
+        <rect x="266" y="237" width="12" height="8" rx="1"/>
+        <rect x="294" y="237" width="12" height="8" rx="1"/>
+        <rect x="322" y="237" width="12" height="8" rx="1"/>
+        <rect x="350" y="237" width="12" height="8" rx="1"/>
+      </g>
+      <g filter="url(#smallGlow)">
+        <rect x="153" y="253" width="7" height="4" rx="2" fill="#14E0D7"/>
+        <rect x="181" y="253" width="7" height="4" rx="2" fill="#75F7EF"/>
+        <rect x="237" y="253" width="7" height="4" rx="2" fill="#2086FF"/>
+        <rect x="293" y="253" width="7" height="4" rx="2" fill="#75F7EF"/>
+        <rect x="349" y="253" width="7" height="4" rx="2" fill="#14E0D7"/>
+        <rect x="416" y="235" width="8" height="5" rx="2" fill="#2086FF"/>
+        <rect x="447" y="235" width="8" height="5" rx="2" fill="#75F7EF"/>
+      </g>
+      <path d="M415 248h40M415 257h31" stroke="#E2FAFF" stroke-width="3" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <g fill="none" stroke="#02101F" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.45">
+    <path d="M156 262C126 286 104 288 78 269"/>
+    <path d="M240 262c-9 49 18 70 82 64"/>
+    <path d="M296 262c37 57 112 66 202 29"/>
+    <path d="M418 262c47-18 81-9 110 27"/>
+  </g>
+  <g fill="none" stroke="url(#cableBlue)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M156 259C126 283 104 285 78 266"/>
+    <path d="M240 259c-9 49 18 70 82 64"/>
+    <path d="M296 259c37 57 112 66 202 29"/>
+    <path d="M418 259c47-18 81-9 110 27"/>
+  </g>
+  <g fill="#DFFAFF" stroke="#70EAFF" stroke-width="1.4">
+    <rect x="148" y="256" width="15" height="8" rx="2"/>
+    <rect x="233" y="256" width="15" height="8" rx="2"/>
+    <rect x="289" y="256" width="15" height="8" rx="2"/>
+    <rect x="411" y="256" width="15" height="8" rx="2"/>
+  </g>
+
+  <g>
+    <rect x="38" y="218" width="82" height="58" rx="10" fill="url(#deviceFill)" stroke="#70EAFF" stroke-width="2"/>
+    <rect x="58" y="233" width="42" height="25" rx="3" fill="#DDF8FF"/>
+    <path d="M53 263h52" stroke="#DDF8FF" stroke-width="4" stroke-linecap="round"/>
+    <text x="79" y="295" text-anchor="middle" fill="#CDE8FF" font-size="18" font-family="Segoe UI, Arial" font-weight="600">Endpoint</text>
+  </g>
+
+  <g>
+    <rect x="278" y="76" width="110" height="66" rx="15" fill="url(#deviceFill)" stroke="#70EAFF" stroke-width="2"/>
+    <path d="M306 112c17-16 37-16 54 0M315 123c11-10 25-10 36 0M330 132h6" stroke="#E7FBFF" stroke-width="4" stroke-linecap="round"/>
+    <text x="333" y="60" text-anchor="middle" fill="#CDE8FF" font-size="18" font-family="Segoe UI, Arial" font-weight="600">Access point</text>
+  </g>
+
+  <g>
+    <rect x="488" y="260" width="96" height="64" rx="12" fill="url(#deviceFill)" stroke="#70EAFF" stroke-width="2"/>
+    <path d="M511 293h50M536 274v38" stroke="#E7FBFF" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="511" cy="311" r="4" fill="#73F4EF"/>
+    <circle cx="562" cy="311" r="4" fill="#2086FF"/>
+    <text x="536" y="349" text-anchor="middle" fill="#CDE8FF" font-size="18" font-family="Segoe UI, Arial" font-weight="600">Gateway</text>
+  </g>
+
+  <g>
+    <rect x="286" y="312" width="100" height="45" rx="10" fill="#082457" stroke="#70EAFF" stroke-width="2"/>
+    <path d="M307 335h58" stroke="#E7FBFF" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="307" cy="335" r="4" fill="#73F4EF"/>
+    <circle cx="365" cy="335" r="4" fill="#2086FF"/>
+    <text x="336" y="384" text-anchor="middle" fill="#CDE8FF" font-size="18" font-family="Segoe UI, Arial" font-weight="600">Local link</text>
+  </g>
+</svg>
