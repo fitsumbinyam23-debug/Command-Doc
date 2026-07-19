@@ -2896,7 +2896,8 @@ function setMissionStudioHomeV2Shell(active, pathLabel = currentMissionPathLabel
 function loadLearningState() {
   const api = beginnerExperience();
   const lessons = api.createLevel0Lessons();
-  state.learning.path = localStorage.getItem(api.STORAGE_KEYS.path) || "";
+  const storedPath = localStorage.getItem(api.STORAGE_KEYS.path);
+  state.learning.path = storedPath === null ? "zero" : storedPath;
   state.learning.recentTool = localStorage.getItem(api.STORAGE_KEYS.recentTool) || "diagnose";
   state.learning.level0Progress = api.restoreLevel0State(api.safeParse(localStorage.getItem(api.STORAGE_KEYS.level0), api.createLevel0State(lessons)), lessons);
 }
