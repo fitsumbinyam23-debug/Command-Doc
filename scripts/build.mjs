@@ -19,6 +19,7 @@ export const publicEntries = [
   "recover.html",
   "styles.css",
   "mission-studio.css",
+  "mission-studio-home-v2.css",
   "sw.js",
   "sw-refresh.js",
   "sw-recover.js",

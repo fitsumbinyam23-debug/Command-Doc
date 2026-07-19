@@ -415,6 +415,8 @@ const state = {
 };
 
 const els = {};
+const HOME_V2_DESKTOP_QUERY = "(min-width: 1024px)";
+const HOME_V2_ICON_SPRITE = "data/mission-studio-home-v2/home-icons.svg";
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", init);
@@ -434,6 +436,7 @@ async function init() {
   if (!state.lab.diagnosticsMode) {
     renderBeginnerNavigation();
     setupMissionStudioShell();
+    setupMissionStudioHomeV2ResizeSync();
   }
   if (state.lab.diagnosticsMode) {
     els.navTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === "lab"));
@@ -2745,6 +2748,14 @@ function missionStudioState() {
   return window.CommandDoctorMissionStudioState;
 }
 
+function missionStudioHomeV2ViewModel() {
+  return window.CommandDoctorMissionStudioHomeV2ViewModel;
+}
+
+function missionStudioHomeV2View() {
+  return window.CommandDoctorMissionStudioHomeV2View;
+}
+
 function missionStudioShell() {
   return window.CommandDoctorMissionStudioShell;
 }
@@ -2770,10 +2781,123 @@ function syncMissionStudioShell(viewName) {
   });
 }
 
+function missionStudioHomeV2Desktop() {
+  if (typeof window.matchMedia === "function") {
+    return window.matchMedia(HOME_V2_DESKTOP_QUERY).matches;
+  }
+  return Number(window.innerWidth || 0) >= 1024;
+}
+
+function shouldRenderMissionStudioHomeV2() {
+  return Boolean(
+    state.learning.path === "zero"
+    && missionStudioHomeV2Desktop()
+    && missionStudioHomeV2ViewModel()?.createHomeV2ViewModel
+    && missionStudioHomeV2View()?.renderMissionStudioHomeV2View
+  );
+}
+
+function homeViewActive() {
+  return document.getElementById("homeView")?.classList.contains("active");
+}
+
+function setupMissionStudioHomeV2ResizeSync() {
+  if (typeof window.matchMedia !== "function") return;
+  const media = window.matchMedia(HOME_V2_DESKTOP_QUERY);
+  const syncHome = () => {
+    const homeActive = document.getElementById("homeView")?.classList.contains("active");
+    if (homeActive) renderHome();
+    else setMissionStudioHomeV2Shell(false);
+  };
+  if (typeof media.addEventListener === "function") media.addEventListener("change", syncHome);
+  else if (typeof media.addListener === "function") media.addListener(syncHome);
+}
+
+function missionStudioHomeV2Icon(name) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+  const href = `${HOME_V2_ICON_SPRITE}#icon-${name}`;
+  svg.setAttribute("aria-hidden", "true");
+  use.setAttribute("href", href);
+  use.setAttributeNS("http://www.w3.org/1999/xlink", "href", href);
+  svg.append(use);
+  return svg;
+}
+
+function missionStudioHomeV2NavLabel(tab) {
+  const navigation = beginnerExperience()?.BEGINNER_NAVIGATION || [];
+  return navigation.find((item) => item.view === tab.dataset.view)?.label
+    || tab.dataset.homeV2OriginalLabel
+    || tab.textContent.trim();
+}
+
+function enhanceMissionStudioHomeV2Shell(pathLabel) {
+  const brandText = document.querySelector(".sidebar .brand p");
+  if (brandText) {
+    brandText.dataset.homeV2OriginalText ||= brandText.textContent || "";
+    brandText.textContent = "Learn. Practise. Diagnose.";
+  }
+  const brandMark = document.querySelector(".sidebar .brand-mark");
+  if (brandMark) {
+    brandMark.dataset.homeV2OriginalText ||= brandMark.textContent || "";
+    brandMark.textContent = "";
+  }
+  els.navTabs.forEach((tab) => {
+    const label = missionStudioHomeV2NavLabel(tab);
+    tab.dataset.homeV2OriginalLabel = label;
+    tab.dataset.homeV2Enhanced = "true";
+    const iconName = tab.dataset.navIcon || tab.dataset.view || "home";
+    const labelNode = document.createElement("span");
+    labelNode.textContent = label;
+    tab.replaceChildren(missionStudioHomeV2Icon(iconName), labelNode);
+  });
+  const summary = document.querySelector(".ms-sidebar-summary");
+  if (summary) {
+    summary.dataset.homeV2Enhanced = "true";
+    const text = document.createElement("div");
+    const title = document.createElement("strong");
+    const value = document.createElement("p");
+    title.textContent = "Your mission";
+    value.dataset.msPathSummary = "";
+    value.textContent = pathLabel;
+    text.append(title, value);
+    summary.replaceChildren(missionStudioHomeV2Icon("path"), text);
+  }
+}
+
+function restoreMissionStudioHomeV2Shell() {
+  const brandText = document.querySelector(".sidebar .brand p");
+  if (brandText?.dataset.homeV2OriginalText !== undefined) brandText.textContent = brandText.dataset.homeV2OriginalText;
+  const brandMark = document.querySelector(".sidebar .brand-mark");
+  if (brandMark?.dataset.homeV2OriginalText !== undefined) brandMark.textContent = brandMark.dataset.homeV2OriginalText;
+  els.navTabs.forEach((tab) => {
+    if (tab.dataset.homeV2Enhanced !== "true") return;
+    tab.textContent = tab.dataset.homeV2OriginalLabel || tab.dataset.view || "";
+    delete tab.dataset.homeV2Enhanced;
+  });
+  const summary = document.querySelector(".ms-sidebar-summary");
+  if (summary?.dataset.homeV2Enhanced === "true") {
+    const title = document.createElement("strong");
+    const value = document.createElement("p");
+    title.textContent = "Your mission";
+    value.dataset.msPathSummary = "";
+    value.textContent = currentMissionPathLabel();
+    summary.replaceChildren(title, value);
+    delete summary.dataset.homeV2Enhanced;
+  }
+}
+
+function setMissionStudioHomeV2Shell(active, pathLabel = currentMissionPathLabel()) {
+  document.body.classList.toggle("mission-studio-home-v2", Boolean(active));
+  if (active) enhanceMissionStudioHomeV2Shell(pathLabel);
+  else restoreMissionStudioHomeV2Shell();
+}
+
 function loadLearningState() {
   const api = beginnerExperience();
   const lessons = api.createLevel0Lessons();
-  state.learning.path = localStorage.getItem(api.STORAGE_KEYS.path) || "";
+  const storedPath = localStorage.getItem(api.STORAGE_KEYS.path);
+  state.learning.path = storedPath === null ? "zero" : storedPath;
   state.learning.recentTool = localStorage.getItem(api.STORAGE_KEYS.recentTool) || "diagnose";
   state.learning.level0Progress = api.restoreLevel0State(api.safeParse(localStorage.getItem(api.STORAGE_KEYS.level0), api.createLevel0State(lessons)), lessons);
 }
@@ -4974,6 +5098,7 @@ function renderHome() {
   const completion = stateApi?.level0Completion(level0Progress, level0Lessons(), api.STEP_IDS) || { percent: 0, completedLessons: 0, lessonCount: 8 };
   const homeState = api.homeStateForPath(state.learning.path, { lessonTitle: currentLesson?.title, lastTool: state.learning.recentTool || "diagnose" });
   const tool = api.toolDestination(state.learning.recentTool || "diagnose");
+  const storedRecentTool = localStorage.getItem(api.STORAGE_KEYS.recentTool);
   const model = {
     path: state.learning.path,
     pathLabel: homeState.label,
@@ -5031,6 +5156,40 @@ function renderHome() {
       focusActiveViewHeading("home");
     }
   };
+  if (shouldRenderMissionStudioHomeV2()) {
+    const homeV2Model = missionStudioHomeV2ViewModel().createHomeV2ViewModel({
+      pathId: state.learning.path,
+      pathLabel: homeState.label,
+      lessons: level0Lessons(),
+      progress: level0Progress,
+      completion,
+      currentLesson,
+      stepIds: api.STEP_IDS,
+      stepNames: api.STEPPER_STEPS,
+      history: state.history,
+      historyCount: state.history.length,
+      hasRecentTool: Boolean(storedRecentTool),
+      recentTool: tool,
+      tools: api.TECHNICIAN_TOOLS,
+      actions: {
+        continueMission: () => {
+          state.learning.levelId = "level_00";
+          state.learning.courseScreen = "lesson";
+          switchView("course");
+        },
+        viewPath: () => {
+          state.learning.levelId = "level_00";
+          state.learning.courseScreen = "map";
+          switchView("course");
+        },
+        openTool: (toolId) => openTechnicianTool(api.toolDestination(toolId))
+      }
+    });
+    setMissionStudioHomeV2Shell(homeViewActive(), homeV2Model.path.label);
+    els.homeRoot.append(missionStudioHomeV2View().renderMissionStudioHomeV2View(document, homeV2Model));
+    return;
+  }
+  setMissionStudioHomeV2Shell(false);
   els.homeRoot.append(views?.renderMissionStudioHomeView(document, model) || labCreate("section", "", "Mission Studio unavailable."));
 }
 
@@ -5926,6 +6085,7 @@ function switchView(viewName, options = {}) {
   els.navTabs.forEach((tab) => tab.classList.toggle("active", tab.dataset.view === viewName));
   els.views.forEach((view) => view.classList.toggle("active", view.id === `${viewName}View`));
   syncMissionStudioShell(viewName);
+  if (viewName !== "home") setMissionStudioHomeV2Shell(false);
   if (viewName === "lab") {
     if (options.resetLab) state.lab.screen = "dashboard";
     renderLab();
