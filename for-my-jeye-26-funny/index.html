@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#ff7fa8">
+  <meta name="description" content="A funny little birthday game made by Buchi for Jeye's 26th birthday.">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>For My Jeye · Level 26</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="asset-p1.js" defer></script>
+  <script src="asset-p2.js" defer></script>
+  <script src="asset-p3.js" defer></script>
+  <script src="asset-p4.js" defer></script>
+  <script src="asset-loader.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="bg-confetti" aria-hidden="true"></div>
+
+  <div id="loader" class="loader" role="status" aria-live="polite">
+    <div class="loader-card">
+      <div class="loader-heart">💗</div>
+      <h1>Preparing Jeye’s level 26…</h1>
+      <div class="loader-track"><span id="loaderFill"></span></div>
+      <p id="loaderText">Polishing the jokes and checking the perfume supply 🧴</p>
+    </div>
+  </div>
+
+  <audio id="bgm" preload="auto" loop playsinline>
+  </audio>
+
+  <header class="topbar" id="topbar" hidden>
+    <button class="brand" data-go="welcome" aria-label="Return to the beginning">
+      <span class="brand-heart">💗</span>
+      <span>For Jeye<small>By Buchi · Level 26</small></span>
+    </button>
+    <div class="top-actions">
+      <button id="soundBtn" class="icon-btn" type="button" aria-label="Turn sound off" title="Sound on">
+        <span id="soundIcon">🔊</span>
+      </button>
+      <button id="restartBtn" class="icon-btn" type="button" aria-label="Restart the game" title="Restart">↻</button>
+    </div>
+  </header>
+
+  <div class="progress-shell" id="progressShell" hidden>
+    <div class="progress-row">
+      <span id="progressLabel">Welcome</span>
+      <strong id="scoreChip">0 pts</strong>
+    </div>
+    <div class="progress-track"><span id="progressFill"></span></div>
+  </div>
+
+  <main id="app" hidden>
+    <section class="screen active welcome-screen" id="welcome" data-step="0">
+      <div class="welcome-copy">
+        <p class="eyebrow">A cute, chaotic birthday game from Buchi 😌</p>
+        <div class="level-pill">LEVEL <b>26</b> UNLOCKED 🎂</div>
+        <h1>Happy Birthday,<br><em>Jeye!</em></h1>
+        <p class="lead">One TikTok Live. One brave kiss. A suspicious amount of fart jokes. One very real love. 💗</p>
+        <button id="startBtn" class="primary jumbo" type="button">Start the game with sound 🔊</button>
+        <button id="silentStartBtn" class="text-btn" type="button">Start quietly 🤫</button>
+        <small class="hint">Best played with your volume up. The first tap unlocks the music on phones.</small>
+      </div>
+
+      <div class="scrapbook" aria-label="Original photos of Jeye and Buchi">
+        <figure class="photo hero-photo"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p1" alt="Jeye and Buchi posing together"></figure>
+        <figure class="photo candle-photo"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p2" alt="Jeye blowing out her birthday candle"><figcaption>Birthday girl ✨</figcaption></figure>
+        <figure class="photo bw-photo"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p3" alt="Jeye and Buchi hugging in black and white"></figure>
+        <figure class="photo hug-photo"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p4" alt="Jeye hugging Buchi in a studio portrait"></figure>
+        <span class="sticker sticker-one">26 looks very good on you 💅</span>
+        <span class="doodle doodle-one">J + B</span>
+        <span class="doodle doodle-two">♡</span>
+      </div>
+    </section>
+
+    <section class="screen story-screen" id="story" data-step="1">
+      <div class="section-head">
+        <p class="eyebrow">Before the chaos begins…</p>
+        <h2 class="section-title">Our <em>story recap</em> 💭</h2>
+        <p>Five little memories. Zero boring lectures.</p>
+      </div>
+      <article class="story-card card" id="storyCard">
+        <div class="story-photo-wrap"><img id="storyPhoto" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p1" alt="A memory of Jeye and Buchi"></div>
+        <div class="story-copy">
+          <span id="storyCount" class="mini-pill">1 / 5</span>
+          <p id="storyLabel" class="eyebrow"></p>
+          <h3 id="storyTitle"></h3>
+          <p id="storyText"></p>
+          <div id="storyJoke" class="joke-box"></div>
+        </div>
+      </article>
+      <div class="nav-row">
+        <button id="storyBack" class="secondary" type="button">← Back</button>
+        <button id="storyNext" class="primary" type="button">Next memory →</button>
+      </div>
+    </section>
+
+    <section class="screen quiz-screen" id="quiz" data-step="2">
+      <div class="section-head">
+        <p class="eyebrow">Game 1 · Certified Buchi Expert</p>
+        <h2 class="section-title">How well do you know <em>this man?</em> 🕵🏽‍♀️</h2>
+        <p>Wrong answers are allowed. Rewriting history is not. 😂</p>
+      </div>
+      <div class="quiz-card card">
+        <div class="quiz-top">
+          <span id="quizCounter" class="mini-pill">Question 1 / 7</span>
+          <span id="quizCombo" class="combo">Combo x0 🔥</span>
+        </div>
+        <h3 id="quizQuestion"></h3>
+        <div id="quizAnswers" class="answer-grid"></div>
+        <div id="quizFeedback" class="feedback" aria-live="polite"></div>
+        <button id="quizNext" class="primary hidden" type="button">Next question →</button>
+      </div>
+    </section>
+
+    <section class="screen mariam-screen" id="mariam" data-step="3">
+      <div class="section-head">
+        <p class="eyebrow">Game 2 · Mariam Mayhem</p>
+        <h2 class="section-title">Tap the cute things.<br><em>Do not tap “Mariam.”</em> 😭</h2>
+        <p>It sounds easy. Jeye’s habits say otherwise.</p>
+      </div>
+      <div class="game-card card">
+        <div class="hud">
+          <span>⏱️ <b id="mariamTime">18</b>s</span>
+          <span>Score <b id="mariamScore">0</b></span>
+          <span>Best streak <b id="mariamStreak">0</b></span>
+        </div>
+        <div id="mariamIntro" class="game-intro">
+          <div class="big-emoji">🙊</div>
+          <p>Tap hearts, perfume, lasagna, movies and Buchi. Avoid the forbidden word.</p>
+          <button id="mariamStart" class="primary" type="button">Start the chaos 😂</button>
+        </div>
+        <div id="mariamGrid" class="mariam-grid hidden" aria-label="Mariam avoidance game"></div>
+        <div id="mariamResult" class="result-box hidden"></div>
+      </div>
+    </section>
+
+    <section class="screen fart-screen" id="fart" data-step="4">
+      <div class="section-head">
+        <p class="eyebrow">Game 3 · Emergency Protocol</p>
+        <h2 class="section-title">Save Jeye from <em>Buchi’s atmosphere</em> 💨</h2>
+        <p>The romance is strong. The air quality is fighting back.</p>
+      </div>
+      <div class="game-card card fart-card">
+        <div class="hud">
+          <span>⏱️ <b id="fartTime">20</b>s</span>
+          <span>Survival <b id="fartScore">100</b>%</span>
+        </div>
+        <div class="fart-stage">
+          <div class="avatar avatar-jeye">J<span>😤</span></div>
+          <div id="gasClouds" class="gas-clouds" aria-hidden="true"></div>
+          <div class="avatar avatar-buchi">B<span>😇</span></div>
+        </div>
+        <div class="meter-wrap">
+          <div class="meter-label"><span>Fresh air 🌸</span><span>Call the authorities 🚨</span></div>
+          <div class="danger-meter"><span id="gasFill"></span></div>
+        </div>
+        <div id="fartIntro" class="game-intro compact">
+          <p>Choose the right emergency action before the smell meter reaches 100.</p>
+          <button id="fartStart" class="primary" type="button">Protect Jeye’s nose 🫡</button>
+        </div>
+        <div id="fartActions" class="action-grid hidden"></div>
+        <div id="fartMessage" class="feedback center" aria-live="polite"></div>
+        <div id="fartResult" class="result-box hidden"></div>
+      </div>
+    </section>
+
+    <section class="screen catch-screen" id="catch" data-step="5">
+      <div class="section-head">
+        <p class="eyebrow">Game 4 · Catch Jeye’s Favorites</p>
+        <h2 class="section-title">Catch the good stuff.<br><em>Avoid the nonsense.</em> 🧺</h2>
+        <p>Perfume and lasagna: yes. Drama and gas clouds: absolutely not.</p>
+      </div>
+      <div class="game-card card arcade-card">
+        <div class="hud">
+          <span>⏱️ <b id="catchTime">24</b>s</span>
+          <span>Score <b id="catchScore">0</b></span>
+          <span>Lives <b id="catchLives">❤️❤️❤️</b></span>
+        </div>
+        <div id="catchIntro" class="game-intro">
+          <div class="big-emoji">🧺</div>
+          <p>Drag the basket—or use the arrows—to catch 💗 🧴 🍝 🎬 📞.</p>
+          <button id="catchStart" class="primary" type="button">Let it rain ✨</button>
+        </div>
+        <div id="canvasWrap" class="canvas-wrap hidden">
+          <canvas id="catchCanvas" width="800" height="520" aria-label="Falling object catch game"></canvas>
+          <div class="catch-controls">
+            <button id="moveLeft" type="button" aria-label="Move basket left">⬅️</button>
+            <button id="moveRight" type="button" aria-label="Move basket right">➡️</button>
+          </div>
+        </div>
+        <div id="catchResult" class="result-box hidden"></div>
+      </div>
+    </section>
+
+    <section class="screen future-screen" id="future" data-step="6">
+      <div class="section-head">
+        <p class="eyebrow">Game 5 · The Very Official Future Department</p>
+        <h2 class="section-title">Build our <em>beautifully chaotic future</em> 🏡</h2>
+        <p>No wrong answers. Some answers may create too much lasagna.</p>
+      </div>
+      <div class="future-card card">
+        <div class="future-progress"><span id="futureFill"></span></div>
+        <span id="futureCounter" class="mini-pill">1 / 6</span>
+        <h3 id="futureQuestion"></h3>
+        <div id="futureChoices" class="future-choices"></div>
+        <div id="futureReport" class="future-report hidden"></div>
+      </div>
+    </section>
+
+    <section class="screen boss-screen" id="boss" data-step="7">
+      <div class="section-head">
+        <p class="eyebrow">Final Boss · Defeat Long Distance</p>
+        <h2 class="section-title">Jeye + Buchi vs. <em>the final nonsense</em> ⚔️</h2>
+        <p>Tap the obstacles. Charge the power hug. Bring the hearts together.</p>
+      </div>
+      <div class="boss-card card">
+        <div class="boss-hud">
+          <span>Boss HP</span>
+          <div class="boss-meter"><span id="bossHpFill"></span></div>
+          <b id="bossHpText">100</b>
+        </div>
+        <div id="bossStage" class="boss-stage">
+          <div id="jeyeFighter" class="fighter fighter-jeye"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p2" alt="Jeye"><span>Jeye 👑</span></div>
+          <div id="bossTarget" class="boss-target">📶<small>Bad connection</small></div>
+          <div id="buchiFighter" class="fighter fighter-buchi"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p1" alt="Buchi"><span>Buchi 🫡</span></div>
+        </div>
+        <div class="combo-wrap">
+          <span>Power hug charge 🤗</span>
+          <div class="combo-meter"><span id="comboFill"></span></div>
+        </div>
+        <div id="bossIntro" class="game-intro compact">
+          <p>No matter how annoying the obstacles are, this team does not quit.</p>
+          <button id="bossStart" class="primary" type="button">Start final battle 💥</button>
+        </div>
+        <button id="powerHug" class="power-btn hidden" type="button" disabled>POWER HUG 🤗</button>
+        <div id="bossResult" class="result-box hidden"></div>
+      </div>
+    </section>
+
+    <section class="screen final-screen" id="final" data-step="8">
+      <div class="final-wrap">
+        <p class="eyebrow">Level 26 complete 🎉</p>
+        <h2 class="section-title">Happy 26th Birthday,<br><em>my Jeye</em> ❤️</h2>
+
+        <div class="certificate card">
+          <div class="certificate-top">
+            <span class="seal">🏆</span>
+            <div>
+              <small>OFFICIAL RESULT</small>
+              <h3 id="finalRank">Certified Buchi Expert</h3>
+            </div>
+            <strong id="finalScore">0/100</strong>
+          </div>
+          <p id="finalFunnyReport"></p>
+        </div>
+
+        <div class="final-collage">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p1" alt="Dreamy portrait of Jeye and Buchi">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p2" alt="Jeye blowing out her candle">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p4" alt="Buchi kissing Jeye on the cheek">
+        </div>
+
+        <article class="letter card">
+          <p>Happy birthday, Jeye ❤️</p>
+          <p>From the TikTok Live that quietly started everything, to Greenbush, the dance, the hands that found each other, and the kiss that changed everything—loving you has become one of the most beautiful things in my life.</p>
+          <p>You are caring, thoughtful, loving and understanding. You make difficult days lighter simply by answering the phone and being you. I want this new year to bring you happiness, freedom from unnecessary drama, peace, growth, and every good thing your heart deserves.</p>
+          <p>I promise to keep you safe, loved and chosen through everything. I want the life we talk about: living together, travelling, building our home, building something of our own, getting married, raising our family, laughing, teasing each other, and still arguing about “Mariam.” 😭</p>
+          <blockquote>No matter what life brings, you will always be my Jeye.<br><strong>betam new mewdesh yene Ayete.</strong></blockquote>
+          <p class="signature">Forever your Buchi 💗</p>
+        </article>
+
+        <div class="memory-gallery" id="memoryGallery">
+          <button class="gallery-photo" data-full="assets/p1.webp"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p1" alt="Jeye and Buchi with a horse"></button>
+          <button class="gallery-photo" data-full="assets/p4.webp"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p4" alt="Jeye and Buchi smiling together"></button>
+          <button class="gallery-photo" data-full="assets/p4.webp"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p4" alt="Jeye and Buchi embracing"></button>
+          <button class="gallery-photo" data-full="assets/p1.webp"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p1" alt="Jeye and Buchi taking a selfie"></button>
+        </div>
+
+        <div class="final-actions">
+          <button id="kissBtn" class="primary jumbo" type="button">Send Buchi a kiss 💋</button>
+          <button id="playAgainBtn" class="secondary" type="button">Play again ↻</button>
+        </div>
+        <p class="our-song">Our song will always be <strong>Yene Jeye</strong> 🎶</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="emojiBurst" class="emoji-burst" aria-hidden="true"></div>
+
+  <dialog id="soundDialog" class="sound-dialog">
+    <button id="closeSoundDialog" class="dialog-close" aria-label="Close">×</button>
+    <div class="big-emoji">🔊</div>
+    <h2>Let’s wake up the sound</h2>
+    <p>Turn off silent mode, raise the media volume, then tap the test button.</p>
+    <button id="testSoundBtn" class="primary" type="button">Test sound 🎵</button>
+  </dialog>
+
+  <dialog id="photoDialog" class="photo-dialog">
+    <button id="closePhotoDialog" class="dialog-close" aria-label="Close photo">×</button>
+    <img id="dialogPhoto" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" data-asset="p1" alt="Expanded memory photo">
+  </dialog>
+</body>
+</html>
